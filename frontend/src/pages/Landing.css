@@ -1,0 +1,31 @@
+/* Core styles adapted from provided Tesla landing CSS - trimmed for essential slider */
+:root { --btn-color:#fff; }
+body.landing-open { overflow:hidden; }
+.landing-wrapper { font-family: 'Helvetica','Arial',sans-serif; color:#fff; background:#000; min-height:100vh; }
+.landing-container { max-width:1080px; margin:0 auto; padding:24px 32px; position:relative; }
+.landing-header { display:flex; justify-content:space-between; align-items:center; }
+.landing-nav a { margin:0 18px; font-size:14px; letter-spacing:.5px; color:#111; text-decoration:none; position:relative; }
+.landing-nav a:after { content:""; position:absolute; left:0; bottom:-4px; height:2px; width:0; background:#111; transition:.3s; }
+.landing-nav a:hover:after, .landing-nav a.active:after { width:100%; }
+.landing-logo { font-weight:700; font-size:22px; color:#111; }
+.landing-hero { margin-top:10px; position:relative; }
+.slider-stage { position:relative; height:520px; }
+.slide-bg { position:absolute; inset:0; opacity:0; transform:translateX(-4%) scale(1.05); transition:opacity .8s ease, transform .8s ease; display:flex; align-items:center; }
+.slide-bg.active { opacity:1; transform:translateX(0) scale(1); }
+.slide-info { max-width:420px; z-index:2; }
+.slide-info h1 { font-size:56px; margin:0 0 12px; line-height:1; }
+.slide-info p { font-size:14px; line-height:1.5; opacity:.85; }
+.slide-stats { display:flex; margin-top:24px; gap:32px; }
+.stat { text-align:center; }
+.stat-value { font-size:32px; font-weight:600; }
+.stat-label { font-size:12px; opacity:.7; }
+.slide-image { position:absolute; right:0; bottom:0; max-width:55%; transition:opacity .8s ease .05s, transform .8s ease .1s; opacity:0; transform:translateY(8%) scale(1.05); }
+.slide-bg.active .slide-image { opacity:1; transform:translateY(0) scale(1); }
+.slider-dots { position:absolute; bottom:12px; left:50%; transform:translateX(-50%); display:flex; gap:10px; }
+.slider-dots button { width:10px; height:10px; border-radius:50%; border:0; background:#444; cursor:pointer; transition:.3s; }
+.slider-dots button.active { background:#fff; transform:scale(1.4); }
+.reserve-btn { margin-top:28px; position:relative; background:transparent; color:#fff; border:1px solid #fff; padding:14px 32px; font-size:13px; letter-spacing:1px; cursor:pointer; overflow:hidden; }
+.reserve-btn:before { content:""; position:absolute; inset:0; background:#fff; transform:scaleX(0); transform-origin:left; transition:.45s ease; z-index:-1; }
+.reserve-btn:hover { color:#000; }
+.reserve-btn:hover:before { transform:scaleX(1); }
+@media (max-width:900px){ .slide-image{display:none;} .slider-stage{height:480px;} .slide-info h1{font-size:42px;} }
