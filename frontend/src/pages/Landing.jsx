@@ -1,95 +1,579 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import PropTypes from 'prop-types';
+import BezierEasing from 'bezier-easing';
 import './Landing.css';
+// Use canonical model3 asset filenames
+import model3Img from '../assets/tesla/model3.png';
+import model3FloorImg from '../assets/tesla/model3_floor.png';
 
-// Simple cubic bezier implementation (approx) for easing
-function cubicBezier(p0, p1, p2, p3){
-  return function(t){
-    const cX = 3*p0; const bX = 3*(p2 - p0) - cX; const aX = 1 - cX - bX;
-    const cY = 3*p1; const bY = 3*(p3 - p1) - cY; const aY = 1 - cY - bY;
-    // Solve x for t ~ assume param t ~ progress for monotonic curves
-    const y = ((aY*t + bY)*t + cY)*t; return y;
-  };
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    });
+  } else {
+    obj[key] = value;
+  }
+  return obj;
 }
-const easing = cubicBezier(0.4, -0.7, 0.1, 1.5);
 
-// Slides data adapted
+const roadsterFloorImg =
+    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-floor.png",
+  roadsterImg =
+    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-car.png",
+  truckFloorImg =
+    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-floor.png",
+  truckImg =
+    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-car.png";
+
+
 const slides = [
-  { id:1, name:'Model S', desc:'Hiệu năng & an toàn chuẩn cao cấp.', color:'#0047fd', imgFloor:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-floor.png', img:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-car.png', topSpeed:75, mph:4.5, mileRange:400 },
-  { id:2, name:'Model X', desc:'SUV điện rộng rãi & mạnh mẽ.', color:'#ee0101', imgFloor:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-floor.png', img:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-car.png', topSpeed:255, mph:3, mileRange:520 },
-  { id:3, name:'Model 3', desc:'Tối ưu chi phí – phù hợp đô thị.', color:'#0047fd', imgFloor:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-floor.png', img:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-car.png', topSpeed:55, mph:6, mileRange:550 },
-  { id:4, name:'Roadster', desc:'Tăng tốc ngoạn mục & thiết kế thể thao.', color:'#ee0101', imgFloor:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-floor.png', img:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-car.png', topSpeed:250, mph:1.9, mileRange:620 },
-  { id:5, name:'Semi Truck', desc:'Hiệu quả logistics tương lai.', color:'#0047fd', imgFloor:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-floor.png', img:'https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-car.png', topSpeed:65, mph:5, mileRange:500 }
+  {
+    id: 1,
+    name: "Model S",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
+    color: "#0047fd",
+    imgFloorUrl: truckFloorImg,
+    imgUrl: truckImg,
+    topSpeed: 75,
+    mph: 4.5,
+    mileRange: 400,
+    bckgHeight: 300,
+    carShadowHeight: 300,
+    shadowOpacity: 0.2,
+  },
+  {
+    id: 2,
+    name: "Model X",
+    desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    color: "#ee0101",
+    imgFloorUrl: roadsterFloorImg,
+    imgUrl: roadsterImg,
+    topSpeed: 255,
+    mph: 3,
+    mileRange: 520,
+    bckgHeight: 250,
+    carShadowHeight: 0,
+    shadowOpacity: 0.5,
+  },
+  {
+    id: 3,
+    name: "Model 3",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
+    color: "#fd0909cb",
+    imgFloorUrl: model3FloorImg,
+    imgUrl: model3Img,
+    topSpeed: 55,
+    mph: 6,
+    mileRange: 550,
+    bckgHeight: 300,
+    carShadowHeight: 250,
+    shadowOpacity: 0.2,
+  },
+  {
+    id: 4,
+    name: "Roadster",
+    desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    color: "#ee0101",
+    imgFloorUrl: roadsterFloorImg,
+    imgUrl: roadsterImg,
+    topSpeed: 250,
+    mph: 1.9,
+    mileRange: 620,
+    bckgHeight: 340,
+    carShadowHeight: 150,
+    shadowOpacity: 0.5,
+  },
+  {
+    id: 5,
+    name: "Semi truck",
+    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+    color: "#0047fd",
+    imgFloorUrl: truckFloorImg,
+    imgUrl: truckImg,
+    topSpeed: 65,
+    mph: 5,
+    mileRange: 500,
+    bckgHeight: 390,
+    carShadowHeight: 400,
+    shadowOpacity: 0.2,
+  },
 ];
 
-const AnimatedValue = ({ value, duration=800, delay=0, format=(v)=>v }) => {
-  const [display, setDisplay] = useState(0);
-  useEffect(()=> {
-    let raf; let start; let frame;
-    function step(ts){
-      if(!start) start = ts; const progress = Math.min(1, (ts-start)/duration);
-      const eased = easing(progress); const current = value * eased;
-      setDisplay(progress === 1 ? value : current);
-      if(progress < 1){ raf = requestAnimationFrame(step);} }
-    frame = setTimeout(()=> requestAnimationFrame(step), delay);
-    return ()=> { cancelAnimationFrame(raf); clearTimeout(frame); };
-  }, [value, duration, delay]);
-  return <span>{format(display)}</span>;
+class SetCSSVariables extends React.Component {
+  componentDidUpdate(prevProps) {
+    if (this.props.cssVariables !== prevProps.cssVariables) {
+      Object.keys(this.props.cssVariables).forEach((key) => {
+        document.documentElement.style.setProperty(key, this.props.cssVariables[key]);
+      });
+    }
+  }
+
+  render() {
+    return this.props.children;
+  }
+}
+
+SetCSSVariables.propTypes = {
+  cssVariables: PropTypes.object.isRequired,
+  children: PropTypes.node,
 };
 
-const Landing = () => {
-  const [index, setIndex] = useState(0);
-  const navigate = useNavigate();
-  const go = useCallback((i)=> setIndex((i+slides.length)%slides.length), []);
-  useEffect(()=> { const t = setInterval(()=> go(index+1), 7000); return ()=> clearInterval(t); }, [index, go]);
-
+function SlideAside(props) {
+  const activeCar = props.activeCar;
   return (
-    <div className="landing-wrapper">
-      <div className="landing-container">
-        <header className="landing-header">
-          <div className="landing-logo">EVDM</div>
-          <nav className="landing-nav">
-            <a onClick={()=> navigate('/catalog')}>Vehicle</a>
-            <a onClick={()=> navigate('/inventory')}>Inventory</a>
-            <a onClick={()=> navigate('/dealer')}>Dealer</a>
-            <a onClick={()=> navigate('/evm')}>EVM</a>
-            <a onClick={()=> navigate('/reports')}>Reports</a>
-          </nav>
-        </header>
-        <section className="landing-hero">
-          <div className="slider-stage">
-            {slides.map((s,i)=> (
-              <div key={s.id} className={`slide-bg ${i===index? 'active':''}`} style={{'--btn-color': s.color}}>
-                <div className="slide-info">
-                  <h1 style={{color:s.color}}>{s.name}</h1>
-                  <p>{s.desc}</p>
-                  <div className="slide-stats">
-                    <div className="stat">
-                      <div className="stat-value"><AnimatedValue value={s.topSpeed} format={v=> Math.floor(v)+ ' mph'} /></div>
-                      <div className="stat-label">Tốc độ</div>
-                    </div>
-                    <div className="stat">
-                      <div className="stat-value"><AnimatedValue value={s.mph} format={v=> (v%1!==0? v.toFixed(1):Math.floor(v)) + ' s'} delay={300} /></div>
-                      <div className="stat-label">0-60 mph</div>
-                    </div>
-                    <div className="stat">
-                      <div className="stat-value"><AnimatedValue value={s.mileRange} format={v=> Math.floor(v)+ ' mi'} delay={600} /></div>
-                      <div className="stat-label">Range</div>
-                    </div>
-                  </div>
-                  <button className="reserve-btn" onClick={()=> navigate('/catalog')}>Khám phá xe</button>
-                </div>
-                <img className="slide-image" src={s.img} alt={s.name} />
-              </div>
-            ))}
-            <div className="slider-dots">
-              {slides.map((s,i)=> <button key={s.id} className={i===index? 'active':''} onClick={()=> setIndex(i)} />)}
-            </div>
-          </div>
-        </section>
+    <div className="tesla-slide-aside">
+      <h1 className="tesla-slide-aside__wholename">
+        <span>Tesla</span>
+        <TransitionGroup
+          component="span"
+          className="tesla-slide-aside__name"
+        >
+          <CSSTransition
+            key={activeCar.name}
+            timeout={{ enter: 800, exit: 1000 }}
+            className="tesla-slide-aside__name-part"
+            classNames="tesla-slide-aside__name-part-"
+            mountOnEnter={true}
+            unmountOnExit={true}
+          >
+            <span>{activeCar.name}</span>
+          </CSSTransition>
+        </TransitionGroup>
+      </h1>
+      <TransitionGroup className="tesla-slide-aside__desc">
+        <CSSTransition
+          key={activeCar.desc}
+          timeout={{ enter: 900, exit: 1200 }}
+          className="tesla-slide-aside__desc-text"
+          classNames="tesla-slide-aside__desc-text-"
+          mountOnEnter={true}
+          unmountOnExit={true}
+        >
+          <p>{activeCar.desc}</p>
+        </CSSTransition>
+      </TransitionGroup>
+      <div className="tesla-slide-aside__button">
+        <a href='/catalog'>
+          <button className="button">Reserve now</button>
+        </a>
+        <TransitionGroup>
+          <CSSTransition
+            key={activeCar.color}
+            timeout={{ enter: 800, exit: 1000 }}
+            mountOnEnter={true}
+            unmountOnExit={true}
+            classNames="button__border-"
+          >
+            <SetCSSVariables cssVariables={{ "--btn-color": activeCar.color }}>
+              <span className="button__border" />
+            </SetCSSVariables>
+          </CSSTransition>
+        </TransitionGroup>
       </div>
     </div>
   );
+}
+
+SlideAside.propTypes = {
+  activeCar: PropTypes.object.isRequired,
 };
 
-export default Landing;
+function animate(render, duration, easing, next = () => null) {
+  const start = Date.now();
+  (function loop() {
+    const current = Date.now(),
+      delta = current - start,
+      step = delta / duration;
+    if (step > 1) {
+      render(1);
+      next();
+    } else {
+      requestAnimationFrame(loop);
+      render(easing(step * 2));
+    }
+  })();
+}
+
+const myEasing = BezierEasing(0.4, -0.7, 0.1, 1.5);
+
+class AnimValue extends React.Component {
+  constructor(props) {
+    super(props);
+    _defineProperty(this, "node", null);
+    _defineProperty(this, "timeout", null);
+    _defineProperty(this, "setValue", (value, step) => {
+      if (!this.node) return;
+      this.node.style.opacity = step === 1 ? 1 : 0.7;
+      this.node.innerHTML = value;
+    });
+  }
+
+  animate(previousValue, newValue, applyFn) {
+    window.clearTimeout(this.timeout);
+    const diff = newValue - previousValue;
+    const renderFunction = (step) => {
+      this.timeout = setTimeout(() => {
+        applyFn(
+          this.props.transformFn(previousValue + diff * step, step),
+          step
+        );
+      }, this.props.delay);
+    };
+    animate(renderFunction, this.props.duration, myEasing);
+  }
+
+  componentDidMount() {
+    this.animate(0, this.props.value, this.setValue);
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.value !== this.props.value) {
+      this.animate(prevProps.value, this.props.value, this.setValue);
+    }
+  }
+
+  componentWillUnmount() {
+    window.clearTimeout(this.timeout);
+    this.timeout = null;
+  }
+
+  render() {
+    return (
+      <span
+        className={this.props.className}
+        ref={(node) => (this.node = node)}
+      >
+        0
+      </span>
+    );
+  }
+}
+_defineProperty(AnimValue, "defaultProps", {
+  delay: 0,
+  duration: 800,
+  transformFn: (value) => Math.floor(value),
+});
+
+AnimValue.propTypes = {
+  className: PropTypes.string,
+  value: PropTypes.number.isRequired,
+  delay: PropTypes.number,
+  duration: PropTypes.number,
+  transformFn: PropTypes.func,
+};
+
+class AnimateValue extends React.Component {
+  render() {
+    return (
+      <AnimValue
+        className={this.props.className}
+        delay={this.props.delay}
+        value={this.props.value}
+        transformFn={(value, step) =>
+          step === 1
+            ? value % 1 !== 0
+              ? value.toFixed(1)
+              : value
+            : Math.abs(Math.floor(value))
+        }
+      />
+    );
+  }
+}
+
+AnimateValue.propTypes = {
+  className: PropTypes.string,
+  delay: PropTypes.number,
+  value: PropTypes.number.isRequired,
+};
+
+let DELAY_TOP_SPEED = 200;
+let DELAY_MPH = 700;
+let DELAY_MILE_RANG = 1200;
+
+class SlideParams extends React.Component {
+  componentDidUpdate(prevProps) {
+    if (prevProps.animationForward !== this.props.animationForward) {
+      if (!this.props.animationForward) {
+        DELAY_TOP_SPEED = 1200;
+        DELAY_MILE_RANG = 200;
+      } else {
+        DELAY_TOP_SPEED = 200;
+        DELAY_MILE_RANG = 1200;
+      }
+    }
+  }
+
+  render() {
+    const { activeCar } = this.props;
+
+    return (
+      <div className="tesla-slide-params">
+        <ul className="tesla-slide-params__list">
+          <li className="tesla-slide-params__item">
+            <div className="tesla-slide-params__wrapper">
+              <span className="tesla-slide-params__prefix">+</span>
+              <AnimateValue
+                className="tesla-slide-params__value"
+                value={activeCar.topSpeed}
+                delay={DELAY_TOP_SPEED}
+              />
+              <span className="tesla-slide-params__sufix">mph</span>
+            </div>
+            <p className="tesla-slide-params__name">Top speed</p>
+          </li>
+          <li className="tesla-slide-params__item">
+            <div className="tesla-slide-params__wrapper">
+              <AnimateValue
+                className="tesla-slide-params__value"
+                value={activeCar.mph}
+                delay={DELAY_MPH}
+              />
+              <span className="tesla-slide-params__sufix">s</span>
+            </div>
+            <p className="tesla-slide-params__name">0-60 mph</p>
+          </li>
+          <li className="tesla-slide-params__item">
+            <div className="tesla-slide-params__wrapper">
+              <AnimateValue
+                className="tesla-slide-params__value"
+                value={activeCar.mileRange}
+                delay={DELAY_MILE_RANG}
+              />
+              <span className="tesla-slide-params__sufix">mi</span>
+            </div>
+            <p className="tesla-slide-params__name">Mile Range</p>
+          </li>
+        </ul>
+      </div>
+    );
+  }
+}
+
+SlideParams.propTypes = {
+  activeCar: PropTypes.object.isRequired,
+  animationForward: PropTypes.bool.isRequired,
+};
+
+class Slide extends React.Component {
+  render() {
+    const { activeSlide, animationForward, setAnimationState, ANIMATION_PHASES } = this.props;
+
+    return (
+      <div className={`tesla-slide ${animationForward ? "animation-forward" : "animation-back"}`}>
+        <SlideAside activeCar={activeSlide} />
+        <TransitionGroup>
+          <CSSTransition
+            key={activeSlide.name}
+            timeout={{ enter: 800, exit: 1000 }}
+            classNames="tesla-slide__bckg-"
+            mountOnEnter={true}
+            unmountOnExit={true}
+          >
+            <SetCSSVariables
+              cssVariables={{
+                "--car-color": activeSlide.color,
+                "--bckg-height": activeSlide.bckgHeight + "px",
+                "--shadow-opacity": activeSlide.shadowOpacity,
+                "--car-shadow-height": activeSlide.carShadowHeight + "px",
+              }}
+            >
+              <div className="tesla-slide__bckg">
+                <div className="tesla-slide__bckg-fill" />
+              </div>
+            </SetCSSVariables>
+          </CSSTransition>
+        </TransitionGroup>
+        <TransitionGroup>
+          <CSSTransition
+            key={activeSlide.name}
+            timeout={{ enter: 700, exit: 1200 }}
+            classNames="tesla-slide__img-"
+            mountOnEnter={true}
+            unmountOnExit={true}
+            onEntered={() => setAnimationState(ANIMATION_PHASES.STOP)}
+          >
+            <div className="tesla-slide__img">
+              <img
+                className="tesla-slide__img-floor"
+                src={activeSlide.imgFloorUrl}
+                alt=""
+              />
+              <img
+                className="tesla-slide__img-car"
+                src={activeSlide.imgUrl}
+                alt=""
+              />
+            </div>
+          </CSSTransition>
+        </TransitionGroup>
+        <SlideParams activeCar={activeSlide} animationForward={animationForward} />
+      </div>
+    );
+  }
+}
+
+Slide.propTypes = {
+  activeSlide: PropTypes.object.isRequired,
+  animationForward: PropTypes.bool.isRequired,
+  setAnimationState: PropTypes.func.isRequired,
+  ANIMATION_PHASES: PropTypes.object.isRequired,
+};
+
+function SliderNavigation(props) {
+  return (
+    <div className="tesla-slider-navigation">
+      <ul className="tesla-slider-navigation__list">
+        {props.carsNames.map((car) => (
+          <li key={car.id} className="tesla-slider-navigation__item">
+            <a
+              href="#"
+              onClick={(event) => {
+                event.preventDefault();
+                props.setActiveSlide(props.carsNames.indexOf(car));
+              }}
+              className={`tesla-slider-navigation__link ${
+                props.carsNames[props.activeSlide] === car
+                  ? "tesla-slider-navigation__link--active"
+                  : ""
+              }`}
+              style={{
+                color:
+                  props.carsNames[props.activeSlide] === car ? car.color : "",
+              }}
+            >
+              {car.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+SliderNavigation.propTypes = {
+  setActiveSlide: PropTypes.func.isRequired,
+  carsNames: PropTypes.array.isRequired,
+  activeSlide: PropTypes.number.isRequired,
+};
+
+const logoTesla =
+    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/logoTesla.svg",
+  mouseImg = "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/mouse.svg",
+  hamburger =
+    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/hamburger.svg";
+
+const ANIMATION_PHASES = {
+  PENDING: "PENDING",
+  STOP: "STOP",
+};
+
+class Slider extends React.Component {
+  constructor(props) {
+    super(props);
+    _defineProperty(this, "state", {
+      activeSlide: 0,
+      animationForward: true,
+      slidesCount: slides.length,
+      animationState: null,
+    });
+    _defineProperty(this, "slider", { header: "", content: "" });
+    _defineProperty(this, "setAnimationState", (animationState) => this.setState({ animationState }));
+    _defineProperty(this, "setActiveSlide", (slideId) => {
+      this.setState({
+        activeSlide: slideId,
+        animationForward: this.state.activeSlide < slideId,
+        animationState: ANIMATION_PHASES.PENDING,
+      });
+    });
+    _defineProperty(this, "timeout", null);
+    _defineProperty(this, "handleScroll", (e) => {
+      const sliderHeight = this.slider.content.clientHeight;
+      const headerHeight = this.slider.header.clientHeight;
+      if (window.innerHeight < sliderHeight + headerHeight) {
+        return;
+      }
+      e.preventDefault();
+      window.clearTimeout(this.timeout);
+      this.timeout = setTimeout(() => {
+        if (e.deltaY < 0 && this.state.activeSlide !== 0) {
+          this.setActiveSlide(this.state.activeSlide - 1);
+        }
+        if (e.deltaY > 0 && this.state.activeSlide !== this.state.slidesCount - 1) {
+          this.setActiveSlide(this.state.activeSlide + 1);
+        }
+      }, 50);
+    });
+  }
+
+  componentDidMount() {
+    this.setState({ activeSlide: 3 });
+    this.setAnimationState(ANIMATION_PHASES.PENDING);
+    this.slider.header = document.querySelector(".tesla-header");
+    this.slider.content = document.querySelector(".tesla-slider");
+    document.body.addEventListener("wheel", this.handleScroll);
+  }
+
+  componentWillUnmount() {
+    document.body.removeEventListener("wheel", this.handleScroll);
+    window.clearTimeout(this.timeout);
+    this.timeout = null;
+  }
+
+  render() {
+    return (
+      <div className="tesla-slider">
+        <SliderNavigation
+          activeSlide={this.state.activeSlide}
+          setActiveSlide={this.setActiveSlide}
+          carsNames={slides.map((slide) => ({
+            id: slide.id,
+            name: slide.name,
+            color: slide.color,
+          }))}
+        />
+        <Slide
+          animationForward={this.state.animationForward}
+          activeSlide={slides[this.state.activeSlide]}
+          animationState={this.state.animationState}
+          setAnimationState={this.setAnimationState}
+          ANIMATION_PHASES={ANIMATION_PHASES}
+        />
+        <div className="tesla-slider__scroll">
+          <img src={mouseImg} alt="" />
+        </div>
+      </div>
+    );
+  }
+}
+
+function Header() {
+  return (
+    <div className="tesla-header">
+      <div className="tesla-header__logo">
+        <img src={logoTesla} alt="" />
+      </div>
+      <div className="tesla-header__nav">
+        <img src={hamburger} alt="" />
+      </div>
+    </div>
+  );
+}
+
+class App extends React.Component {
+  render() {
+    return (
+      <div className="container">
+        <Header />
+        <Slider />
+      </div>
+    );
+  }
+}
+
+export default App;
