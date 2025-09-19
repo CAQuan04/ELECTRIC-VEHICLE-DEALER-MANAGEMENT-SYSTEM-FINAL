@@ -3,9 +3,8 @@ import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import PropTypes from 'prop-types';
 import BezierEasing from 'bezier-easing';
 import './Landing.css';
-// Use canonical model3 asset filenames
-import model3Img from '../assets/tesla/model3.png';
-import model3FloorImg from '../assets/tesla/model3_floor.png';
+
+
 
 function _defineProperty(obj, key, value) {
   if (key in obj) {
@@ -21,24 +20,21 @@ function _defineProperty(obj, key, value) {
   return obj;
 }
 
-const roadsterFloorImg =
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-floor.png",
-  roadsterImg =
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/roadster-car.png",
-  truckFloorImg =
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-floor.png",
-  truckImg =
-    "https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/truck-car.png";
-
+const 
+  modelSImg = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-Hero-Desktop-US.png",
+  modelYImg = "https://www.topgear.com/sites/default/files/2022/03/TopGear%20-%20Tesla%20Model%20Y%20-%20003.jpg",
+  modelXImg = "https://static1.pocketlintimages.com/wordpress/wp-content/uploads/2024/05/tesla-model-x.jpg",
+  cyphertruckImg = "https://cdn.magzter.com/1406567956/1701902482/articles/l3D7l_ggN1702027544376/TESLAS-DISRUPTIVE-BREAKTHROUGH-PRESE-FOR-THE-PICKUP-INDUSTRY.jpg",
+  model3Img = "https://cdn.motor1.com/images/mgl/qkZnAR/s1/model-3-2.jpg";
 
 const slides = [
   {
     id: 1,
     name: "Model S",
     desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
-    color: "#0047fd",
-    imgFloorUrl: truckFloorImg,
-    imgUrl: truckImg,
+    color: "#cf1717ff",
+    imgFloorUrl: modelSImg,
+    imgUrl: modelSImg,
     topSpeed: 75,
     mph: 4.5,
     mileRange: 400,
@@ -50,9 +46,9 @@ const slides = [
     id: 2,
     name: "Model X",
     desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    color: "#ee0101",
-    imgFloorUrl: roadsterFloorImg,
-    imgUrl: roadsterImg,
+    color: "#080181cd",
+    imgFloorUrl: modelXImg,
+    imgUrl: modelXImg,
     topSpeed: 255,
     mph: 3,
     mileRange: 520,
@@ -65,7 +61,7 @@ const slides = [
     name: "Model 3",
     desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
     color: "#fd0909cb",
-    imgFloorUrl: model3FloorImg,
+    imgFloorUrl: model3Img,
     imgUrl: model3Img,
     topSpeed: 55,
     mph: 6,
@@ -76,11 +72,11 @@ const slides = [
   },
   {
     id: 4,
-    name: "Roadster",
+    name: "Model Y",
     desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    color: "#ee0101",
-    imgFloorUrl: roadsterFloorImg,
-    imgUrl: roadsterImg,
+    color: "#d9d9d9ff",
+    imgFloorUrl: modelYImg,
+    imgUrl: modelYImg,
     topSpeed: 250,
     mph: 1.9,
     mileRange: 620,
@@ -90,11 +86,11 @@ const slides = [
   },
   {
     id: 5,
-    name: "Semi truck",
+    name: "Cybertruck",
     desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
-    color: "#0047fd",
-    imgFloorUrl: truckFloorImg,
-    imgUrl: truckImg,
+    color: "#5d5d5dff",
+    imgFloorUrl: cyphertruckImg,
+    imgUrl: cyphertruckImg,
     topSpeed: 65,
     mph: 5,
     mileRange: 500,
@@ -159,7 +155,7 @@ function SlideAside(props) {
       </TransitionGroup>
       <div className="tesla-slide-aside__button">
         <a href='/catalog'>
-          <button className="button">Reserve now</button>
+          <button className="button" style={{ backgroundColor: activeCar.color }}>Reserve now</button>
         </a>
         <TransitionGroup>
           <CSSTransition
@@ -444,7 +440,7 @@ function SliderNavigation(props) {
               }`}
               style={{
                 color:
-                  props.carsNames[props.activeSlide] === car ? car.color : "",
+                  props.carsNames[props.activeSlide] === car ? car.color : "#f1f1f1",
               }}
             >
               {car.name}
