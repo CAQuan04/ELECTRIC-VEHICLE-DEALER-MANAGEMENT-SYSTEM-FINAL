@@ -1,0 +1,25 @@
+body {
+  background: url("https://images.unsplash.com/photo-1617814071651-dc9fa9a316d0?auto=format&fit=crop&w=1950&q=80")
+    no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-card {
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  padding: 2rem;
+}
+
+.dashboard-container {
+  background-color: #f9fafb;
+  min-height: 100vh;
+}
+
+.card-stat {
+  transition: transform 0.2s ease;
+}
+.card-stat:hover {
+  transform: translateY(-5px);
+}
