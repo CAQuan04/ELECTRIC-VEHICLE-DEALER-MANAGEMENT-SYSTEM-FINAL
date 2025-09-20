@@ -489,21 +489,21 @@ class Slider extends React.Component {
     });
     _defineProperty(this, "timeout", null);
     _defineProperty(this, "handleScroll", (e) => {
-      const sliderHeight = this.slider.content.clientHeight;
-      const headerHeight = this.slider.header.clientHeight;
-      if (window.innerHeight < sliderHeight + headerHeight) {
-        return;
-      }
+      // Always allow scroll wheel navigation for Tesla slider
       e.preventDefault();
+      
+      // Debounce scroll events
       window.clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
-        if (e.deltaY < 0 && this.state.activeSlide !== 0) {
+        // Scroll up - previous slide
+        if (e.deltaY < 0 && this.state.activeSlide > 0) {
           this.setActiveSlide(this.state.activeSlide - 1);
         }
-        if (e.deltaY > 0 && this.state.activeSlide !== this.state.slidesCount - 1) {
+        // Scroll down - next slide
+        if (e.deltaY > 0 && this.state.activeSlide < this.state.slidesCount - 1) {
           this.setActiveSlide(this.state.activeSlide + 1);
         }
-      }, 50);
+      }, 150); // Increased debounce time for smoother navigation
     });
   }
 
