@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { handleGoogleLoginSuccess, handleGoogleLoginError } from '../utils/googleAuth';
 import PropTypes from 'prop-types';
 import BezierEasing from 'bezier-easing';
 import './Landing.css';
@@ -22,22 +24,23 @@ function _defineProperty(obj, key, value) {
 
 const 
   modelSImg = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-Hero-Desktop-US.png",
-  modelYImg = "https://www.topgear.com/sites/default/files/2022/03/TopGear%20-%20Tesla%20Model%20Y%20-%20003.jpg",
+  modelYImg = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-Y-2-Hero-Desktop.jpg",
   modelXImg = "https://static1.pocketlintimages.com/wordpress/wp-content/uploads/2024/05/tesla-model-x.jpg",
   cyphertruckImg = "https://cdn.magzter.com/1406567956/1701902482/articles/l3D7l_ggN1702027544376/TESLAS-DISRUPTIVE-BREAKTHROUGH-PRESE-FOR-THE-PICKUP-INDUSTRY.jpg",
-  model3Img = "https://cdn.motor1.com/images/mgl/qkZnAR/s1/model-3-2.jpg";
+  model3Img = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-3-Exterior-Hero-Desktop-LHD.jpg";
 
 const slides = [
   {
     id: 1,
     name: "Model S",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
-    color: "#cf1717ff",
+    desc: "Experience pure electric speed with unmatched luxury and elegance ",
+    color: "#cf17176d",
     imgFloorUrl: modelSImg,
     imgUrl: modelSImg,
-    topSpeed: 75,
-    mph: 4.5,
-    mileRange: 400,
+    topSpeed: 155
+    ,
+    mph: 3.1,
+    mileRange: 410,
     bckgHeight: 300,
     carShadowHeight: 300,
     shadowOpacity: 0.2,
@@ -45,13 +48,13 @@ const slides = [
   {
     id: 2,
     name: "Model X",
-    desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    desc: "The electric car that makes innovation simple, modern, and accessible to everyone.",
     color: "#080181cd",
     imgFloorUrl: modelXImg,
     imgUrl: modelXImg,
-    topSpeed: 255,
-    mph: 3,
-    mileRange: 520,
+    topSpeed: 163,
+    mph: 2.5,
+    mileRange:  352,
     bckgHeight: 250,
     carShadowHeight: 0,
     shadowOpacity: 0.5,
@@ -59,13 +62,13 @@ const slides = [
   {
     id: 3,
     name: "Model 3",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
-    color: "#fd0909cb",
+    desc: "Open the wings of tomorrow and drive into the future with style and power. ",
+    color: "#61068ecb",
     imgFloorUrl: model3Img,
     imgUrl: model3Img,
-    topSpeed: 55,
-    mph: 6,
-    mileRange: 550,
+    topSpeed: 155,
+    mph: 4.2,
+    mileRange: 346,
     bckgHeight: 300,
     carShadowHeight: 250,
     shadowOpacity: 0.2,
@@ -73,13 +76,13 @@ const slides = [
   {
     id: 4,
     name: "Model Y",
-    desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    desc: "Designed for every journey – versatile, practical, and ready for your lifestyle.",
     color: "#d9d9d9ff",
     imgFloorUrl: modelYImg,
     imgUrl: modelYImg,
-    topSpeed: 250,
-    mph: 1.9,
-    mileRange: 620,
+    topSpeed: 124.9,
+    mph: 3.6,
+    mileRange: 357,
     bckgHeight: 340,
     carShadowHeight: 150,
     shadowOpacity: 0.5,
@@ -87,7 +90,7 @@ const slides = [
   {
     id: 5,
     name: "Cybertruck",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+    desc: "Forged in steel, built for strength, and made to break every limit.",
     color: "#5d5d5dff",
     imgFloorUrl: cyphertruckImg,
     imgUrl: cyphertruckImg,
@@ -489,21 +492,17 @@ class Slider extends React.Component {
     });
     _defineProperty(this, "timeout", null);
     _defineProperty(this, "handleScroll", (e) => {
-      // Always allow scroll wheel navigation for Tesla slider
+      // Remove height restriction that was blocking scroll
       e.preventDefault();
-      
-      // Debounce scroll events
       window.clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
-        // Scroll up - previous slide
-        if (e.deltaY < 0 && this.state.activeSlide > 0) {
+        if (e.deltaY < 0 && this.state.activeSlide !== 0) {
           this.setActiveSlide(this.state.activeSlide - 1);
         }
-        // Scroll down - next slide
-        if (e.deltaY > 0 && this.state.activeSlide < this.state.slidesCount - 1) {
+        if (e.deltaY > 0 && this.state.activeSlide !== this.state.slidesCount - 1) {
           this.setActiveSlide(this.state.activeSlide + 1);
         }
-      }, 150); // Increased debounce time for smoother navigation
+      }, 50);
     });
   }
 
@@ -549,14 +548,178 @@ class Slider extends React.Component {
 }
 
 function Header() {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [activeSubmenu, setActiveSubmenu] = React.useState(null);
+  const [isLoginOpen, setIsLoginOpen] = React.useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    setActiveSubmenu(null);
+  };
+
+  const toggleLogin = () => {
+    setIsLoginOpen(!isLoginOpen);
+  };
+
+  const handleMenuItemClick = (itemId) => {
+    setActiveSubmenu(activeSubmenu === itemId ? null : itemId);
+  };
+
+  const menuItems = [
+    {
+      id: 1,
+      title: 'Vehicles',
+      submenu: ['Model S', 'Model 3', 'Model X', 'Model Y', 'Cybertruck', 'Roadster']
+    },
+    {
+      id: 2,
+      title: 'Charging',
+      submenu: ['Home Charging', 'Supercharger', 'Destination Charging', 'Mobile Charging']
+    },
+    {
+      id: 3,
+      title: 'Discover',
+      submenu: ['Demo Drive', 'Compare', 'Trade-In', 'Careers', 'Events', 'Find Us']
+    },
+    {
+      id: 4,
+      title: 'Shop',
+      submenu: ['Accessories', 'Apparel', 'Lifestyle', 'Charging', 'Vehicle Accessories']
+    },
+    {
+      id: 5,
+      title: 'Information',
+      submenu: ['About Tesla', 'Investor Relations', 'Blog', 'Careers', 'News', 'Locations']
+    }
+  ];
+
   return (
     <div className="tesla-header">
       <div className="tesla-header__logo">
-        <img src={logoTesla} alt="" />
+        <img src={logoTesla} alt="Tesla" />
       </div>
-      <div className="tesla-header__nav">
-        <img src={hamburger} alt="" />
+      <div className="tesla-header__actions">
+        <button className="tesla-login-btn" onClick={toggleLogin}>
+          Login
+        </button>
+        <div className="tesla-header__nav">
+          <img 
+            src={hamburger} 
+            alt="Menu" 
+            onClick={toggleMenu}
+            className={`tesla-header__hamburger ${isMenuOpen ? 'active' : ''}`}
+          />
+        </div>
       </div>
+      
+      {/* Google Login Popup */}
+      {isLoginOpen && (
+        <div className="tesla-login-overlay" onClick={toggleLogin}>
+          <div className="tesla-google-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="tesla-google-header">
+              <div className="google-logo">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+              </div>
+              <span>Sign in to Tesla</span>
+              <button className="tesla-google-close" onClick={toggleLogin}>×</button>
+            </div>
+            <div className="tesla-google-content">
+              {/* Real Google Sign-in Button */}
+              <div className="google-signin-container">
+                <GoogleLogin
+                  onSuccess={(credentialResponse) => {
+                    const result = handleGoogleLoginSuccess(credentialResponse);
+                    if (result.success) {
+                      alert(`Welcome ${result.user.name}!\nEmail: ${result.user.email}`);
+                      console.log('User authenticated:', result.user);
+                      // Here you would typically update your app's authentication state
+                      // setUser(result.user);
+                      // localStorage.setItem('authToken', result.token);
+                      toggleLogin(); // Close popup
+                    } else {
+                      alert('Authentication failed: ' + result.error);
+                    }
+                  }}
+                  onError={() => {
+                    const result = handleGoogleLoginError();
+                    alert('Google Sign-in failed: ' + result.error);
+                  }}
+                  useOneTap
+                  text="signin_with"
+                  theme="filled_black"
+                  size="large"
+                  shape="rectangular"
+                  width="100%"
+                />
+              </div>
+              
+              {/* Alternative Custom Button */}
+              <div className="tesla-login-divider">
+                <span>or</span>
+              </div>
+              
+              <div className="tesla-custom-google-section">
+                <p className="tesla-google-info">
+                  Click the button above for secure Google authentication, or use a custom implementation:
+                </p>
+                <button 
+                  className="tesla-custom-google-btn"
+                  onClick={() => {
+                    // This would trigger custom Google login flow
+                    console.log('Custom Google button clicked');
+                    alert('Custom Google implementation - would open Google OAuth flow');
+                  }}
+                >
+                  <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                  </svg>
+                  Continue with Google (Custom)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Hamburger Menu Overlay */}
+      {isMenuOpen && (
+        <div className={`tesla-menu-overlay ${isMenuOpen ? 'open' : ''}`}>
+          <div className="tesla-menu">
+            <div className="tesla-menu__content">
+              {/* Close button */}
+              <div className="tesla-menu__close" onClick={toggleMenu}>
+                <span>×</span>
+              </div>
+              {menuItems.map((item) => (
+                <div key={item.id} className="tesla-menu__item">
+                  <div 
+                    className={`tesla-menu__title ${activeSubmenu === item.id ? 'active' : ''}`}
+                    onClick={() => handleMenuItemClick(item.id)}
+                  >
+                    {item.title}
+                    <span className="tesla-menu__arrow">›</span>
+                  </div>
+                  <div className={`tesla-menu__submenu ${activeSubmenu === item.id ? 'open' : ''}`}>
+                    {item.submenu.map((subItem, index) => (
+                      <div key={index} className="tesla-menu__subitem">
+                        {subItem}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

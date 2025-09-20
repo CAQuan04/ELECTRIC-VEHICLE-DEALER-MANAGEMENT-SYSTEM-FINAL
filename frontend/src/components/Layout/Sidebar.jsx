@@ -14,7 +14,9 @@ const Sidebar = () => {
   ];
   return (
     <aside style={styles.sidebar}>
-      <h2 style={styles.logo}>EVM</h2>
+      <NavLink to="/" style={styles.logo}>
+        <h2>EVM</h2>
+      </NavLink>
       <nav>
         {links.map(l => (
           <NavLink key={l.to} to={l.to} style={styles.link} className={({isActive})=> isActive ? 'active' : ''}>
