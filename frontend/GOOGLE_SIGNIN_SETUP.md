@@ -19,14 +19,18 @@ npm install @react-oauth/google@latest
 6. Set Application type to **Web application**
 7. Add authorized JavaScript origins:
    - `http://localhost:3000`
-   - `http://localhost:5173` (for Vite)
+   - `http://localhost:5173` (for Vite default)
+   - `http://localhost:5174` (for Vite when 5173 is busy)
    - Your production domain
+
+**IMPORTANT:** Make sure to add the exact port your app is running on!
 
 ### 3. Configure Environment Variables
 
 Create `.env` file in your frontend directory:
 ```env
 VITE_GOOGLE_CLIENT_ID=your_google_client_id_here
+VITE_API_BASE_URL=https://your-api.example.com
 ```
 
 ### 4. Implementation Features
@@ -111,6 +115,17 @@ The popup also includes a custom Google button for advanced use cases where you 
 
 ## 🚨 Common Issues
 
+### "no registered origin" Error (Error 401: invalid_client)
+**Problem:** Your current localhost port is not in authorized origins
+**Solution:** 
+1. Go to [Google Cloud Console Credentials](https://console.cloud.google.com/apis/credentials)
+2. Click on your OAuth 2.0 Client ID
+3. Add your current localhost URL to "Authorized JavaScript origins":
+   - `http://localhost:5174` (or whatever port your app is running on)
+4. Click "Save"
+5. Wait a few minutes for changes to take effect
+6. Refresh your application
+
 ### "popup_closed_by_user" Error
 - Usually means incorrect Client ID
 - Check that your domain is in authorized origins
@@ -139,6 +154,7 @@ The popup also includes a custom Google button for advanced use cases where you 
 - Implement proper error handling UI
 - Set up backend token verification
 - Configure user session management
+- Set `VITE_API_BASE_URL` to your backend base URL (e.g., https://api.yourdomain.com)
 
 ## 🔗 Useful Links
 
