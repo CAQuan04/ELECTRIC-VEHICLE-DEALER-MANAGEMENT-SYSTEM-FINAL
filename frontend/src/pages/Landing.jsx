@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
+import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
+import { handleGoogleLoginSuccess, handleGoogleLoginError, handleGoogleAccessTokenLogin } from '../utils/googleAuth';
+import { handleFacebookLoginSuccess, handleFacebookLoginError } from '../utils/facebookAuth';
 import PropTypes from 'prop-types';
 import BezierEasing from 'bezier-easing';
 import './Landing.css';
@@ -22,22 +25,23 @@ function _defineProperty(obj, key, value) {
 
 const 
   modelSImg = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-S-Hero-Desktop-US.png",
-  modelYImg = "https://www.topgear.com/sites/default/files/2022/03/TopGear%20-%20Tesla%20Model%20Y%20-%20003.jpg",
+  modelYImg = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-Y-2-Hero-Desktop.jpg",
   modelXImg = "https://static1.pocketlintimages.com/wordpress/wp-content/uploads/2024/05/tesla-model-x.jpg",
   cyphertruckImg = "https://cdn.magzter.com/1406567956/1701902482/articles/l3D7l_ggN1702027544376/TESLAS-DISRUPTIVE-BREAKTHROUGH-PRESE-FOR-THE-PICKUP-INDUSTRY.jpg",
-  model3Img = "https://cdn.motor1.com/images/mgl/qkZnAR/s1/model-3-2.jpg";
+  model3Img = "https://digitalassets.tesla.com/tesla-contents/image/upload/f_auto,q_auto/Model-3-Exterior-Hero-Desktop-LHD.jpg";
 
 const slides = [
   {
     id: 1,
     name: "Model S",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
-    color: "#cf1717ff",
+    desc: "Experience pure electric speed with unmatched luxury and elegance ",
+    color: "#e21414fa",
     imgFloorUrl: modelSImg,
     imgUrl: modelSImg,
-    topSpeed: 75,
-    mph: 4.5,
-    mileRange: 400,
+    topSpeed: 155
+    ,
+    mph: 3.1,
+    mileRange: 410,
     bckgHeight: 300,
     carShadowHeight: 300,
     shadowOpacity: 0.2,
@@ -45,13 +49,13 @@ const slides = [
   {
     id: 2,
     name: "Model X",
-    desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    desc: "The electric car that makes innovation simple, modern, and accessible to everyone.",
     color: "#080181cd",
     imgFloorUrl: modelXImg,
     imgUrl: modelXImg,
-    topSpeed: 255,
-    mph: 3,
-    mileRange: 520,
+    topSpeed: 163,
+    mph: 2.5,
+    mileRange:  352,
     bckgHeight: 250,
     carShadowHeight: 0,
     shadowOpacity: 0.5,
@@ -59,13 +63,13 @@ const slides = [
   {
     id: 3,
     name: "Model 3",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et ",
-    color: "#fd0909cb",
+    desc: "Open the wings of tomorrow and drive into the future with style and power. ",
+    color: "#61068ecb",
     imgFloorUrl: model3Img,
     imgUrl: model3Img,
-    topSpeed: 55,
-    mph: 6,
-    mileRange: 550,
+    topSpeed: 155,
+    mph: 4.2,
+    mileRange: 346,
     bckgHeight: 300,
     carShadowHeight: 250,
     shadowOpacity: 0.2,
@@ -73,13 +77,13 @@ const slides = [
   {
     id: 4,
     name: "Model Y",
-    desc: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+    desc: "Designed for every journey – versatile, practical, and ready for your lifestyle.",
     color: "#d9d9d9ff",
     imgFloorUrl: modelYImg,
     imgUrl: modelYImg,
-    topSpeed: 250,
-    mph: 1.9,
-    mileRange: 620,
+    topSpeed: 124.9,
+    mph: 3.6,
+    mileRange: 357,
     bckgHeight: 340,
     carShadowHeight: 150,
     shadowOpacity: 0.5,
@@ -87,7 +91,7 @@ const slides = [
   {
     id: 5,
     name: "Cybertruck",
-    desc: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore",
+    desc: "Forged in steel, built for strength, and made to break every limit.",
     color: "#5d5d5dff",
     imgFloorUrl: cyphertruckImg,
     imgUrl: cyphertruckImg,
@@ -489,21 +493,17 @@ class Slider extends React.Component {
     });
     _defineProperty(this, "timeout", null);
     _defineProperty(this, "handleScroll", (e) => {
-      // Always allow scroll wheel navigation for Tesla slider
+      // Remove height restriction that was blocking scroll
       e.preventDefault();
-      
-      // Debounce scroll events
       window.clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
-        // Scroll up - previous slide
-        if (e.deltaY < 0 && this.state.activeSlide > 0) {
+        if (e.deltaY < 0 && this.state.activeSlide !== 0) {
           this.setActiveSlide(this.state.activeSlide - 1);
         }
-        // Scroll down - next slide
-        if (e.deltaY > 0 && this.state.activeSlide < this.state.slidesCount - 1) {
+        if (e.deltaY > 0 && this.state.activeSlide !== this.state.slidesCount - 1) {
           this.setActiveSlide(this.state.activeSlide + 1);
         }
-      }, 150); // Increased debounce time for smoother navigation
+      }, 50);
     });
   }
 
@@ -549,14 +549,240 @@ class Slider extends React.Component {
 }
 
 function Header() {
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [activeSubmenu, setActiveSubmenu] = React.useState(null);
+  const [isLoginOpen, setIsLoginOpen] = React.useState(false);
+  const [isRegisterMode, setIsRegisterMode] = React.useState(false);
+
+  // Google OAuth hook for icon-based login
+  const login = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const result = await handleGoogleAccessTokenLogin(tokenResponse);
+        if (result.success) {
+          alert(`Chào mừng ${result.user.name}! Đăng nhập Google thành công.`);
+          toggleLogin();
+        } else {
+          alert('Đăng nhập thất bại: ' + result.error);
+        }
+      } catch (error) {
+        console.error('Google login error:', error);
+        alert('Lỗi đăng nhập Google: ' + error.message);
+      }
+    },
+    onError: (error) => {
+      console.error('Google login error:', error);
+      handleGoogleLoginError();
+    }
+  });
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+    setActiveSubmenu(null);
+  };
+
+  const toggleLogin = () => {
+    setIsLoginOpen(!isLoginOpen);
+  };
+
+  const handleMenuItemClick = (itemId) => {
+    setActiveSubmenu(activeSubmenu === itemId ? null : itemId);
+  };
+
+  const menuItems = [
+    {
+      id: 1,
+      title: 'Vehicles',
+      submenu: ['Model S', 'Model 3', 'Model X', 'Model Y', 'Cybertruck', 'Roadster']
+    },
+    {
+      id: 2,
+      title: 'Charging',
+      submenu: ['Home Charging', 'Supercharger', 'Destination Charging', 'Mobile Charging']
+    },
+    {
+      id: 3,
+      title: 'Discover',
+      submenu: ['Demo Drive', 'Compare', 'Trade-In', 'Careers', 'Events', 'Find Us']
+    },
+    {
+      id: 4,
+      title: 'Shop',
+      submenu: ['Accessories', 'Apparel', 'Lifestyle', 'Charging', 'Vehicle Accessories']
+    },
+    {
+      id: 5,
+      title: 'Information',
+      submenu: ['About Tesla', 'Investor Relations', 'Blog', 'Careers', 'News', 'Locations']
+    }
+  ];
+
   return (
     <div className="tesla-header">
       <div className="tesla-header__logo">
-        <img src={logoTesla} alt="" />
+        <img src={logoTesla} alt="Tesla" />
       </div>
-      <div className="tesla-header__nav">
-        <img src={hamburger} alt="" />
+      <div className="tesla-header__actions">
+        <button className="tesla-login-btn" onClick={toggleLogin}>
+          Login
+        </button>
+        <div className="tesla-header__nav">
+          <img 
+            src={hamburger} 
+            alt="Menu" 
+            onClick={toggleMenu}
+            className={`tesla-header__hamburger ${isMenuOpen ? 'active' : ''}`}
+          />
+        </div>
       </div>
+      
+      {/* Modern Login/Signup Popup */}
+      {isLoginOpen && (
+        <div className="auth-overlay" onClick={toggleLogin}>
+          <div className={`auth-container ${isRegisterMode ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
+            {/* Login Form */}
+            <div className="form-box login">
+              <form action="#" onSubmit={(e) => e.preventDefault()}>
+                <h1>Login</h1>
+                <div className="input-box">
+                  <input type="text" placeholder="Username" required />
+                  <i className="bx bxs-user"></i>
+                </div>
+                <div className="input-box">
+                  <input type="password" placeholder="Password" required />
+                  <i className="bx bxs-lock-alt"></i>
+                </div>
+                <div className="forgot-link">
+                  <a href="#">Forgot Password?</a>
+                </div>
+                <button type="submit" className="auth-btn">Login</button>
+                <p>or login with social platforms</p>
+                <div className="social-icons">
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    login();
+                  }}>
+                    <i className="bx bxl-google"></i>
+                  </a>
+                  <a href="#" onClick={async (e) => {
+                    e.preventDefault();
+                    try {
+                      const userData = await handleFacebookLoginSuccess();
+                      console.log('Facebook login successful:', userData);
+                      alert(`Chào mừng ${userData.name}! Đăng nhập Facebook thành công.`);
+                      toggleLogin();
+                    } catch (error) {
+                      handleFacebookLoginError(error);
+                    }
+                  }}>
+                    <i className="bx bxl-facebook"></i>
+                  </a>
+                  <a href="#"><i className="bx bxl-github"></i></a>
+                  <a href="#"><i className="bx bxl-linkedin"></i></a>
+                </div>
+              </form>
+            </div>
+
+            {/* Register Form */}
+            <div className="form-box register">
+              <form action="#" onSubmit={(e) => e.preventDefault()}>
+                <h1>Registration</h1>
+                <div className="input-box">
+                  <input type="text" placeholder="Username" required />
+                  <i className="bx bxs-user"></i>
+                </div>
+                <div className="input-box">
+                  <input type="email" placeholder="Email" required />
+                  <i className="bx bxs-envelope"></i>
+                </div>
+                <div className="input-box">
+                  <input type="password" placeholder="Password" required />
+                  <i className="bx bxs-lock-alt"></i>
+                </div>
+                <button type="submit" className="auth-btn">Register</button>
+                <p>or register with social platforms</p>
+                <div className="social-icons">
+                  <a href="#" onClick={(e) => {
+                    e.preventDefault();
+                    login();
+                  }}>
+                    <i className="bx bxl-google"></i>
+                  </a>
+                  <a href="#" onClick={async (e) => {
+                    e.preventDefault();
+                    try {
+                      const userData = await handleFacebookLoginSuccess();
+                      console.log('Facebook register successful:', userData);
+                      alert(`Chào mừng ${userData.name}! Đăng ký Facebook thành công.`);
+                      toggleLogin();
+                    } catch (error) {
+                      handleFacebookLoginError(error);
+                    }
+                  }}>
+                    <i className="bx bxl-facebook"></i>
+                  </a>
+                  <a href="#"><i className="bx bxl-github"></i></a>
+                  <a href="#"><i className="bx bxl-linkedin"></i></a>
+                </div>
+              </form>
+            </div>
+
+            {/* Toggle Box */}
+            <div className="toggle-box">
+              <div className="toggle-panel toggle-left">
+                <h1>Hello, Welcome!</h1>
+                <p>Don't have an account?</p>
+                <button className="auth-btn register-btn" onClick={() => setIsRegisterMode(true)}>
+                  Register
+                </button>
+              </div>
+
+              <div className="toggle-panel toggle-right">
+                <h1>Welcome Back!</h1>
+                <p>Already have an account?</p>
+                <button className="auth-btn login-btn" onClick={() => setIsRegisterMode(false)}>
+                  Login
+                </button>
+              </div>
+            </div>
+
+            {/* Close button */}
+            <button className="auth-close" onClick={toggleLogin}>×</button>
+          </div>
+        </div>
+      )}
+      
+      {/* Hamburger Menu Overlay */}
+      {isMenuOpen && (
+        <div className={`tesla-menu-overlay ${isMenuOpen ? 'open' : ''}`}>
+          <div className="tesla-menu">
+            <div className="tesla-menu__content">
+              {/* Close button */}
+              <div className="tesla-menu__close" onClick={toggleMenu}>
+                <span>×</span>
+              </div>
+              {menuItems.map((item) => (
+                <div key={item.id} className="tesla-menu__item">
+                  <div 
+                    className={`tesla-menu__title ${activeSubmenu === item.id ? 'active' : ''}`}
+                    onClick={() => handleMenuItemClick(item.id)}
+                  >
+                    {item.title}
+                    <span className="tesla-menu__arrow">›</span>
+                  </div>
+                  <div className={`tesla-menu__submenu ${activeSubmenu === item.id ? 'open' : ''}`}>
+                    {item.submenu.map((subItem, index) => (
+                      <div key={index} className="tesla-menu__subitem">
+                        {subItem}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
