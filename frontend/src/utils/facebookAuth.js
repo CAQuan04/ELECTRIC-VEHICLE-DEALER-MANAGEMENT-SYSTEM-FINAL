@@ -1,6 +1,35 @@
 // Facebook Authentication utilities
 // Requires Facebook SDK to be loaded in index.html
 
+// Helper function to determine user role (same as Google auth)
+const getUserRole = (email) => {
+  // Mock role assignment based on email domain or specific emails
+  if (email && (email.includes('@dealer.') || email.includes('dealer@'))) {
+    return 'dealer';
+  } else if (email && (email.includes('@evm.') || email.includes('admin@') || email.includes('evm@'))) {
+    return 'evm';
+  } else {
+    return 'customer';
+  }
+};
+
+// Helper function to redirect user based on role
+export const redirectUserBasedOnRole = (userRole) => {
+  switch (userRole) {
+    case 'dealer':
+      window.location.href = '/dealer';
+      break;
+    case 'evm':
+      window.location.href = '/evm';
+      break;
+    case 'customer':
+    default:
+      // Stay on current page or redirect to catalog
+      console.log('Customer logged in, staying on current page');
+      break;
+  }
+};
+
 // Initialize Facebook SDK
 export const initializeFacebook = () => {
   return new Promise((resolve, reject) => {
@@ -109,7 +138,8 @@ export const handleFacebookLoginSuccess = async () => {
         email: userInfo.email,
         picture: userInfo.picture?.data?.url,
         provider: 'facebook',
-        accessToken: loginResponse.authResponse.accessToken
+        accessToken: loginResponse.authResponse.accessToken,
+        role: getUserRole(userInfo.email) // Add role based on email
       };
       
       localStorage.setItem('userData', JSON.stringify(userData));

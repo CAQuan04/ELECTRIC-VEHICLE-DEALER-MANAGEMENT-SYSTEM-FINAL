@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
-import { handleGoogleLoginSuccess, handleGoogleLoginError, handleGoogleAccessTokenLogin } from '../utils/googleAuth';
-import { handleFacebookLoginSuccess, handleFacebookLoginError } from '../utils/facebookAuth';
+import { handleGoogleLoginSuccess, handleGoogleLoginError, handleGoogleAccessTokenLogin, redirectUserBasedOnRole } from '../utils/googleAuth';
+import { handleFacebookLoginSuccess, handleFacebookLoginError, redirectUserBasedOnRole as redirectUserBasedOnRoleFB } from '../utils/facebookAuth';
 import PropTypes from 'prop-types';
 import BezierEasing from 'bezier-easing';
 import './Landing.css';
@@ -562,6 +562,11 @@ function Header() {
         if (result.success) {
           alert(`Chào mừng ${result.user.name}! Đăng nhập Google thành công.`);
           toggleLogin();
+          
+          // Redirect based on user role
+          setTimeout(() => {
+            redirectUserBasedOnRole(result.user.role);
+          }, 1000);
         } else {
           alert('Đăng nhập thất bại: ' + result.error);
         }
@@ -671,6 +676,11 @@ function Header() {
                       console.log('Facebook login successful:', userData);
                       alert(`Chào mừng ${userData.name}! Đăng nhập Facebook thành công.`);
                       toggleLogin();
+                      
+                      // Redirect based on user role
+                      setTimeout(() => {
+                        redirectUserBasedOnRoleFB(userData.role);
+                      }, 1000);
                     } catch (error) {
                       handleFacebookLoginError(error);
                     }
@@ -715,6 +725,11 @@ function Header() {
                       console.log('Facebook register successful:', userData);
                       alert(`Chào mừng ${userData.name}! Đăng ký Facebook thành công.`);
                       toggleLogin();
+                      
+                      // Redirect based on user role
+                      setTimeout(() => {
+                        redirectUserBasedOnRoleFB(userData.role);
+                      }, 1000);
                     } catch (error) {
                       handleFacebookLoginError(error);
                     }
