@@ -19,6 +19,35 @@ export const decodeJWT = (token) => {
   }
 };
 
+// Helper function to determine user role (mock implementation - replace with real API call)
+const getUserRole = (email) => {
+  // Mock role assignment based on email domain or specific emails
+  if (email.includes('@dealer.') || email.includes('dealer@')) {
+    return 'dealer';
+  } else if (email.includes('@evm.') || email.includes('admin@') || email.includes('evm@')) {
+    return 'evm';
+  } else {
+    return 'customer';
+  }
+};
+
+// Helper function to redirect user based on role
+export const redirectUserBasedOnRole = (userRole) => {
+  switch (userRole) {
+    case 'dealer':
+      window.location.href = '/dealer';
+      break;
+    case 'evm':
+      window.location.href = '/evm';
+      break;
+    case 'customer':
+    default:
+      // Stay on current page or redirect to catalog
+      console.log('Customer logged in, staying on current page');
+      break;
+  }
+};
+
 // Helper function to handle Google OAuth with access token (for useGoogleLogin hook)
 export const handleGoogleAccessTokenLogin = async (tokenResponse) => {
   if (import.meta.env.DEV) {
@@ -46,7 +75,8 @@ export const handleGoogleAccessTokenLogin = async (tokenResponse) => {
       name: userInfo.name,
       picture: userInfo.picture,
       emailVerified: userInfo.verified_email,
-      provider: 'google'
+      provider: 'google',
+      role: getUserRole(userInfo.email) // Add role based on email
     };
     
     localStorage.setItem('user', JSON.stringify(fallbackUser));
@@ -88,7 +118,8 @@ export const handleGoogleLoginSuccess = async (credentialResponse) => {
       name: decodedToken.name,
       picture: decodedToken.picture,
       emailVerified: decodedToken.email_verified,
-      provider: 'google'
+      provider: 'google',
+      role: getUserRole(decodedToken.email) // Add role based on email
     };
     
     localStorage.setItem('user', JSON.stringify(fallbackUser));
