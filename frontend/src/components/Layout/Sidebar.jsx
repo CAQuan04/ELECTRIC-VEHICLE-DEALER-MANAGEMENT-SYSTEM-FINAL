@@ -1,37 +1,24 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import './Sidebar.css';
 
 const Sidebar = () => {
-  const links = [
-    { to: '/dealer', label: 'Dealer Dashboard' },
-    { to: '/evm', label: 'EVM Dashboard' },
-    { to: '/catalog', label: 'Danh mục xe' },
-    { to: '/sales/orders', label: 'Đơn hàng' },
-    { to: '/customers', label: 'Khách hàng' },
-    { to: '/inventory', label: 'Tồn kho' },
-    { to: '/reports', label: 'Báo cáo' },
-    { to: '/admin/dealers', label: 'Đại lý' }
-  ];
   return (
-    <aside style={styles.sidebar}>
-      <NavLink to="/" style={styles.logo}>
-        <h2>EVM</h2>
-      </NavLink>
-      <nav>
-        {links.map(l => (
-          <NavLink key={l.to} to={l.to} style={styles.link} className={({isActive})=> isActive ? 'active' : ''}>
-            {l.label}
-          </NavLink>
-        ))}
-      </nav>
-    </aside>
+    <div className="sidebar">
+      <div className="sidebar-header">EV Management</div>
+      <ul className="sidebar-menu">
+        <li><Link to="/dealer">🏢 Dealer Dashboard</Link></li>
+        <li><Link to="/evm">⚡ EVM Dashboard</Link></li>
+        <li><Link to="/reports">📊 Reports & Analytics</Link></li>
+        <li><Link to="/catalog">🚗 Vehicle Catalog</Link></li>
+        <li><Link to="/inventory">📦 Inventory</Link></li>
+        <li><Link to="/customers">👥 Customers</Link></li>
+        <li><Link to="/sales/orders">🛒 Sales Orders</Link></li>
+        <li><Link to="/admin/dealers">🏪 Dealer Management</Link></li>
+        <li><Link to="/">🏠 Home</Link></li>
+      </ul>
+    </div>
   );
-};
-
-const styles = {
-  sidebar: { width: '220px', background: '#102027', color: '#fff', padding: '1rem', height: '100vh', boxSizing: 'border-box', position: 'fixed', left: 0, top: 0 },
-  logo: { marginTop: 0 },
-  link: { display: 'block', color: '#eceff1', textDecoration: 'none', padding: '0.5rem 0', fontSize: '0.9rem' }
 };
 
 export default Sidebar;
