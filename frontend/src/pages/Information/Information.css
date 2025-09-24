@@ -1,0 +1,141 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.information-page {
+  min-height: calc(100vh - 60px);
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  color: white;
+  padding-top: 60px; /* Account for header */
+  flex: 1;
+}
+
+.information-hero {
+  text-align: center;
+  padding: 80px 20px 60px;
+  background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+  background-size: 400% 400%;
+  animation: gradientShift 6s ease infinite;
+}
+
+.information-hero h1 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+  background: linear-gradient(45deg, #fff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.information-hero p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.company-info {
+  padding: 80px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.company-info h2 {
+  font-size: 3rem;
+  text-align: center;
+  margin-bottom: 60px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+}
+
+.mission-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  padding: 40px 30px;
+  border-radius: 15px;
+  border: 1px solid rgba(255,255,255,0.1);
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.mission-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(102, 126, 234, 0.3);
+  box-shadow: 0 15px 30px rgba(102, 126, 234, 0.2);
+}
+
+.mission-card h3 {
+  font-size: 1.8rem;
+  color: #667eea;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.mission-card p {
+  opacity: 0.8;
+  line-height: 1.6;
+  font-size: 1.1rem;
+}
+
+.company-stats {
+  display: flex;
+  justify-content: center;
+  gap: 80px;
+  padding: 80px 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-number {
+  display: block;
+  font-size: 3rem;
+  font-weight: 700;
+  color: #667eea;
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@media (max-width: 768px) {
+  .mission-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .company-stats {
+    flex-direction: column;
+    gap: 40px;
+  }
+  
+  .information-hero h1 {
+    font-size: 2.5rem;
+  }
+  
+  .company-info {
+    padding: 60px 20px;
+  }
+}

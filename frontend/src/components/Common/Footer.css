@@ -1,0 +1,411 @@
+.tesla-footer {
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  color: #ffffff;
+  margin-top: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.tesla-footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #667eea, #764ba2, transparent);
+  animation: gradientShift 3s ease-in-out infinite alternate;
+}
+
+@keyframes gradientShift {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.tesla-footer__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 24px 15px; /* Reduced from 60px to 40px top, 20px to 15px bottom */
+}
+
+/* Main Footer Content */
+.tesla-footer__main {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 40px; /* Reduced from 60px to 40px */
+  margin-bottom: 40px; /* Reduced from 60px to 40px */
+}
+
+/* Brand Section */
+.tesla-footer__brand {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Reduced from 24px to 16px */
+}
+
+.tesla-footer__logo {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.tesla-logo-footer {
+  height: 32px;
+  width: auto;
+  filter: brightness(0) invert(1);
+  transition: all 0.3s ease;
+}
+
+.tesla-footer__logo:hover .tesla-logo-footer {
+  filter: brightness(0) saturate(100%) invert(100%) sepia(66%) saturate(1516%) hue-rotate(210deg) brightness(91%) contrast(100%);
+  transform: scale(1.05);
+}
+
+.tesla-footer__tagline {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #cccccc;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* Social Media */
+.tesla-footer__social {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.tesla-footer__social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  color: #ffffff;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tesla-footer__social-link:hover {
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.tesla-footer__social-link svg {
+  width: 20px;
+  height: 20px;
+  transition: transform 0.3s ease;
+}
+
+.tesla-footer__social-link:hover svg {
+  transform: scale(1.1);
+}
+
+/* Links Grid */
+.tesla-footer__links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 30px; /* Reduced from 40px to 30px */
+}
+
+.tesla-footer__column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; /* Reduced from 16px to 12px */
+}
+
+.tesla-footer__column-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.tesla-footer__column-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 30px;
+  height: 2px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 1px;
+}
+
+.tesla-footer__column-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Reduced from 12px to 8px */
+}
+
+.tesla-footer__link {
+  color: #cccccc;
+  text-decoration: none;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  padding: 4px 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.tesla-footer__link::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: -100%;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  transition: left 0.3s ease;
+}
+
+.tesla-footer__link:hover {
+  color: #ffffff;
+  transform: translateX(5px);
+}
+
+.tesla-footer__link:hover::before {
+  left: 0;
+}
+
+/* Newsletter Section */
+.tesla-footer__newsletter {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 30px; /* Reduced from 40px to 30px */
+  margin-bottom: 30px; /* Reduced from 40px to 30px */
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.tesla-footer__newsletter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.newsletter-content {
+  position: relative;
+  z-index: 1;
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.newsletter-title {
+  font-size: 20px; /* Reduced from 24px to 20px */
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.newsletter-description {
+  font-size: 14px; /* Reduced from 16px to 14px */
+  color: #cccccc;
+  margin: 0 0 20px 0; /* Reduced from 24px to 20px */
+  line-height: 1.5;
+}
+
+.newsletter-form {
+  display: flex;
+  gap: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.newsletter-input {
+  flex: 1;
+  padding: 12px 16px; /* Reduced from 16px 20px to 12px 16px */
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 14px;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.newsletter-input::placeholder {
+  color: #999999;
+}
+
+.newsletter-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.newsletter-button {
+  padding: 12px 20px; /* Reduced from 16px 24px to 12px 20px */
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.newsletter-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+/* Bottom Bar */
+.tesla-footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 15px; /* Reduced from 20px to 15px */
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 15px; /* Reduced from 20px to 15px */
+}
+
+.tesla-footer__bottom-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tesla-footer__copyright {
+  color: #999999;
+  font-size: 14px;
+  margin: 0;
+}
+
+.tesla-footer__legal {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.tesla-footer__legal-link {
+  color: #cccccc;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.tesla-footer__legal-link:hover {
+  color: #667eea;
+}
+
+.tesla-footer__bottom-right {
+  display: flex;
+  align-items: center;
+}
+
+.tesla-footer__contact {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.contact-info {
+  color: #cccccc;
+  font-size: 14px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .tesla-footer__main {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .tesla-footer__links {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tesla-footer__container {
+    padding: 30px 16px 15px; /* Reduced from 40px to 30px */
+  }
+  
+  .tesla-footer__main {
+    gap: 25px; /* Reduced from 30px to 25px */
+    margin-bottom: 30px; /* Reduced from 40px to 30px */
+  }
+  
+  .tesla-footer__links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px; /* Reduced from 24px to 20px */
+  }
+  
+  .tesla-footer__newsletter {
+    padding: 20px 16px; /* Reduced from 24px 20px to 20px 16px */
+    margin-bottom: 25px; /* Reduced from 30px to 25px */
+  }
+  
+  .newsletter-title {
+    font-size: 18px; /* Reduced from 20px to 18px */
+  }
+  
+  .newsletter-form {
+    flex-direction: column;
+  }
+  
+  .tesla-footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px; /* Reduced from 16px to 12px */
+  }
+  
+  .tesla-footer__legal {
+    gap: 12px; /* Reduced from 16px to 12px */
+  }
+}
+
+@media (max-width: 480px) {
+  .tesla-footer__links {
+    grid-template-columns: 1fr;
+  }
+  
+  .tesla-footer__social {
+    gap: 12px;
+  }
+  
+  .tesla-footer__social-link {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .tesla-footer__social-link svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .tesla-footer__legal {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

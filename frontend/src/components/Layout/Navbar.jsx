@@ -1,17 +1,20 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import './Navbar.css';
 
 const Navbar = () => {
   return (
-    <header className="navbar" style={styles.nav}>
-      <h1 style={styles.title}>EVM Dealer Management</h1>
-      <div>/* User / Role / Notifications placeholder */</div>
-    </header>
+    <nav className="navbar">
+      <div className="navbar-brand">⚡ EV Manager</div>
+      <div className="navbar-menu">
+        <Link to="/vehicles">Vehicles</Link>
+        <Link to="/charging">Charging</Link>
+        <Link to="/shop">Shop</Link>
+        <Link to="/information">Info</Link>
+        <Link to="/discover">Discover</Link>
+      </div>
+    </nav>
   );
-};
-
-const styles = {
-  nav: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1rem', background: '#0d47a1', color: '#fff' },
-  title: { fontSize: '1.1rem', margin: 0 }
 };
 
 export default Navbar;

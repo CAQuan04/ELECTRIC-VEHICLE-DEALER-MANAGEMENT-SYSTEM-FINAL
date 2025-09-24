@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
-import { GoogleLogin, useGoogleLogin } from '@react-oauth/google';
-import { handleGoogleLoginSuccess, handleGoogleLoginError, handleGoogleAccessTokenLogin, redirectUserBasedOnRole } from '../utils/googleAuth';
-import { handleFacebookLoginSuccess, handleFacebookLoginError, redirectUserBasedOnRole as redirectUserBasedOnRoleFB } from '../utils/facebookAuth';
+import { Link } from 'react-router-dom';
+import AuthComponent from '../components/Auth/AuthComponent';
+import Header from '../components/Common/Header';
+import Footer from '../components/Common/Footer';
 import PropTypes from 'prop-types';
 import BezierEasing from 'bezier-easing';
 import './Landing.css';
@@ -481,6 +482,7 @@ class Slider extends React.Component {
       animationForward: true,
       slidesCount: slides.length,
       animationState: null,
+      showScrollHint: false,
     });
     _defineProperty(this, "slider", { header: "", content: "" });
     _defineProperty(this, "setAnimationState", (animationState) => this.setState({ animationState }));
@@ -492,16 +494,46 @@ class Slider extends React.Component {
       });
     });
     _defineProperty(this, "timeout", null);
+    _defineProperty(this, "handleWindowScroll", () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const sliderElement = document.querySelector('.tesla-slider');
+      
+      // If user scrolled back up to slider area and wheel listener is not active
+      if (scrollTop <= (sliderElement ? sliderElement.offsetHeight : window.innerHeight)) {
+        // Re-enable wheel listener for slider navigation
+        if (!this._wheelListenerActive) {
+          document.body.addEventListener("wheel", this.handleScroll);
+          this._wheelListenerActive = true;
+        }
+      }
+    });
     _defineProperty(this, "handleScroll", (e) => {
-      // Remove height restriction that was blocking scroll
       e.preventDefault();
       window.clearTimeout(this.timeout);
+      
       this.timeout = setTimeout(() => {
+        // Scroll up logic - navigate to previous slide
         if (e.deltaY < 0 && this.state.activeSlide !== 0) {
           this.setActiveSlide(this.state.activeSlide - 1);
         }
-        if (e.deltaY > 0 && this.state.activeSlide !== this.state.slidesCount - 1) {
-          this.setActiveSlide(this.state.activeSlide + 1);
+        
+        // Scroll down logic
+        if (e.deltaY > 0) {
+          // If not at the last slide, go to next slide
+          if (this.state.activeSlide !== this.state.slidesCount - 1) {
+            this.setActiveSlide(this.state.activeSlide + 1);
+          } else {
+            // If at the last slide, allow scrolling to footer
+            document.body.removeEventListener("wheel", this.handleScroll);
+            this._wheelListenerActive = false;
+            setTimeout(() => {
+              // Scroll to footer smoothly
+              const footer = document.querySelector('footer');
+              if (footer) {
+                footer.scrollIntoView({ behavior: 'smooth' });
+              }
+            }, 300);
+          }
         }
       }, 50);
     });
@@ -512,13 +544,21 @@ class Slider extends React.Component {
     this.setAnimationState(ANIMATION_PHASES.PENDING);
     this.slider.header = document.querySelector(".tesla-header");
     this.slider.content = document.querySelector(".tesla-slider");
+    
+    // Add wheel listener for slider navigation
     document.body.addEventListener("wheel", this.handleScroll);
+    this._wheelListenerActive = true;
+    
+    // Add scroll listener to detect when user scrolls back up from footer
+    window.addEventListener('scroll', this.handleWindowScroll);
   }
 
   componentWillUnmount() {
     document.body.removeEventListener("wheel", this.handleScroll);
+    window.removeEventListener('scroll', this.handleWindowScroll);
     window.clearTimeout(this.timeout);
     this.timeout = null;
+    this._wheelListenerActive = false;
   }
 
   render() {
@@ -542,272 +582,28 @@ class Slider extends React.Component {
         />
         <div className="tesla-slider__scroll">
           <img src={mouseImg} alt="" />
+          {this.state.activeSlide === this.state.slidesCount - 1 && (
+            <div className="scroll-hint">
+              <p>Cuộn xuống để xem thêm</p>
+            </div>
+          )}
         </div>
       </div>
     );
   }
 }
 
-function Header() {
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-  const [activeSubmenu, setActiveSubmenu] = React.useState(null);
-  const [isLoginOpen, setIsLoginOpen] = React.useState(false);
-  const [isRegisterMode, setIsRegisterMode] = React.useState(false);
 
-  // Google OAuth hook for icon-based login
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const result = await handleGoogleAccessTokenLogin(tokenResponse);
-        if (result.success) {
-          alert(`Chào mừng ${result.user.name}! Đăng nhập Google thành công.`);
-          toggleLogin();
-          
-          // Redirect based on user role
-          setTimeout(() => {
-            redirectUserBasedOnRole(result.user.role);
-          }, 1000);
-        } else {
-          alert('Đăng nhập thất bại: ' + result.error);
-        }
-      } catch (error) {
-        console.error('Google login error:', error);
-        alert('Lỗi đăng nhập Google: ' + error.message);
-      }
-    },
-    onError: (error) => {
-      console.error('Google login error:', error);
-      handleGoogleLoginError();
-    }
-  });
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-    setActiveSubmenu(null);
-  };
-
-  const toggleLogin = () => {
-    setIsLoginOpen(!isLoginOpen);
-  };
-
-  const handleMenuItemClick = (itemId) => {
-    setActiveSubmenu(activeSubmenu === itemId ? null : itemId);
-  };
-
-  const menuItems = [
-    {
-      id: 1,
-      title: 'Vehicles',
-      submenu: ['Model S', 'Model 3', 'Model X', 'Model Y', 'Cybertruck', 'Roadster']
-    },
-    {
-      id: 2,
-      title: 'Charging',
-      submenu: ['Home Charging', 'Supercharger', 'Destination Charging', 'Mobile Charging']
-    },
-    {
-      id: 3,
-      title: 'Discover',
-      submenu: ['Demo Drive', 'Compare', 'Trade-In', 'Careers', 'Events', 'Find Us']
-    },
-    {
-      id: 4,
-      title: 'Shop',
-      submenu: ['Accessories', 'Apparel', 'Lifestyle', 'Charging', 'Vehicle Accessories']
-    },
-    {
-      id: 5,
-      title: 'Information',
-      submenu: ['About Tesla', 'Investor Relations', 'Blog', 'Careers', 'News', 'Locations']
-    }
-  ];
-
-  return (
-    <div className="tesla-header">
-      <div className="tesla-header__logo">
-        <img src={logoTesla} alt="Tesla" />
-      </div>
-      <div className="tesla-header__actions">
-        <button className="tesla-login-btn" onClick={toggleLogin}>
-          Login
-        </button>
-        <div className="tesla-header__nav">
-          <img 
-            src={hamburger} 
-            alt="Menu" 
-            onClick={toggleMenu}
-            className={`tesla-header__hamburger ${isMenuOpen ? 'active' : ''}`}
-          />
-        </div>
-      </div>
-      
-      {/* Modern Login/Signup Popup */}
-      {isLoginOpen && (
-        <div className="auth-overlay" onClick={toggleLogin}>
-          <div className={`auth-container ${isRegisterMode ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
-            {/* Login Form */}
-            <div className="form-box login">
-              <form action="#" onSubmit={(e) => e.preventDefault()}>
-                <h1>Login</h1>
-                <div className="input-box">
-                  <input type="text" placeholder="Username" required />
-                  <i className="bx bxs-user"></i>
-                </div>
-                <div className="input-box">
-                  <input type="password" placeholder="Password" required />
-                  <i className="bx bxs-lock-alt"></i>
-                </div>
-                <div className="forgot-link">
-                  <a href="#">Forgot Password?</a>
-                </div>
-                <button type="submit" className="auth-btn">Login</button>
-                <p>or login with social platforms</p>
-                <div className="social-icons">
-                  <a href="#" onClick={(e) => {
-                    e.preventDefault();
-                    login();
-                  }}>
-                    <i className="bx bxl-google"></i>
-                  </a>
-                  <a href="#" onClick={async (e) => {
-                    e.preventDefault();
-                    try {
-                      const userData = await handleFacebookLoginSuccess();
-                      console.log('Facebook login successful:', userData);
-                      alert(`Chào mừng ${userData.name}! Đăng nhập Facebook thành công.`);
-                      toggleLogin();
-                      
-                      // Redirect based on user role
-                      setTimeout(() => {
-                        redirectUserBasedOnRoleFB(userData.role);
-                      }, 1000);
-                    } catch (error) {
-                      handleFacebookLoginError(error);
-                    }
-                  }}>
-                    <i className="bx bxl-facebook"></i>
-                  </a>
-                  <a href="#"><i className="bx bxl-github"></i></a>
-                  <a href="#"><i className="bx bxl-linkedin"></i></a>
-                </div>
-              </form>
-            </div>
-
-            {/* Register Form */}
-            <div className="form-box register">
-              <form action="#" onSubmit={(e) => e.preventDefault()}>
-                <h1>Registration</h1>
-                <div className="input-box">
-                  <input type="text" placeholder="Username" required />
-                  <i className="bx bxs-user"></i>
-                </div>
-                <div className="input-box">
-                  <input type="email" placeholder="Email" required />
-                  <i className="bx bxs-envelope"></i>
-                </div>
-                <div className="input-box">
-                  <input type="password" placeholder="Password" required />
-                  <i className="bx bxs-lock-alt"></i>
-                </div>
-                <button type="submit" className="auth-btn">Register</button>
-                <p>or register with social platforms</p>
-                <div className="social-icons">
-                  <a href="#" onClick={(e) => {
-                    e.preventDefault();
-                    login();
-                  }}>
-                    <i className="bx bxl-google"></i>
-                  </a>
-                  <a href="#" onClick={async (e) => {
-                    e.preventDefault();
-                    try {
-                      const userData = await handleFacebookLoginSuccess();
-                      console.log('Facebook register successful:', userData);
-                      alert(`Chào mừng ${userData.name}! Đăng ký Facebook thành công.`);
-                      toggleLogin();
-                      
-                      // Redirect based on user role
-                      setTimeout(() => {
-                        redirectUserBasedOnRoleFB(userData.role);
-                      }, 1000);
-                    } catch (error) {
-                      handleFacebookLoginError(error);
-                    }
-                  }}>
-                    <i className="bx bxl-facebook"></i>
-                  </a>
-                  <a href="#"><i className="bx bxl-github"></i></a>
-                  <a href="#"><i className="bx bxl-linkedin"></i></a>
-                </div>
-              </form>
-            </div>
-
-            {/* Toggle Box */}
-            <div className="toggle-box">
-              <div className="toggle-panel toggle-left">
-                <h1>Hello, Welcome!</h1>
-                <p>Don't have an account?</p>
-                <button className="auth-btn register-btn" onClick={() => setIsRegisterMode(true)}>
-                  Register
-                </button>
-              </div>
-
-              <div className="toggle-panel toggle-right">
-                <h1>Welcome Back!</h1>
-                <p>Already have an account?</p>
-                <button className="auth-btn login-btn" onClick={() => setIsRegisterMode(false)}>
-                  Login
-                </button>
-              </div>
-            </div>
-
-            {/* Close button */}
-            <button className="auth-close" onClick={toggleLogin}>×</button>
-          </div>
-        </div>
-      )}
-      
-      {/* Hamburger Menu Overlay */}
-      {isMenuOpen && (
-        <div className={`tesla-menu-overlay ${isMenuOpen ? 'open' : ''}`}>
-          <div className="tesla-menu">
-            <div className="tesla-menu__content">
-              {/* Close button */}
-              <div className="tesla-menu__close" onClick={toggleMenu}>
-                <span>×</span>
-              </div>
-              {menuItems.map((item) => (
-                <div key={item.id} className="tesla-menu__item">
-                  <div 
-                    className={`tesla-menu__title ${activeSubmenu === item.id ? 'active' : ''}`}
-                    onClick={() => handleMenuItemClick(item.id)}
-                  >
-                    {item.title}
-                    <span className="tesla-menu__arrow">›</span>
-                  </div>
-                  <div className={`tesla-menu__submenu ${activeSubmenu === item.id ? 'open' : ''}`}>
-                    {item.submenu.map((subItem, index) => (
-                      <div key={index} className="tesla-menu__subitem">
-                        {subItem}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 class App extends React.Component {
   render() {
     return (
-      <div className="container">
+      <div className="app-wrapper">
         <Header />
-        <Slider />
+        <div className="container">
+          <Slider />
+        </div>
+        <Footer />
       </div>
     );
   }
