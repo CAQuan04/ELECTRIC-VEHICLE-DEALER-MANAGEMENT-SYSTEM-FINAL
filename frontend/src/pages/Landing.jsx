@@ -553,6 +553,67 @@ function Header() {
   const [activeSubmenu, setActiveSubmenu] = React.useState(null);
   const [isLoginOpen, setIsLoginOpen] = React.useState(false);
   const [isRegisterMode, setIsRegisterMode] = React.useState(false);
+  const [loginForm, setLoginForm] = React.useState({ username: '', password: '' });
+  const [registerForm, setRegisterForm] = React.useState({ username: '', email: '', password: '' });
+
+  // Mock user accounts for testing
+  const mockUsers = [
+    { username: 'dealer01', password: 'dealer123', role: 'dealer', name: 'Dealer User', email: 'dealer@company.com' },
+    { username: 'admin01', password: 'admin123', role: 'evm', name: 'EVM Admin', email: 'admin@evm.com' },
+    { username: 'customer01', password: 'customer123', role: 'customer', name: 'Customer User', email: 'customer@gmail.com' },
+    // Additional test accounts
+    { username: 'dealer02', password: 'password', role: 'dealer', name: 'Dealer Manager', email: 'manager@dealer.com' },
+    { username: 'evm01', password: 'password', role: 'evm', name: 'EVM Director', email: 'director@evm.com' },
+    { username: 'user01', password: 'password', role: 'customer', name: 'Regular User', email: 'user@example.com' }
+  ];
+
+  // Handle mock login
+  const handleMockLogin = (e) => {
+    e.preventDefault();
+    const user = mockUsers.find(u => u.username === loginForm.username && u.password === loginForm.password);
+    
+    if (user) {
+      // Store user info similar to OAuth flow
+      const userData = {
+        id: user.username,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        provider: 'mock'
+      };
+      
+      localStorage.setItem('user', JSON.stringify(userData));
+      alert(`Chào mừng ${user.name}! Đăng nhập thành công với role: ${user.role}`);
+      toggleLogin();
+      
+      // Redirect based on user role
+      setTimeout(() => {
+        redirectUserBasedOnRole(user.role);
+      }, 1000);
+    } else {
+      alert('Tên đăng nhập hoặc mật khẩu không đúng!');
+    }
+  };
+
+  // Handle mock register
+  const handleMockRegister = (e) => {
+    e.preventDefault();
+    // For demo purposes, assume all new registrations are customers
+    const userData = {
+      id: registerForm.username,
+      name: registerForm.username,
+      email: registerForm.email,
+      role: 'customer',
+      provider: 'mock'
+    };
+    
+    localStorage.setItem('user', JSON.stringify(userData));
+    alert(`Chào mừng ${registerForm.username}! Đăng ký thành công với role: customer`);
+    toggleLogin();
+    
+    // Customer stays on current page, so no redirect needed
+    console.log('Customer registered, staying on landing page');
+  };
 
   // Google OAuth hook for icon-based login
   const login = useGoogleLogin({
@@ -647,20 +708,45 @@ function Header() {
           <div className={`auth-container ${isRegisterMode ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
             {/* Login Form */}
             <div className="form-box login">
-              <form action="#" onSubmit={(e) => e.preventDefault()}>
+              <form action="#" onSubmit={handleMockLogin}>
                 <h1>Login</h1>
                 <div className="input-box">
-                  <input type="text" placeholder="Username" required />
+                  <input 
+                    type="text" 
+                    placeholder="Username" 
+                    required 
+                    value={loginForm.username}
+                    onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                  />
                   <i className="bx bxs-user"></i>
                 </div>
                 <div className="input-box">
-                  <input type="password" placeholder="Password" required />
+                  <input 
+                    type="password" 
+                    placeholder="Password" 
+                    required 
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  />
                   <i className="bx bxs-lock-alt"></i>
                 </div>
                 <div className="forgot-link">
                   <a href="#">Forgot Password?</a>
                 </div>
                 <button type="submit" className="auth-btn">Login</button>
+                
+                {/* Test Accounts Info */}
+                <div style={{ marginTop: '10px', fontSize: '12px', color: '#666', textAlign: 'left' }}>
+                  <details>
+                    <summary style={{ cursor: 'pointer', color: '#4A90E2' }}>📝 Test Accounts</summary>
+                    <div style={{ marginTop: '5px', lineHeight: '1.4' }}>
+                      <strong>Dealer:</strong> dealer01 / dealer123<br/>
+                      <strong>EVM:</strong> admin01 / admin123<br/>
+                      <strong>Customer:</strong> customer01 / customer123
+                    </div>
+                  </details>
+                </div>
+                
                 <p>or login with social platforms</p>
                 <div className="social-icons">
                   <a href="#" onClick={(e) => {
@@ -695,18 +781,36 @@ function Header() {
 
             {/* Register Form */}
             <div className="form-box register">
-              <form action="#" onSubmit={(e) => e.preventDefault()}>
+              <form action="#" onSubmit={handleMockRegister}>
                 <h1>Registration</h1>
                 <div className="input-box">
-                  <input type="text" placeholder="Username" required />
+                  <input 
+                    type="text" 
+                    placeholder="Username" 
+                    required 
+                    value={registerForm.username}
+                    onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
+                  />
                   <i className="bx bxs-user"></i>
                 </div>
                 <div className="input-box">
-                  <input type="email" placeholder="Email" required />
+                  <input 
+                    type="email" 
+                    placeholder="Email" 
+                    required 
+                    value={registerForm.email}
+                    onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
+                  />
                   <i className="bx bxs-envelope"></i>
                 </div>
                 <div className="input-box">
-                  <input type="password" placeholder="Password" required />
+                  <input 
+                    type="password" 
+                    placeholder="Password" 
+                    required 
+                    value={registerForm.password}
+                    onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
+                  />
                   <i className="bx bxs-lock-alt"></i>
                 </div>
                 <button type="submit" className="auth-btn">Register</button>
