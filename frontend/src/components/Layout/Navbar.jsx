@@ -7,7 +7,7 @@ const Navbar = () => {
     <nav className="navbar">
       <div className="navbar-brand">⚡ EV Manager</div>
       <div className="navbar-menu">
-        <Link to="/vehicles">Vehicles</Link>
+        <Link to="/vehicles">Vehicle</Link>
         <Link to="/charging">Charging</Link>
         <Link to="/shop">Shop</Link>
         <Link to="/information">Info</Link>
