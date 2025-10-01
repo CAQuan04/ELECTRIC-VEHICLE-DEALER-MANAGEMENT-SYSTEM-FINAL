@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import AuthComponent from '../Auth/AuthComponent';
-import { AuthService, USER_ROLES } from '../../services/auth';
+import AuthComponent from '../auth/AuthComponent';
+import { AuthService, USER_ROLES } from '../utils/auth';
 import './Header.css';
 
 const Header = () => {

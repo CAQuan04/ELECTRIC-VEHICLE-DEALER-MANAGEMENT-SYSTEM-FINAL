@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { AuthService, USER_ROLES } from '../../services/auth';
+import { AuthService, USER_ROLES } from '../utils/auth';
 import './Navbar.css';
 
 const Navbar = () => {

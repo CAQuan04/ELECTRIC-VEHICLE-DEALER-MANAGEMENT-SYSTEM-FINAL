@@ -56,15 +56,15 @@
 }
 
 .role-indicator.dealer {
-  background: linear-gradient(135deg, #22c55e, #16a34a);
+  background: linear-gradient(135deg, #22c55e86, #a6cfb59f);
 }
 
 .role-indicator.customer {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #3b83f665, #abbef19a);
 }
 
 .role-indicator.evm_admin {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
+  background: linear-gradient(135deg, #ef444479, #dba2a275);
 }
 
 @media (max-width: 768px) {
@@ -96,6 +96,8 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  outline: none;
+  border: none;
 }
 
 .nav-link::before {
@@ -409,23 +411,44 @@
   display: inline-block;
 }
 
-.user-menu-trigger {
+.tesla-header .user-menu-trigger {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: none;
-  border: none;
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
   color: white;
   cursor: pointer;
-  padding: 8px 12px;
-  border-radius: 20px;
-  transition: all 0.3s ease;
+  padding: 4px 8px;
+  transition: opacity 0.3s ease;
   font-size: 12px;
   font-weight: 500;
 }
 
-.user-menu-trigger:hover {
-  background: rgba(255, 255, 255, 0.1);
+.tesla-header .user-menu-trigger:hover {
+  opacity: 0.8;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transform: none !important;
+}
+
+.tesla-header .user-menu-trigger:focus,
+.tesla-header .user-menu-trigger:active {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  outline-style: none !important;
+  outline-width: 0 !important;
 }
 
 .dropdown-arrow {
