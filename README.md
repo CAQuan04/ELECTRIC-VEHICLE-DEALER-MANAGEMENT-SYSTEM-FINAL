@@ -20,25 +20,43 @@ Trang `/` là landing (hero slider) mô phỏng giới thiệu dòng xe, sử d�
 
 ## Cấu trúc thư mục
 ```
-frontend/
-  src/
-    components/
-      Layout/ (Navbar, Sidebar)
-      Catalog/VehicleList.jsx
-      Sales/OrderList.jsx
-      Customers/CustomerList.jsx
-      Inventory/InventoryList.jsx
-      Reports/ReportDashboard.jsx
-      Admin/DealerList.jsx
-    pages/
-      Landing.jsx / Landing.css
-      DealerDashboard.jsx
-      EvmDashboard.jsx
-    services/api.js (mock data layer)
-    App.jsx
-    main.jsx
-  vite.config.js
-  package.json
+src/
+├── features/               # Feature-based modules
+│   ├── customer/          # Customer role features
+│   │   ├── components/    # Customer-specific components
+│   │   ├── pages/         # CustomerDashboard.jsx
+│   │   ├── styles/        # Customer-specific styles
+│   │   └── index.js       # Feature exports
+│   │
+│   ├── dealer/            # Dealer role features
+│   │   ├── components/    # Dealer, Sales, Inventory
+│   │   ├── pages/         # DealerDashboard.jsx
+│   │   ├── styles/        # Dealer-specific styles
+│   │   └── index.js       # Feature exports
+│   │
+│   ├── admin/             # Admin/EVM role features
+│   │   ├── components/    # Admin, Reports
+│   │   ├── pages/         # EvmDashboard.jsx
+│   │   ├── styles/        # Admin-specific styles
+│   │   └── index.js       # Feature exports
+│   │
+│   └── public/            # Public pages (no auth required)
+│       ├── pages/         # Landing, Vehicles, Shop, etc.
+│       ├── components/    # Public-specific components
+│       ├── styles/        # Public page styles
+│       └── index.js       # Feature exports
+│
+├── shared/                # Shared components & utilities
+│   ├── components/        # Header, Footer, Common UI
+│   ├── layout/           # Navbar, Sidebar
+│   ├── auth/             # AuthComponent, RoleGuards
+│   ├── utils/            # AuthService, API, helpers
+│   └── index.js          # Shared exports
+│
+├── assets/               # Static assets (images, icons)
+├── styles/               # Global styles
+├── App.jsx              # Main app with clean imports
+└── main.jsx             # Entry point
 ```
 
 ## Chạy dự án (Windows cmd)
