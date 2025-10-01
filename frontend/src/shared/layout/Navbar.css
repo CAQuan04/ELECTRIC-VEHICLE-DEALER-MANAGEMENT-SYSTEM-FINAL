@@ -25,7 +25,7 @@
   text-decoration: none;
   color: white;
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   transition: all 0.3s ease;
 }
 
@@ -35,7 +35,7 @@
 }
 
 .brand-icon {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   filter: drop-shadow(0 0 8px rgba(249, 115, 22, 0.6));
 }
 
@@ -83,7 +83,7 @@
 }
 
 .nav-icon {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   transition: transform 0.3s ease;
 }
 
@@ -92,7 +92,7 @@
 }
 
 .nav-text {
-  font-size: 0.95rem;
+  font-size: 1.1rem;
   white-space: nowrap;
 }
 
@@ -108,19 +108,20 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  background: rgba(55, 65, 81, 0.8);
-  border: 1px solid #4b5563;
+  background: rgba(75, 85, 99, 0.4);
+  border: 1px solid rgba(107, 114, 128, 0.3);
   border-radius: 12px;
   padding: 0.5rem 1rem;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: inherit;
+  backdrop-filter: blur(8px);
 }
 
 .user-menu-trigger:hover {
-  background: rgba(75, 85, 99, 0.9);
-  border-color: #6b7280;
+  background: rgba(107, 114, 128, 0.6);
+  border-color: rgba(156, 163, 175, 0.5);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
@@ -133,15 +134,15 @@
 }
 
 .role-indicator.dealer {
-  color: #60a5fa;
+  color: white;
 }
 
 .role-indicator.customer {
-  color: #34d399;
+  color: white;
 }
 
 .role-indicator.evm_admin {
-  color: #f59e0b;
+  color: white;
 }
 
 .user-name {
@@ -229,31 +230,33 @@
   width: 100%;
   padding: 0.75rem;
   border: none;
-  background: none;
+  background: rgba(75, 85, 99, 0.2);
   text-align: left;
   cursor: pointer;
   border-radius: 8px;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  font-size: 0.9rem;
-  color: #374151;
+  font-size: 1rem;
+  color: white;
   transition: all 0.2s ease;
   font-family: inherit;
+  margin-bottom: 0.25rem;
 }
 
 .user-menu-item:hover {
-  background: #f3f4f6;
-  color: #1f2937;
+  background: rgba(107, 114, 128, 0.4);
+  color: white;
 }
 
 .user-menu-item.logout {
-  color: #dc2626;
+  background: rgba(75, 85, 99, 0.2);
+  color: #fca5a5;
 }
 
 .user-menu-item.logout:hover {
-  background: #fef2f2;
-  color: #b91c1c;
+  background: rgba(107, 114, 128, 0.4);
+  color: #f87171;
 }
 
 .menu-icon {

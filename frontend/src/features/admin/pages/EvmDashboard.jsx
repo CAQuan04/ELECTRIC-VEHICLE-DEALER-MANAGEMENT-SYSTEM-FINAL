@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { AuthService } from '../services/auth';
-import './EvmDashboard.css';
+import { AuthService } from '../../../shared/utils/auth';
+import '../styles/EvmDashboard.css';
 
 const EvmDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);

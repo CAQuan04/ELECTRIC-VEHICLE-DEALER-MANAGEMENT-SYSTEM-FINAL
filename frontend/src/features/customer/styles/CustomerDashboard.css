@@ -1,0 +1,539 @@
+/* Customer Dashboard - Modern Dark Theme */
+.customer-dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-family: 'Arial', sans-serif;
+  color: #1f2937;
+}
+
+/* Hero Section - Modern Dark Theme */
+.hero-section {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  padding: 3rem 2rem;
+  text-align: center;
+  margin-bottom: 2rem;
+  border-radius: 0 0 30px 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.hero-section h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 300;
+}
+
+.hero-section p {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Navigation Pills - Rounded buttons instead of admin tabs */
+.nav-pills {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  padding: 0 2rem;
+  flex-wrap: wrap;
+}
+
+.nav-pill {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 50px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #374151;
+}
+
+.nav-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+  border-color: #374151;
+}
+
+.nav-pill.active {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  border-color: #374151;
+  transform: translateY(-2px);
+}
+
+/* Customer Content - Card-based layout */
+.customer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.overview-section h2 {
+  text-align: center;
+  color: #1f2937;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 300;
+}
+
+/* Customer Stats - Different from admin tables */
+.customer-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.stat-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.stat-card h3 {
+  font-size: 3rem;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  font-weight: 300;
+}
+
+.stat-card p {
+  color: #666;
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Sections */
+.vehicles-section,
+.services-section {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.vehicles-section h2,
+.services-section h2 {
+  color: #1f2937;
+  margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 300;
+}
+
+.vehicles-section p,
+.services-section p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 1rem;
+  }
+  
+  .hero-section h1 {
+    font-size: 2rem;
+  }
+  
+  .nav-pills {
+    padding: 0 1rem;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .nav-pill {
+    width: 100%;
+    max-width: 300px;
+    justify-content: center;
+  }
+  
+  .customer-content {
+    padding: 0 1rem;
+  }
+  
+  .stat-card h3 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Financing Section */
+.financing-section {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.financing-section h2 {
+  color: #1f2937;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  font-weight: 300;
+  text-align: center;
+}
+
+.financing-content {
+  display: grid;
+  gap: 2rem;
+}
+
+.financing-overview h3,
+.payment-history h3 {
+  color: #374151;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+/* Loan Info Cards */
+.loan-info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.loan-card {
+  background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(31, 41, 55, 0.3);
+}
+
+.loan-card h4 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.loan-card p {
+  margin: 0.5rem 0;
+  font-size: 0.95rem;
+}
+
+.loan-amount {
+  font-weight: 600;
+  font-size: 1rem !important;
+}
+
+.loan-remaining {
+  color: #fbbf24;
+  font-weight: 500;
+}
+
+.monthly-payment {
+  color: #34d399;
+  font-weight: 500;
+}
+
+.next-payment {
+  color: #f87171;
+  font-weight: 500;
+}
+
+/* Payment History Table */
+.payment-table {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.payment-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr 1fr;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.payment-row.header {
+  background: #f9fafb;
+  font-weight: 600;
+  color: #374151;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.payment-row:last-child {
+  border-bottom: none;
+}
+
+.status.paid {
+  color: #059669;
+  font-weight: 500;
+}
+
+.status.pending {
+  color: #d97706;
+  font-weight: 500;
+}
+
+.status.overdue {
+  color: #dc2626;
+  font-weight: 500;
+}
+
+/* Responsive for financing section */
+@media (max-width: 768px) {
+  .loan-info-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .payment-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: left;
+  }
+  
+  .payment-row.header {
+    display: none;
+  }
+  
+  .payment-row span:before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+    color: #374151;
+  }
+}
+
+/* Loading States */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-section p {
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+/* Error States */
+.error-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background: #fef2f2;
+  border-radius: 12px;
+  margin: 2rem;
+  border: 1px solid #fecaca;
+}
+
+.error-section h3 {
+  color: #dc2626;
+  margin-bottom: 1rem;
+}
+
+.error-section p {
+  color: #7f1d1d;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.error-section button {
+  background: #dc2626;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.3s ease;
+}
+
+.error-section button:hover {
+  background: #b91c1c;
+}
+
+/* Vehicle Cards Grid */
+.vehicles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+}
+
+.vehicle-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vehicle-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.vehicle-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.vehicle-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.3rem;
+}
+
+.vehicle-status {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.vehicle-status.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.vehicle-details p {
+  margin: 0.5rem 0;
+  color: #4b5563;
+}
+
+.vehicle-details strong {
+  color: #1f2937;
+}
+
+/* Service Cards */
+.services-list {
+  display: grid;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.service-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease;
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+}
+
+.service-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.service-header h4 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.2rem;
+}
+
+.service-status {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.service-status.scheduled {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.service-status.completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.service-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.service-details p {
+  margin: 0.5rem 0;
+  color: #4b5563;
+}
+
+.service-details strong {
+  color: #1f2937;
+}
+
+/* Overview Details */
+.overview-details {
+  margin-top: 2rem;
+  padding: 0 2rem;
+}
+
+.detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+.detail-card h4 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.2rem;
+}
+
+.detail-card p {
+  margin: 0.5rem 0;
+  color: #4b5563;
+}
+
+.detail-card strong {
+  color: #1f2937;
+}
