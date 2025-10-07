@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { AuthService } from '../services/auth';
-import './EvmDashboard.css';
+import { AuthService } from '../shared/utils/auth';
+import { usePageLoading } from '../shared/components/LoadingHOC';
+import '../shared/components/GlobalLoading.css';
 
 const EvmDashboard = () => {
+  const { startLoading, stopLoading, isLoading } = usePageLoading();
   const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const currentUser = AuthService.getCurrentUser();
@@ -13,7 +14,7 @@ const EvmDashboard = () => {
     // Simulate API call
     const loadDashboardData = async () => {
       try {
-        setLoading(true);
+        startLoading('Đang tải dữ liệu hệ thống...');
         // Mock data
         const mockData = {
           system: {
@@ -41,23 +42,12 @@ const EvmDashboard = () => {
         setError('Failed to load EVM dashboard data');
         console.error('EVM Dashboard error:', err);
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 
     loadDashboardData();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="evm-dashboard">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Đang tải dữ liệu hệ thống...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

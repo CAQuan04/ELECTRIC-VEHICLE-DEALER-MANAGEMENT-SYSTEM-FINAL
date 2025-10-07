@@ -9,6 +9,7 @@ import './AuthComponent.css';
 const AuthComponent = ({ onUserChange }) => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [isAdvancedRegister, setIsAdvancedRegister] = useState(false);
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '' });
   const [currentUser, setCurrentUser] = useState(null);
@@ -35,6 +36,7 @@ const AuthComponent = ({ onUserChange }) => {
     }
   }, [onUserChange]);
 
+  // Multi-step registration handlers
   // Mock user accounts for testing
   const mockUsers = [
     { username: 'dealer01', password: 'dealer123', role: 'dealer', name: 'Dealer User', email: 'dealer@company.com' },
@@ -74,27 +76,6 @@ const AuthComponent = ({ onUserChange }) => {
     } else {
       alert('Tên đăng nhập hoặc mật khẩu không đúng!');
     }
-  };
-
-  // Handle mock register
-  const handleMockRegister = (e) => {
-    e.preventDefault();
-    const userData = {
-      id: registerForm.username,
-      name: registerForm.username,
-      email: registerForm.email,
-      role: 'customer',
-      provider: 'mock'
-    };
-    
-    localStorage.setItem('user', JSON.stringify(userData));
-    setCurrentUser(userData);
-    AuthService.setCurrentUser(userData); // Update AuthService
-    if (onUserChange) {
-      onUserChange(userData);
-    }
-    AuthNotifications.registerSuccess(registerForm.username);
-    toggleLogin();
   };
 
   // Google OAuth hook
@@ -144,6 +125,35 @@ const AuthComponent = ({ onUserChange }) => {
     window.location.href = '/';
   };
 
+  // Handle mock register
+  const handleMockRegister = (e) => {
+    e.preventDefault();
+    
+    if (isAdvancedRegister) {
+      // Redirect to existing multi-step registration
+      window.location.href = '/register';
+      return;
+    }
+
+    // Simple registration
+    const userData = {
+      id: registerForm.username,
+      name: registerForm.username,
+      email: registerForm.email,
+      role: 'customer',
+      provider: 'mock'
+    };
+    
+    localStorage.setItem('user', JSON.stringify(userData));
+    setCurrentUser(userData);
+    AuthService.setCurrentUser(userData); // Update AuthService
+    if (onUserChange) {
+      onUserChange(userData);
+    }
+    AuthNotifications.registerSuccess(registerForm.username);
+    toggleLogin();
+  };
+
   return (
     <>
       {currentUser ? (
@@ -161,6 +171,8 @@ const AuthComponent = ({ onUserChange }) => {
       {isLoginOpen && (
         <div className="auth-overlay" onClick={toggleLogin}>
           <div className={`auth-container ${isRegisterMode ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
+            
+            {/* Login Form */}
             <div className="form-box login">
               <form action="#" onSubmit={handleMockLogin}>
                 <h1>Login</h1>
@@ -189,10 +201,10 @@ const AuthComponent = ({ onUserChange }) => {
                 </div>
                 <button type="submit" className="auth-btn">Login</button>
                 
-                <div style={{ marginTop: '10px', fontSize: '12px', color: '#666', textAlign: 'left' }}>
+                <div className="test-accounts">
                   <details>
-                    <summary style={{ cursor: 'pointer', color: '#4A90E2' }}>📝 Test Accounts</summary>
-                    <div style={{ marginTop: '5px', lineHeight: '1.4' }}>
+                    <summary>📝 Test Accounts</summary>
+                    <div className="test-list">
                       <strong>Dealer:</strong> dealer01 / dealer123<br/>
                       <strong>EVM:</strong> admin01 / admin123<br/>
                       <strong>Customer:</strong> customer01 / customer123
@@ -230,9 +242,26 @@ const AuthComponent = ({ onUserChange }) => {
               </form>
             </div>
 
+            {/* Register Form */}
             <div className="form-box register">
               <form action="#" onSubmit={handleMockRegister}>
                 <h1>Registration</h1>
+                
+                {/* Registration Mode Toggle */}
+                <div className="register-mode-toggle">
+                  <label className="toggle-switch">
+                    <input 
+                      type="checkbox" 
+                      checked={isAdvancedRegister}
+                      onChange={(e) => setIsAdvancedRegister(e.target.checked)}
+                    />
+                    <span className="toggle-slider"></span>
+                    <span className="toggle-label">
+                      {isAdvancedRegister ? 'Đăng ký nâng cao' : 'Đăng ký thường'}
+                    </span>
+                  </label>
+                </div>
+
                 <div className="input-box">
                   <input 
                     type="text" 
@@ -263,7 +292,17 @@ const AuthComponent = ({ onUserChange }) => {
                   />
                   <i className="bx bxs-lock-alt"></i>
                 </div>
-                <button type="submit" className="auth-btn">Register</button>
+                
+                <button type="submit" className="auth-btn">
+                  {isAdvancedRegister ? 'Đến trang đăng ký nâng cao' : 'Register'}
+                </button>
+                
+                {isAdvancedRegister && (
+                  <p className="advanced-note">
+                    🚀 Sẽ chuyển đến trang đăng ký nhiều bước với xác thực email và khảo sát
+                  </p>
+                )}
+                
                 <p>or register with social platforms</p>
                 <div className="social-icons">
                   <a href="#" className="google-icon" onClick={(e) => {
@@ -294,6 +333,7 @@ const AuthComponent = ({ onUserChange }) => {
               </form>
             </div>
 
+            {/* Toggle Box */}
             <div className="toggle-box">
               <div className="toggle-panel toggle-left">
                 <h1>Welcome Back!</h1>

@@ -1,73 +1,103 @@
 import React from 'react';
 
-const StepIndicator = ({ currentStep, totalSteps, steps }) => {
+const StepIndicator = ({ currentStep, steps, stepNames, completedSteps = [] }) => {
+  const stepArray = Object.values(steps);
+  const totalSteps = stepArray.length;
+
+  const getStepStatus = (step) => {
+    if (completedSteps.includes(step)) return 'completed';
+    if (step === currentStep) return 'current';
+    if (step < currentStep) return 'completed';
+    return 'upcoming';
+  };
+
+  const getStepIcon = (step, status) => {
+    if (status === 'completed') {
+      return (
+        <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      );
+    }
+    
+    if (status === 'current') {
+      return (
+        <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse"></div>
+      );
+    }
+    
+    return (
+      <span className="text-gray-400 text-sm font-medium">{step}</span>
+    );
+  };
+
+  const getStepClasses = (status) => {
+    const baseClasses = "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200";
+    
+    switch (status) {
+      case 'completed':
+        return `${baseClasses} bg-green-500 border-green-500`;
+      case 'current':
+        return `${baseClasses} bg-blue-500 border-blue-500 shadow-lg shadow-blue-500/30`;
+      default:
+        return `${baseClasses} bg-gray-700 border-gray-600`;
+    }
+  };
+
+  const getConnectorClasses = (step) => {
+    const isCompleted = step < currentStep || completedSteps.includes(step);
+    return `flex-1 h-0.5 mx-4 transition-all duration-300 ${
+      isCompleted ? 'bg-green-500' : 'bg-gray-600'
+    }`;
+  };
+
   return (
-    <div className="w-full max-w-4xl mx-auto mb-8">
-      <div className="relative">
-        <div className="flex items-center justify-between mb-4">
-          {steps.map((step, index) => {
-            const stepNumber = index + 1;
-            const isActive = stepNumber === currentStep;
-            const isCompleted = stepNumber < currentStep;
-
-            return (
-              <div key={index} className="flex flex-col items-center relative">
-                <div
-                  className={`w-12 h-12 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                    isCompleted
-                      ? 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg'
-                      : isActive
-                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-110'
-                      : 'bg-gray-700 text-gray-400 border-2 border-gray-600'
-                  }`}
-                >
-                  {isCompleted ? '✓' : stepNumber}
+    <div className="px-8 py-6 border-b border-gray-700/30">
+      <div className="flex items-center justify-between max-w-2xl mx-auto">
+        {stepArray.map((step, index) => {
+          const status = getStepStatus(step);
+          const isLast = index === stepArray.length - 1;
+          
+          return (
+            <div key={step} className="flex items-center flex-1">
+              <div className="flex flex-col items-center">
+                {/* Step Circle */}
+                <div className={getStepClasses(status)}>
+                  {getStepIcon(step, status)}
                 </div>
-
-                <div className="mt-3 text-center">
-                  <div
-                    className={`text-sm font-medium transition-colors duration-300 ${
-                      isActive
-                        ? 'text-blue-400'
-                        : isCompleted
-                        ? 'text-green-400'
-                        : 'text-gray-500'
-                    }`}
-                  >
-                    {step.title}
-                  </div>
-                </div>
-
-                {index < steps.length - 1 && (
-                  <div
-                    className={`absolute top-6 left-12 w-20 h-0.5 transition-colors duration-500 ${
-                      stepNumber < currentStep
-                        ? 'bg-gradient-to-r from-green-500 to-blue-500'
-                        : 'bg-gray-600'
-                    }`}
-                  />
-                )}
+                
+                {/* Step Label */}
+                <span className={`mt-2 text-xs font-medium transition-colors duration-200 ${
+                  status === 'current' 
+                    ? 'text-blue-400' 
+                    : status === 'completed' 
+                      ? 'text-green-400' 
+                      : 'text-gray-500'
+                }`}>
+                  {stepNames[step]}
+                </span>
               </div>
-            );
-          })}
+              
+              {/* Connector Line */}
+              {!isLast && (
+                <div className={getConnectorClasses(step)}></div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      
+      {/* Progress Bar */}
+      <div className="mt-6 max-w-2xl mx-auto">
+        <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
+          <span>Bước {currentStep} / {totalSteps}</span>
+          <span>{Math.round((currentStep / totalSteps) * 100)}% hoàn thành</span>
         </div>
-
-        <div className="w-full bg-gray-700 rounded-full h-2 mb-6 overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-red-500 rounded-full transition-all duration-700 ease-out"
-            style={{
-              width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%`
-            }}
-          />
-        </div>
-
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-white mb-2">
-            {steps[currentStep - 1]?.title}
-          </h2>
-          <p className="text-gray-400">
-            {steps[currentStep - 1]?.description}
-          </p>
+        <div className="w-full bg-gray-700 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+          ></div>
         </div>
       </div>
     </div>

@@ -72,6 +72,11 @@ export const AuthNotifications = {
   socialLoginError: (provider, error) => showError(
     `Lỗi đăng nhập ${provider}`,
     error
+  ),
+
+  info: (message, title = 'Thông báo') => showInfo(
+    title,
+    message
   )
 };
 

@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react';
+import { usePageLoading } from '../components/LoadingHOC';
 
 // Custom hook for data fetching with loading and error states
 export const useDataFetching = (fetchFunction, dependencies = []) => {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { startLoading, stopLoading, isLoading } = usePageLoading();
 
   const fetchData = async () => {
     try {
-      setLoading(true);
+      startLoading('Đang tải dữ liệu...');
       setError(null);
       
       const response = await fetchFunction();
@@ -21,7 +22,7 @@ export const useDataFetching = (fetchFunction, dependencies = []) => {
     } catch (err) {
       setError('Lỗi kết nối: ' + err.message);
     } finally {
-      setLoading(false);
+      stopLoading();
     }
   };
 
@@ -33,7 +34,7 @@ export const useDataFetching = (fetchFunction, dependencies = []) => {
     fetchData();
   };
 
-  return { data, loading, error, refetch };
+  return { data, loading: isLoading, error, refetch };
 };
 
 // Custom hook for URL parameters

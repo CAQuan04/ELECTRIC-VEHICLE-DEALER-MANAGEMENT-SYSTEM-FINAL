@@ -36,7 +36,8 @@ const MultiStepRegister = () => {
     email: initialData.email || '',
     password: initialData.password || '',
     confirmPassword: '',
-    fullName: initialData.fullName || initialData.username || '',
+    username: initialData.username || '',
+    fullName: initialData.fullName || '',
     role: 'customer',
     
     // Personal info
@@ -100,11 +101,12 @@ const MultiStepRegister = () => {
     try {
       // Check if we're in edit mode and should return to success
       if (returnToSuccess) {
-        // Normalize the user data to ensure fullName is available
+        // Normalize the user data to ensure both username and fullName are available
         const normalizedUser = {
           ...initialData, 
           ...basicData,
-          fullName: basicData.fullName || basicData.username || initialData.fullName || initialData.username
+          username: basicData.username || initialData.username,
+          fullName: basicData.fullName || initialData.fullName
         };
         // Just update the data and return to success page
         navigate('/register/success', {
@@ -121,6 +123,7 @@ const MultiStepRegister = () => {
         updateFormData({ 
           tempUserId: result.tempUserId,
           email: basicData.email,
+          username: basicData.username,
           fullName: basicData.fullName,
           role: basicData.role
         });
@@ -223,11 +226,12 @@ const MultiStepRegister = () => {
       if (result.success) {
         // Check if we need to return to success page
         if (returnToSuccess) {
-          // Normalize the user data to ensure fullName is available
+          // Normalize the user data to ensure both username and fullName are available
           const normalizedUser = {
             ...initialData, 
             ...surveyData,
-            fullName: initialData.fullName || initialData.username || surveyData.fullName || surveyData.username
+            username: initialData.username || surveyData.username,
+            fullName: initialData.fullName || surveyData.fullName
           };
           // Return directly to success page with updated data
           navigate('/register/success', {
@@ -237,10 +241,11 @@ const MultiStepRegister = () => {
             }
           });
         } else {
-          // Normalize the user data to ensure fullName is available
+          // Normalize the user data to ensure both username and fullName are available
           const normalizedUser = {
             ...result.user,
-            fullName: result.user.fullName || result.user.username || result.user.name || formData.fullName || formData.username
+            username: result.user.username || formData.username,
+            fullName: result.user.fullName || result.user.name || formData.fullName
           };
           // Registration complete, redirect to success page
           navigate('/register/success', {

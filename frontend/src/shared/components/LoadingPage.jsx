@@ -1,65 +1,138 @@
 import React from 'react';
-import './LoadingPage.css';
 
 const LoadingPage = ({ 
-  message = "Loading...", 
+  message = "Đang tải...", 
   showLogo = true, 
   variant = "default" // "default", "minimal", "full-screen"
 }) => {
+  const containerClass = 
+    variant === "minimal" 
+      ? "flex flex-col items-center justify-center min-h-[200px] bg-transparent"
+      : variant === "full-screen"
+      ? "fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black backdrop-blur-lg"
+      : "flex flex-col items-center justify-center min-h-screen bg-black relative overflow-hidden";
+
   return (
-    <div className={`loading-page ${variant}`}>
-      <div className="loading-content">
+    <div className={containerClass}>
+      {/* Background Overlay Effect */}
+      {variant !== "minimal" && (
+        <div className="absolute inset-0 bg-gradient-radial from-white/10 to-transparent pointer-events-none" />
+      )}
+
+      <div className="flex flex-col items-center gap-8 text-center z-10">
+        {/* Logo Section */}
         {showLogo && (
-          <div className="loading-logo">
-            <div className="tesla-logo">
-              <svg width="120" height="120" viewBox="0 0 100 100" fill="none">
+          <div className="flex flex-col items-center gap-4">
+            <div className="text-emerald-400 animate-pulse">
+              <svg 
+                width="120" 
+                height="120" 
+                viewBox="0 0 100 100" 
+                fill="none"
+                className="drop-shadow-[0_0_20px_rgba(16,185,129,0.4)]"
+              >
                 <circle cx="50" cy="50" r="48" stroke="currentColor" strokeWidth="2" opacity="0.3"/>
                 <path
                   d="M30 35h40M25 45h50M20 55h60M35 65h30"
                   stroke="currentColor"
                   strokeWidth="3"
                   strokeLinecap="round"
-                  className="charging-lines"
+                  className="animate-[charge_1.5s_ease-in-out_infinite]"
                 />
-                <circle cx="50" cy="50" r="15" fill="currentColor" className="center-dot"/>
+                <circle 
+                  cx="50" 
+                  cy="50" 
+                  r="15" 
+                  fill="currentColor" 
+                  className="animate-[glow_2s_ease-in-out_infinite_alternate]"
+                />
               </svg>
             </div>
-            <h2 className="brand-name">EVM</h2>
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent animate-[textGlow_3s_ease-in-out_infinite]">
+              EVM
+            </h2>
           </div>
         )}
         
-        <div className="loading-animation">
-          <div className="spinner">
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
+        {/* Spinner Animation */}
+        <div className="relative w-20 h-20">
+          {/* Ring 1 */}
+          <div className="absolute inset-0 border-[3px] border-transparent border-t-emerald-400 rounded-full animate-spin" 
+               style={{ animationDuration: '2s' }} />
+          {/* Ring 2 */}
+          <div className="absolute inset-0 border-[3px] border-transparent border-r-cyan-400 rounded-full animate-spin" 
+               style={{ animationDuration: '3s', animationDirection: 'reverse' }} />
+          {/* Ring 3 */}
+          <div className="absolute inset-0 border-[3px] border-transparent border-b-red-400 rounded-full animate-spin" 
+               style={{ animationDuration: '4s' }} />
+        </div>
+        
+        {/* Loading Text */}
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xl font-medium text-white/80">
+            {message}
+          </p>
+          <div className="flex gap-1">
+            <span className="text-2xl font-bold animate-[bounce_1.4s_ease-in-out_-0.32s_infinite_both]">.</span>
+            <span className="text-2xl font-bold animate-[bounce_1.4s_ease-in-out_-0.16s_infinite_both]">.</span>
+            <span className="text-2xl font-bold animate-[bounce_1.4s_ease-in-out_0s_infinite_both]">.</span>
           </div>
         </div>
         
-        <div className="loading-text">
-          <p className="main-message">{message}</p>
-          <div className="dots-animation">
-            <span>.</span>
-            <span>.</span>
-            <span>.</span>
-          </div>
-        </div>
-        
-        <div className="progress-bar">
-          <div className="progress-fill"></div>
+        {/* Progress Bar */}
+        <div className="w-52 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-full animate-[progress_2s_ease-in-out_infinite]" />
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes charge {
+          0%, 100% { opacity: 0.3; }
+          50% { opacity: 1; }
+        }
+        @keyframes glow {
+          0% { opacity: 0.5; }
+          100% { opacity: 1; }
+        }
+        @keyframes textGlow {
+          0%, 100% { text-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+          50% { text-shadow: 0 0 20px rgba(16, 185, 129, 0.8), 0 0 30px rgba(6, 182, 212, 0.5); }
+        }
+        @keyframes progress {
+          0% { transform: translateX(-100%); }
+          50% { transform: translateX(0%); }
+          100% { transform: translateX(100%); }
+        }
+        @keyframes bounce {
+          0%, 80%, 100% {
+            transform: scale(0);
+            opacity: 0.5;
+          }
+          40% {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
 // Variant cho loading inline (không full screen)
 export const LoadingSpinner = ({ size = "medium", color = "primary" }) => {
+  const sizeClass = 
+    size === "small" ? "w-5 h-5" : 
+    size === "large" ? "w-10 h-10" : 
+    "w-8 h-8";
+
+  const colorClass = 
+    color === "secondary" ? "border-t-cyan-400" :
+    color === "white" ? "border-t-white" :
+    "border-t-emerald-400";
+
   return (
-    <div className={`inline-loading ${size}`}>
-      <div className={`simple-spinner ${color}`}>
-        <div className="spinner-circle"></div>
-      </div>
+    <div className="inline-flex items-center justify-center">
+      <div className={`${sizeClass} border-2 border-transparent ${colorClass} rounded-full animate-spin`} />
     </div>
   );
 };
@@ -67,13 +140,20 @@ export const LoadingSpinner = ({ size = "medium", color = "primary" }) => {
 // Variant cho loading button
 export const LoadingButton = ({ children, loading, ...props }) => {
   return (
-    <button {...props} disabled={loading} className={`btn ${props.className || ''} ${loading ? 'loading' : ''}`}>
+    <button 
+      {...props} 
+      disabled={loading} 
+      className={`relative px-6 py-3 rounded-lg bg-gradient-to-r from-emerald-400 to-cyan-400 text-white font-semibold 
+                  transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_5px_15px_rgba(16,185,129,0.3)]
+                  disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0
+                  ${props.className || ''} ${loading ? 'pointer-events-none' : ''}`}
+    >
       {loading && (
-        <span className="btn-spinner">
-          <div className="btn-spinner-circle"></div>
+        <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         </span>
       )}
-      <span className={loading ? 'btn-text-hidden' : ''}>{children}</span>
+      <span className={loading ? 'opacity-0' : ''}>{children}</span>
     </button>
   );
 };

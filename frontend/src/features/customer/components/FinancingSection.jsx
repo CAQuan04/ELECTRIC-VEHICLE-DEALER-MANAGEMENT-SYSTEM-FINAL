@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { usePageLoading } from '../../../shared/components/LoadingHOC';
+import '../../../shared/components/GlobalLoading.css';
 import LoanInfoCards from './LoanInfoCards';
 import PaymentHistory from './PaymentHistory';
 import { CustomerMockAPI } from '../services/customerMockAPI';
 
 const FinancingSection = () => {
+  const { startLoading, stopLoading, isLoading } = usePageLoading();
   const [loans, setLoans] = useState([]);
   const [payments, setPayments] = useState([]);
   const [summary, setSummary] = useState({});
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        setLoading(true);
+        startLoading('Đang tải thông tin tài chính...');
         
         // Tải dữ liệu song song
         const [financingData, paymentsData] = await Promise.all([
@@ -54,7 +56,7 @@ const FinancingSection = () => {
       } catch (error) {
         console.error('Error loading financing data:', error);
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 
@@ -94,42 +96,6 @@ const FinancingSection = () => {
     console.log('Viewing payment details:', payment);
     // TODO: Implement payment details view
   };
-
-  if (loading) {
-    return (
-      <div className="space-y-8">
-        {/* Summary Loading */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <div key={i} className="bg-gray-100 p-6 rounded-2xl animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-8 bg-gray-200 rounded w-1/2"></div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Loans Loading */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-gray-100 p-6 rounded-2xl animate-pulse">
-              <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-              <div className="h-32 bg-gray-200 rounded"></div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Payment History Loading */}
-        <div className="bg-gray-100 rounded-2xl p-6 animate-pulse">
-          <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">
@@ -209,7 +175,6 @@ const FinancingSection = () => {
         
         <LoanInfoCards 
           loans={loans}
-          loading={loading}
           onMakePayment={handleMakePayment}
           onViewDetails={handleViewLoanDetails}
         />
@@ -219,7 +184,6 @@ const FinancingSection = () => {
       <div>
         <PaymentHistory 
           payments={payments}
-          loading={loading}
           onPaymentClick={handlePaymentClick}
         />
       </div>

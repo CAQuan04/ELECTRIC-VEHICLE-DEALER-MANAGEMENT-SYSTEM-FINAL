@@ -6,7 +6,8 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Loading State */
+/* Loading State - DEPRECATED: Now using LoadingHOC system */
+/*
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -30,6 +31,7 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+*/
 
 /* Hero Section */
 .dealer-hero {

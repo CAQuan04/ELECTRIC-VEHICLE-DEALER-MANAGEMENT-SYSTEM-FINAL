@@ -104,6 +104,137 @@ export const AuthService = {
   logout: () => {
     currentUser = null;
     localStorage.removeItem('user');
+  },
+
+  // Registration methods for MultiStepRegister
+  registerBasic: async (basicData) => {
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock validation
+      if (!basicData.email || !basicData.password || !basicData.fullName) {
+        return { success: false, error: 'Vui lòng điền đầy đủ thông tin' };
+      }
+      
+      // Generate temp user ID
+      const tempUserId = `temp_${Date.now()}`;
+      
+      // Store temp data in localStorage
+      localStorage.setItem('tempRegistration', JSON.stringify({
+        tempUserId,
+        ...basicData,
+        createdAt: new Date().toISOString()
+      }));
+      
+      return { success: true, tempUserId };
+    } catch (error) {
+      return { success: false, error: 'Có lỗi xảy ra khi đăng ký' };
+    }
+  },
+
+  verifyEmail: async (verificationData) => {
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Mock verification (accept any 6-digit code)
+      const code = verificationData.verificationCode;
+      if (!code || code.length !== 6) {
+        return { success: false, error: 'Mã xác thực phải có 6 số' };
+      }
+      
+      // Update temp data
+      const tempData = JSON.parse(localStorage.getItem('tempRegistration') || '{}');
+      tempData.emailVerified = true;
+      tempData.verificationCode = code;
+      localStorage.setItem('tempRegistration', JSON.stringify(tempData));
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Xác thực email thất bại' };
+    }
+  },
+
+  updatePersonalInfo: async (personalData) => {
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      // Update temp data
+      const tempData = JSON.parse(localStorage.getItem('tempRegistration') || '{}');
+      Object.assign(tempData, personalData);
+      tempData.personalInfoCompleted = true;
+      localStorage.setItem('tempRegistration', JSON.stringify(tempData));
+      
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: 'Cập nhật thông tin cá nhân thất bại' };
+    }
+  },
+
+  completeSurvey: async (surveyData) => {
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Get temp data and create final user
+      const tempData = JSON.parse(localStorage.getItem('tempRegistration') || '{}');
+      const finalUser = {
+        id: `user_${Date.now()}`,
+        username: tempData.fullName,
+        fullName: tempData.fullName,
+        email: tempData.email,
+        role: 'customer',
+        provider: 'registration',
+        personalInfo: tempData,
+        surveyData: surveyData,
+        emailVerified: tempData.emailVerified,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Clean up temp data
+      localStorage.removeItem('tempRegistration');
+      
+      // Set as current user
+      AuthService.setCurrentUser(finalUser);
+      
+      return { success: true, user: finalUser };
+    } catch (error) {
+      return { success: false, error: 'Hoàn tất khảo sát thất bại' };
+    }
+  },
+
+  completeRegistration: async (data) => {
+    try {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Get temp data and create final user (without survey)
+      const tempData = JSON.parse(localStorage.getItem('tempRegistration') || '{}');
+      const finalUser = {
+        id: `user_${Date.now()}`,
+        username: tempData.fullName,
+        fullName: tempData.fullName,
+        email: tempData.email,
+        role: 'customer',
+        provider: 'registration',
+        personalInfo: tempData,
+        surveyData: { skipped: true },
+        emailVerified: tempData.emailVerified,
+        createdAt: new Date().toISOString()
+      };
+      
+      // Clean up temp data
+      localStorage.removeItem('tempRegistration');
+      
+      // Set as current user
+      AuthService.setCurrentUser(finalUser);
+      
+      return { success: true, user: finalUser };
+    } catch (error) {
+      return { success: false, error: 'Hoàn tất đăng ký thất bại' };
+    }
   }
 };
 

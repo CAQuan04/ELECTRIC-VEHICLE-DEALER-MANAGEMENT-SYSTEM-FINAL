@@ -6,7 +6,8 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Loading and Error States */
+/* Loading and Error States - DEPRECATED: Now using LoadingHOC system */
+/*
 .loading-container,
 .error-container {
   display: flex;
@@ -30,6 +31,16 @@
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+*/
+
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
 }
 
 .retry-btn {

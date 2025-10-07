@@ -1,7 +1,6 @@
 import React from 'react';
 import { AuthService } from '../../../shared/utils/auth';
 import { 
-  DashboardSpinner, 
   ErrorMessage, 
   DashboardHero, 
   NavigationPills,
@@ -235,8 +234,6 @@ const DealerDashboard = () => {
       />
 
       <div className="dealer-content">
-        {loading && <DashboardSpinner message="Đang tải dữ liệu dealer..." />}
-        
         {error && (
           <ErrorMessage 
             error={error}
@@ -244,7 +241,7 @@ const DealerDashboard = () => {
           />
         )}
 
-        {!loading && !error && renderActiveSection()}
+        {!error && renderActiveSection()}
       </div>
     </div>
   );

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { AuthService } from '../../../shared/utils/auth';
+import { usePageLoading } from '../../../shared/components/LoadingHOC';
+import '../../../shared/components/GlobalLoading.css';
 import '../styles/DealerDashboard.css';
 
 const DealerDashboard = () => {
+  const { startLoading, stopLoading, isLoading } = usePageLoading();
   const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('overview');
   const currentUser = AuthService.getCurrentUser();
 
@@ -12,7 +14,7 @@ const DealerDashboard = () => {
     // Simulate API call
     const loadDashboardData = async () => {
       try {
-        setLoading(true);
+        startLoading('Đang tải dữ liệu đại lý...');
         // Mock data for dealer
         const mockData = {
           dealer: {
@@ -44,23 +46,12 @@ const DealerDashboard = () => {
       } catch (err) {
         console.error('Dealer Dashboard error:', err);
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 
     loadDashboardData();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="dealer-dashboard">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Đang tải dữ liệu đại lý...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="dealer-dashboard">

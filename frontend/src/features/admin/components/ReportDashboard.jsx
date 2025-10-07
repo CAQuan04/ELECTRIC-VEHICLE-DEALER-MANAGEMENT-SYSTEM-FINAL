@@ -1,22 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { usePageLoading } from '../../../shared/components/LoadingHOC';
+import '../../../shared/components/GlobalLoading.css';
 import DashboardCard from '../../../shared/components/DashboardCard';
 import StatsGrid from '../../../shared/components/StatsGrid';
 import ActivityList from '../../../shared/components/ActivityList';
 import DashboardHeader from '../../../shared/components/DashboardHeader';
 import ActionButton from '../../../shared/components/ActionButton';
 import { dashboardAPI } from '../../../shared/utils/api-simple';
-import '../../../styles/Dashboard.css';
 
 const ReportDashboard = () => {
+  const { startLoading, stopLoading, isLoading } = usePageLoading();
   const [dashboardData, setDashboardData] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
         console.log('Loading reports dashboard data...');
-        setLoading(true);
+        startLoading('Đang tải dữ liệu báo cáo...');
         const response = await dashboardAPI.getReportStats();
         console.log('Reports API Response:', response);
         setDashboardData(response.data);
@@ -25,23 +26,12 @@ const ReportDashboard = () => {
         console.error('Reports Dashboard API error:', err);
         setError('Failed to load reports data');
       } finally {
-        setLoading(false);
+        stopLoading();
       }
     };
 
     loadDashboardData();
   }, []);
-
-  if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="loading-spinner">
-          <div className="spinner"></div>
-          <p>Đang tải dữ liệu báo cáo...</p>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (

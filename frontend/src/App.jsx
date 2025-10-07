@@ -14,6 +14,14 @@ import {
   VehicleList
 } from './shared';
 
+// Loading system
+import { 
+  GlobalLoadingProvider, 
+  withRouteLoading,
+  withFullPageLoading,
+  withDashboardLoading 
+} from './shared/components/LoadingHOC';
+
 // Notification system
 import NotificationContainer from './shared/components/Notification/NotificationContainer';
 
@@ -45,6 +53,68 @@ import {
   Information,
   Discover
 } from './features/public';
+
+// Pages
+import LoadingDemo from './pages/LoadingDemo';
+import RegisterSuccess from './pages/RegisterSuccess';
+
+// Auth components  
+import RegisterForm from './components/Auth/RegisterForm';
+
+// Enhanced components with loading HOCs
+const LandingWithLoading = withRouteLoading(Landing, {
+  loadingMessage: 'Chào mừng đến với Tesla EVM...',
+  loadingVariant: 'tesla',
+  showLogo: true,
+  autoLoadOnMount: true,
+  loadingDuration: 1200
+});
+
+const CustomerDashboardWithLoading = withDashboardLoading(CustomerDashboard, {
+  loadingMessage: 'Đang khởi tạo Customer Dashboard...',
+  dataLoadingMessage: 'Đang tải dữ liệu khách hàng...',
+  loadingVariant: 'dashboard',
+  showLogo: true,
+  enableSkeleton: true
+});
+
+const DealerDashboardWithLoading = withDashboardLoading(DealerDashboard, {
+  loadingMessage: 'Đang khởi tạo Dealer Dashboard...',
+  dataLoadingMessage: 'Đang tải dữ liệu đại lý...',
+  loadingVariant: 'dashboard',
+  showLogo: true,
+  enableSkeleton: true
+});
+
+const EvmDashboardWithLoading = withDashboardLoading(EvmDashboard, {
+  loadingMessage: 'Đang khởi tạo Admin Dashboard...',
+  dataLoadingMessage: 'Đang tải dữ liệu hệ thống...',
+  loadingVariant: 'dashboard',
+  showLogo: true,
+  enableSkeleton: true
+});
+
+const VehiclesWithLoading = withFullPageLoading(Vehicles, {
+  loadingMessage: 'Đang tải danh sách xe Tesla...',
+  loadingVariant: 'tesla',
+  showLogo: true,
+  minimumLoadingTime: 800,
+  enableProgressBar: true
+});
+
+const ModelSWithLoading = withFullPageLoading(ModelS, {
+  loadingMessage: 'Đang tải thông tin Tesla Model S...',
+  loadingVariant: 'tesla',
+  showLogo: true,
+  minimumLoadingTime: 600
+});
+
+const Model3WithLoading = withFullPageLoading(Model3, {
+  loadingMessage: 'Đang tải thông tin Tesla Model 3...',
+  loadingVariant: 'tesla',
+  showLogo: true,
+  minimumLoadingTime: 600
+});
 const AppLayout = ({children}) => {
   const currentUser = AuthService.getCurrentUser();
   
@@ -102,98 +172,105 @@ const PublicLayout = ({children}) => {
 
 const App = () => {
   return (
-    <>
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<Landing />} />
-      <Route path="/landing" element={<Landing />} />
-      <Route path="/access-denied" element={<AccessDenied />} />
-      
-      {/* Role-based Dashboard Routes */}
-      <Route path="/dealer-dashboard" element={
-        <DealerGuard>
-          <AppLayout>
-            <DealerDashboard />
-          </AppLayout>
-        </DealerGuard>
-      } />
-      
-      <Route path="/customer-dashboard" element={
-        <CustomerGuard>
-          <AppLayout>
-            <CustomerDashboard />
-          </AppLayout>
-        </CustomerGuard>
-      } />
-      
-      <Route path="/evm-dashboard" element={
-        <AdminGuard>
-          <AppLayout>
-            <EvmDashboard />
-          </AppLayout>
-        </AdminGuard>
-      } />
+    <GlobalLoadingProvider>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<LandingWithLoading />} />
+        <Route path="/landing" element={<LandingWithLoading />} />
+        <Route path="/access-denied" element={<AccessDenied />} />
+        
+        {/* Role-based Dashboard Routes */}
+        <Route path="/dealer-dashboard" element={
+          <DealerGuard>
+            <AppLayout>
+              <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
+            </AppLayout>
+          </DealerGuard>
+        } />
+        
+        <Route path="/customer-dashboard" element={
+          <CustomerGuard>
+            <AppLayout>
+              <CustomerDashboardWithLoading isLoading={false} isDataLoading={false} />
+            </AppLayout>
+          </CustomerGuard>
+        } />
+        
+        <Route path="/evm-dashboard" element={
+          <AdminGuard>
+            <AppLayout>
+              <EvmDashboardWithLoading isLoading={false} isDataLoading={false} />
+            </AppLayout>
+          </AdminGuard>
+        } />
 
-      {/* Dealer-only Routes */}
-      <Route path="/catalog" element={
-        <DealerGuard>
-          <AppLayout><VehicleList /></AppLayout>
-        </DealerGuard>
-      } />
-      <Route path="/sales/orders" element={
-        <DealerGuard>
-          <AppLayout><OrderList /></AppLayout>
-        </DealerGuard>
-      } />
-      <Route path="/customers" element={
-        <DealerGuard>
-          <AppLayout><CustomerList /></AppLayout>
-        </DealerGuard>
-      } />
-      <Route path="/inventory" element={
-        <DealerGuard>
-          <AppLayout><InventoryList /></AppLayout>
-        </DealerGuard>
-      } />
+        {/* Dealer-only Routes */}
+        <Route path="/catalog" element={
+          <DealerGuard>
+            <AppLayout><VehicleList /></AppLayout>
+          </DealerGuard>
+        } />
+        <Route path="/sales/orders" element={
+          <DealerGuard>
+            <AppLayout><OrderList /></AppLayout>
+          </DealerGuard>
+        } />
+        <Route path="/customers" element={
+          <DealerGuard>
+            <AppLayout><CustomerList /></AppLayout>
+          </DealerGuard>
+        } />
+        <Route path="/inventory" element={
+          <DealerGuard>
+            <AppLayout><InventoryList /></AppLayout>
+          </DealerGuard>
+        } />
 
-      {/* Admin-only Routes */}
-      <Route path="/reports" element={
-        <AdminGuard>
-          <AppLayout><ReportDashboard /></AppLayout>
-        </AdminGuard>
-      } />
-      <Route path="/admin/dealers" element={
-        <AdminGuard>
-          <AppLayout><DealerList /></AppLayout>
-        </AdminGuard>
-      } />
+        {/* Admin-only Routes */}
+        <Route path="/reports" element={
+          <AdminGuard>
+            <AppLayout><ReportDashboard /></AppLayout>
+          </AdminGuard>
+        } />
+        <Route path="/admin/dealers" element={
+          <AdminGuard>
+            <AppLayout><DealerList /></AppLayout>
+          </AdminGuard>
+        } />
+        
+        {/* Public Tesla website routes */}
+        {/* Public Pages with Header */}
+        <Route path="/vehicles" element={<PublicLayout><VehiclesWithLoading isLoading={false} /></PublicLayout>} />
+        <Route path="/vehicles/model-s" element={<PublicLayout><ModelSWithLoading isLoading={false} /></PublicLayout>} />
+        <Route path="/vehicles/model-3" element={<PublicLayout><Model3WithLoading isLoading={false} /></PublicLayout>} />
+        <Route path="/charging" element={<PublicLayout><Charging /></PublicLayout>} />
+        <Route path="/shop" element={<PublicLayout><Shop /></PublicLayout>} />
+        <Route path="/information" element={<PublicLayout><Information /></PublicLayout>} />
+        <Route path="/discover" element={<PublicLayout><Discover /></PublicLayout>} />
+        
+        {/* Demo Pages */}
+        <Route path="/loading-demo" element={<PublicLayout><LoadingDemo /></PublicLayout>} />
+        
+        {/* Auth Pages */}
+        <Route path="/register" element={<RegisterForm />} />
+        <Route path="/register/success" element={<RegisterSuccess />} />
+        
+        {/* Legacy routes - redirect to role-based */}
+        <Route path="/dealer" element={
+          <DealerGuard>
+            <AppLayout><DealerDashboardWithLoading isLoading={false} isDataLoading={false} /></AppLayout>
+          </DealerGuard>
+        } />
+        <Route path="/evm" element={
+          <AdminGuard>
+            <AppLayout><EvmDashboardWithLoading isLoading={false} isDataLoading={false} /></AppLayout>
+          </AdminGuard>
+        } />
+      </Routes>
       
-      {/* Public Tesla website routes */}
-      {/* Public Pages with Header */}
-      <Route path="/vehicles" element={<PublicLayout><Vehicles /></PublicLayout>} />
-      <Route path="/vehicles/model-s" element={<PublicLayout><ModelS /></PublicLayout>} />
-      <Route path="/vehicles/model-3" element={<PublicLayout><Model3 /></PublicLayout>} />
-      <Route path="/charging" element={<PublicLayout><Charging /></PublicLayout>} />
-      <Route path="/shop" element={<PublicLayout><Shop /></PublicLayout>} />
-      <Route path="/information" element={<PublicLayout><Information /></PublicLayout>} />
-      <Route path="/discover" element={<PublicLayout><Discover /></PublicLayout>} />
-      
-      {/* Legacy routes - redirect to role-based */}
-      <Route path="/dealer" element={
-        <DealerGuard>
-          <AppLayout><DealerDashboard /></AppLayout>
-        </DealerGuard>
-      } />
-      <Route path="/evm" element={
-        <AdminGuard>
-          <AppLayout><EvmDashboard /></AppLayout>
-        </AdminGuard>
-      } />
-    </Routes>
-    
-    {/* Global Notification Container */}
-    <NotificationContainer />
-    </>
+      {/* Global Notification Container */}
+      <NotificationContainer />
+    </GlobalLoadingProvider>
   );
 };
 export default App;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+ import React, { useState, useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Link } from 'react-router-dom';
 import AuthComponent from '../../../shared/auth/AuthComponent';
@@ -598,7 +598,7 @@ class Slider extends React.Component {
 class App extends React.Component {
   render() {
     return (
-      <div className="app-wrapper">
+      <div className="app-wrapper landing-page-no-scrollbar">
         <Header />
         <div className="container">
           <Slider />
