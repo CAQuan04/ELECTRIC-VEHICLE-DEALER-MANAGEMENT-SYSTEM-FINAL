@@ -1,0 +1,271 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.api\\evdealer.be.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|solutionrelative:evdealer.be.api\\evdealer.be.api.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|solutionrelative:evdealer.be.api\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|solutionrelative:evdealer.be.api\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{69FAC197-4663-406D-9BF5-508129801F68}|EVDealer.BE.API\\EVDealer.BE.API.csproj|solutionrelative:evdealer.be.api\\controllers\\authcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F997A6A4-2CEF-4F05-B801-E9A05B520CF1}|EVDealer.BE.Services\\EVDealer.BE.Services.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.services\\auth\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F997A6A4-2CEF-4F05-B801-E9A05B520CF1}|EVDealer.BE.Services\\EVDealer.BE.Services.csproj|solutionrelative:evdealer.be.services\\auth\\authservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F997A6A4-2CEF-4F05-B801-E9A05B520CF1}|EVDealer.BE.Services\\EVDealer.BE.Services.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.services\\auth\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F997A6A4-2CEF-4F05-B801-E9A05B520CF1}|EVDealer.BE.Services\\EVDealer.BE.Services.csproj|solutionrelative:evdealer.be.services\\auth\\iauthservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.common\\dtos\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|solutionrelative:evdealer.be.common\\dtos\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.common\\dtos\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|solutionrelative:evdealer.be.common\\dtos\\loginrequestdto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.common\\evdealer.be.common.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|solutionrelative:evdealer.be.common\\evdealer.be.common.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.dal\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|solutionrelative:evdealer.be.dal\\repositories\\userrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.dal\\repositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|solutionrelative:evdealer.be.dal\\repositories\\iuserrepository.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.dal\\evdealer.be.dal.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|solutionrelative:evdealer.be.dal\\evdealer.be.dal.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F997A6A4-2CEF-4F05-B801-E9A05B520CF1}|EVDealer.BE.Services\\EVDealer.BE.Services.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.services\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F997A6A4-2CEF-4F05-B801-E9A05B520CF1}|EVDealer.BE.Services\\EVDealer.BE.Services.csproj|solutionrelative:evdealer.be.services\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.dal\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{4E1CF844-FDA4-4B05-BB3A-007B08AB7F19}|EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj|solutionrelative:evdealer.be.dal\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|c:\\users\\quanc\\desktop\\evdealer.be\\evdealer.be.common\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{68E4E47E-CA7E-4B2F-9CA7-3929D0795FC8}|EVDealer.BE.Common\\EVDealer.BE.Common.csproj|solutionrelative:evdealer.be.common\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\Program.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.API\\Program.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\Program.cs",
+              "RelativeToolTip": "EVDealer.BE.API\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAwBcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:15:14.414Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "AuthController.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\Controllers\\AuthController.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.API\\Controllers\\AuthController.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\Controllers\\AuthController.cs",
+              "RelativeToolTip": "EVDealer.BE.API\\Controllers\\AuthController.cs",
+              "ViewState": "AgIAABQAAAAAAAAAAAAQwCcAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:13:39.5Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "IAuthService.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Services\\Auth\\IAuthService.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.Services\\Auth\\IAuthService.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Services\\Auth\\IAuthService.cs",
+              "RelativeToolTip": "EVDealer.BE.Services\\Auth\\IAuthService.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAwAAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:10:50.054Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "EVDealer.BE.API.csproj",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\EVDealer.BE.API.csproj",
+              "RelativeDocumentMoniker": "EVDealer.BE.API\\EVDealer.BE.API.csproj",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\EVDealer.BE.API.csproj",
+              "RelativeToolTip": "EVDealer.BE.API\\EVDealer.BE.API.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-13T09:24:05.552Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\appsettings.json",
+              "RelativeDocumentMoniker": "EVDealer.BE.API\\appsettings.json",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\appsettings.json",
+              "RelativeToolTip": "EVDealer.BE.API\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-10-13T09:08:42.867Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "AuthService.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Services\\Auth\\AuthService.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.Services\\Auth\\AuthService.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Services\\Auth\\AuthService.cs",
+              "RelativeToolTip": "EVDealer.BE.Services\\Auth\\AuthService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAE0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T11:06:59.039Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "LoginResponseDto.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\DTOs\\LoginResponseDto.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.Common\\DTOs\\LoginResponseDto.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\DTOs\\LoginResponseDto.cs",
+              "RelativeToolTip": "EVDealer.BE.Common\\DTOs\\LoginResponseDto.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAxwBEAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:08:08.221Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "LoginRequestDto.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\DTOs\\LoginRequestDto.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.Common\\DTOs\\LoginRequestDto.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\DTOs\\LoginRequestDto.cs",
+              "RelativeToolTip": "EVDealer.BE.Common\\DTOs\\LoginRequestDto.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAADwvw4AAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:08:00.264Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "EVDealer.BE.Common.csproj",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+              "RelativeDocumentMoniker": "EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+              "RelativeToolTip": "EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-13T10:07:39.715Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "UserRepository.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\Repositories\\UserRepository.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.DAL\\Repositories\\UserRepository.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\Repositories\\UserRepository.cs",
+              "RelativeToolTip": "EVDealer.BE.DAL\\Repositories\\UserRepository.cs",
+              "ViewState": "AgIAABMAAAAAAAAAAAAIwBgAAABVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:05:40.392Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "IUserRepository.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\Repositories\\IUserRepository.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.DAL\\Repositories\\IUserRepository.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\Repositories\\IUserRepository.cs",
+              "RelativeToolTip": "EVDealer.BE.DAL\\Repositories\\IUserRepository.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAIwA4AAAA3AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T10:05:29.152Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "EVDealer.BE.DAL.csproj",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
+              "RelativeDocumentMoniker": "EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
+              "RelativeToolTip": "EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-10-13T09:24:00.261Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Services\\Class1.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.Services\\Class1.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Services\\Class1.cs",
+              "RelativeToolTip": "EVDealer.BE.Services\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T09:03:45.128Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\Class1.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.DAL\\Class1.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\Class1.cs",
+              "RelativeToolTip": "EVDealer.BE.DAL\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T09:03:17.545Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\Class1.cs",
+              "RelativeDocumentMoniker": "EVDealer.BE.Common\\Class1.cs",
+              "ToolTip": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.Common\\Class1.cs",
+              "RelativeToolTip": "EVDealer.BE.Common\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-10-13T09:03:02.472Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

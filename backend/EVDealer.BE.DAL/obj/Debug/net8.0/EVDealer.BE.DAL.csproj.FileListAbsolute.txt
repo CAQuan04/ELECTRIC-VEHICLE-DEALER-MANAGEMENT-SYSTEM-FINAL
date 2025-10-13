@@ -1,0 +1,14 @@
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\bin\Debug\net8.0\EVDealer.BE.DAL.deps.json
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\bin\Debug\net8.0\EVDealer.BE.DAL.runtimeconfig.json
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\bin\Debug\net8.0\EVDealer.BE.DAL.dll
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\bin\Debug\net8.0\EVDealer.BE.DAL.pdb
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.csproj.AssemblyReference.cache
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.AssemblyInfoInputs.cache
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.AssemblyInfo.cs
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.csproj.CoreCompileInputs.cache
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.dll
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\refint\EVDealer.BE.DAL.dll
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.pdb
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\EVDealer.BE.DAL.genruntimeconfig.cache
+C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.DAL\obj\Debug\net8.0\ref\EVDealer.BE.DAL.dll

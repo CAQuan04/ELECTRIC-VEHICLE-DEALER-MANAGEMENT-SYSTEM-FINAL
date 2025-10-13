@@ -1,0 +1,6 @@
+@EVDealer.BE.API_HostAddress = http://localhost:5166
+
+GET {{EVDealer.BE.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
