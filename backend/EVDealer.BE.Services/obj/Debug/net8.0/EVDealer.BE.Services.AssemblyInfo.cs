@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EVDealer.BE.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f0b6d8dc308ecddd7c09d0b642487ff441d5ce99")]
 [assembly: System.Reflection.AssemblyProductAttribute("EVDealer.BE.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EVDealer.BE.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

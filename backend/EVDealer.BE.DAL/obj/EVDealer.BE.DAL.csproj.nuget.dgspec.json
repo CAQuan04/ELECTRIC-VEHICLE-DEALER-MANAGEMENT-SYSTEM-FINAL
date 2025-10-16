@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj": {}
+    "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj": {}
   },
   "projects": {
-    "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj": {
+    "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
+        "projectUniqueName": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
         "projectName": "EVDealer.BE.DAL",
-        "projectPath": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
+        "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
         "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.DAL\\obj\\",
+        "outputPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

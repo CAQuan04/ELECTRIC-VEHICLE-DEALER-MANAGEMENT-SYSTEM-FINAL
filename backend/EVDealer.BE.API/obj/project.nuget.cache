@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "8wXfnkxN5mI=",
+  "dgSpecHash": "CjVqJ4OZfMQ=",
   "success": true,
-  "projectFilePath": "C:\\Users\\quanc\\Desktop\\EVDealer.BE\\EVDealer.BE.API\\EVDealer.BE.API.csproj",
+  "projectFilePath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.API\\EVDealer.BE.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\quanc\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\quanc\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",
