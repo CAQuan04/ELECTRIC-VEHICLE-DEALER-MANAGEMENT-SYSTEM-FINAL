@@ -1,6 +1,22 @@
 [
   {
     "ContainingType": "EVDealer.BE.API.Controllers.AuthController",
+    "Method": "HashPassword",
+    "RelativePath": "api/Auth/hash/{password}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "password",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "EVDealer.BE.API.Controllers.AuthController",
     "Method": "Login",
     "RelativePath": "api/Auth/login",
     "HttpMethod": "POST",
@@ -17,8 +33,8 @@
   },
   {
     "ContainingType": "EVDealer.BE.API.Controllers.DashboardController",
-    "Method": "GetAdminOnlyData",
-    "RelativePath": "api/Dashboard/admin-only-data",
+    "Method": "GetDashboardStats",
+    "RelativePath": "api/Dashboard/stats",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -27,8 +43,8 @@
   },
   {
     "ContainingType": "EVDealer.BE.API.Controllers.DashboardController",
-    "Method": "GetGeneralStats",
-    "RelativePath": "api/Dashboard/general-stats",
+    "Method": "GetUserInfo",
+    "RelativePath": "api/Dashboard/user-info",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

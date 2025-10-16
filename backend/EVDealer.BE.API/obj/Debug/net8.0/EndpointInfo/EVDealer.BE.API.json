@@ -36,7 +36,29 @@
         }
       }
     },
-    "/api/Dashboard/general-stats": {
+    "/api/Auth/hash/{password}": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "parameters": [
+          {
+            "name": "password",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Dashboard/user-info": {
       "get": {
         "tags": [
           "Dashboard"
@@ -48,7 +70,7 @@
         }
       }
     },
-    "/api/Dashboard/admin-only-data": {
+    "/api/Dashboard/stats": {
       "get": {
         "tags": [
           "Dashboard"
@@ -143,7 +165,7 @@
     "securitySchemes": {
       "Bearer": {
         "type": "http",
-        "description": "Please enter a valid token",
+        "description": "Vui lòng nhập token",
         "scheme": "Bearer",
         "bearerFormat": "JWT"
       }

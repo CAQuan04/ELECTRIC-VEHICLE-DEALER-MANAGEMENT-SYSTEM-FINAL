@@ -46,6 +46,8 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<VehicleConfig> VehicleConfigs { get; set; }
 
+    public virtual DbSet<Permission> Permissions { get; set; }
+    public virtual DbSet<RolePermission> RolePermissions { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
 
@@ -459,6 +461,53 @@ public partial class ApplicationDbContext : DbContext
                 .HasConstraintName("FK_VehicleConfig_Vehicle");
         });
 
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            // Ghi chú: Dòng này ra lệnh: "Lớp C# 'Permission' phải được ánh xạ vào bảng
+            // có tên chính xác là 'Permission' (số ít) trong CSDL."
+            // Đây chính là câu lệnh sửa lỗi của bạn.
+            entity.ToTable("Permission");
+
+            // Ghi chú: Tool scaffold thường tự nhận diện khóa chính và các thuộc tính,
+            // nhưng chúng ta có thể định nghĩa lại cho rõ ràng.
+            entity.HasKey(e => e.PermissionId);
+
+            entity.Property(e => e.PermissionId).HasColumnName("PermissionId");
+            entity.Property(e => e.PermissionName)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("PermissionName");
+
+            // Ghi chú: Đảm bảo rằng cột PermissionName là duy nhất (unique),
+            // điều này khớp với ràng buộc UNIQUE trong CSDL của bạn.
+            entity.HasIndex(e => e.PermissionName).IsUnique();
+        });
+
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            // Ghi chú: Ra lệnh cho EF ánh xạ lớp 'RolePermission' vào bảng 'Role_Permission'.
+            // Tên này phải khớp chính xác với tên bảng trong script SQL của bạn.
+            entity.ToTable("Role_Permission");
+
+            // Ghi chú: Định nghĩa khóa chính kết hợp (composite primary key) cho bảng trung gian.
+            // Điều này khớp với `PRIMARY KEY (RoleId, PermissionId)` trong SQL.
+            entity.HasKey(e => new { e.RoleId, e.PermissionId });
+
+            // Ghi chú: Cấu hình các mối quan hệ (relationship).
+            // Mặc dù EF có thể tự suy ra, việc định nghĩa rõ ràng sẽ tránh được các lỗi ngầm.
+
+            // Ghi chú: Mối quan hệ "Một Role có nhiều RolePermission".
+            entity.HasOne(rp => rp.Role)
+                .WithMany(r => r.RolePermissions) // 'RolePermissions' là thuộc tính collection trong lớp Role.
+                .HasForeignKey(rp => rp.RoleId);  // Khóa ngoại là cột RoleId.
+
+            // Ghi chú: Mối quan hệ "Một Permission có nhiều RolePermission".
+            entity.HasOne(rp => rp.Permission)
+                .WithMany(p => p.RolePermissions) // 'RolePermissions' là thuộc tính collection trong lớp Permission.
+                .HasForeignKey(rp => rp.PermissionId); // Khóa ngoại là cột PermissionId.
+        });
+
+        // Ghi chú: Dòng này được tool tự sinh ra, giữ lại nó.
         OnModelCreatingPartial(modelBuilder);
     }
 

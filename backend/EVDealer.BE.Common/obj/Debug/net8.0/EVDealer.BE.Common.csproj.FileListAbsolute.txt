@@ -9,3 +9,15 @@ C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.
 C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.Common\obj\Debug\net8.0\refint\EVDealer.BE.Common.dll
 C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.pdb
 C:\Users\quanc\Desktop\EVDealer.BE\EVDealer.BE.Common\obj\Debug\net8.0\ref\EVDealer.BE.Common.dll
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\bin\Debug\net8.0\EVDealer.BE.Common.deps.json
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\bin\Debug\net8.0\EVDealer.BE.Common.dll
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\bin\Debug\net8.0\EVDealer.BE.Common.pdb
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.AssemblyInfoInputs.cache
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.AssemblyInfo.cs
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.csproj.CoreCompileInputs.cache
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.sourcelink.json
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.dll
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\refint\EVDealer.BE.Common.dll
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.pdb
+C:\Users\quanc\Desktop\Swp_Project\backend\EVDealer.BE.Common\obj\Debug\net8.0\ref\EVDealer.BE.Common.dll

@@ -1,4 +1,4 @@
-﻿// Ghi chú: Đây là file khởi động, là "tổng đài" kết nối tất cả các dịch vụ.
+﻿
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Auth;
@@ -18,7 +18,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// 3. Thiết lập "hệ thống an ninh" JWT
+// 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -34,26 +34,37 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// ===================================================================================
+// === PHẦN ĐÃ HOÀN CHỈNH: ĐỊNH NGHĨA CÁC CHÍNH SÁCH PHÂN QUYỀN (POLICY-BASED) ===
+// ===================================================================================
+// Ghi chú: Đây là nơi chúng ta "dạy" cho hệ thống biết các quy tắc phân quyền.
+builder.Services.AddAuthorization(options =>
+{
+    // Ghi chú: Định nghĩa một chính sách tên là "CanViewDashboardStats".
+    // Yêu cầu: Người dùng phải có một claim với type là "permission" và value là "ViewDashboardStats".
+    options.AddPolicy("CanViewDashboardStats", policy =>
+        policy.RequireClaim("permission", "ViewDashboardStats"));
+
+    // Ghi chú: Định nghĩa chính sách cho việc quản lý người dùng.
+    options.AddPolicy("CanManageUsers", policy =>
+        policy.RequireClaim("permission", "ManageUsers"));
+});
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
-// =========================================================================
-// === PHẦN ĐÃ SỬA ĐỔI: CẤU HÌNH SWAGGER ĐỂ HIỂN THỊ NÚT AUTHORIZE ===
-// =========================================================================
+// Cấu hình Swagger để hiển thị nút Authorize (giữ nguyên, phần này bạn đã làm đúng)
 builder.Services.AddSwaggerGen(options =>
 {
-    // Định nghĩa Security Scheme cho JWT Bearer
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Please enter a valid token",
+        Description = "Vui lòng nhập token",
         Name = "Authorization",
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
         BearerFormat = "JWT",
         Scheme = "Bearer"
     });
-
-    // Yêu cầu tất cả các API phải sử dụng Security Scheme đã định nghĩa
     options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -69,7 +80,6 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-// =========================================================================
 
 var app = builder.Build();
 
@@ -80,9 +90,9 @@ if (app.Environment.IsDevelopment())
 }
 app.UseHttpsRedirection();
 
-// Kích hoạt các "chốt bảo vệ"
-app.UseAuthentication();
-app.UseAuthorization();
+// Kích hoạt các "chốt bảo vệ" theo đúng thứ tự
+app.UseAuthentication(); // Chốt 1: Xác thực xem "thẻ bài" (Token) có hợp lệ không.
+app.UseAuthorization();  // Chốt 2: Kiểm tra xem người mang thẻ có đủ quyền vào khu vực này không.
 
 app.MapControllers();
 app.Run();
