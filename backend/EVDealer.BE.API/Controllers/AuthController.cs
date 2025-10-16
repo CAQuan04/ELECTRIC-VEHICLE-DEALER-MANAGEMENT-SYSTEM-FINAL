@@ -1,6 +1,4 @@
-﻿// Ghi chú: Controller này là "cửa ra vào" cho các chức năng xác thực.
-// Nó chỉ làm nhiệm vụ nhận yêu cầu HTTP và chuyển cho AuthService, không tự xử lý logic.
-
+﻿
 using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.Services.Auth;
 using Microsoft.AspNetCore.Authorization;
