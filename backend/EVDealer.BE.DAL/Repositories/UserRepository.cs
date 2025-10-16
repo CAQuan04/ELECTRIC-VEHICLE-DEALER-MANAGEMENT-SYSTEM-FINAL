@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// Ghi chú: Đây là nơi triển khai chi tiết các chức năng đã hứa trong "hợp đồng" IUserRepository.
-// Mọi logic truy vấn CSDL liên quan đến User sẽ nằm gọn trong file này.
+
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Models;
 using Microsoft.EntityFrameworkCore;

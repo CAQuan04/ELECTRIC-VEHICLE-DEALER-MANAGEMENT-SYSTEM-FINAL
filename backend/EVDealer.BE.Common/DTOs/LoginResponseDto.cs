@@ -4,8 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-// Ghi chú: Định nghĩa "biểu mẫu" chuẩn để server trả kết quả đăng nhập về cho client.
-// Chúng ta chủ động chọn những thông tin an toàn để trả về, không trả về toàn bộ đối tượng User.
+
 namespace EVDealer.BE.Common.DTOs
 {
     public class LoginResponseDto

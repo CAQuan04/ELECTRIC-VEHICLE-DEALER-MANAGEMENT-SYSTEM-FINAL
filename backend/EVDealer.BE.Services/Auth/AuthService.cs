@@ -1,4 +1,4 @@
-﻿// Ghi chú: Đây là nơi chứa toàn bộ "não bộ" của chức năng đăng nhập.
+﻿
 using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.DAL.Models;
 using EVDealer.BE.DAL.Repositories;
