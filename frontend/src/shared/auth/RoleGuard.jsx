@@ -39,6 +39,12 @@ export const AdminGuard = ({ children }) => (
   </RoleGuard>
 );
 
+export const StaffGuard = ({ children }) => (
+  <RoleGuard requiredRole="staff" fallback="/access-denied">
+    {children}
+  </RoleGuard>
+);
+
 // Access Denied page
 export const AccessDenied = () => (
   <div className="dashboard-container">

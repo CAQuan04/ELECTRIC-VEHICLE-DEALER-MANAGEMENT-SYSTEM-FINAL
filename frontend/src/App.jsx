@@ -9,6 +9,7 @@ import {
   DealerGuard, 
   CustomerGuard, 
   AdminGuard, 
+  StaffGuard,
   AccessDenied,
   AuthService,
   VehicleList
@@ -36,6 +37,12 @@ import {
   OrderList, 
   InventoryList 
 } from './features/dealer';
+
+import {
+  StaffDashboard,
+  OrderList2, 
+  InventoryList2
+} from './features/staff';
 
 import { 
   EvmDashboard, 
@@ -81,6 +88,14 @@ const CustomerDashboardWithLoading = withDashboardLoading(CustomerDashboard, {
 const DealerDashboardWithLoading = withDashboardLoading(DealerDashboard, {
   loadingMessage: 'Đang khởi tạo Dealer Dashboard...',
   dataLoadingMessage: 'Đang tải dữ liệu đại lý...',
+  loadingVariant: 'dashboard',
+  showLogo: true,
+  enableSkeleton: true
+});
+
+const StaffDashboardWithLoading = withDashboardLoading(StaffDashboard, {
+  loadingMessage: 'Đang khởi tạo Staff Dashboard...',
+  dataLoadingMessage: 'Đang tải dữ liệu nhân viên...',
   loadingVariant: 'dashboard',
   showLogo: true,
   enableSkeleton: true
@@ -203,6 +218,15 @@ const App = () => {
             </AppLayout>
           </AdminGuard>
         } />
+
+        <Route path="/staff-dashboard" element={
+          <StaffGuard>
+            <AppLayout>
+              <StaffDashboardWithLoading isLoading={false} isDataLoading={false} />
+            </AppLayout>
+          </StaffGuard>
+        } />
+        
 
         {/* Dealer-only Routes */}
         <Route path="/catalog" element={

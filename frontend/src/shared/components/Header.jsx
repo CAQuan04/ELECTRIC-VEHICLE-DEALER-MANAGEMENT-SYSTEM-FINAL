@@ -84,6 +84,17 @@ const Header = () => {
           { name: 'Customer Management', path: '/customers' }
         ]
       });
+    } else if (userRole === USER_ROLES.STAFF) {
+      baseMenuItems.push({
+        id: 6,
+        title: 'Business',
+        submenu: [
+          { name: 'Dealer Dashboard', path: '/dealer-dashboard' },
+          { name: 'Inventory', path: '/inventory' },
+          { name: 'Orders', path: '/sales/orders' },
+          { name: 'Customer Management', path: '/customers' }
+        ]
+      });
     } else if (userRole === USER_ROLES.EVM_ADMIN) {
       baseMenuItems.push({
         id: 6,
@@ -206,6 +217,8 @@ const Header = () => {
                         window.location.href = '/dealer-dashboard';
                       } else if (userRole === USER_ROLES.EVM_ADMIN) {
                         window.location.href = '/evm-dashboard';
+                      } else if (userRole === USER_ROLES.STAFF) {
+                        window.location.href = '/staff-dashboard';
                       }
                     }}>
                       <span className="menu-icon">👤</span>
