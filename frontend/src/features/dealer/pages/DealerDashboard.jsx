@@ -62,15 +62,15 @@ const DealerDashboard = () => {
           <p>Chào mừng {currentUser?.name} - Quản lý kinh doanh và bán hàng</p>
           <div className="hero-stats">
             <div className="hero-stat">
-              <span className="stat-value">{dashboardData.dealer.vehicles}</span>
+              <span className="stat-value">{dashboardData?.dealer?.vehicles}</span>
               <span className="stat-label">Xe có sẵn</span>
             </div>
             <div className="hero-stat">
-              <span className="stat-value">{dashboardData.dealer.orders}</span>
+              <span className="stat-value">{dashboardData?.dealer?.orders}</span>
               <span className="stat-label">Đơn hàng tháng này</span>
             </div>
             <div className="hero-stat">
-              <span className="stat-value">{dashboardData.performance.quarterTarget}%</span>
+              <span className="stat-value">{dashboardData?.performance?.quarterTarget}%</span>
               <span className="stat-label">Hoàn thành mục tiêu</span>
             </div>
           </div>
@@ -126,7 +126,7 @@ const DealerDashboard = () => {
                 <span className="stat-icon">🚗</span>
                 <span className="stat-title">Xe có sẵn</span>
               </div>
-              <div className="stat-value">{dashboardData.dealer.vehicles}</div>
+              <div className="stat-value">{dashboardData?.dealer?.vehicles}</div>
               <div className="stat-change positive">+5 xe trong tuần</div>
             </div>
             <div className="stat-card">
@@ -134,7 +134,7 @@ const DealerDashboard = () => {
                 <span className="stat-icon">📋</span>
                 <span className="stat-title">Đơn hàng tháng này</span>
               </div>
-              <div className="stat-value">{dashboardData.dealer.orders}</div>
+              <div className="stat-value">{dashboardData?.dealer?.orders}</div>
               <div className="stat-change positive">+18% so với tháng trước</div>
             </div>
             <div className="stat-card">
@@ -142,7 +142,7 @@ const DealerDashboard = () => {
                 <span className="stat-icon">👥</span>
                 <span className="stat-title">Khách hàng</span>
               </div>
-              <div className="stat-value">{dashboardData.dealer.customers}</div>
+              <div className="stat-value">{dashboardData?.dealer?.customers}</div>
               <div className="stat-change positive">+12 khách mới</div>
             </div>
             <div className="stat-card">
@@ -150,7 +150,7 @@ const DealerDashboard = () => {
                 <span className="stat-icon">💰</span>
                 <span className="stat-title">Doanh thu</span>
               </div>
-              <div className="stat-value">{dashboardData.dealer.revenue} tỷ</div>
+              <div className="stat-value">{dashboardData?.dealer?.revenue} tỷ</div>
               <div className="stat-change positive">+25% so với tháng trước</div>
             </div>
           </div>
@@ -162,19 +162,19 @@ const DealerDashboard = () => {
               <div className="performance-metrics">
                 <div className="metric">
                   <span className="metric-label">Bán hàng tháng này</span>
-                  <span className="metric-value">{dashboardData.performance.monthlySales}</span>
+                  <span className="metric-value">{dashboardData?.performance?.monthlySales}</span>
                 </div>
                 <div className="metric">
                   <span className="metric-label">Mục tiêu quý</span>
-                  <span className="metric-value">{dashboardData.performance.quarterTarget}%</span>
+                  <span className="metric-value">{dashboardData?.performance?.quarterTarget}%</span>
                 </div>
                 <div className="metric">
                   <span className="metric-label">Hài lòng khách hàng</span>
-                  <span className="metric-value">{dashboardData.performance.customerSatisfaction}/5</span>
+                  <span className="metric-value">{dashboardData?.performance?.customerSatisfaction}/5</span>
                 </div>
                 <div className="metric">
                   <span className="metric-label">Thời gian giao xe</span>
-                  <span className="metric-value">{dashboardData.performance.deliveryTime} ngày</span>
+                  <span className="metric-value">{dashboardData?.performance?.deliveryTime} ngày</span>
                 </div>
               </div>
             </div>
@@ -182,7 +182,7 @@ const DealerDashboard = () => {
             <div className="orders-card">
               <h3>📋 Đơn hàng gần đây</h3>
               <div className="orders-list">
-                {dashboardData.recentOrders.map((order) => (
+                {dashboardData?.recentOrders.map((order) => (
                   <div key={order.id} className="order-item">
                     <div className="order-info">
                       <div className="order-customer">{order.customer}</div>

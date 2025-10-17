@@ -73,15 +73,15 @@ const EvmDashboard = () => {
           <p>Chào mừng {currentUser?.name} - Quản lý toàn bộ hệ thống EVM</p>
           <div className="hero-stats">
             <div className="hero-stat">
-              <span className="stat-value">{dashboardData.system.dealers}</span>
+              <span className="stat-value">{dashboardData?.system?.dealers}</span>
               <span className="stat-label">Đại lý hoạt động</span>
             </div>
             <div className="hero-stat">
-              <span className="stat-value">{dashboardData.system.sales}</span>
+              <span className="stat-value">{dashboardData?.system?.sales}</span>
               <span className="stat-label">Xe bán/tháng</span>
             </div>
             <div className="hero-stat">
-              <span className="stat-value">{dashboardData.performance.uptime}%</span>
+              <span className="stat-value">{dashboardData?.performance?.uptime}%</span>
               <span className="stat-label">Uptime hệ thống</span>
             </div>
           </div>
@@ -130,7 +130,7 @@ const EvmDashboard = () => {
                 <span className="stat-icon">🏢</span>
                 <span className="stat-title">Đại lý hoạt động</span>
               </div>
-              <div className="stat-value">{dashboardData.system.dealers}</div>
+              <div className="stat-value">{dashboardData?.system?.dealers}</div>
               <div className="stat-change positive">+3 tháng này</div>
             </div>
             <div className="stat-card">
@@ -138,7 +138,7 @@ const EvmDashboard = () => {
                 <span className="stat-icon">🚗</span>
                 <span className="stat-title">Xe bán tháng này</span>
               </div>
-              <div className="stat-value">{dashboardData.system.sales}</div>
+              <div className="stat-value">{dashboardData?.system?.sales}</div>
               <div className="stat-change positive">+8.7% so với tháng trước</div>
             </div>
             <div className="stat-card">
@@ -146,7 +146,7 @@ const EvmDashboard = () => {
                 <span className="stat-icon">📦</span>
                 <span className="stat-title">Tồn kho toàn hệ thống</span>
               </div>
-              <div className="stat-value">{dashboardData.system.inventory.toLocaleString()}</div>
+              <div className="stat-value">{dashboardData?.system?.inventory.toLocaleString()}</div>
               <div className="stat-change negative">-2.1% so với tháng trước</div>
             </div>
             <div className="stat-card">
@@ -154,7 +154,7 @@ const EvmDashboard = () => {
                 <span className="stat-icon">💰</span>
                 <span className="stat-title">Doanh thu tổng</span>
               </div>
-              <div className="stat-value">{dashboardData.system.revenue}B VND</div>
+              <div className="stat-value">{dashboardData?.system?.revenue}B VND</div>
               <div className="stat-change positive">+15.3% so với tháng trước</div>
             </div>
           </div>
@@ -166,19 +166,19 @@ const EvmDashboard = () => {
               <div className="performance-metrics">
                 <div className="metric">
                   <span className="metric-label">Uptime</span>
-                  <span className="metric-value">{dashboardData.performance.uptime}%</span>
+                  <span className="metric-value">{dashboardData?.performance?.uptime}%</span>
                 </div>
                 <div className="metric">
                   <span className="metric-label">Hài lòng khách hàng</span>
-                  <span className="metric-value">{dashboardData.performance.customerSatisfaction}/5</span>
+                  <span className="metric-value">{dashboardData?.performance?.customerSatisfaction}/5</span>
                 </div>
                 <div className="metric">
                   <span className="metric-label">Thời gian giao hàng</span>
-                  <span className="metric-value">{dashboardData.performance.deliveryTime} ngày</span>
+                  <span className="metric-value">{dashboardData?.performance?.deliveryTime} ngày</span>
                 </div>
                 <div className="metric">
                   <span className="metric-label">Hoàn thành mục tiêu</span>
-                  <span className="metric-value">{dashboardData.performance.targetAchievement}%</span>
+                  <span className="metric-value">{dashboardData?.performance?.targetAchievement}%</span>
                 </div>
               </div>
             </div>
@@ -186,7 +186,7 @@ const EvmDashboard = () => {
             <div className="activity-card">
               <h3>🔔 Hoạt động gần đây</h3>
               <div className="activity-list">
-                {dashboardData.activities.map((activity) => (
+                {dashboardData?.activities.map((activity) => (
                   <div key={activity.id} className="activity-item">
                     <span className="activity-icon">{activity.icon}</span>
                     <div className="activity-content">
