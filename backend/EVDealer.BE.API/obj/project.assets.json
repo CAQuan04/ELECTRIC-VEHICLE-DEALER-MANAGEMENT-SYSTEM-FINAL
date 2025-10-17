@@ -4306,7 +4306,7 @@
       "projectName": "EVDealer.BE.API",
       "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.API\\EVDealer.BE.API.csproj",
       "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.API\\obj\\",
+      "outputPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.API\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

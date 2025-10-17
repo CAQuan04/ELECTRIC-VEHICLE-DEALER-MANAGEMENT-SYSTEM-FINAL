@@ -11,7 +11,7 @@
         "projectName": "EVDealer.BE.Common",
         "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
         "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Common\\obj\\",
+        "outputPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -76,7 +76,7 @@
         "projectName": "EVDealer.BE.DAL",
         "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\EVDealer.BE.DAL.csproj",
         "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.DAL\\obj\\",
+        "outputPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.DAL\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -153,7 +153,7 @@
         "projectName": "EVDealer.BE.Services",
         "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Services\\EVDealer.BE.Services.csproj",
         "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Services\\obj\\",
+        "outputPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

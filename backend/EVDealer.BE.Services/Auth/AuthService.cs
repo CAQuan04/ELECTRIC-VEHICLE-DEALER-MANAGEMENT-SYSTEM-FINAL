@@ -72,8 +72,8 @@ namespace EVDealer.BE.Services.Auth
                 claims.Add(new Claim("dealerId", user.DealerId.Value.ToString()));
             }
 
-            // Ghi chú: Duyệt qua danh sách các quyền của vai trò người dùng
-            // và thêm mỗi quyền như một claim riêng biệt có type là "permission".
+            //Ghi chú: Duyệt qua danh sách các quyền của vai trò người dùng
+            //và thêm mỗi quyền như một claim riêng biệt có type là "permission".
             if (user.Role?.RolePermissions != null)
             {
                 foreach (var rolePermission in user.Role.RolePermissions)
@@ -84,6 +84,8 @@ namespace EVDealer.BE.Services.Auth
                     }
                 }
             }
+
+
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
