@@ -1,15 +1,15 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {}
+    "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {}
   },
   "projects": {
-    "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {
+    "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+        "projectUniqueName": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
         "projectName": "EVDealer.BE.Common",
-        "projectPath": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+        "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
         "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
         "outputPath": "C:\\Users\\quanc\\Desktop\\Swp_Project\\backend\\EVDealer.BE.Common\\obj\\",
         "projectStyle": "PackageReference",
