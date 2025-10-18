@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { AuthService } from '../../../shared/utils/auth';
-import { usePageLoading } from '../../../shared/components/LoadingHOC';
-import '../../../shared/components/GlobalLoading.css';
+import { AuthService } from '@utils';
+import { usePageLoading } from '@modules/loading';
+import '@modules/loading/GlobalLoading.css';
 import '../styles/EvmDashboard.css';
 
 const EvmDashboard = () => {
@@ -62,6 +62,10 @@ const EvmDashboard = () => {
         </div>
       </div>
     );
+  }
+
+  if (!dashboardData) {
+    return null; // Loading is handled by LoadingHOC
   }
 
   return (

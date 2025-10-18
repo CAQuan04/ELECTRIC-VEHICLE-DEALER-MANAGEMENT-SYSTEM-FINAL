@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { usePageLoading } from '../../../shared/components/LoadingHOC';
-import '../../../shared/components/GlobalLoading.css';
-import DashboardCard from '../../../shared/components/DashboardCard';
-import StatsGrid from '../../../shared/components/StatsGrid';
-import ActivityList from '../../../shared/components/ActivityList';
-import DashboardHeader from '../../../shared/components/DashboardHeader';
-import ActionButton from '../../../shared/components/ActionButton';
-import { dashboardAPI } from '../../../shared/utils/api-simple';
+import { usePageLoading } from '@modules/loading';
+import '@modules/loading/GlobalLoading.css';
+import { DashboardCard, StatsGrid, ActivityList, DashboardHeader, ActionButton } from '@modules/dashboard';
+import { apiClient } from '@utils';
 
 const ReportDashboard = () => {
   const { startLoading, stopLoading, isLoading } = usePageLoading();

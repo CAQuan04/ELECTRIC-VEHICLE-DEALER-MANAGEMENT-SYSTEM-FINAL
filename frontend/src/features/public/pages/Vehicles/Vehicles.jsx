@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import Header from '../../../../shared/components/Header';
-import Footer from '../../../../shared/components/Footer';
+import { Header, Footer } from '@modules/layout';
 import './Vehicles.css';
 
 const Vehicles = () => {

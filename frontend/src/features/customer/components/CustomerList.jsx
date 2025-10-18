@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../../../shared/utils/api';
+import api from '@utils';
 
 const CustomerList = () => {
   const [customers, setCustomers] = useState([]);
