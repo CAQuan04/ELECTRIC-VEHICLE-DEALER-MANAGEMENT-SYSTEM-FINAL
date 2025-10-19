@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { usePageLoading } from '../../../shared/components/LoadingHOC';
-import '../../../shared/components/GlobalLoading.css';
+import { usePageLoading } from '@modules/loading';
+import '@modules/loading/GlobalLoading.css';
 import LoanInfoCards from './LoanInfoCards';
 import PaymentHistory from './PaymentHistory';
 import { CustomerMockAPI } from '../services/customerMockAPI';

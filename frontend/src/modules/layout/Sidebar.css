@@ -1,0 +1,304 @@
+/* ============================================
+   🎨 SIDEBAR - Futuristic Light Mode Design
+   ============================================ */
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100vh;
+  /* Light Mode - Glassmorphism effect */
+  background: linear-gradient(180deg, 
+    rgba(255, 255, 255, 0.95) 0%, 
+    rgba(240, 249, 255, 0.95) 100%);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(6, 182, 212, 0.2);
+  padding: 0;
+  z-index: 1001;
+  overflow-y: auto;
+  box-shadow: 
+    4px 0 30px rgba(6, 182, 212, 0.08),
+    0 0 0 1px rgba(6, 182, 212, 0.05) inset;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark mode */
+.dark .sidebar {
+  background: linear-gradient(180deg, #1f2937 0%, #374151 100%);
+  backdrop-filter: blur(20px);
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 4px 0 20px rgba(31, 41, 55, 0.3);
+}
+
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Light mode - Subtle cyan gradient overlay */
+  background: 
+    linear-gradient(135deg, 
+      rgba(6, 182, 212, 0.03) 0%, 
+      rgba(59, 130, 246, 0.02) 50%,
+      transparent 100%);
+  pointer-events: none;
+  transition: background 0.3s ease;
+}
+
+.dark .sidebar::before {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+}
+
+.sidebar-header {
+  padding: 20px 20px 15px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  text-align: center;
+  border-bottom: 1px solid rgba(6, 182, 212, 0.15);
+  background: linear-gradient(135deg, 
+    rgba(6, 182, 212, 0.08) 0%, 
+    rgba(59, 130, 246, 0.05) 100%);
+  margin-bottom: 10px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.dark .sidebar-header {
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-header .user-info {
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.sidebar-header .user-info small {
+  display: block;
+  margin: 2px 0;
+}
+
+.role-badge {
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+.role-badge.dealer {
+  background: rgba(34, 197, 94, 0.8);
+  color: white;
+}
+
+.role-badge.customer {
+  background: rgba(59, 130, 246, 0.8);
+  color: white;
+}
+
+.role-badge.evm_admin {
+  background: rgba(239, 68, 68, 0.8);
+  color: white;
+}
+
+.sidebar-header::before {
+  content: '🚗';
+  position: absolute;
+  top: 50%;
+  left: -10px;
+  transform: translateY(-50%);
+  font-size: 30px;
+  opacity: 0.3;
+}
+
+.sidebar-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar-menu li {
+  margin: 5px 15px;
+}
+
+.sidebar-menu a {
+  display: block;
+  padding: 15px 20px;
+  color: #334155;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark .sidebar-menu a {
+  color: white;
+}
+
+.sidebar-menu a::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  /* Light mode - Cyan gradient shimmer */
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(6, 182, 212, 0.15), 
+    transparent);
+  transition: left 0.5s ease;
+}
+
+.dark .sidebar-menu a::before {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+}
+
+.sidebar-menu a:hover::before {
+  left: 100%;
+}
+
+.sidebar-menu a:hover {
+  /* Light mode - Cyan glass effect */
+  background: linear-gradient(135deg, 
+    rgba(6, 182, 212, 0.12) 0%,
+    rgba(59, 130, 246, 0.08) 100%);
+  color: #0891b2;
+  transform: translateX(5px);
+  box-shadow: 
+    0 4px 20px rgba(6, 182, 212, 0.15),
+    0 0 0 1px rgba(6, 182, 212, 0.2) inset;
+  border-radius: 12px;
+}
+
+.dark .sidebar-menu a:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-menu a.active {
+  /* Light mode - Strong cyan active state */
+  background: linear-gradient(135deg, 
+    rgba(6, 182, 212, 0.2) 0%,
+    rgba(59, 130, 246, 0.15) 100%);
+  color: #0e7490;
+  box-shadow: 
+    0 5px 25px rgba(6, 182, 212, 0.2),
+    0 0 0 1px rgba(6, 182, 212, 0.3) inset;
+  transform: translateX(5px);
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.dark .sidebar-menu a.active {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  color: white;
+}
+
+/* Role Switcher for Development */
+.role-switcher {
+  padding: 15px 20px;
+  margin-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.role-switcher small {
+  color: rgba(0, 0, 0, 0.6);
+  display: block;
+  margin-bottom: 10px;
+  transition: color 0.3s ease;
+}
+
+.dark .role-switcher small {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.role-switcher button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  color: #374151;
+  transition: all 0.3s ease;
+}
+
+.dark .role-switcher button {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.role-switcher button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Sidebar Icons */
+.sidebar-menu a::after {
+  content: '';
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.sidebar-menu a:hover::after {
+  background: white;
+  transform: translateY(-50%) scale(1.5);
+}
+
+/* Scrollbar styling for sidebar */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Sidebar */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar {
+    width: 100vw;
+  }
+}

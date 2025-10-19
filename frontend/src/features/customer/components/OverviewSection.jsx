@@ -4,7 +4,7 @@ import {
   StatCard, 
   Card, 
   Grid 
-} from '../../../shared/components/ui/UIComponents';
+} from '@modules/common/ui/UIComponents';
 import { CustomerMockAPI } from '../services/customerMockAPI';
 import '../styles/CustomerSections.css';
 

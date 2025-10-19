@@ -1,9 +1,8 @@
  import React, { useState, useEffect, useRef } from 'react';
 import { TransitionGroup, CSSTransition } from 'react-transition-group';
 import { Link } from 'react-router-dom';
-import AuthComponent from '../../../shared/auth/AuthComponent';
-import Header from '../../../shared/components/Header';
-import Footer from '../../../shared/components/Footer';
+import { AuthComponent } from '@modules/auth';
+import { Header, Footer } from '@modules/layout';
 import PropTypes from 'prop-types';
 import BezierEasing from 'bezier-easing';
 import './Landing.css';

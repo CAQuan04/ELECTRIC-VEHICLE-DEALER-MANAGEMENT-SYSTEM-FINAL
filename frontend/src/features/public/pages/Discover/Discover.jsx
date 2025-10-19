@@ -1,6 +1,5 @@
 import React from 'react';
-import Header from '../../../../shared/components/Header';
-import Footer from '../../../../shared/components/Footer';
+import { Header, Footer } from '@modules/layout';
 import './Discover.css';
 
 const Discover = () => {
