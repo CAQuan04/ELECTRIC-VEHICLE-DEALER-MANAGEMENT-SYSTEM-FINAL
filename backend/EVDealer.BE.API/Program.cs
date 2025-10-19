@@ -2,6 +2,7 @@
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Auth;
+using EVDealer.BE.Services.Users;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -18,6 +19,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // 2. Đăng ký các "phòng ban" (Dependency Injection)
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+// Ghi chú: "Khai báo" cho hệ thống biết rằng mỗi khi có ai đó cần IUserService,
+// hãy tạo một đối tượng UserService để cung cấp.
+builder.Services.AddScoped<IUserService, UserService>();
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -49,6 +53,10 @@ builder.Services.AddAuthorization(options =>
     // Ghi chú: Định nghĩa chính sách cho việc quản lý người dùng.
     options.AddPolicy("CanManageUsers", policy =>
         policy.RequireClaim("permission", "ManageUsers"));
+
+    // Ghi chú: "Dạy" cho hệ thống biết Policy "CanManageDealerAccounts" có nghĩa là gì.
+    options.AddPolicy("CanManageDealerAccounts", policy =>
+        policy.RequireClaim("permission", "ManageDealerAccounts"));
 });
 
 builder.Services.AddControllers();
@@ -81,6 +89,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
+
 
 var app = builder.Build();
 
