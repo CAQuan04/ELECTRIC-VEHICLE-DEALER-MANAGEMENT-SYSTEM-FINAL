@@ -10,3 +10,15 @@ C:\Users\quanc\Desktop\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\E
 C:\Users\quanc\Desktop\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\refint\EVDealer.BE.Common.dll
 C:\Users\quanc\Desktop\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.pdb
 C:\Users\quanc\Desktop\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\ref\EVDealer.BE.Common.dll
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\bin\Debug\net8.0\EVDealer.BE.Common.deps.json
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\bin\Debug\net8.0\EVDealer.BE.Common.dll
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\bin\Debug\net8.0\EVDealer.BE.Common.pdb
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.GeneratedMSBuildEditorConfig.editorconfig
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.AssemblyInfoInputs.cache
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.AssemblyInfo.cs
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.csproj.CoreCompileInputs.cache
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.sourcelink.json
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.dll
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\refint\EVDealer.BE.Common.dll
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\EVDealer.BE.Common.pdb
+E:\_job\_toanta\swp_project\backend\EVDealer.BE.Common\obj\Debug\net8.0\ref\EVDealer.BE.Common.dll
