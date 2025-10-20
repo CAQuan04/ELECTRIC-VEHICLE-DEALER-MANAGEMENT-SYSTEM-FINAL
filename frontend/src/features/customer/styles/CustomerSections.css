@@ -1,0 +1,149 @@
+/* Component-specific styles for Customer Dashboard sections */
+
+/* Detail Row Component */
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+}
+
+.detail-row .label {
+  font-weight: 600;
+  color: #374151;
+  min-width: 150px;
+}
+
+.detail-row .value {
+  color: #1f2937;
+  text-align: right;
+}
+
+/* Overview Details */
+.overview-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.overview-details p {
+  margin: 0.5rem 0;
+  color: #4b5563;
+}
+
+.overview-details strong {
+  color: #1f2937;
+}
+
+/* Vehicle Details */
+.vehicle-details {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Service Details */
+.service-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.services-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Loan Details */
+.loan-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.loan-card h4 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.loan-details {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Payment Table Customization */
+.payment-table .table-row {
+  grid-template-columns: 1fr 1fr 1.2fr 1.2fr 1fr;
+}
+
+.payment-table .status {
+  text-align: center;
+}
+
+.payment-table .status.paid {
+  color: #166534;
+  font-weight: 600;
+}
+
+.payment-table .status.pending {
+  color: #92400e;
+  font-weight: 600;
+}
+
+/* Financing Content Layout */
+.financing-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Responsive Design for Sections */
+@media (max-width: 768px) {
+  .detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+  
+  .detail-row .label {
+    min-width: auto;
+    font-size: 0.9rem;
+  }
+  
+  .detail-row .value {
+    text-align: left;
+    font-size: 0.95rem;
+  }
+  
+  .payment-table .table-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+    text-align: left;
+  }
+  
+  .payment-table .table-row.header {
+    display: none;
+  }
+  
+  .payment-table .table-row span:before {
+    content: attr(data-label) ": ";
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .loan-card {
+    padding: 1rem;
+  }
+  
+  .financing-content {
+    gap: 1.5rem;
+  }
+}

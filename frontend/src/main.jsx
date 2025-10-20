@@ -1,21 +1,19 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import App from "./App.jsx";
-import "./index.css";
-import "bootstrap/dist/css/bootstrap.min.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import App from './App.jsx';
+import './index.css';
 
-import { AuthProvider } from "./context/AuthContext.jsx";
+// Google OAuth Client ID from environment variables
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "YOUR_GOOGLE_CLIENT_ID_HERE";
 
-// BrowserRouter phải ở ngoài AuthProvider nếu AuthProvider KHÔNG dùng useNavigate.
-// Ở đây AuthProvider dùng useNavigate nên phải đặt *bên trong* BrowserRouter.
-ReactDOM.createRoot(document.getElementById("root")).render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <BrowserRouter>
         <App />
-      </AuthProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
-

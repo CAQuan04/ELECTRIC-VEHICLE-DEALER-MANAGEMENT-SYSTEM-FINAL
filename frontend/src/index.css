@@ -1,25 +1,52 @@
+@import "tailwindcss";
+
+/* Enable scrollbar for entire system */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.7) transparent;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.7);
+  border-radius: 6px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(155, 155, 155, 0.9);
+}
+
+/* Hide scrollbar for landing page only */
+.landing-page-no-scrollbar,
+.landing-page-no-scrollbar * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.landing-page-no-scrollbar::-webkit-scrollbar,
+.landing-page-no-scrollbar *::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ensure body and html can scroll */
+html,
 body {
-  background: url("https://images.unsplash.com/photo-1617814071651-dc9fa9a316d0?auto=format&fit=crop&w=1950&q=80")
-    no-repeat center center fixed;
-  background-size: cover;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
-.login-card {
-  backdrop-filter: blur(10px);
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  padding: 2rem;
-}
-
-.dashboard-container {
-  background-color: #f9fafb;
-  min-height: 100vh;
-}
-
-.card-stat {
-  transition: transform 0.2s ease;
-}
-.card-stat:hover {
-  transform: translateY(-5px);
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
 }
