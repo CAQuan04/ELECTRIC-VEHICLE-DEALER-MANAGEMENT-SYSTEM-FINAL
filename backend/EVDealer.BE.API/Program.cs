@@ -3,10 +3,10 @@ using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Auth;
 using EVDealer.BE.Services.Users;
+using EVDealer.BE.Services.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -22,6 +22,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Ghi chú: "Khai báo" cho hệ thống biết rằng mỗi khi có ai đó cần IUserService,
 // hãy tạo một đối tượng UserService để cung cấp.
 builder.Services.AddScoped<IUserService, UserService>();
+
+
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+
+
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
