@@ -15,6 +15,7 @@ import {
   DealerGuard, 
   CustomerGuard, 
   AdminGuard, 
+  StaffGuard,
   AccessDenied
 } from '@modules/auth';
 
@@ -102,6 +103,8 @@ import {
   Discover
 } from './features/public';
 
+import {StaffDashboard} from './features/staff'
+
 // Pages from public features
 import LoadingDemo from './features/public/pages/LoadingDemo';
 import RegisterSuccess from './features/public/pages/RegisterSuccess';
@@ -137,6 +140,14 @@ const DealerDashboardWithLoading = withDashboardLoading(DealerDashboard, {
 const EvmDashboardWithLoading = withDashboardLoading(EvmDashboard, {
   loadingMessage: 'Đang khởi tạo Admin Dashboard...',
   dataLoadingMessage: 'Đang tải dữ liệu hệ thống...',
+  loadingVariant: 'dashboard',
+  showLogo: true,
+  enableSkeleton: true
+});
+
+const StaffDashboardWithLoading = withDashboardLoading(StaffDashboard, {
+  loadingMessage: 'Đang khởi tạo Staff Dashboard...',
+  dataLoadingMessage: 'Đang tải dữ liệu nhân viên...',
   loadingVariant: 'dashboard',
   showLogo: true,
   enableSkeleton: true
@@ -263,6 +274,14 @@ const App = () => {
               <EvmDashboardWithLoading isLoading={false} isDataLoading={false} />
             </AppLayout>
           </AdminGuard>
+        } />
+
+        <Route path="/staff-dashboard" element={
+          <StaffGuard>
+            <AppLayout>
+              <StaffDashboardWithLoading isLoading={false} isDataLoading={false} />
+            </AppLayout>
+          </StaffGuard>
         } />
 
         {/* Dealer-only Routes */}

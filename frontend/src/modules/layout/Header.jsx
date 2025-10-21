@@ -206,6 +206,8 @@ const Header = () => {
                         window.location.href = '/dealer-dashboard';
                       } else if (userRole === USER_ROLES.EVM_ADMIN) {
                         window.location.href = '/evm-dashboard';
+                      } else if (userRole === USER_ROLES.STAFF) {
+                        window.location.href = '/staff-dashboard';
                       }
                     }}>
                       <span className="menu-icon">👤</span>
