@@ -187,7 +187,7 @@ const AppLayout = ({children}) => {
         <Sidebar />
         <div className="main-content-with-sidebar">
           <Navbar />
-          <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+          <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
             {children}
           </main>
         </div>
@@ -211,7 +211,7 @@ const AppLayout = ({children}) => {
     return (
       <div style={{minHeight: '100vh'}}>
         <Header />
-        <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+        <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
           {children}
         </main>
       </div>
@@ -224,7 +224,7 @@ const PublicLayout = ({children}) => {
   return (
     <div style={{minHeight: '100vh'}}>
       <Header />
-      <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+      <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
         {children}
       </main>
     </div>
