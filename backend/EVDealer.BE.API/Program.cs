@@ -1,6 +1,7 @@
 ﻿
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
+using EVDealer.BE.Services.Admin;
 using EVDealer.BE.Services.Auth;
 using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
@@ -26,6 +27,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+
+builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
 
 
 
@@ -63,6 +67,10 @@ builder.Services.AddAuthorization(options =>
     // Ghi chú: "Dạy" cho hệ thống biết Policy "CanManageDealerAccounts" có nghĩa là gì.
     options.AddPolicy("CanManageDealerAccounts", policy =>
         policy.RequireClaim("permission", "ManageDealerAccounts"));
+
+    // Ghi chú: Thêm chính sách mới 'CanManageVehicles' để bảo vệ Controller của bạn.
+    options.AddPolicy("CanManageVehicles", policy =>
+        policy.RequireClaim("permission", "ManageVehicles"));
 });
 
 builder.Services.AddControllers();
