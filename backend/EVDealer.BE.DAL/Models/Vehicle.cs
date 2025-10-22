@@ -1,4 +1,8 @@
-﻿namespace EVDealer.BE.DAL.Models;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EVDealer.BE.DAL.Models;
 
 public partial class Vehicle
 {
@@ -25,6 +29,10 @@ public partial class Vehicle
     public virtual ICollection<TestDrive> TestDrives { get; set; } = new List<TestDrive>();
 
     public virtual ICollection<VehicleConfig> VehicleConfigs { get; set; } = new List<VehicleConfig>();
+
+    [Required]
+    [Column(TypeName = "varchar(20)")] // <-- Thử thêm attribute này để rõ ràng hơn
+    public string Status { get; set; }
 }
 
 #region Seed Query

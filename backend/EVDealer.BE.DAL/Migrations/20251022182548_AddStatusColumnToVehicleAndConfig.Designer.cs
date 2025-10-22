@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EVDealer.BE.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251016150213_AddPermissionAndRolePermissionTables")]
-    partial class AddPermissionAndRolePermissionTables
+    [Migration("20251022182548_AddStatusColumnToVehicleAndConfig")]
+    partial class AddStatusColumnToVehicleAndConfig
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -316,21 +316,24 @@ namespace EVDealer.BE.DAL.Migrations
                 {
                     b.Property<int>("PermissionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("PermissionId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
 
                     b.Property<string>("PermissionName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("PermissionName");
 
                     b.HasKey("PermissionId");
 
                     b.HasIndex("PermissionName")
                         .IsUnique();
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permission", (string)null);
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PurchaseRequest", b =>
@@ -453,7 +456,7 @@ namespace EVDealer.BE.DAL.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("Role_Permission");
+                    b.ToTable("Role_Permission", (string)null);
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.SalesOrder", b =>
@@ -640,6 +643,14 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("model");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("Active");
+
                     b.Property<int?>("Year")
                         .HasColumnType("int")
                         .HasColumnName("year");
@@ -671,6 +682,14 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Property<int?>("RangeKm")
                         .HasColumnType("int")
                         .HasColumnName("range_km");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("Active");
 
                     b.Property<int>("VehicleId")
                         .HasColumnType("int")

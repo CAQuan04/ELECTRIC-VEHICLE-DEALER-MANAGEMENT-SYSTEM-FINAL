@@ -439,6 +439,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("model");
             entity.Property(e => e.Year).HasColumnName("year");
+            entity.Property(e => e.Status)
+           .IsRequired()
+           .HasMaxLength(20)
+           .IsUnicode(false)
+           .HasDefaultValue("Active");
         });
 
         modelBuilder.Entity<VehicleConfig>(entity =>
@@ -459,6 +464,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.VehicleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VehicleConfig_Vehicle");
+            entity.Property(e => e.Status)
+            .IsRequired()
+            .HasMaxLength(20)
+            .IsUnicode(false)
+            .HasDefaultValue("Active");
         });
 
         modelBuilder.Entity<Permission>(entity =>
