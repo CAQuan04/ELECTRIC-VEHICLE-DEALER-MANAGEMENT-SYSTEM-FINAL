@@ -1,8 +1,10 @@
 ﻿
+using EVDealer.BE.API.Helpers;
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Admin;
 using EVDealer.BE.Services.Auth;
+using EVDealer.BE.Services.IInventory;
 using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -31,7 +33,8 @@ builder.Services.AddScoped<IVehicleService, VehicleService>();
 builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
 builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
 
-
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -71,9 +74,18 @@ builder.Services.AddAuthorization(options =>
     // Ghi chú: Thêm chính sách mới 'CanManageVehicles' để bảo vệ Controller của bạn.
     options.AddPolicy("CanManageVehicles", policy =>
         policy.RequireClaim("permission", "ManageVehicles"));
-});
 
-builder.Services.AddControllers();
+    options.AddPolicy("ManageInventory", policy => policy.RequireClaim("permission", "ManageInventory"));
+    options.AddPolicy("ManageDistributions", policy => policy.RequireClaim("permission", "ManageDistributions"));
+    options.AddPolicy("ConfirmDistributions", policy => policy.RequireClaim("permission", "ConfirmDistributions"));
+    
+    });
+
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+ {
+     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+ });
 builder.Services.AddEndpointsApiExplorer();
 
 // Cấu hình Swagger để hiển thị nút Authorize (giữ nguyên, phần này bạn đã làm đúng)

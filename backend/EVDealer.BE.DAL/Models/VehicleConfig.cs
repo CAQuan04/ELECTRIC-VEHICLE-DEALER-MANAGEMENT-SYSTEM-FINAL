@@ -21,6 +21,7 @@ public partial class VehicleConfig
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual Vehicle Vehicle { get; set; } = null!;
+    public virtual ICollection<Distribution> Distributions { get; set; }
 
     [Required]
     [Column(TypeName = "varchar(20)")]
