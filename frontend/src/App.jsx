@@ -104,6 +104,7 @@ import {
 } from './features/public';
 
 import {StaffDashboard} from './features/staff'
+import { CatalogueManager } from './features/admin'
 
 // Pages from public features
 import LoadingDemo from './features/public/pages/LoadingDemo';
@@ -478,6 +479,11 @@ const App = () => {
         <Route path="/admin/dealers" element={
           <AdminGuard>
             <AppLayout><DealerList /></AppLayout>
+          </AdminGuard>
+        } />
+        <Route path="/admin/catalog" element={
+          <AdminGuard>
+            <AppLayout><CatalogueManager /></AppLayout>
           </AdminGuard>
         } />
         
