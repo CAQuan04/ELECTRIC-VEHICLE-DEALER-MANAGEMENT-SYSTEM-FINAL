@@ -48,6 +48,10 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Permission> Permissions { get; set; }
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
+
+    public virtual DbSet<DealerContract> DealerContracts { get; set; }
+    public virtual DbSet<DealerTarget> DealerTargets { get; set; }
+    public virtual DbSet<Debt> Debts { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
 
