@@ -20,5 +20,12 @@ namespace EVDealer.BE.DAL.Repositories
 
         // Hợp đồng: Phải có chức năng lưu tất cả các thay đổi (thêm, sửa, xóa).
         Task<bool> SaveChangesAsync();
+
+        // Ghi chú: Bổ sung hợp đồng - Phải có chức năng tìm MỘT cấu hình cụ thể theo ID của nó.
+        Task<VehicleConfig> FindConfigByIdAsync(int configId);
+
+        // GHI CHÚ: BỔ SUNG HỢP ĐỒNG MỚI
+        // Hợp đồng: Phải có chức năng lấy TOÀN BỘ danh sách xe (cả Active và Inactive).
+        Task<IEnumerable<Vehicle>> GetAllVehiclesForAdminAsync();
     }
 }

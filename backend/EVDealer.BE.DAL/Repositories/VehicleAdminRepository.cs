@@ -1,5 +1,6 @@
 ﻿using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,6 +41,22 @@ namespace EVDealer.BE.DAL.Repositories
         public async Task<bool> SaveChangesAsync()
         {
             return await _context.SaveChangesAsync() > 0;
+        }
+
+        // Ghi chú: Triển khai chức năng tìm cấu hình bằng hàm FindAsync, rất hiệu quả.
+        public async Task<VehicleConfig> FindConfigByIdAsync(int configId)
+        {
+            return await _context.VehicleConfigs.FindAsync(configId);
+        }
+
+        public async Task<IEnumerable<Vehicle>> GetAllVehiclesForAdminAsync()
+        {
+            // Ghi chú: Câu lệnh này lấy tất cả xe và các cấu hình liên quan.
+            // Điểm khác biệt mấu chốt so với Repository của Dealer là nó KHÔNG CÓ
+            // mệnh đề .Where(v => v.Status == "Active").
+            return await _context.Vehicles
+                .Include(v => v.VehicleConfigs)
+                .ToListAsync();
         }
     }
 }
