@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 
 // Theme override CSS
 import './styles/theme-override.css';
+import './styles/theme-variables.css';
 
 // Modules
 import { 
@@ -183,11 +184,11 @@ const AppLayout = ({children}) => {
   if (currentUser && currentUser.role !== 'guest') {
     // For dashboard pages - show sidebar + navbar layout
     return (
-      <div style={{minHeight: '100vh'}}>
+      <div className="theme-page" style={{minHeight: '100vh'}}>
         <Sidebar />
         <div className="main-content-with-sidebar">
           <Navbar />
-          <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+          <main className="theme-main" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
             {children}
           </main>
         </div>

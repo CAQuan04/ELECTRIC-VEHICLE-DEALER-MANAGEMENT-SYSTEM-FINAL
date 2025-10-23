@@ -10,18 +10,18 @@ import React from 'react';
  */
 const StatCard = ({ icon, title, value, change, trend = 'up', className = '' }) => {
   const trendColors = {
-    up: 'text-emerald-400',
-    down: 'text-red-400',
-    neutral: 'text-gray-400'
+    up: 'dark:text-emerald-400 text-emerald-600',
+    down: 'dark:text-red-400 text-red-600',
+    neutral: 'dark:text-gray-400 text-gray-600'
   };
 
   return (
-    <div className={`group dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 dark:border-white/10 border-gray-200 border dark:hover:border-emerald-500/50 dark:hover:shadow-emerald-500/20 dark:hover:shadow-2xl hover:border-cyan-500 hover:shadow-cyan-500/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 ${className}`}>
+    <div className={`theme-card group rounded-2xl p-6 border hover:scale-[1.02] ${className}`}>
       <div className="flex items-center gap-3 mb-4">
         <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{icon}</span>
-        <span className="text-lg font-medium dark:text-gray-300 text-gray-600">{title}</span>
+        <span className="text-lg font-medium theme-text-secondary">{title}</span>
       </div>
-      <div className="stat-value text-4xl font-bold mb-2">{value}</div>
+      <div className="theme-text-primary text-4xl font-bold mb-2">{value}</div>
       {change && (
         <div className={`text-sm font-semibold ${trendColors[trend]}`}>
           {change}

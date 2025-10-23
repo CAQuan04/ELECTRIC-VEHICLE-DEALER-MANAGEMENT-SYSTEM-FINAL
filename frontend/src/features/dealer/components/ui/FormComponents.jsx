@@ -13,7 +13,7 @@ export const FormGroup = ({ children, className = '' }) => (
  * Label - Form label
  */
 export const Label = ({ children, required, htmlFor, className = '' }) => (
-  <label htmlFor={htmlFor} className={`block text-sm font-medium text-gray-300 mb-2 ${className}`}>
+  <label htmlFor={htmlFor} className={`block text-sm font-medium theme-text-secondary mb-2 ${className}`}>
     {children}
     {required && <span className="text-red-400 ml-1">*</span>}
   </label>
@@ -38,9 +38,9 @@ export const Input = ({
       value={value}
       onChange={onChange}
       className={`
-        w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-gray-500 
-        focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all
-        ${error ? 'border-red-500' : 'border-white/10'}
+        theme-input w-full px-4 py-3 rounded-xl border
+        focus:outline-none focus:ring-2
+        ${error ? 'border-red-500 focus:border-red-500' : ''}
         ${className}
       `}
       {...props}
@@ -58,16 +58,16 @@ export const Select = ({ value, onChange, options, placeholder, error, className
       value={value}
       onChange={onChange}
       className={`
-        w-full px-4 py-3 bg-white/5 border rounded-xl text-white 
-        focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all
-        ${error ? 'border-red-500' : 'border-white/10'}
+        theme-input w-full px-4 py-3 rounded-xl border
+        focus:outline-none focus:ring-2
+        ${error ? 'border-red-500 focus:border-red-500' : ''}
         ${className}
       `}
       {...props}
     >
       {placeholder && <option value="">{placeholder}</option>}
       {options.map((option) => (
-        <option key={option.value} value={option.value} className="bg-gray-800">
+        <option key={option.value} value={option.value}>
           {option.label}
         </option>
       ))}
@@ -87,9 +87,9 @@ export const Textarea = ({ placeholder, value, onChange, rows = 4, error, classN
       onChange={onChange}
       rows={rows}
       className={`
-        w-full px-4 py-3 bg-white/5 border rounded-xl text-white placeholder-gray-500 
-        focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all resize-none
-        ${error ? 'border-red-500' : 'border-white/10'}
+        theme-input w-full px-4 py-3 rounded-xl border resize-none
+        focus:outline-none focus:ring-2
+        ${error ? 'border-red-500 focus:border-red-500' : ''}
         ${className}
       `}
       {...props}

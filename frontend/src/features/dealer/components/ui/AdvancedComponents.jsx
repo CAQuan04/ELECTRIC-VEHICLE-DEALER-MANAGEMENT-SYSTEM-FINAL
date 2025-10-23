@@ -8,12 +8,12 @@ import React from 'react';
  */
 export const InfoRow = ({ label, value, icon }) => {
   return (
-    <div className="flex justify-between items-center py-3 dark:border-white/10 border-gray-200 border-b last:border-0">
-      <span className="dark:text-gray-400 text-gray-600 flex items-center gap-2">
+    <div className="flex justify-between items-center py-3 border-b last:border-0" style={{ borderColor: 'var(--border-default)' }}>
+      <span className="theme-text-muted flex items-center gap-2">
         {icon && <span>{icon}</span>}
         {label}
       </span>
-      <span className="dark:text-white text-gray-900 font-semibold">{value}</span>
+      <span className="theme-text-primary font-semibold">{value}</span>
     </div>
   );
 };
@@ -26,8 +26,8 @@ export const InfoRow = ({ label, value, icon }) => {
  */
 export const InfoSection = ({ title, icon, children }) => {
   return (
-    <div className="group dark:bg-white/5 bg-white backdrop-blur-xl rounded-2xl p-6 shadow-lg dark:border-white/10 border-gray-200 border dark:hover:border-emerald-500/30 hover:border-cyan-500/30 transition-all duration-300">
-      <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+    <div className="group theme-card rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.01]">
+      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 theme-text-primary">
         {icon && <span className="group-hover:scale-110 transition-transform duration-300">{icon}</span>}
         {title}
       </h3>
@@ -49,10 +49,8 @@ export const GridCard = ({ children, onClick, className = '' }) => {
     <div
       onClick={onClick}
       className={`
-        group dark:bg-white/5 bg-white backdrop-blur-xl rounded-2xl p-6 shadow-lg
-        dark:border-white/10 border-gray-200 border
-        dark:hover:bg-white/10 dark:hover:border-emerald-500/50 dark:hover:shadow-emerald-500/20 dark:hover:shadow-2xl
-        hover:bg-cyan-50/50 hover:border-cyan-500 hover:shadow-cyan-500/20 hover:shadow-2xl hover:scale-105 
+        group theme-card rounded-2xl p-6 border
+        hover:scale-105 
         transition-all duration-300 cursor-pointer
         ${className}
       `}
@@ -76,7 +74,7 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
       {onBack && (
         <button
           onClick={onBack}
-          className="dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 mb-4 flex items-center gap-2 transition-colors"
+          className="theme-text-muted hover:text-primary mb-4 flex items-center gap-2 transition-colors"
         >
           ← Quay lại
         </button>
@@ -84,11 +82,11 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold dark:text-white text-gray-900">{title}</h1>
+            <h1 className="text-4xl font-bold theme-text-primary">{title}</h1>
             {badge}
           </div>
           {subtitle && (
-            <p className="dark:text-gray-400 text-gray-600 text-lg">{subtitle}</p>
+            <p className="theme-text-muted text-lg">{subtitle}</p>
           )}
         </div>
         {actions && (
@@ -110,15 +108,15 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
  */
 export const ListSection = ({ title, icon, items = [], itemIcon = '✓' }) => {
   return (
-    <div className="dark:bg-white/5 bg-white backdrop-blur-xl rounded-2xl p-6 shadow-lg dark:border-white/10 border-gray-200 border transition-colors duration-300">
-      <h3 className="text-xl font-bold dark:text-white text-gray-900 mb-4 flex items-center gap-2">
+    <div className="theme-card rounded-2xl p-6 border transition-colors duration-300">
+      <h3 className="text-xl font-bold theme-text-primary mb-4 flex items-center gap-2">
         {icon && <span>{icon}</span>}
         {title}
       </h3>
       <ul className="space-y-3">
         {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-3 dark:text-gray-300 text-gray-700">
-            <span className="text-emerald-400 flex-shrink-0">{itemIcon}</span>
+          <li key={index} className="flex items-start gap-3 theme-text-secondary">
+            <span style={{ color: 'var(--accent-primary)' }} className="flex-shrink-0">{itemIcon}</span>
             <span>{item}</span>
           </li>
         ))}
@@ -140,7 +138,7 @@ export const ActionBar = ({ children, align = 'left' }) => {
   }[align];
 
   return (
-    <div className="dark:bg-white/5 bg-white backdrop-blur-xl rounded-2xl p-6 shadow-lg dark:border-white/10 border-gray-200 border transition-colors duration-300">
+    <div className="theme-card rounded-2xl p-6 border transition-colors duration-300">
       <div className={`flex gap-4 ${alignClass}`}>
         {children}
       </div>
@@ -155,31 +153,31 @@ export const ActionBar = ({ children, align = 'left' }) => {
 export const StatusTimeline = ({ events = [] }) => {
   const getStatusColor = (status) => {
     const colors = {
-      success: 'bg-emerald-500',
-      warning: 'bg-yellow-500',
-      info: 'bg-blue-500',
-      danger: 'bg-red-500',
-      default: 'bg-gray-500'
+      success: 'dark:bg-emerald-500 bg-emerald-600',
+      warning: 'dark:bg-yellow-500 bg-yellow-600',
+      info: 'dark:bg-blue-500 bg-blue-600',
+      danger: 'dark:bg-red-500 bg-red-600',
+      default: 'dark:bg-gray-500 bg-gray-600'
     };
     return colors[status] || colors.default;
   };
 
   return (
-    <div className="dark:bg-white/5 bg-white backdrop-blur-xl rounded-2xl p-6 shadow-lg dark:border-white/10 border-gray-200 border transition-colors duration-300">
+    <div className="theme-card rounded-2xl p-6 border transition-colors duration-300">
       <div className="space-y-6">
         {events.map((event, index) => (
           <div key={index} className="flex gap-4">
             <div className="flex flex-col items-center">
               <div className={`w-3 h-3 rounded-full ${getStatusColor(event.status)}`} />
               {index < events.length - 1 && (
-                <div className="w-px h-full dark:bg-white/10 bg-gray-300 mt-2" />
+                <div className="w-px h-full mt-2" style={{ backgroundColor: 'var(--border-default)' }} />
               )}
             </div>
             <div className="flex-1 pb-6">
-              <div className="dark:text-gray-400 text-gray-600 text-sm mb-1">{event.date}</div>
-              <div className="dark:text-white text-gray-900 font-semibold mb-1">{event.title}</div>
+              <div className="theme-text-muted text-sm mb-1">{event.date}</div>
+              <div className="theme-text-primary font-semibold mb-1">{event.title}</div>
               {event.description && (
-                <div className="dark:text-gray-400 text-gray-600 text-sm">{event.description}</div>
+                <div className="theme-text-muted text-sm">{event.description}</div>
               )}
             </div>
           </div>
@@ -214,9 +212,9 @@ export const MetricCard = ({ icon, label, value, trend, change, color = 'emerald
   };
 
   const trendColors = {
-    up: 'text-emerald-400',
-    down: 'text-red-400',
-    neutral: 'text-gray-400'
+    up: 'dark:text-emerald-400 text-emerald-600',
+    down: 'dark:text-red-400 text-red-600',
+    neutral: 'dark:text-gray-400 text-gray-600'
   };
 
   return (
@@ -225,10 +223,10 @@ export const MetricCard = ({ icon, label, value, trend, change, color = 'emerald
         <span className="text-4xl">{icon}</span>
         {trend && <span className="text-xl">{trendIcons[trend]}</span>}
       </div>
-      <div className="dark:text-gray-400 text-gray-600 text-sm mb-1">{label}</div>
-      <div className="dark:text-white text-gray-900 text-3xl font-bold mb-2">{value}</div>
+      <div className="theme-text-muted text-sm mb-1">{label}</div>
+      <div className="theme-text-primary text-3xl font-bold mb-2">{value}</div>
       {change && (
-        <div className={`text-sm ${trendColors[trend] || 'text-gray-400'}`}>
+        <div className={`text-sm ${trendColors[trend] || 'theme-text-muted'}`}>
           {change}
         </div>
       )}
@@ -244,7 +242,7 @@ export const MetricCard = ({ icon, label, value, trend, change, color = 'emerald
  */
 export const TabPanel = ({ tabs = [], activeTab, onTabChange }) => {
   return (
-    <div className="dark:bg-white/5 bg-white backdrop-blur-xl rounded-2xl p-2 shadow-lg dark:border-white/10 border-gray-200 border mb-6 transition-colors duration-300">
+    <div className="theme-card rounded-2xl p-2 border mb-6 transition-colors duration-300">
       <div className="flex gap-2 overflow-x-auto">
         {tabs.map(tab => (
           <button
@@ -253,8 +251,8 @@ export const TabPanel = ({ tabs = [], activeTab, onTabChange }) => {
             className={`
               px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap
               ${activeTab === tab.id
-                ? 'bg-emerald-500 text-white'
-                : 'dark:text-gray-400 text-gray-600 dark:hover:text-white hover:text-gray-900 dark:hover:bg-white/5 hover:bg-gray-100'
+                ? 'dark:bg-gradient-to-r dark:from-emerald-600 dark:to-emerald-700 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                : 'theme-text-muted hover:opacity-70 dark:hover:bg-gray-700/50 hover:bg-gray-100'
               }
             `}
           >
@@ -277,11 +275,11 @@ export const QuickStats = ({ stats = [] }) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="dark:bg-white/5 bg-white backdrop-blur-xl rounded-xl p-4 dark:border-white/10 border-gray-200 border transition-colors duration-300"
+          className="theme-card rounded-xl p-4 border transition-colors duration-300"
         >
           <div className="text-2xl mb-2">{stat.icon}</div>
-          <div className="dark:text-gray-400 text-gray-600 text-xs mb-1">{stat.label}</div>
-          <div className={`text-xl font-bold ${stat.color || 'dark:text-white text-gray-900'}`}>
+          <div className="theme-text-muted text-xs mb-1">{stat.label}</div>
+          <div className={`text-xl font-bold ${stat.color || 'theme-text-primary'}`}>
             {stat.value}
           </div>
         </div>

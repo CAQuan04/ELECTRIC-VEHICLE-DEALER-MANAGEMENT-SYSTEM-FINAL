@@ -7,6 +7,7 @@ import '@modules/loading/GlobalLoading.css';
 // Import PageContainer for theme support
 import PageContainer from '../components/layout/PageContainer';
 import ReportsSection from '../components/ReportsSection';
+import BentoMenu from '../components/BentoMenu';
 
 // --- CONFIGURATION DATA (Move to a separate config file if the app grows) ---
 
@@ -192,59 +193,10 @@ const OverviewSection = ({ dashboardData, navigate }) => {
 
       <QuickActions navigate={navigate} />
 
-      {/* Feature Modules */}
+      {/* Feature Modules - Bento Grid Style */}
       <div className="mt-12">
         <h3 className="text-3xl font-extrabold mb-8 bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 from-cyan-600 to-blue-600 bg-clip-text text-transparent">📦 Các chức năng chính</h3>
-
-        {/* Quản lý thông tin xe */}
-        <div className="mb-10">
-          <h4 className="text-2xl font-bold mb-6 flex items-center gap-3 border-l-4 dark:border-emerald-500 border-cyan-500 pl-4 dark:bg-emerald-500/10 bg-cyan-50 py-3 rounded-r-xl dark:text-white text-gray-900">
-            🚗 Quản lý thông tin xe
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModuleCard icon="📋" title="Danh mục xe" description="Xem danh sách xe, cấu hình, giá bán" tag="UC 1.a.1" onClick={() => navigate('/dealer/vehicles')} />
-            <ModuleCard icon="⚖️" title="So sánh xe" description="So sánh mẫu xe, tính năng" tag="UC 1.a.2" onClick={() => navigate('/dealer/vehicles/compare')} />
-          </div>
-        </div>
-
-        {/* Quản lý bán hàng */}
-        <div className="mb-10">
-          <h4 className="text-2xl font-bold mb-6 flex items-center gap-3 border-l-4 dark:border-purple-500 border-purple-600 pl-4 dark:bg-purple-500/10 bg-purple-50 py-3 rounded-r-xl dark:text-white text-gray-900">
-            💼 Quản lý bán hàng
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModuleCard icon="💰" title="Quản lý báo giá" description="Tạo và quản lý báo giá cho khách hàng" tag="UC 1.b.1" onClick={() => navigate('/dealer/quotations')} />
-            <ModuleCard icon="📄" title="Đơn hàng & Hợp đồng" description="Tạo đơn hàng và sinh hợp đồng" tag="UC 1.b.2" onClick={() => navigate('/dealer/orders')} />
-            <ModuleCard icon="🎁" title="Khuyến mãi" description="Quản lý và áp dụng khuyến mãi" tag="UC 1.b.3" onClick={() => navigate('/dealer/promotions')} />
-            <ModuleCard icon="🏭" title="Đặt xe từ hãng" description="Tạo yêu cầu mua hàng từ EVM" tag="UC 1.b.4" onClick={() => navigate('/dealer/purchase-requests')} />
-            <ModuleCard icon="🚚" title="Theo dõi giao xe" description="Lên lịch và theo dõi giao xe" tag="UC 1.b.5" onClick={() => navigate('/dealer/deliveries')} />
-            <ModuleCard icon="💳" title="Quản lý thanh toán" description="Xử lý thanh toán tiền mặt/trả góp" tag="UC 1.b.6" onClick={() => navigate('/dealer/payments')} />
-          </div>
-        </div>
-
-        {/* Quản lý khách hàng */}
-        <div className="mb-10">
-          <h4 className="text-2xl font-bold mb-6 flex items-center gap-3 border-l-4 dark:border-blue-500 border-blue-600 pl-4 dark:bg-blue-500/10 bg-blue-50 py-3 rounded-r-xl dark:text-white text-gray-900">
-            👥 Quản lý khách hàng
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModuleCard icon="📇" title="Hồ sơ khách hàng" description="Tạo và quản lý thông tin khách hàng" tag="UC 1.c.1" onClick={() => navigate('/dealer/customers')} />
-            <ModuleCard icon="🚙" title="Lịch hẹn lái thử" description="Đặt lịch và quản lý lái thử xe" tag="UC 1.c.2" onClick={() => navigate('/dealer/test-drives')} />
-            <ModuleCard icon="💬" title="Phản hồi & Khiếu nại" description="Ghi nhận và xử lý phản hồi khách hàng" tag="UC 1.c.3" onClick={() => navigate('/dealer/feedback-complaints')} />
-          </div>
-        </div>
-
-        {/* Báo cáo & Phân tích */}
-        <div className="mb-10">
-          <h4 className="text-2xl font-bold mb-6 flex items-center gap-3 border-l-4 dark:border-pink-500 border-pink-600 pl-4 dark:bg-pink-500/10 bg-pink-50 py-3 rounded-r-xl dark:text-white text-gray-900">
-            📊 Báo cáo & Phân tích
-          </h4>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ModuleCard icon="📈" title="Doanh số nhân viên" description="Báo cáo doanh số theo nhân viên" tag="UC 1.d.1" onClick={() => navigate('/dealer/reports/sales-performance')} />
-            <ModuleCard icon="💸" title="Công nợ khách hàng" description="Báo cáo công nợ và aging" tag="UC 1.d.2 (AR)" onClick={() => navigate('/dealer/reports/customer-debt')} />
-            <ModuleCard icon="🏢" title="Công nợ nhà cung cấp" description="Báo cáo công nợ hãng" tag="UC 1.d.2 (AP)" onClick={() => navigate('/dealer/reports/supplier-debt')} />
-          </div>
-        </div>
+        <BentoMenu onModuleClick={(path) => navigate(path)} />
       </div>
     </div>
   );

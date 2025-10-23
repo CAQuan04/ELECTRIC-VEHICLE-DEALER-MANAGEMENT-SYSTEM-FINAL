@@ -2,14 +2,12 @@ import React from 'react';
 
 /**
  * PageContainer - Container chính cho tất cả các trang dealer
- * Cung cấp padding responsive
- * Note: Background gradient được handle bởi AppLayout
+ * Sử dụng CSS variables từ theme-variables.css
  */
 const PageContainer = ({ children, className = '' }) => {
   return (
     <div className={`
-      min-h-screen p-4 md:p-8 transition-colors duration-300
-      dark:text-white text-gray-900
+      theme-page min-h-screen p-4 md:p-8
       ${className}
     `}>
       {children}
