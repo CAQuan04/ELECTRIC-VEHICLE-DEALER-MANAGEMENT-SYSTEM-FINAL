@@ -11,6 +11,10 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using EVDealer.BE.Services.DealerManagement;
+using EVDealer.BE.API.Validators;
+using FluentValidation.AspNetCore;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -35,6 +39,16 @@ builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
 
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
+
+builder.Services.AddScoped<IDealerManagementRepository, DealerManagementRepository>();
+builder.Services.AddScoped<IDealerManagementService, DealerManagementService>();
+
+// Ghi chú: Đăng ký AutoMapper ở đây.
+builder.Services.AddAutoMapper(typeof(Program));
+
+// Ghi chú: Dòng này sẽ tự động tìm tất cả các lớp kế thừa từ 'Profile'
+// trong Assembly hiện tại (tức là project API) và đăng ký chúng.
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -78,14 +92,20 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ManageInventory", policy => policy.RequireClaim("permission", "ManageInventory"));
     options.AddPolicy("ManageDistributions", policy => policy.RequireClaim("permission", "ManageDistributions"));
     options.AddPolicy("ConfirmDistributions", policy => policy.RequireClaim("permission", "ConfirmDistributions"));
-    
-    });
+
+    options.AddPolicy("ManageDealers", policy =>
+        policy.RequireClaim("permission", "ManageDealers"));
+
+});
 
 builder.Services.AddControllers()
 .AddJsonOptions(options =>
  {
      options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
- });
+ })
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateContractDtoValidator>());
+
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Cấu hình Swagger để hiển thị nút Authorize (giữ nguyên, phần này bạn đã làm đúng)
