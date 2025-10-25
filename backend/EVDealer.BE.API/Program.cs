@@ -15,6 +15,8 @@ using EVDealer.BE.Services.DealerManagement;
 using EVDealer.BE.API.Validators;
 using FluentValidation.AspNetCore;
 using System.Reflection;
+using EVDealer.BE.Services.Pricing;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -45,10 +47,15 @@ builder.Services.AddScoped<IDealerManagementService, DealerManagementService>();
 
 // Ghi chú: Đăng ký AutoMapper ở đây.
 builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Ghi chú: Dòng này sẽ tự động tìm tất cả các lớp kế thừa từ 'Profile'
 // trong Assembly hiện tại (tức là project API) và đăng ký chúng.
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+builder.Services.AddScoped<IPricingRepository, PricingRepository>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -96,6 +103,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ManageDealers", policy =>
         policy.RequireClaim("permission", "ManageDealers"));
 
+    options.AddPolicy("ManagePricing", policy =>
+        policy.RequireClaim("permission", "ManagePricing"));
+
 });
 
 builder.Services.AddControllers()
@@ -103,7 +113,8 @@ builder.Services.AddControllers()
  {
      options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
  })
-.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>());
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>())
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SetWholesalePriceDtoValidator>());
 
 
 builder.Services.AddEndpointsApiExplorer();
