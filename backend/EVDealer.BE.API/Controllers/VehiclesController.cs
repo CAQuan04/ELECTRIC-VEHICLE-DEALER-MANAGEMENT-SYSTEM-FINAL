@@ -1,13 +1,11 @@
 ﻿using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Vehicles;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EVDealer.BE.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize] // Yêu cầu authentication
 public class VehiclesController : ControllerBase
 {
     private readonly IVehicleService _vehicleService;
@@ -19,10 +17,8 @@ public class VehiclesController : ControllerBase
 
     /// <summary>
     /// Load danh mục xe với lọc và phân trang
-    /// Auth: Dealer Staff/Manager/EVM/Admin
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
     public async Task<IActionResult> GetVehicles([FromQuery] VehicleQueryDto query)
     {
         var result = await _vehicleService.GetVehiclesAsync(query);
@@ -31,10 +27,8 @@ public class VehiclesController : ControllerBase
 
     /// <summary>
     /// Chi tiết xe
-    /// Auth: Dealer Staff/Manager/EVM/Admin
     /// </summary>
     [HttpGet("{vehicleId}")]
-    [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
     public async Task<IActionResult> GetVehicleDetail(int vehicleId)
     {
         var vehicle = await _vehicleService.GetVehicleDetailAsync(vehicleId);
@@ -45,10 +39,8 @@ public class VehiclesController : ControllerBase
 
     /// <summary>
     /// So sánh các mẫu xe
-    /// Auth: Dealer Staff/Manager/EVM/Admin
     /// </summary>
     [HttpPost("compare")]
-    [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
     public async Task<IActionResult> CompareVehicles([FromBody] IEnumerable<int> vehicleIds)
     {
         if (vehicleIds == null || !vehicleIds.Any())
@@ -60,10 +52,8 @@ public class VehiclesController : ControllerBase
 
     /// <summary>
     /// Lấy các cấu hình có sẵn của xe
-    /// Auth: Dealer Staff/Manager/EVM/Admin
     /// </summary>
     [HttpGet("{vehicleId}/configs")]
-    [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
     public async Task<IActionResult> GetAvailableConfigs(int vehicleId)
     {
         var configs = await _vehicleService.GetAvailableConfigsAsync(vehicleId);

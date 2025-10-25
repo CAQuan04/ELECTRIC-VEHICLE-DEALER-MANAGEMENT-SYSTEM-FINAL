@@ -105,6 +105,17 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// ===== ADD CORS SERVICE (SIMPLER VERSION) =====
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()           // Allow all origins (development only!)
+               .AllowAnyMethod()           // Allow all HTTP methods
+               .AllowAnyHeader();           // Allow all headers
+    });
+});
+
 
 var app = builder.Build();
 
@@ -113,6 +124,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 
 // Kích hoạt các "chốt bảo vệ" theo đúng thứ tự
