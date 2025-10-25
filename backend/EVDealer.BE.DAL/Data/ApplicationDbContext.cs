@@ -52,6 +52,10 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<DealerContract> DealerContracts { get; set; }
     public virtual DbSet<DealerTarget> DealerTargets { get; set; }
     public virtual DbSet<Debt> Debts { get; set; }
+
+    public virtual DbSet<WholesalePrice> WholesalePrices { get; set; }
+
+    public virtual DbSet<PromotionPolicy> PromotionPolicies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
 
