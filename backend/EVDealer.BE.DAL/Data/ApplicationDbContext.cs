@@ -424,6 +424,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Role");
+
+            entity.HasIndex(e => e.Email, "UQ_User_Email").IsUnique()
+                    .HasFilter("[email] IS NOT NULL");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>
