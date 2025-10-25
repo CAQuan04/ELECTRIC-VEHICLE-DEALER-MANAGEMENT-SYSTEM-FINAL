@@ -103,7 +103,7 @@ builder.Services.AddControllers()
  {
      options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
  })
-.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<CreateContractDtoValidator>());
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>());
 
 
 builder.Services.AddEndpointsApiExplorer();
