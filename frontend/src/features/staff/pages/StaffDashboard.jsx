@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { AuthService } from '@utils';
 import { usePageLoading } from '@modules/loading';
 import '@modules/loading/GlobalLoading.css';
+import InventoryManagement from "./InventoryManagement";
+
 
 // Import PageContainer for theme support
 import PageContainer from '../components/layout/PageContainer';
@@ -31,10 +33,12 @@ const MOCK_DASHBOARD_DATA = {
 const NAV_SECTIONS = [
   { id: 'overview', icon: '📊', label: 'Tổng quan' },
   { id: 'inventory', icon: '🚗', label: 'Kho xe' },
+  { id: 'stock', icon: '🏭', label: 'Tồn kho & Điều phối' }, // ✅ Thêm dòng này
   { id: 'orders', icon: '📋', label: 'Đơn hàng' },
   { id: 'customers', icon: '👥', label: 'Khách hàng' },
   { id: 'reports', icon: '📈', label: 'Báo cáo' }
 ];
+
 
 const getStatusClasses = (status) => {
   switch (status) {
@@ -337,20 +341,23 @@ const DealerDashboard = () => {
   const { dealer, inventory } = dashboardData;
 
   const renderActiveSection = () => {
-    switch (activeSection) {
-      case 'overview':
-        return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
-      case 'inventory':
-        return <InventorySection inventory={inventory} />;
-      case 'reports':
-        return <ReportsSection />;
-      case 'orders':
-      case 'customers':
-        return <PlaceholderSection activeSection={activeSection} setActiveSection={setActiveSection} />;
-      default:
-        return <PlaceholderSection activeSection="overview" setActiveSection={setActiveSection} />;
-    }
-  };
+  switch (activeSection) {
+    case 'overview':
+      return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
+    case 'inventory':
+      return <InventorySection inventory={inventory} />;
+    case 'stock':
+      return <InventoryManagement />; // ✅ Thêm dòng này
+    case 'reports':
+      return <ReportsSection />;
+    case 'orders':
+    case 'customers':
+      return <PlaceholderSection activeSection={activeSection} setActiveSection={setActiveSection} />;
+    default:
+      return <PlaceholderSection activeSection="overview" setActiveSection={setActiveSection} />;
+  }
+};
+
 
   return (
     <PageContainer>
@@ -407,6 +414,7 @@ const DealerDashboard = () => {
       {renderActiveSection()}
 
     </PageContainer>
+    
   );
 };
 
