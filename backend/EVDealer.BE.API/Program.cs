@@ -17,6 +17,7 @@ using FluentValidation.AspNetCore;
 using System.Reflection;
 using EVDealer.BE.Services.Pricing;
 using System.Reflection;
+using EVDealer.BE.Services.Analytics;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -56,6 +57,8 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IPricingRepository, PricingRepository>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 
+builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -106,6 +109,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("ManagePricing", policy =>
         policy.RequireClaim("permission", "ManagePricing"));
 
+    options.AddPolicy("CanViewAnalytics", policy =>
+       policy.RequireClaim("permission", "CanViewAnalytics"));
+
 });
 
 builder.Services.AddControllers()
@@ -114,7 +120,10 @@ builder.Services.AddControllers()
      options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
  })
 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>())
-.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SetWholesalePriceDtoValidator>());
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SetWholesalePriceDtoValidator>())
+.AddFluentValidation(fv =>
+{fv.RegisterValidatorsFromAssemblyContaining<SalesReportQueryDtoValidator>();
+});
 
 
 builder.Services.AddEndpointsApiExplorer();
