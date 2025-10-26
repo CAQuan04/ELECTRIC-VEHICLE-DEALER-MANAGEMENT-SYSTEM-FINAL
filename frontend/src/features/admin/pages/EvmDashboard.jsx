@@ -4,6 +4,8 @@ import { AuthService } from "@utils";
 import { usePageLoading } from "@modules/loading";
 import "@modules/loading/GlobalLoading.css";
 import DashboardWithLogo from "./DashboardWithLogo";
+import DealerManagement from "./DealerManagement";
+
 
 /* ========== Inline SVG Logo (sang, gradient xanh biển) ========== */
 const Logo = ({ size = 44, className = "" }) => (
@@ -489,20 +491,8 @@ const EvmDashboard = () => {
       )}
 
       {/* DEALERS placeholder */}
-      {activeSection === "dealers" && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 shadow-xl">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl md:text-2xl font-bold">Quản lý đại lý</h2>
-            <button
-              className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 text-base font-semibold shadow-lg hover:brightness-105"
-              onClick={() => alert("Tính năng đang phát triển")}
-            >
-              + Thêm đại lý mới
-            </button>
-          </div>
-          <p className="text-slate-300 mt-4">Tính năng đang được phát triển…</p>
-        </div>
-      )}
+      {activeSection === "dealers" && <DealerManagement />}
+
 
       {/* USERS: CRUD */}
       {activeSection === "users" && (
