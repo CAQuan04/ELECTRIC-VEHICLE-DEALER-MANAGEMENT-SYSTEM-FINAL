@@ -44,36 +44,65 @@ const initialUsers = [
   {
     id: "U001",
     name: "Nguyễn Minh Anh",
+    username: "minhanh",
+    password: "123456",
     email: "minh.anh@example.com",
     role: "Admin",
+    dealer: "DL001",
     active: true,
     createdAt: "2025-09-01",
+    updatedAt: "2025-10-10",
   },
   {
     id: "U002",
     name: "Trần Bảo",
+    username: "tranbao",
+    password: "abc123",
     email: "tran.bao@example.com",
     role: "Manager",
+    dealer: "DL002",
     active: true,
     createdAt: "2025-09-10",
+    updatedAt: "2025-10-15",
   },
   {
     id: "U003",
     name: "Lê Kiên",
+    username: "lekien",
+    password: "kien789",
     email: "le.kien@example.com",
     role: "Staff",
+    dealer: "DL005",
     active: false,
     createdAt: "2025-10-02",
+    updatedAt: "2025-10-20",
   },
   {
     id: "U004",
     name: "Phạm Trí",
+    username: "phamtri",
+    password: "tri123",
     email: "pham.tri@example.com",
     role: "Staff",
+    dealer: "DL008",
     active: true,
     createdAt: "2025-10-10",
+    updatedAt: "2025-10-23",
   },
 ];
+
+const emptyForm = {
+  id: "",
+  name: "",
+  username: "",
+  password: "",
+  email: "",
+  role: "Staff",
+  dealer: "",
+  active: true,
+  createdAt: "",
+  updatedAt: "",
+};
 
 // --- Các icon SVG nhỏ (React components) ---
 const IconClipboard = ({ className = "w-6 h-6" }) => (
@@ -106,7 +135,7 @@ const IconUser = ({ className = "w-6 h-6" }) => (
   </svg>
 );
 
-const emptyForm = { id: "", name: "", email: "", role: "Staff", active: true };
+
 
 /* ========== Dashboard Component ========== */
 const EvmDashboard = () => {
@@ -215,22 +244,29 @@ const EvmDashboard = () => {
   };
 
   const saveUser = (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) return alert("Vui lòng nhập họ tên.");
-    if (!isValidEmail(form.email)) return alert("Email không hợp lệ.");
-    if (isEdit) {
-      setUsers((prev) =>
-        prev.map((u) => (u.id === form.id ? { ...u, ...form } : u))
-      );
-    } else {
-      setUsers((prev) => [
-        { ...form, createdAt: new Date().toISOString().slice(0, 10) },
-        ...prev,
-      ]);
-    }
-    setShowModal(false);
-    setForm(emptyForm);
-  };
+  e.preventDefault();
+  if (!form.name.trim()) return alert("Vui lòng nhập họ tên.");
+  if (!form.username.trim()) return alert("Vui lòng nhập username.");
+  if (!form.password.trim()) return alert("Vui lòng nhập mật khẩu.");
+  if (!isValidEmail(form.email)) return alert("Email không hợp lệ.");
+
+  const now = new Date().toISOString().slice(0, 10);
+
+  if (isEdit) {
+    setUsers((prev) =>
+      prev.map((u) =>
+        u.id === form.id ? { ...u, ...form, updatedAt: now } : u
+      )
+    );
+  } else {
+    setUsers((prev) => [
+      { ...form, createdAt: now, updatedAt: now },
+      ...prev,
+    ]);
+  }
+  setShowModal(false);
+  setForm(emptyForm);
+};
 
   const toggleActive = (id) =>
     setUsers((prev) =>
@@ -512,102 +548,90 @@ const EvmDashboard = () => {
             </select>
           </div>
 
-          {/* Table */}
           <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-            <table className="min-w-full text-[15.5px] md:text-[16px]">
-              <thead>
-                <tr className="text-left border-b border-slate-800/70">
-                  {[
-                    "ID",
-                    "Họ tên",
-                    "Email",
-                    "Vai trò",
-                    "Trạng thái",
-                    "Ngày tạo",
-                    "Thao tác",
-                  ].map((h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 font-semibold text-slate-200 text-base"
-                    >
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="border-b border-slate-800/50 last:border-b-0"
-                  >
-                    <td className="px-4 py-3">{u.id}</td>
-                    <td className="px-4 py-3 font-semibold">{u.name}</td>
-                    <td className="px-4 py-3">{u.email}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={[
-                          "inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold border",
-                          u.role === "Admin"
-                            ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
-                            : u.role === "Manager"
-                            ? "bg-sky-500/15 text-sky-300 border-sky-500/30"
-                            : "bg-lime-500/15 text-lime-300 border-lime-500/30",
-                        ].join(" ")}
-                      >
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={[
-                          "inline-flex items-center rounded-full px-2.5 py-1 text-sm font-semibold border",
-                          u.active
-                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                            : "bg-slate-600/20 text-slate-300 border-slate-600/40",
-                        ].join(" ")}
-                      >
-                        {u.active ? "Active" : "Inactive"}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">{u.createdAt}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <button
-                          className="px-3.5 py-1.5 rounded-lg border border-slate-700 text-sm md:text-base hover:border-sky-500/50 hover:bg-sky-500/10 transition"
-                          onClick={() => openEdit(u)}
-                        >
-                          Sửa
-                        </button>
-                        <button
-                          className="px-3.5 py-1.5 rounded-lg border border-slate-700 text-sm md:text-base hover:border-sky-500/50 hover:bg-sky-500/10 transition"
-                          onClick={() => toggleActive(u.id)}
-                        >
-                          {u.active ? "Vô hiệu" : "Kích hoạt"}
-                        </button>
-                        <button
-                          className="px-3.5 py-1.5 rounded-lg border border-rose-600/40 text-rose-300 text-sm md:text-base hover:bg-rose-600/10 transition"
-                          onClick={() => askDelete(u)}
-                        >
-                          Xoá
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredUsers.length === 0 && (
-                  <tr>
-                    <td
-                      className="px-4 py-6 text-center text-slate-400"
-                      colSpan={7}
-                    >
-                      Không có người dùng phù hợp.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+  <table className="min-w-full border-collapse text-sm md:text-base">
+    <thead className="bg-slate-800/60 text-sky-300">
+      <tr>
+        <th className="p-3 text-left">ID</th>
+        <th className="p-3 text-left">Họ và tên</th>
+        <th className="p-3 text-left">Username</th>
+        <th className="p-3 text-left">Mật khẩu</th>
+        <th className="p-3 text-left">Gmail</th>
+        <th className="p-3 text-left">Vai trò</th>
+        <th className="p-3 text-left">Đại lý</th>
+        <th className="p-3 text-left">Ngày tạo</th>
+        <th className="p-3 text-left">Ngày cập nhật</th>
+        <th className="p-3 text-left">Trạng thái</th>
+        <th className="p-3 text-center">Hành động</th>
+      </tr>
+    </thead>
+    <tbody>
+      {filteredUsers.map((u) => (
+        <tr
+          key={u.id}
+          className="border-t border-slate-800 hover:bg-slate-800/30"
+        >
+          <td className="p-3">{u.id}</td>
+          <td className="p-3 font-medium">{u.name}</td>
+          <td className="p-3">{u.username}</td>
+          <td className="p-3">{u.password}</td>
+          <td className="p-3">{u.email}</td>
+          <td className="p-3">{u.role}</td>
+          <td className="p-3">{u.dealer}</td>
+          <td className="p-3">{u.createdAt}</td>
+          <td className="p-3">{u.updatedAt}</td>
+          <td className="p-3">
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                u.active
+                  ? "bg-emerald-500/20 text-emerald-300"
+                  : "bg-rose-500/20 text-rose-300"
+              }`}
+            >
+              {u.active ? "Hoạt động" : "Ngưng"}
+            </span>
+          </td>
+          <td className="p-3 text-center space-x-2">
+            <button
+              className="px-2 py-1 rounded-lg bg-sky-600/40 hover:bg-sky-600 text-white"
+              onClick={() => openEdit(u)}
+            >
+              Sửa
+            </button>
+            <button
+              className="px-2 py-1 rounded-lg bg-rose-600/40 hover:bg-rose-600 text-white"
+              onClick={() => askDelete(u)}
+            >
+              Xóa
+            </button>
+            <button
+              className={`px-2 py-1 rounded-lg ${
+                u.active
+                  ? "bg-slate-700 hover:bg-slate-600"
+                  : "bg-emerald-600/40 hover:bg-emerald-600"
+              }`}
+              onClick={() => toggleActive(u.id)}
+            >
+              {u.active ? "Tắt" : "Bật"}
+            </button>
+          </td>
+        </tr>
+      ))}
+      {filteredUsers.length === 0 && (
+        <tr>
+          <td
+            colSpan="11"
+            className="text-center text-slate-400 p-4 italic"
+          >
+            Không có người dùng phù hợp
+          </td>
+        </tr>
+      )}
+    </tbody>
+  </table>
+</div>
+
+
 
           {/* Modal Create/Edit */}
           {showModal && (
