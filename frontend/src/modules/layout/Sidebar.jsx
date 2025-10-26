@@ -12,9 +12,9 @@ const Sidebar = () => {
       case USER_ROLES.DEALER:
         return [
           { path: '/dealer-dashboard', icon: '🏢', label: 'Dashboard Đại Lý' },
-          { path: '/catalog', icon: '🚗', label: 'Catalog Xe' },
+          { path: '/dealer/vehicles', icon: '🚗', label: 'Catalog Xe' },
           { path: '/inventory', icon: '📦', label: 'Quản Lý Kho' },
-          { path: '/customers', icon: '👥', label: 'Khách Hàng' },
+          { path: '/dealer/customers', icon: '👥', label: 'Khách Hàng' },
           { path: '/sales/orders', icon: '🛒', label: 'Đơn Hàng' },
           { path: '/', icon: '🏠', label: 'Trang Chủ' }
         ];

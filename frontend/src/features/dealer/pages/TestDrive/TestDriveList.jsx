@@ -1,16 +1,30 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+
+// Giả sử các component này được import từ thư mục components
+import {
+  PageContainer,
+  PageHeader,
+  Button,
+  Badge,
+  Table
+} from '../../components';
 
 const TestDriveList = () => {
   const navigate = useNavigate();
   const { startLoading, stopLoading } = usePageLoading();
-  const [testDrives, setTestDrives] = useState([]);
+  
+  // allTestDrives sẽ giữ danh sách đầy đủ từ API
+  const [allTestDrives, setAllTestDrives] = useState([]);
+  
+  // filter sẽ kiểm soát tab nào đang được chọn
   const [filter, setFilter] = useState('all'); // all, pending, confirmed, completed
 
+  // Chỉ tải dữ liệu một lần khi component mount
   useEffect(() => {
     loadTestDrives();
-  }, [filter]);
+  }, []);
 
   const loadTestDrives = async () => {
     try {
@@ -21,10 +35,11 @@ const TestDriveList = () => {
         { id: 1, customer: 'Nguyễn Văn A', vehicle: 'Model 3', date: '2025-10-15', time: '10:00', status: 'Đã xác nhận' },
         { id: 2, customer: 'Trần Thị B', vehicle: 'Model Y', date: '2025-10-16', time: '14:00', status: 'Chờ xác nhận' },
         { id: 3, customer: 'Lê Văn C', vehicle: 'Model S', date: '2025-10-14', time: '09:00', status: 'Hoàn thành' },
-        { id: 4, customer: 'Phạm Thị D', vehicle: 'Model X', date: '2025-10-17', time: '15:30', status: 'Đã xác nhận' }
+        { id: 4, customer: 'Phạm Thị D', vehicle: 'Model X', date: '2025-10-17', time: '15:30', status: 'Đã xác nhận' },
+        { id: 5, customer: 'Võ Văn E', vehicle: 'Model 3', date: '2025-10-18', time: '11:00', status: 'Chờ xác nhận' },
       ];
       
-      setTestDrives(mockTestDrives);
+      setAllTestDrives(mockTestDrives);
     } catch (error) {
       console.error('Error loading test drives:', error);
     } finally {
@@ -32,96 +47,139 @@ const TestDriveList = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
+  // Lọc danh sách hiển thị bằng useMemo để tối ưu hiệu suất
+  const filteredTestDrives = useMemo(() => {
+    if (filter === 'all') {
+      return allTestDrives;
+    }
+    
+    // Map trạng thái của filter sang trạng thái trong dữ liệu
     const statusMap = {
-      'Chờ xác nhận': 'badge-warning',
-      'Đã xác nhận': 'badge-info',
-      'Hoàn thành': 'badge-success',
-      'Đã hủy': 'badge-danger'
+      pending: 'Chờ xác nhận',
+      confirmed: 'Đã xác nhận',
+      completed: 'Hoàn thành',
     };
-    return statusMap[status] || 'badge-secondary';
+    
+    return allTestDrives.filter(drive => drive.status === statusMap[filter]);
+  }, [allTestDrives, filter]);
+
+  // Helper để chuyển đổi status (dữ liệu) sang variant (Badge)
+  const getStatusVariant = (status) => {
+    const statusMap = {
+      'Chờ xác nhận': 'warning',
+      'Đã xác nhận': 'info',
+      'Hoàn thành': 'success',
+      'Đã hủy': 'danger'
+    };
+    return statusMap[status] || 'secondary';
   };
 
+  // Định nghĩa cột cho component Table
+  const columns = [
+    {
+      key: 'customer',
+      label: 'Khách hàng',
+      render: (row) => (
+        <span className="font-semibold text-gray-900 dark:text-white">
+          {row.customer}
+        </span>
+      )
+    },
+    {
+      key: 'vehicle',
+      label: 'Xe'
+    },
+    {
+      key: 'date',
+      label: 'Ngày'
+    },
+    {
+      key: 'time',
+      label: 'Giờ'
+    },
+    {
+      key: 'status',
+      label: 'Trạng thái',
+      render: (row) => (
+        <Badge variant={getStatusVariant(row.status)}>
+          {row.status}
+        </Badge>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Thao tác',
+      render: (row) => (
+        <div className="flex space-x-2">
+          <Button variant="link" size="sm" onClick={() => alert(`Xem chi tiết ${row.id}`)}>
+            Chi tiết
+          </Button>
+          {row.status === 'Chờ xác nhận' && (
+            <Button variant="link" size="sm" className="text-emerald-600 dark:text-emerald-400" onClick={() => alert(`Xác nhận ${row.id}`)}>
+              Xác nhận
+            </Button>
+          )}
+        </div>
+      )
+    }
+  ];
+
+  // Component cho Tab
+  const FilterTab = ({ value, label }) => (
+    <button
+      className={`px-4 py-3 font-semibold text-sm transition-colors
+        ${
+          filter === value
+            ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border-b-2 border-transparent'
+        }`}
+      onClick={() => setFilter(value)}
+    >
+      {label}
+    </button>
+  );
+
   return (
-    <div className="test-drive-list-page">
-      <div className="page-header">
-        <h1>🚗 Quản lý lái thử</h1>
-        <button className="btn-primary" onClick={() => navigate('/dealer/test-drive/new')}>
-          + Đăng ký lái thử mới
-        </button>
+    <PageContainer>
+      <PageHeader
+        title="🚗 Quản lý lái thử"
+        actions={
+          <div className="flex gap-3">
+            <Button 
+              variant="outline"
+              icon="📅"
+              onClick={() => navigate('/dealer/test-drives/calendar')}
+            >
+              Xem lịch
+            </Button>
+            <Button 
+              variant="primary"
+              icon="+"
+              onClick={() => navigate('/dealer/test-drives/schedule')}
+            >
+              Đăng ký mới
+            </Button>
+          </div>
+        }
+      />
+
+      {/* Filter Tabs (Giao diện mới) */}
+      <div className="mb-6 bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+        <nav className="flex flex-wrap -mb-px" aria-label="Tabs">
+          <FilterTab value="all" label="Tất cả" />
+          <FilterTab value="pending" label="Chờ xác nhận" />
+          <FilterTab value="confirmed" label="Đã xác nhận" />
+          <FilterTab value="completed" label="Hoàn thành" />
+        </nav>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="filter-tabs">
-        <button 
-          className={filter === 'all' ? 'active' : ''}
-          onClick={() => setFilter('all')}
-        >
-          Tất cả
-        </button>
-        <button 
-          className={filter === 'pending' ? 'active' : ''}
-          onClick={() => setFilter('pending')}
-        >
-          Chờ xác nhận
-        </button>
-        <button 
-          className={filter === 'confirmed' ? 'active' : ''}
-          onClick={() => setFilter('confirmed')}
-        >
-          Đã xác nhận
-        </button>
-        <button 
-          className={filter === 'completed' ? 'active' : ''}
-          onClick={() => setFilter('completed')}
-        >
-          Hoàn thành
-        </button>
-      </div>
-
-      {/* Test Drive Table */}
-      <div className="test-drive-table">
-        <table>
-          <thead>
-            <tr>
-              <th>Khách hàng</th>
-              <th>Xe</th>
-              <th>Ngày</th>
-              <th>Giờ</th>
-              <th>Trạng thái</th>
-              <th>Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {testDrives.map(testDrive => (
-              <tr key={testDrive.id}>
-                <td><strong>{testDrive.customer}</strong></td>
-                <td>{testDrive.vehicle}</td>
-                <td>{testDrive.date}</td>
-                <td>{testDrive.time}</td>
-                <td>
-                  <span className={getStatusBadge(testDrive.status)}>
-                    {testDrive.status}
-                  </span>
-                </td>
-                <td>
-                  <button className="btn-link">Chi tiết</button>
-                  {testDrive.status === 'Chờ xác nhận' && (
-                    <button className="btn-link">Xác nhận</button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="page-actions">
-        <button className="btn-secondary" onClick={() => navigate('/dealer/test-drive/calendar')}>
-          📅 Xem lịch
-        </button>
-      </div>
-    </div>
+      {/* Bảng dữ liệu (Sử dụng component Table) */}
+      <Table
+        columns={columns}
+        data={filteredTestDrives}
+        onRowClick={(row) => navigate(`/dealer/test-drives/${row.id}`)}
+      />
+    </PageContainer>
   );
 };
 

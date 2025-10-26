@@ -2,45 +2,49 @@ import React from 'react';
 
 /**
  * Table - Responsive table component
- * @param {array} columns - Array of column definitions: [{ key, label, render }]
+ * @param {array} columns - Array of column definitions: [{ key, label, render, className, tdClassName }]
  * @param {array} data - Array of data objects
  * @param {function} onRowClick - Click handler for rows (optional)
  */
 const Table = ({ columns, data, onRowClick, className = '' }) => {
   return (
-    <div className={`theme-card rounded-2xl border overflow-hidden ${className}`}>
+    // Wrapper: Giữ bo góc lớn và thêm shadow
+    <div className={`shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead style={{ background: 'var(--bg-table-header)' }}>
+        {/* Màu nền và viền cho Dark Mode */}
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-500">
+          
+          {/* THEAD - Background tối, chữ sáng */}
+          <thead className="bg-gray-100 dark:bg-gray-700">
             <tr>
               {columns.map((column) => (
                 <th 
                   key={column.key}
-                  className={`px-6 py-4 text-left text-sm font-bold theme-text-primary ${column.className || ''}`}
+                  // Tăng kích thước chữ từ text-xs lên text-sm
+                  className={`px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 ${column.className || ''}`}
                 >
                   {column.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody style={{ borderColor: 'var(--border-default)' }} className="divide-y">
+          
+          {/* TBODY - Background tối, chữ sáng */}
+          <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
             {data.map((row, rowIndex) => (
               <tr 
                 key={row.id || rowIndex}
-                className={`transition-all duration-200 ${onRowClick ? 'cursor-pointer' : ''}`}
-                style={{ 
-                  '--hover-bg': 'var(--hover-bg)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--hover-bg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
+                // Hiệu ứng hover cho cả Light/Dark Mode
+                className={`transition duration-200 ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700' : ''}`}
                 onClick={() => onRowClick && onRowClick(row)}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={`px-6 py-4 theme-text-primary ${column.tdClassName || ''}`}>
+                  <td 
+                    key={column.key} 
+                    
+                    // Màu chữ: Dark mode đổi thành trắng/xám sáng
+                    className={`px-6 py-4 whitespace-nowrap text-base text-gray-900 dark:text-gray-100 ${column.tdClassName || ''}`}
+                  >
                     {column.render ? column.render(row) : row[column.key]}
                   </td>
                 ))}
@@ -52,10 +56,10 @@ const Table = ({ columns, data, onRowClick, className = '' }) => {
       
       {/* Empty State */}
       {data.length === 0 && (
-        <div className="text-center py-20">
+        <div className="text-center py-20 bg-white dark:bg-gray-900">
           <div className="text-6xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold mb-2 theme-text-primary">Không có dữ liệu</h3>
-          <p className="theme-text-muted">Chưa có dữ liệu để hiển thị</p>
+          <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Không có dữ liệu</h3>
+          <p className="text-gray-500 dark:text-gray-400">Chưa có dữ liệu để hiển thị</p>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Theme override CSS
-import './styles/theme-override.css';
+
 import './styles/theme-variables.css';
 
 // Modules
@@ -13,7 +13,8 @@ import {
 } from '@modules/layout';
 
 import { 
-  DealerGuard, 
+  DealerGuard,
+  DealerShopGuard, 
   CustomerGuard, 
   AdminGuard, 
   AccessDenied
@@ -59,6 +60,7 @@ import {
   TestDriveList,
   TestDriveForm,
   TestDriveCalendar,
+  TestDriveDetail,
   // Sales
   QuotationList,
   CreateQuotation,
@@ -184,11 +186,11 @@ const AppLayout = ({children}) => {
   if (currentUser && currentUser.role !== 'guest') {
     // For dashboard pages - show sidebar + navbar layout
     return (
-      <div className="theme-page" style={{minHeight: '100vh'}}>
+      <div style={{minHeight: '100vh'}}>
         <Sidebar />
         <div className="main-content-with-sidebar">
           <Navbar />
-          <main className="theme-main" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+          <main className="theme-main" style={{minHeight: 'calc(100vh - 70px)'}}>
             {children}
           </main>
         </div>
@@ -244,9 +246,11 @@ const App = () => {
         {/* Role-based Dashboard Routes */}
         <Route path="/dealer-dashboard" element={
           <DealerGuard>
-            <DealerLayout>
-              <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
-            </DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout>
+                <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
+              </DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         
@@ -266,171 +270,235 @@ const App = () => {
           </AdminGuard>
         } />
 
-        {/* Dealer-only Routes */}
+        {/* Dealer-only Routes - Protected by DealerShopGuard */}
         <Route path="/catalog" element={
           <DealerGuard>
-            <DealerLayout><VehicleList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><VehicleList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/sales/orders" element={
           <DealerGuard>
-            <DealerLayout><OrderList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><OrderList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/customers" element={
           <DealerGuard>
-            <DealerLayout><CustomerList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CustomerList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/inventory" element={
           <DealerGuard>
-            <DealerLayout><DealerInventory /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><DealerInventory /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Vehicles (UC 1.a) */}
         <Route path="/dealer/vehicles" element={
           <DealerGuard>
-            <DealerLayout><DealerVehicleList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><DealerVehicleList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/vehicles/:vehicleId" element={
           <DealerGuard>
-            <DealerLayout><VehicleDetail /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><VehicleDetail /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/vehicles/compare" element={
           <DealerGuard>
-            <DealerLayout><CompareVehicles /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CompareVehicles /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Inventory (UC 1.b.4) */}
         <Route path="/dealer/inventory" element={
           <DealerGuard>
-            <DealerLayout><DealerInventory /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><DealerInventory /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/inventory/:stockId" element={
           <DealerGuard>
-            <DealerLayout><StockDetail /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><StockDetail /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/inventory/request" element={
           <DealerGuard>
-            <DealerLayout><RequestStock /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><RequestStock /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Customers (UC 1.c.1) */}
         <Route path="/dealer/customers" element={
           <DealerGuard>
-            <DealerLayout><DealerCustomerList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><DealerCustomerList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/customers/new" element={
           <DealerGuard>
-            <DealerLayout><CustomerForm /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CustomerForm /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/customers/:customerId" element={
           <DealerGuard>
-            <DealerLayout><CustomerDetail /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CustomerDetail /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/customers/:customerId/edit" element={
           <DealerGuard>
-            <DealerLayout><CustomerForm /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CustomerForm /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Test Drive (UC 1.c.2) */}
         <Route path="/dealer/test-drives" element={
           <DealerGuard>
-            <DealerLayout><TestDriveList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><TestDriveList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/test-drives/new" element={
           <DealerGuard>
-            <DealerLayout><TestDriveForm /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><TestDriveForm /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/test-drives/calendar" element={
           <DealerGuard>
-            <DealerLayout><TestDriveCalendar /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><TestDriveCalendar /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
-
+        <Route path="/dealer/test-drives/:id" element={
+          <DealerGuard><DealerShopGuard>
+            <DealerLayout><TestDriveDetail /></DealerLayout>
+          </DealerShopGuard></DealerGuard>
+        } />
         {/* Dealer Routes - Sales (UC 1.b.1, 1.b.2, 1.b.6) */}
         <Route path="/dealer/quotations" element={
           <DealerGuard>
-            <DealerLayout><QuotationList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><QuotationList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/quotations/create" element={
           <DealerGuard>
-            <DealerLayout><CreateQuotation /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CreateQuotation /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/orders" element={
           <DealerGuard>
-            <DealerLayout><OrderList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><OrderList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/orders/create" element={
           <DealerGuard>
-            <DealerLayout><CreateOrder /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CreateOrder /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/payments" element={
           <DealerGuard>
-            <DealerLayout><PaymentList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><PaymentList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/payments/new" element={
           <DealerGuard>
-            <DealerLayout><PaymentForm /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><PaymentForm /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Purchase (UC 1.b.4) */}
         <Route path="/dealer/purchase-requests" element={
           <DealerGuard>
-            <DealerLayout><PurchaseRequestList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><PurchaseRequestList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/purchase-requests/create" element={
           <DealerGuard>
-            <DealerLayout><CreatePurchaseRequest /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CreatePurchaseRequest /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Reports (UC 1.d) */}
         <Route path="/dealer/reports/sales-performance" element={
           <DealerGuard>
-            <DealerLayout><SalesPerformanceReport /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><SalesPerformanceReport /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/reports/customer-debt" element={
           <DealerGuard>
-            <DealerLayout><CustomerDebtReport /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><CustomerDebtReport /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/reports/supplier-debt" element={
           <DealerGuard>
-            <DealerLayout><SupplierDebtReport /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><SupplierDebtReport /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 
         {/* Dealer Routes - Promotion (UC 1.b.3) */}
         <Route path="/dealer/promotions" element={
           <DealerGuard>
-            <DealerLayout><PromotionList /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><PromotionList /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/promotions/:promoId" element={
           <DealerGuard>
-            <DealerLayout><PromotionDetail /></DealerLayout>
+            <DealerShopGuard>
+              <DealerLayout><PromotionDetail /></DealerLayout>
+            </DealerShopGuard>
           </DealerGuard>
         } />
 

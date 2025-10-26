@@ -51,7 +51,7 @@ const getStatusClasses = (status) => {
 const ModuleCard = ({ icon, title, description, tag, onClick }) => (
   <div
     onClick={onClick}
-    className="group cursor-pointer dark:bg-white/5 bg-white border dark:border-white/10 border-gray-200 rounded-2xl p-6 dark:hover:border-emerald-500/50 dark:hover:bg-white/10 dark:hover:shadow-emerald-500/20 dark:hover:shadow-2xl hover:border-cyan-500 hover:bg-cyan-50/50 hover:shadow-cyan-500/20 hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex gap-4 shadow-lg backdrop-blur-sm"
+    className="group cursor-pointer bg-white dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-2xl p-6 hover:border-cyan-500 dark:hover:border-emerald-500/50 hover:bg-cyan-50/50 dark:hover:bg-white/10 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 hover:shadow-2xl dark:hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 flex gap-4 shadow-lg backdrop-blur-sm"
   >
     <div className="text-4xl flex-shrink-0 group-hover:scale-110 transition-transform duration-300">{icon}</div>
     <div className="flex-1">
@@ -119,11 +119,11 @@ const QuickActions = ({ navigate }) => {
 };
 
 const RecentOrdersList = ({ orders }) => (
-  <div className="dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200 shadow-lg transition-all duration-300">
+  <div className="bg-cyan dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg transition-all duration-300">
     <h3 className="text-2xl font-bold mb-6">📋 Đơn hàng gần đây</h3>
     <div className="space-y-3">
       {orders.map((order) => (
-        <div key={order.id} className="group flex items-center justify-between p-4 dark:bg-white/5 bg-gray-50 rounded-xl dark:hover:bg-emerald-500/10 hover:bg-cyan-50 dark:hover:border-emerald-500/30 hover:border-cyan-500/30 border border-transparent transition-all duration-300 cursor-pointer hover:scale-[1.02]">
+        <div key={order.id} className="group flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl hover:bg-cyan-50 dark:hover:bg-emerald-500/10 hover:border-cyan-500/30 dark:hover:border-emerald-500/30 border border-transparent transition-all duration-300 cursor-pointer hover:scale-[1.02]">
           <div className="flex-1">
             <div className="font-bold dark:text-white text-gray-900">{order.customer}</div>
             <div className="text-sm dark:text-gray-400 text-gray-600 font-medium">{order.vehicle}</div>
@@ -164,7 +164,7 @@ const OverviewSection = ({ dashboardData, navigate }) => {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {overviewStatsConfig.map((stat, idx) => (
-          <div key={idx} className="group dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200 dark:hover:border-emerald-500/50 dark:hover:bg-white/10 dark:hover:shadow-emerald-500/20 dark:hover:shadow-2xl hover:border-cyan-500 hover:bg-cyan-50/50 hover:shadow-cyan-500/20 hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg">
+          <div key={idx} className="group dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:border-cyan-500 dark:hover:border-emerald-500/50 hover:bg-cyan-50/50 dark:hover:bg-white/10 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 hover:shadow-2xl dark:hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg">
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{stat.icon}</span>
               <span className="text-lg font-bold dark:text-gray-300 text-gray-700">{stat.title}</span>
@@ -177,11 +177,11 @@ const OverviewSection = ({ dashboardData, navigate }) => {
 
       {/* Performance & Recent Orders */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200 shadow-lg transition-all duration-300">
+        <div className="bg-cyan dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg transition-all duration-300">
           <h3 className="text-2xl font-bold mb-6">📈 Hiệu suất kinh doanh</h3>
           <div className="space-y-4">
             {performanceMetrics.map((metric, idx) => (
-              <div key={idx} className="group flex justify-between items-center p-4 dark:bg-white/5 bg-gradient-to-r from-gray-50 to-cyan-50/30 rounded-xl dark:hover:bg-emerald-500/10 hover:bg-cyan-100/50 transition-all duration-300 border border-transparent dark:hover:border-emerald-500/30 hover:border-cyan-500/30">
+              <div key={idx} className="group flex justify-between items-center p-4 bg-gradient-to-r from-gray-800 to-rose-500/30 dark:bg-white/5 rounded-xl hover:bg-cyan-100/50 dark:hover:bg-emerald-500/10 transition-all duration-300 border border-transparent hover:border-cyan-500/30 dark:hover:border-emerald-500/30">
                 <span className="dark:text-gray-300 text-gray-700 font-semibold">{metric.label}</span>
                 <span className="metric-value text-2xl font-extrabold">{metric.value}</span>
               </div>
@@ -212,7 +212,7 @@ const InventorySection = ({ inventory }) => (
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {inventory.map((item, idx) => (
-        <div key={idx} className="group dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200 shadow-lg hover:scale-105 dark:hover:border-emerald-500/50 hover:border-cyan-500 dark:hover:shadow-emerald-500/20 hover:shadow-cyan-500/20 dark:hover:shadow-2xl hover:shadow-2xl transition-all duration-300">
+        <div key={idx} className="group bg-white dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg hover:scale-105 hover:border-cyan-500 dark:hover:border-emerald-500/50 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 hover:shadow-2xl dark:hover:shadow-2xl transition-all duration-300">
           <h4 className="text-2xl font-extrabold mb-6">{item.model}</h4>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 dark:bg-emerald-500/20 bg-emerald-50 rounded-lg border dark:border-emerald-500/30 border-emerald-200 dark:hover:bg-emerald-500/30 hover:bg-emerald-100 transition-colors">
@@ -311,14 +311,14 @@ const DealerDashboard = () => {
       <div className="relative overflow-hidden dark:bg-gradient-to-br dark:from-gray-900/95 dark:via-gray-800/90 dark:to-emerald-900/80 bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 rounded-3xl p-6 md:p-12 mb-8 shadow-2xl dark:shadow-emerald-500/20 shadow-cyan-500/30 border dark:border-emerald-500/30 border-cyan-400/50 backdrop-blur-xl">
         {/* Animated Background Pattern */}
         <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-72 h-72 dark:bg-emerald-500 bg-white rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 dark:bg-emerald-600 bg-cyan-300 rounded-full blur-3xl animate-pulse delay-1000"></div>
+          <div className="absolute top-0 left-0 w-72 h-72 bg-white dark:bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-300 dark:bg-emerald-600 rounded-full blur-3xl animate-pulse delay-1000"></div>
         </div>
         
         {/* Content */}
         <div className="relative z-10">
           <div className="flex items-center gap-4 mb-4">
-            <div className="p-4 dark:bg-emerald-500/20 bg-white/30 rounded-2xl backdrop-blur-sm border dark:border-emerald-400/30 border-white/50 shadow-lg">
+            <div className="p-4 bg-white/30 dark:bg-emerald-500/20 rounded-2xl backdrop-blur-sm border border-white/50 dark:border-emerald-400/30 shadow-lg">
               <span className="text-4xl md:text-5xl">🏢</span>
             </div>
             <div>
@@ -329,9 +329,29 @@ const DealerDashboard = () => {
             </div>
           </div>
           
-          <p className="text-base md:text-lg lg:text-xl text-white/95 mb-8 font-medium drop-shadow-md">
-            Chào mừng <span className="font-bold dark:text-emerald-300 text-yellow-200 px-2 py-1 dark:bg-emerald-500/20 bg-white/20 rounded-lg backdrop-blur-sm">{currentUser?.name || 'Quản lý'}</span> - Quản lý kinh doanh và bán hàng
+          <p className="text-base md:text-lg lg:text-xl text-white/95 mb-4 font-medium drop-shadow-md">
+            Chào mừng <span className="font-bold text-yellow-200 dark:text-emerald-300 px-2 py-1 bg-white/20 dark:bg-emerald-500/20 rounded-lg backdrop-blur-sm">{currentUser?.name || 'Quản lý'}</span> - Quản lý kinh doanh và bán hàng
           </p>
+          
+          {/* Shop Information */}
+          {currentUser?.dealerShopId && (
+            <div className="flex items-center gap-3 mb-8">
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-white/10 rounded-xl backdrop-blur-md border border-white/60 dark:border-emerald-400/40 shadow-lg">
+                <span className="text-2xl">🏪</span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-white/80 font-medium">Cửa hàng</span>
+                  <span className="text-white font-bold">{currentUser?.shopName || currentUser?.dealerShopId}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-white/10 rounded-xl backdrop-blur-md border border-white/60 dark:border-emerald-400/40 shadow-lg">
+                <span className="text-xl">🆔</span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-white/80 font-medium">Mã cửa hàng</span>
+                  <span className="text-white font-bold font-mono">{currentUser?.dealerShopId}</span>
+                </div>
+              </div>
+            </div>
+          )}
           
           <HeroStats dashboardData={dashboardData} />
         </div>
@@ -344,8 +364,8 @@ const DealerDashboard = () => {
             key={section.id}
             className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 border ${
               activeSection === section.id
-                ? 'dark:bg-gradient-to-r dark:from-emerald-600 dark:to-emerald-700 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg dark:shadow-emerald-500/50 shadow-cyan-500/50 scale-105 dark:border-emerald-400/50 border-cyan-400/50'
-                : 'dark:bg-white/5 bg-white dark:text-gray-300 text-gray-700 dark:hover:bg-white/10 hover:bg-cyan-50 dark:border-white/10 border-gray-300 hover:scale-105 dark:hover:border-emerald-500/30 hover:border-cyan-500/50 dark:hover:shadow-emerald-500/20 hover:shadow-cyan-500/20 shadow-md'
+                ? 'dark:bg-gradient-to-r dark:from-fuchsia-400 dark:to-fuchsia-500 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg dark:shadow-emerald-500/50 shadow-cyan-500/50 scale-105 dark:border-emerald-400/50 border-cyan-400/50'
+                : 'dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-white/10 border-gray-300 dark:border-white/10 hover:scale-105 hover:border-cyan-500/50 dark:hover:border-emerald-500/30 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 shadow-md'
             }`}
             onClick={() => setActiveSection(section.id)}
           >

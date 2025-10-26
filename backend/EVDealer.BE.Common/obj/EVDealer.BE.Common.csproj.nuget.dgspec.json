@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {}
+    "D:\\FPT\\Ky_5\\SWP\\FE_EVM\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {}
   },
   "projects": {
-    "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {
+    "D:\\FPT\\Ky_5\\SWP\\FE_EVM\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+        "projectUniqueName": "D:\\FPT\\Ky_5\\SWP\\FE_EVM\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
         "projectName": "EVDealer.BE.Common",
-        "projectPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
-        "packagesPath": "C:\\Users\\quanc\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\quanc\\Desktop\\swp_project\\backend\\EVDealer.BE.Common\\obj\\",
+        "projectPath": "D:\\FPT\\Ky_5\\SWP\\FE_EVM\\backend\\EVDealer.BE.Common\\EVDealer.BE.Common.csproj",
+        "packagesPath": "C:\\Users\\MyPC\\.nuget\\packages\\",
+        "outputPath": "D:\\FPT\\Ky_5\\SWP\\FE_EVM\\backend\\EVDealer.BE.Common\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\quanc\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\MyPC\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -60,6 +54,20 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "Microsoft.AspNetCore.App.Ref",
+              "version": "[8.0.19, 8.0.19]"
+            },
+            {
+              "name": "Microsoft.NETCore.App.Ref",
+              "version": "[8.0.19, 8.0.19]"
+            },
+            {
+              "name": "Microsoft.WindowsDesktop.App.Ref",
+              "version": "[8.0.19, 8.0.19]"
+            }
+          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"

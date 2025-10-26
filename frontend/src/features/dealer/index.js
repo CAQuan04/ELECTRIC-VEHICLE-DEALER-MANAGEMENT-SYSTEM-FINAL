@@ -32,6 +32,7 @@ export { default as CustomerDetail } from './pages/Customers/CustomerDetail';
 export { default as TestDriveList } from './pages/TestDrive/TestDriveList';
 export { default as TestDriveForm } from './pages/TestDrive/TestDriveForm';
 export { default as TestDriveCalendar } from './pages/TestDrive/TestDriveCalendar';
+export { default as TestDriveDetail } from './pages/TestDrive/TestDriveDetail';
 
 // Sales Management
 export { default as QuotationList } from './pages/Sales/QuotationList';
