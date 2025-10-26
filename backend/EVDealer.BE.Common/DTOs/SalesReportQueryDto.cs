@@ -15,5 +15,8 @@ namespace EVDealer.BE.Common.DTOs
 
         // Ghi chú: Ngày kết thúc của kỳ báo cáo.
         public DateOnly EndDate { get; set; }
+
+        public int? DealerId { get; set; } // Thuộc tính mới
+        public int? VehicleId { get; set; } // Thuộc tính mới
     }
 }

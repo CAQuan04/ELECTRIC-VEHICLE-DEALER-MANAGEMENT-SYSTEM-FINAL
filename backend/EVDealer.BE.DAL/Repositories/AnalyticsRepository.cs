@@ -13,40 +13,81 @@ namespace EVDealer.BE.DAL.Repositories
         private readonly ApplicationDbContext _context;
         public AnalyticsRepository(ApplicationDbContext context) => _context = context;
 
-        public async Task<IEnumerable<SalesReportItemDto>> GetSalesDataByDealerAsync(DateOnly startDate, DateOnly endDate)
+        // ===================================================================================
+        // === PHẦN ĐÃ SỬA ĐỔI HOÀN TOÀN: CHIA NHỎ CÂU LỆNH TRUY VẤN ===
+        public async Task<IEnumerable<SalesReportItemDto>> GetSalesDataByDealerAsync(DateOnly startDate, DateOnly endDate, int? dealerId, int? vehicleId)
         {
-            // === PHIÊN BẢN SỬA LỖI - TIẾP CẬN TỪ SALESORDER ===
+            // Ghi chú: Bắt đầu xây dựng câu truy vấn trên bảng SalesOrder.
+            var query = _context.SalesOrders
+                .Where(order => order.Status == "Completed" && order.OrderDate >= startDate && order.OrderDate <= endDate);
 
-            // Ghi chú: Bắt đầu truy vấn trực tiếp từ bảng SalesOrder.
-            // Đây là cách tiếp cận tự nhiên và chính xác nhất cho bài toán này.
-            return await _context.SalesOrders
-                // Ghi chú: Bước 1 - Lọc ra các đơn hàng hợp lệ để tính toán.
-                .Where(order => order.Status == "Completed" &&
-                               order.OrderDate >= startDate &&
-                               order.OrderDate <= endDate)
+            // Ghi chú: Áp dụng các bộ lọc động như cũ.
+            if (dealerId.HasValue)
+            {
+                query = query.Where(order => order.DealerId == dealerId.Value);
+            }
 
-                // Ghi chú: Bước 2 - Nhóm các đơn hàng đã lọc theo thông tin của Đại lý.
-                // Chúng ta nhóm theo cả ID và Tên để đảm bảo tính duy nhất.
-                .GroupBy(order => new { order.DealerId, order.Dealer.Name })
+            if (vehicleId.HasValue)
+            {
+                query = query.Where(order => order.OrderItems.Any(item => item.VehicleId == vehicleId.Value));
+            }
 
-                // Ghi chú: Bước 3 - Biến đổi mỗi nhóm thành một dòng báo cáo (DTO).
+            // Ghi chú: Đây là bước quan trọng. Thay vì thực hiện GroupBy và Sum lồng nhau,
+            // chúng ta chỉ thực hiện GroupBy và Sum cho TotalRevenue.
+            // Đối với TotalQuantitySold, chúng ta sẽ tính toán riêng.
+            var reportData = await query
+                .Include(order => order.Dealer) // Cần Include Dealer để lấy tên.
+                .GroupBy(order => new { order.DealerId, order.Dealer.Name }) // Nhóm theo cả ID và Tên.
                 .Select(dealerGroup => new SalesReportItemDto
                 {
-                    // Ghi chú: Lấy Tên của Đại lý từ khóa của nhóm.
-                    GroupingKey = dealerGroup.Key.Name,
-
-                    // Ghi chú: Tính tổng doanh thu.
-                    // Đây là thao tác SUM trực tiếp và đơn giản trên cột TotalAmount của tất cả các đơn hàng trong nhóm.
-                    // Nó sẽ cộng tất cả các đơn, kể cả các đơn có vẻ trùng lặp, đây là điều chúng ta muốn.
+                    GroupingKey = dealerGroup.Key.Name, // Lấy tên từ key của nhóm.
                     TotalRevenue = dealerGroup.Sum(order => order.TotalAmount),
-
-                    // Ghi chú: Tính tổng số lượng xe bán được.
-                    // SelectMany dùng để "làm phẳng" danh sách các OrderItem từ tất cả các đơn hàng trong nhóm
-                    // thành một danh sách duy nhất, sau đó tính tổng Quantity trên danh sách đó.
+                    // Ghi chú: Bây giờ chúng ta tính tổng số lượng của tất cả các item trong nhóm.
+                    // SelectMany sẽ "làm phẳng" tất cả các OrderItems từ tất cả các đơn hàng trong nhóm
+                    // thành một danh sách duy nhất, sau đó chúng ta Sum trên danh sách đó.
                     TotalQuantitySold = dealerGroup.SelectMany(order => order.OrderItems).Sum(item => item.Quantity)
                 })
-                // Ghi chú: Thực thi truy vấn và trả về kết quả.
                 .ToListAsync();
+
+            return reportData;
         }
+        // ===================================================================================
+
+        // --- CÁC PHƯƠNG THỨC CHO BÁO CÁO TỒN KHO KHÔNG BỊ ẢNH HƯỞNG VÀ GIỮ NGUYÊN ---
+        // ... (GetTotalSalesByDealerAsync, GetTotalReceiptsByDealerAsync, GetCurrentInventoryByDealerAsync) ...
+        // ... (Toàn bộ các phương thức này đã đúng và không cần sửa) ...
+        public async Task<Dictionary<int, int>> GetTotalSalesByDealerAsync(DateOnly startDate, DateOnly endDate, int? dealerId, int? vehicleId)
+        {
+            var query = _context.OrderItems
+                .Where(item => item.Order.Status == "Completed" && item.Order.OrderDate >= startDate && item.Order.OrderDate <= endDate);
+            if (dealerId.HasValue) { query = query.Where(item => item.Order.DealerId == dealerId.Value); }
+            if (vehicleId.HasValue) { query = query.Where(item => item.VehicleId == vehicleId.Value); }
+            return await query
+                .GroupBy(item => item.Order.DealerId)
+                .ToDictionaryAsync(group => group.Key, group => group.Sum(item => item.Quantity));
+        }
+
+        public async Task<Dictionary<int, int>> GetTotalReceiptsByDealerAsync(DateOnly startDate, DateOnly endDate, int? dealerId, int? vehicleId)
+        {
+            var query = _context.Distributions
+                .Where(dist => dist.Status == "Completed" && dist.ScheduledDate >= startDate && dist.ScheduledDate <= endDate);
+            if (dealerId.HasValue) { query = query.Where(dist => dist.ToDealerId == dealerId.Value); }
+            if (vehicleId.HasValue) { query = query.Where(dist => dist.VehicleId == vehicleId.Value); }
+            return await query
+                .GroupBy(dist => dist.ToDealerId)
+                .ToDictionaryAsync(group => group.Key, group => group.Sum(dist => dist.Quantity));
+        }
+
+        public async Task<Dictionary<int, int>> GetCurrentInventoryByDealerAsync(int? dealerId, int? vehicleId)
+        {
+            var query = _context.Inventories
+                .Where(inv => inv.LocationType == "DEALER");
+            if (dealerId.HasValue) { query = query.Where(inv => inv.LocationId == dealerId.Value); }
+            if (vehicleId.HasValue) { query = query.Where(inv => inv.VehicleId == vehicleId.Value); }
+            return await query
+                .GroupBy(inv => inv.LocationId)
+                .ToDictionaryAsync(group => group.Key, group => group.Sum(inv => inv.Quantity));
+        }
+
     }
 }
