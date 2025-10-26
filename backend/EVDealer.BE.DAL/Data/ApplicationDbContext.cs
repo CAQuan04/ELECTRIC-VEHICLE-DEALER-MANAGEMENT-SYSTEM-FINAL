@@ -52,6 +52,10 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<DealerContract> DealerContracts { get; set; }
     public virtual DbSet<DealerTarget> DealerTargets { get; set; }
     public virtual DbSet<Debt> Debts { get; set; }
+
+    public virtual DbSet<WholesalePrice> WholesalePrices { get; set; }
+
+    public virtual DbSet<PromotionPolicy> PromotionPolicies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
 
@@ -424,6 +428,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Role");
+
+            entity.HasIndex(e => e.Email, "UQ_User_Email").IsUnique()
+                    .HasFilter("[email] IS NOT NULL");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>

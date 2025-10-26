@@ -4,6 +4,7 @@ using EVDealer.BE.DAL.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EVDealer.BE.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251024170521_AddNewFieldsToUserTable")]
+    partial class AddNewFieldsToUserTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -446,47 +449,6 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("Permission", (string)null);
                 });
 
-            modelBuilder.Entity("EVDealer.BE.DAL.Models.PromotionPolicy", b =>
-                {
-                    b.Property<int>("PolicyId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("policy_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PolicyId"));
-
-                    b.Property<string>("Conditions")
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("conditions");
-
-                    b.Property<int>("DealerId")
-                        .HasColumnType("int")
-                        .HasColumnName("dealer_id");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
-                        .HasColumnName("description");
-
-                    b.Property<decimal>("DiscountPercent")
-                        .HasColumnType("decimal(5, 2)")
-                        .HasColumnName("discount_percent");
-
-                    b.Property<DateOnly>("EndDate")
-                        .HasColumnType("date")
-                        .HasColumnName("end_date");
-
-                    b.Property<DateOnly>("StartDate")
-                        .HasColumnType("date")
-                        .HasColumnName("start_date");
-
-                    b.HasKey("PolicyId");
-
-                    b.HasIndex("DealerId");
-
-                    b.ToTable("PromotionPolicies");
-                });
-
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PurchaseRequest", b =>
                 {
                     b.Property<int>("RequestId")
@@ -887,44 +849,6 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("VehicleConfig", (string)null);
                 });
 
-            modelBuilder.Entity("EVDealer.BE.DAL.Models.WholesalePrice", b =>
-                {
-                    b.Property<int>("PriceId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("price_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PriceId"));
-
-                    b.Property<int?>("DealerId")
-                        .HasColumnType("int")
-                        .HasColumnName("dealer_id");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18, 2)")
-                        .HasColumnName("price");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int")
-                        .HasColumnName("product_id");
-
-                    b.Property<DateOnly>("ValidFrom")
-                        .HasColumnType("date")
-                        .HasColumnName("valid_from");
-
-                    b.Property<DateOnly>("ValidTo")
-                        .HasColumnType("date")
-                        .HasColumnName("valid_to");
-
-                    b.HasKey("PriceId");
-
-                    b.HasIndex("DealerId");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("WholesalePrices");
-                });
-
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerContract", b =>
                 {
                     b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
@@ -1058,17 +982,6 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasConstraintName("FK_Payment_SalesOrder");
 
                     b.Navigation("Order");
-                });
-
-            modelBuilder.Entity("EVDealer.BE.DAL.Models.PromotionPolicy", b =>
-                {
-                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
-                        .WithMany()
-                        .HasForeignKey("DealerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dealer");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PurchaseRequest", b =>
@@ -1213,23 +1126,6 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasForeignKey("VehicleId")
                         .IsRequired()
                         .HasConstraintName("FK_VehicleConfig_Vehicle");
-
-                    b.Navigation("Vehicle");
-                });
-
-            modelBuilder.Entity("EVDealer.BE.DAL.Models.WholesalePrice", b =>
-                {
-                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
-                        .WithMany()
-                        .HasForeignKey("DealerId");
-
-                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dealer");
 
                     b.Navigation("Vehicle");
                 });
