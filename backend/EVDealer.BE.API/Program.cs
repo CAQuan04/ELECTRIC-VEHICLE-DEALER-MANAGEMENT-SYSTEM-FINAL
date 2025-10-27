@@ -4,7 +4,13 @@ using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Admin;
 using EVDealer.BE.Services.Auth;
+  
+using EVDealer.BE.Services.Customers;
+using EVDealer.BE.Services.Dealers;
+using EVDealer.BE.Services.TestDrives;
+
 using EVDealer.BE.Services.IInventory;
+
 using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -33,9 +39,18 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // hãy tạo một đối tượng UserService để cung cấp.
 builder.Services.AddScoped<IUserService, UserService>();
 
-
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
+
+
+builder.Services.AddScoped<IDealerRepository, DealerRepository>();
+builder.Services.AddScoped<IDealerService, DealerService>();
+
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+
+builder.Services.AddScoped<ITestDriveRepository, TestDriveRepository>();
+builder.Services.AddScoped<ITestDriveService, TestDriveService>();
 
 builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
 builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
@@ -59,6 +74,7 @@ builder.Services.AddScoped<IPricingService, PricingService>();
 
 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -156,6 +172,17 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// ===== ADD CORS SERVICE (SIMPLER VERSION) =====
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()           // Allow all origins (development only!)
+               .AllowAnyMethod()           // Allow all HTTP methods
+               .AllowAnyHeader();           // Allow all headers
+    });
+});
+
 
 var app = builder.Build();
 
@@ -164,6 +191,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 
 // Kích hoạt các "chốt bảo vệ" theo đúng thứ tự

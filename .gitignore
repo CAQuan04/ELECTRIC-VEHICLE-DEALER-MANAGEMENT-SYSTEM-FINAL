@@ -83,3 +83,4 @@ Thumbs.db
 tmp/
 temp/
 .cache/
+backend/EVDealer.BE.API/appsettings.json
