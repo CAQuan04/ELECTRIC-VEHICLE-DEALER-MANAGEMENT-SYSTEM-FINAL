@@ -3,14 +3,16 @@ export const USER_ROLES = {
   DEALER: 'dealer',
   CUSTOMER: 'customer', 
   EVM_ADMIN: 'evm_admin',
-  GUEST: 'guest'
+  GUEST: 'guest',
+  STAFF: 'staff'
 };
 
 export const DASHBOARD_ROUTES = {
   [USER_ROLES.DEALER]: '/dealer-dashboard',
   [USER_ROLES.CUSTOMER]: '/customer-dashboard', 
   [USER_ROLES.EVM_ADMIN]: '/evm-dashboard',
-  [USER_ROLES.GUEST]: '/landing'
+  [USER_ROLES.GUEST]: '/landing',
+  [USER_ROLES.STAFF]: '/staff-dashboard'
 };
 
 // Mock user data - Replace with real authentication
