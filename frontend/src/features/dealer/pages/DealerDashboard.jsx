@@ -9,25 +9,8 @@ import PageContainer from '../components/layout/PageContainer';
 import ReportsSection from '../components/ReportsSection';
 import BentoMenu from '../components/BentoMenu';
 
-// --- CONFIGURATION DATA (Move to a separate config file if the app grows) ---
-
-// Mock data structure - Kept here for context, but should ideally be fetched from API
-const MOCK_DASHBOARD_DATA = {
-  dealer: { vehicles: 47, orders: 13, customers: 156, revenue: 11.3 },
-  performance: { monthlySales: 13, quarterTarget: 85, customerSatisfaction: 4.7, deliveryTime: 5 },
-  recentOrders: [
-    { id: 1, customer: 'Nguyễn Văn A', vehicle: 'Tesla Model 3', status: 'Đang xử lý', date: '2 giờ trước' },
-    { id: 2, customer: 'Trần Thị B', vehicle: 'Tesla Model Y', status: 'Hoàn thành', date: '1 ngày trước' },
-    { id: 3, customer: 'Lê Văn C', vehicle: 'Tesla Model S', status: 'Chờ duyệt', date: '2 ngày trước' },
-    { id: 4, customer: 'Phạm Thị D', vehicle: 'Tesla Model X', status: 'Đang giao', date: '3 ngày trước' }
-  ],
-  inventory: [
-    { model: 'Model 3', available: 12, reserved: 3, total: 15 },
-    { model: 'Model Y', available: 8, reserved: 2, total: 10 },
-    { model: 'Model S', available: 5, reserved: 1, total: 6 },
-    { model: 'Model X', available: 3, reserved: 0, total: 3 }
-  ]
-};
+// Import mock data
+import { MOCK_DASHBOARD_DATA } from '../data/mockData';
 
 const NAV_SECTIONS = [
   { id: 'overview', icon: '📊', label: 'Tổng quan' },

@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 
 // Theme override CSS
 
-import './styles/theme-variables.css';
+//import './styles/theme-variables.css';
 
 // Modules
 import { 
@@ -82,11 +82,9 @@ import {
   StaffList,
   StaffForm,
   // Theme
-  ThemeProvider
+  ThemeProvider, 
+  ThemeToggle 
 } from './features/dealer';
-
-// Import ThemeToggle separately
-import ThemeToggle from './features/dealer/components/ui/ThemeToggle';
 
 import { 
   EvmDashboard, 
@@ -190,7 +188,7 @@ const AppLayout = ({children}) => {
         <Sidebar />
         <div className="main-content-with-sidebar">
           <Navbar />
-          <main className="theme-main" style={{minHeight: 'calc(100vh - 70px)'}}>
+  <main className="p-5 bg-gray-50 dark:bg-slate-900 transition-colors duration-300" style={{minHeight: 'calc(100vh - 70px)'}}>
             {children}
           </main>
         </div>
@@ -237,6 +235,7 @@ const PublicLayout = ({children}) => {
 const App = () => {
   return (
     <GlobalLoadingProvider>
+      <ThemeProvider>
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingWithLoading />} />
@@ -247,9 +246,9 @@ const App = () => {
         <Route path="/dealer-dashboard" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout>
+              <AppLayout>
                 <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
-              </DealerLayout>
+              </AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -274,28 +273,28 @@ const App = () => {
         <Route path="/catalog" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><VehicleList /></DealerLayout>
+              <AppLayout><VehicleList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/sales/orders" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><OrderList /></DealerLayout>
+              <AppLayout><OrderList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/customers" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CustomerList /></DealerLayout>
+              <AppLayout><CustomerList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/inventory" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><DealerInventory /></DealerLayout>
+              <AppLayout><DealerInventory /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -304,21 +303,21 @@ const App = () => {
         <Route path="/dealer/vehicles" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><DealerVehicleList /></DealerLayout>
+              <AppLayout><DealerVehicleList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/vehicles/:vehicleId" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><VehicleDetail /></DealerLayout>
+              <AppLayout><VehicleDetail /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/vehicles/compare" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CompareVehicles /></DealerLayout>
+              <AppLayout><CompareVehicles /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -327,21 +326,21 @@ const App = () => {
         <Route path="/dealer/inventory" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><DealerInventory /></DealerLayout>
+              <AppLayout><DealerInventory /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/inventory/:stockId" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><StockDetail /></DealerLayout>
+              <AppLayout><StockDetail /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/inventory/request" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><RequestStock /></DealerLayout>
+              <AppLayout><RequestStock /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -350,28 +349,28 @@ const App = () => {
         <Route path="/dealer/customers" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><DealerCustomerList /></DealerLayout>
+              <AppLayout><DealerCustomerList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/customers/new" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CustomerForm /></DealerLayout>
+              <AppLayout><CustomerForm /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/customers/:customerId" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CustomerDetail /></DealerLayout>
+              <AppLayout><CustomerDetail /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/customers/:customerId/edit" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CustomerForm /></DealerLayout>
+              <AppLayout><CustomerForm /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -380,69 +379,69 @@ const App = () => {
         <Route path="/dealer/test-drives" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><TestDriveList /></DealerLayout>
+              <AppLayout><TestDriveList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/test-drives/new" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><TestDriveForm /></DealerLayout>
+              <AppLayout><TestDriveForm /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/test-drives/calendar" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><TestDriveCalendar /></DealerLayout>
+              <AppLayout><TestDriveCalendar /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/test-drives/:id" element={
           <DealerGuard><DealerShopGuard>
-            <DealerLayout><TestDriveDetail /></DealerLayout>
+            <AppLayout><TestDriveDetail /></AppLayout>
           </DealerShopGuard></DealerGuard>
         } />
         {/* Dealer Routes - Sales (UC 1.b.1, 1.b.2, 1.b.6) */}
         <Route path="/dealer/quotations" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><QuotationList /></DealerLayout>
+              <AppLayout><QuotationList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/quotations/create" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CreateQuotation /></DealerLayout>
+              <AppLayout><CreateQuotation /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/orders" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><OrderList /></DealerLayout>
+              <AppLayout><OrderList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/orders/create" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CreateOrder /></DealerLayout>
+              <AppLayout><CreateOrder /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/payments" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><PaymentList /></DealerLayout>
+              <AppLayout><PaymentList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/payments/new" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><PaymentForm /></DealerLayout>
+              <AppLayout><PaymentForm /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -451,14 +450,14 @@ const App = () => {
         <Route path="/dealer/purchase-requests" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><PurchaseRequestList /></DealerLayout>
+              <AppLayout><PurchaseRequestList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/purchase-requests/create" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CreatePurchaseRequest /></DealerLayout>
+              <AppLayout><CreatePurchaseRequest /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -467,21 +466,21 @@ const App = () => {
         <Route path="/dealer/reports/sales-performance" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><SalesPerformanceReport /></DealerLayout>
+              <AppLayout><SalesPerformanceReport /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/reports/customer-debt" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><CustomerDebtReport /></DealerLayout>
+              <AppLayout><CustomerDebtReport /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/reports/supplier-debt" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><SupplierDebtReport /></DealerLayout>
+              <AppLayout><SupplierDebtReport /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -490,14 +489,14 @@ const App = () => {
         <Route path="/dealer/promotions" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><PromotionList /></DealerLayout>
+              <AppLayout><PromotionList /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
         <Route path="/dealer/promotions/:promoId" element={
           <DealerGuard>
             <DealerShopGuard>
-              <DealerLayout><PromotionDetail /></DealerLayout>
+              <AppLayout><PromotionDetail /></AppLayout>
             </DealerShopGuard>
           </DealerGuard>
         } />
@@ -505,17 +504,17 @@ const App = () => {
         {/* Dealer Routes - Staff Management */}
         <Route path="/dealer/staff" element={
           <DealerGuard>
-            <DealerLayout><StaffList /></DealerLayout>
+            <AppLayout><StaffList /></AppLayout>
           </DealerGuard>
         } />
         <Route path="/dealer/staff/new" element={
           <DealerGuard>
-            <DealerLayout><StaffForm /></DealerLayout>
+            <AppLayout><StaffForm /></AppLayout>
           </DealerGuard>
         } />
         <Route path="/dealer/staff/:staffId/edit" element={
           <DealerGuard>
-            <DealerLayout><StaffForm /></DealerLayout>
+            <AppLayout><StaffForm /></AppLayout>
           </DealerGuard>
         } />
 
@@ -560,9 +559,10 @@ const App = () => {
           </AdminGuard>
         } />
       </Routes>
-      
+      <ThemeToggle />
       {/* Global Notification Container */}
       <NotificationContainer />
+      </ThemeProvider>
     </GlobalLoadingProvider>
   );
 };

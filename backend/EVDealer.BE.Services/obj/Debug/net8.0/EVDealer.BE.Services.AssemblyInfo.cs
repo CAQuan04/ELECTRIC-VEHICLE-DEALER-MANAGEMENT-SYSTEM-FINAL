@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EVDealer.BE.Services")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+25998f6c4de8f8c775a4439a52ee57c044b4a9d2")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e7d65131f9f45fa29c864b75ac619183e51ac06e")]
 [assembly: System.Reflection.AssemblyProductAttribute("EVDealer.BE.Services")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EVDealer.BE.Services")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

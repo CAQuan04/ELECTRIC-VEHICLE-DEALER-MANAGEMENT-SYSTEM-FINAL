@@ -4,7 +4,7 @@
  */
 
 // Import unified dealer theme styles
-import './styles/dealer-theme.css';
+//import './styles/dealer-theme.css';
 
 // ============================================
 // PAGES
@@ -80,3 +80,4 @@ export { ThemeProvider, useTheme } from './context/ThemeContext';
 // - components/modals/
 // - components/tables/
 // Import directly from component files when needed
+export { default as ThemeToggle } from './components/ui/ThemeToggle';
