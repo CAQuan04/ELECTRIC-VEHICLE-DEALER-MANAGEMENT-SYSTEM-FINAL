@@ -1,4 +1,8 @@
-﻿namespace EVDealer.BE.DAL.Models;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EVDealer.BE.DAL.Models;
 
 public partial class VehicleConfig
 {
@@ -17,6 +21,11 @@ public partial class VehicleConfig
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual Vehicle Vehicle { get; set; } = null!;
+    public virtual ICollection<Distribution> Distributions { get; set; }
+
+    [Required]
+    [Column(TypeName = "varchar(20)")]
+    public string Status { get; set; }
 }
 
 

@@ -41,6 +41,11 @@ export const redirectUserBasedOnRole = (userRole) => {
       window.location.href = '/evm-dashboard';
       break;
     case 'customer':
+      window.location.href = '/customer-dashboard';
+      break;
+    case 'staff':
+      window.location.href = '/staff-dashboard';
+      break;
     default:
       window.location.href = '/customer-dashboard';
       break;

@@ -1,16 +1,29 @@
 ﻿
+using EVDealer.BE.API.Helpers;
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
+using EVDealer.BE.Services.Admin;
 using EVDealer.BE.Services.Auth;
+  
 using EVDealer.BE.Services.Customers;
 using EVDealer.BE.Services.Dealers;
 using EVDealer.BE.Services.TestDrives;
+
+using EVDealer.BE.Services.IInventory;
+
 using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using EVDealer.BE.Services.DealerManagement;
+using EVDealer.BE.API.Validators;
+using FluentValidation.AspNetCore;
+using System.Reflection;
+using EVDealer.BE.Services.Pricing;
+using System.Reflection;
+using EVDealer.BE.Services.Analytics;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
@@ -29,6 +42,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
 
+
 builder.Services.AddScoped<IDealerRepository, DealerRepository>();
 builder.Services.AddScoped<IDealerService, DealerService>();
 
@@ -37,6 +51,30 @@ builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 builder.Services.AddScoped<ITestDriveRepository, TestDriveRepository>();
 builder.Services.AddScoped<ITestDriveService, TestDriveService>();
+
+builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
+
+builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+
+builder.Services.AddScoped<IDealerManagementRepository, DealerManagementRepository>();
+builder.Services.AddScoped<IDealerManagementService, DealerManagementService>();
+
+// Ghi chú: Đăng ký AutoMapper ở đây.
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Ghi chú: Dòng này sẽ tự động tìm tất cả các lớp kế thừa từ 'Profile'
+// trong Assembly hiện tại (tức là project API) và đăng ký chúng.
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+builder.Services.AddScoped<IPricingRepository, PricingRepository>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+
+builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+
 
 // 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -72,9 +110,38 @@ builder.Services.AddAuthorization(options =>
     // Ghi chú: "Dạy" cho hệ thống biết Policy "CanManageDealerAccounts" có nghĩa là gì.
     options.AddPolicy("CanManageDealerAccounts", policy =>
         policy.RequireClaim("permission", "ManageDealerAccounts"));
+
+    // Ghi chú: Thêm chính sách mới 'CanManageVehicles' để bảo vệ Controller của bạn.
+    options.AddPolicy("CanManageVehicles", policy =>
+        policy.RequireClaim("permission", "ManageVehicles"));
+
+    options.AddPolicy("ManageInventory", policy => policy.RequireClaim("permission", "ManageInventory"));
+    options.AddPolicy("ManageDistributions", policy => policy.RequireClaim("permission", "ManageDistributions"));
+    options.AddPolicy("ConfirmDistributions", policy => policy.RequireClaim("permission", "ConfirmDistributions"));
+
+    options.AddPolicy("ManageDealers", policy =>
+        policy.RequireClaim("permission", "ManageDealers"));
+
+    options.AddPolicy("ManagePricing", policy =>
+        policy.RequireClaim("permission", "ManagePricing"));
+
+    options.AddPolicy("CanViewAnalytics", policy =>
+       policy.RequireClaim("permission", "CanViewAnalytics"));
+
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+.AddJsonOptions(options =>
+ {
+     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+ })
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>())
+.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SetWholesalePriceDtoValidator>())
+.AddFluentValidation(fv =>
+{fv.RegisterValidatorsFromAssemblyContaining<SalesReportQueryDtoValidator>();
+});
+
+
 builder.Services.AddEndpointsApiExplorer();
 
 // Cấu hình Swagger để hiển thị nút Authorize (giữ nguyên, phần này bạn đã làm đúng)

@@ -44,7 +44,8 @@ const AuthComponent = ({ onUserChange }) => {
     { username: 'customer01', password: 'customer123', role: 'customer', name: 'Customer User', email: 'customer@gmail.com' },
     { username: 'dealer02', password: 'password', role: 'dealer', name: 'Dealer Manager', email: 'manager@dealer.com' },
     { username: 'evm01', password: 'password', role: 'evm_admin', name: 'EVM Director', email: 'director@evm.com' },
-    { username: 'user01', password: 'password', role: 'customer', name: 'Regular User', email: 'user@example.com' }
+    { username: 'user01', password: 'password', role: 'customer', name: 'Regular User', email: 'user@example.com' },
+    { username: 'staff01', password: 'staff123', role: 'staff', name: 'Regular Staff', email: 'staff@example.com' }
   ];
 
   // Handle mock login
@@ -207,7 +208,8 @@ const AuthComponent = ({ onUserChange }) => {
                     <div className="test-list">
                       <strong>Dealer:</strong> dealer01 / dealer123<br/>
                       <strong>EVM:</strong> admin01 / admin123<br/>
-                      <strong>Customer:</strong> customer01 / customer123
+                      <strong>Customer:</strong> customer01 / customer123<br/>
+                      <strong>Staff:</strong> staff01 / staff123<br/>
                     </div>
                   </details>
                 </div>

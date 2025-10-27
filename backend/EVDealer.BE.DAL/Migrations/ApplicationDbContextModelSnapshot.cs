@@ -98,6 +98,114 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("Dealer", (string)null);
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerContract", b =>
+                {
+                    b.Property<int>("ContractId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("contract_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContractId"));
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Terms")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("terms");
+
+                    b.HasKey("ContractId");
+
+                    b.HasIndex("DealerId");
+
+                    b.ToTable("DealerContract");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerTarget", b =>
+                {
+                    b.Property<int>("TargetId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("target_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TargetId"));
+
+                    b.Property<decimal?>("ActualSales")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("actual_sales");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<DateOnly>("PeriodEnd")
+                        .HasColumnType("date")
+                        .HasColumnName("period_end");
+
+                    b.Property<DateOnly>("PeriodStart")
+                        .HasColumnType("date")
+                        .HasColumnName("period_start");
+
+                    b.Property<decimal>("SalesTarget")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("sales_target");
+
+                    b.HasKey("TargetId");
+
+                    b.HasIndex("DealerId");
+
+                    b.ToTable("DealerTarget");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Debt", b =>
+                {
+                    b.Property<int>("DebtId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("debt_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DebtId"));
+
+                    b.Property<decimal>("AmountDue")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("amount_due");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<DateOnly>("DueDate")
+                        .HasColumnType("date")
+                        .HasColumnName("due_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("DebtId");
+
+                    b.HasIndex("DealerId");
+
+                    b.ToTable("Debt");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DemandForecast", b =>
                 {
                     b.Property<int>("ForecastId")
@@ -150,6 +258,9 @@ namespace EVDealer.BE.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DistId"));
 
+                    b.Property<int>("ConfigId")
+                        .HasColumnType("int");
+
                     b.Property<string>("FromLocation")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
@@ -182,6 +293,8 @@ namespace EVDealer.BE.DAL.Migrations
 
                     b.HasKey("DistId")
                         .HasName("PK__Distribu__FBDA893075D5E843");
+
+                    b.HasIndex("ConfigId");
 
                     b.HasIndex("ToDealerId");
 
@@ -313,21 +426,65 @@ namespace EVDealer.BE.DAL.Migrations
                 {
                     b.Property<int>("PermissionId")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("int")
+                        .HasColumnName("PermissionId");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PermissionId"));
 
                     b.Property<string>("PermissionName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("PermissionName");
 
                     b.HasKey("PermissionId");
 
                     b.HasIndex("PermissionName")
                         .IsUnique();
 
-                    b.ToTable("Permissions");
+                    b.ToTable("Permission", (string)null);
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.PromotionPolicy", b =>
+                {
+                    b.Property<int>("PolicyId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("policy_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PolicyId"));
+
+                    b.Property<string>("Conditions")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("conditions");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<decimal>("DiscountPercent")
+                        .HasColumnType("decimal(5, 2)")
+                        .HasColumnName("discount_percent");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.HasKey("PolicyId");
+
+                    b.HasIndex("DealerId");
+
+                    b.ToTable("PromotionPolicies");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PurchaseRequest", b =>
@@ -450,7 +607,7 @@ namespace EVDealer.BE.DAL.Migrations
 
                     b.HasIndex("PermissionId");
 
-                    b.ToTable("Role_Permission");
+                    b.ToTable("Role_Permission", (string)null);
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.SalesOrder", b =>
@@ -568,9 +725,29 @@ namespace EVDealer.BE.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date")
+                        .HasColumnName("date_of_birth");
+
                     b.Property<int?>("DealerId")
                         .HasColumnType("int")
                         .HasColumnName("dealer_id");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("FullName")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)")
+                        .HasColumnName("full_name");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -578,6 +755,11 @@ namespace EVDealer.BE.DAL.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("password_hash");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("phone_number");
 
                     b.Property<int>("RoleId")
                         .HasColumnType("int")
@@ -592,6 +774,10 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasDefaultValue("active")
                         .HasColumnName("status");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("updated_at");
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -605,6 +791,10 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("DealerId");
 
                     b.HasIndex("RoleId");
+
+                    b.HasIndex(new[] { "Email" }, "UQ_User_Email")
+                        .IsUnique()
+                        .HasFilter("[email] IS NOT NULL");
 
                     b.HasIndex(new[] { "Username" }, "UQ__User__F3DBC57225A4DD70")
                         .IsUnique();
@@ -636,6 +826,14 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("model");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("Active");
 
                     b.Property<int?>("Year")
                         .HasColumnType("int")
@@ -669,6 +867,14 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("range_km");
 
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(20)")
+                        .HasDefaultValue("Active");
+
                     b.Property<int>("VehicleId")
                         .HasColumnType("int")
                         .HasColumnName("vehicle_id");
@@ -679,6 +885,77 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("VehicleId");
 
                     b.ToTable("VehicleConfig", (string)null);
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.WholesalePrice", b =>
+                {
+                    b.Property<int>("PriceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("price_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PriceId"));
+
+                    b.Property<int?>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("price");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int")
+                        .HasColumnName("product_id");
+
+                    b.Property<DateOnly>("ValidFrom")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateOnly>("ValidTo")
+                        .HasColumnType("date")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("PriceId");
+
+                    b.HasIndex("DealerId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("WholesalePrices");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerContract", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerTarget", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Debt", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DemandForecast", b =>
@@ -701,6 +978,12 @@ namespace EVDealer.BE.DAL.Migrations
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Distribution", b =>
                 {
+                    b.HasOne("EVDealer.BE.DAL.Models.VehicleConfig", "Config")
+                        .WithMany("Distributions")
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EVDealer.BE.DAL.Models.Dealer", "ToDealer")
                         .WithMany("Distributions")
                         .HasForeignKey("ToDealerId")
@@ -712,6 +995,8 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasForeignKey("VehicleId")
                         .IsRequired()
                         .HasConstraintName("FK_Distribution_Vehicle");
+
+                    b.Navigation("Config");
 
                     b.Navigation("ToDealer");
 
@@ -773,6 +1058,17 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasConstraintName("FK_Payment_SalesOrder");
 
                     b.Navigation("Order");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.PromotionPolicy", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PurchaseRequest", b =>
@@ -921,6 +1217,23 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.WholesalePrice", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Customer", b =>
                 {
                     b.Navigation("Quotations");
@@ -995,6 +1308,8 @@ namespace EVDealer.BE.DAL.Migrations
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.VehicleConfig", b =>
                 {
+                    b.Navigation("Distributions");
+
                     b.Navigation("Inventories");
 
                     b.Navigation("OrderItems");
