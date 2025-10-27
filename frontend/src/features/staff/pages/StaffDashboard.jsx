@@ -7,6 +7,7 @@ import "@modules/loading/GlobalLoading.css";
 import InventoryManagement from "./InventoryManagement";
 import PricingManagement from "./PricingManagement";
 import ReportsSection from "../components/ReportsSection";
+import InventoryTurnoverReport from "./InventoryTurnoverReport";
 
 /* =======================
    MOCK / ORIGINAL DATA
@@ -64,6 +65,7 @@ const NAV_SECTIONS = [
   { id: "pricing", icon: "💵", label: "Giá sỉ & Khuyến mãi" },
   { id: "orders", icon: "📋", label: "Đơn hàng" },
   { id: "customers", icon: "👥", label: "Khách hàng" },
+  { id: "inventory-report", icon: "📊", label: "Báo cáo tồn kho" },
   { id: "reports", icon: "📈", label: "Báo cáo" },
 ];
 
@@ -104,7 +106,9 @@ const ModuleCard = ({ icon, title, description, tag, onClick }) => (
 
 const RecentOrdersList = ({ orders }) => (
   <div className="bg-slate-900/40 rounded-2xl p-6 border border-slate-800 shadow-xl">
-    <h3 className="text-2xl font-bold mb-6 text-slate-100">📋 Đơn hàng gần đây</h3>
+    <h3 className="text-2xl font-bold mb-6 text-slate-100">
+      📋 Đơn hàng gần đây
+    </h3>
     <div className="space-y-3">
       {orders.map((order) => (
         <div
@@ -113,7 +117,9 @@ const RecentOrdersList = ({ orders }) => (
         >
           <div className="flex-1">
             <div className="font-bold text-slate-100">{order.customer}</div>
-            <div className="text-sm text-slate-400 font-medium">{order.vehicle}</div>
+            <div className="text-sm text-slate-400 font-medium">
+              {order.vehicle}
+            </div>
           </div>
           <div className="flex flex-col items-end gap-2">
             <span
@@ -123,7 +129,9 @@ const RecentOrdersList = ({ orders }) => (
             >
               {order.status}
             </span>
-            <span className="text-xs text-slate-400 font-semibold">{order.date}</span>
+            <span className="text-xs text-slate-400 font-semibold">
+              {order.date}
+            </span>
           </div>
         </div>
       ))}
@@ -143,7 +151,9 @@ const HeroStats = ({ stats }) => (
         key={i}
         className="rounded-2xl border border-slate-800 bg-white/5 p-5 text-center shadow-[0_12px_40px_rgba(14,165,233,.06)]"
       >
-        <div className="text-3xl md:text-4xl font-extrabold text-slate-50">{s.value}</div>
+        <div className="text-3xl md:text-4xl font-extrabold text-slate-50">
+          {s.value}
+        </div>
         <div className="text-slate-400 text-base mt-1">{s.label}</div>
       </div>
     ))}
@@ -200,9 +210,13 @@ const OverviewSection = ({ dashboardData, navigate }) => {
           >
             <div className="flex items-center gap-3 mb-4">
               <span className="text-3xl">{stat.icon}</span>
-              <span className="text-lg font-bold text-slate-200">{stat.title}</span>
+              <span className="text-lg font-bold text-slate-200">
+                {stat.title}
+              </span>
             </div>
-            <div className="text-3xl font-extrabold text-slate-100 mb-2">{stat.value}</div>
+            <div className="text-3xl font-extrabold text-slate-100 mb-2">
+              {stat.value}
+            </div>
             <div className="text-sm text-slate-400">{stat.change}</div>
           </div>
         ))}
@@ -210,12 +224,21 @@ const OverviewSection = ({ dashboardData, navigate }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="rounded-2xl p-6 bg-slate-900/40 border border-slate-800 shadow-xl">
-          <h3 className="text-2xl font-bold mb-6 text-slate-100">📈 Hiệu suất kinh doanh</h3>
+          <h3 className="text-2xl font-bold mb-6 text-slate-100">
+            📈 Hiệu suất kinh doanh
+          </h3>
           <div className="space-y-4">
             {performanceMetrics.map((metric, idx) => (
-              <div key={idx} className="flex justify-between items-center p-4 bg-slate-950/30 rounded-xl border border-slate-800">
-                <span className="text-slate-300 font-semibold">{metric.label}</span>
-                <span className="text-2xl font-extrabold text-slate-100">{metric.value}</span>
+              <div
+                key={idx}
+                className="flex justify-between items-center p-4 bg-slate-950/30 rounded-xl border border-slate-800"
+              >
+                <span className="text-slate-300 font-semibold">
+                  {metric.label}
+                </span>
+                <span className="text-2xl font-extrabold text-slate-100">
+                  {metric.value}
+                </span>
               </div>
             ))}
           </div>
@@ -230,27 +253,44 @@ const OverviewSection = ({ dashboardData, navigate }) => {
 const InventorySection = ({ inventory }) => (
   <div className="space-y-6">
     <div className="flex items-center justify-between flex-wrap gap-4">
-      <h2 className="text-3xl font-extrabold text-slate-100">🚗 Quản lý kho xe</h2>
+      <h2 className="text-3xl font-extrabold text-slate-100">
+        🚗 Quản lý kho xe
+      </h2>
       <button className="px-6 py-3 bg-gradient-to-r from-sky-500 to-sky-600 rounded-xl font-bold text-white shadow-lg">
         + Nhập xe mới
       </button>
     </div>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {inventory.map((item, idx) => (
-        <div key={idx} className="rounded-2xl p-6 bg-slate-900/40 border border-slate-800 shadow-xl">
-          <h4 className="text-2xl font-extrabold mb-6 text-slate-100">{item.model}</h4>
+        <div
+          key={idx}
+          className="rounded-2xl p-6 bg-slate-900/40 border border-slate-800 shadow-xl"
+        >
+          <h4 className="text-2xl font-extrabold mb-6 text-slate-100">
+            {item.model}
+          </h4>
           <div className="space-y-3">
             <div className="flex justify-between items-center p-3 bg-slate-950/30 rounded-lg border border-slate-800">
-              <span className="text-sm text-slate-300 font-semibold">Có sẵn</span>
-              <span className="text-2xl font-extrabold text-sky-400">{item.available}</span>
+              <span className="text-sm text-slate-300 font-semibold">
+                Có sẵn
+              </span>
+              <span className="text-2xl font-extrabold text-sky-400">
+                {item.available}
+              </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-950/30 rounded-lg border border-slate-800">
-              <span className="text-sm text-slate-300 font-semibold">Đã đặt</span>
-              <span className="text-2xl font-extrabold text-amber-400">{item.reserved}</span>
+              <span className="text-sm text-slate-300 font-semibold">
+                Đã đặt
+              </span>
+              <span className="text-2xl font-extrabold text-amber-400">
+                {item.reserved}
+              </span>
             </div>
             <div className="flex justify-between items-center p-3 bg-slate-950/30 rounded-lg border border-slate-800">
               <span className="text-sm text-slate-300 font-semibold">Tổng</span>
-              <span className="text-2xl font-extrabold text-sky-300">{item.total}</span>
+              <span className="text-2xl font-extrabold text-sky-300">
+                {item.total}
+              </span>
             </div>
           </div>
         </div>
@@ -264,7 +304,13 @@ const InventorySection = ({ inventory }) => (
    ======================= */
 
 const UserLogo = ({ size = 44 }) => (
-  <svg viewBox="0 0 64 64" width={size} height={size} className="rounded-xl" aria-hidden>
+  <svg
+    viewBox="0 0 64 64"
+    width={size}
+    height={size}
+    className="rounded-xl"
+    aria-hidden
+  >
     <defs>
       <linearGradient id="userGrad" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0%" stopColor="#60a5fa" />
@@ -273,7 +319,11 @@ const UserLogo = ({ size = 44 }) => (
     </defs>
     <rect x="6" y="6" width="52" height="52" rx="12" fill="url(#userGrad)" />
     <path d="M32 20a6 6 0 100 12 6 6 0 000-12z" fill="white" opacity="0.95" />
-    <path d="M20 44c0-6 6-10 12-10s12 4 12 10v2H20v-2z" fill="white" opacity="0.95" />
+    <path
+      d="M20 44c0-6 6-10 12-10s12 4 12 10v2H20v-2z"
+      fill="white"
+      opacity="0.95"
+    />
   </svg>
 );
 
@@ -320,7 +370,9 @@ const StaffDashboard = () => {
   const renderActiveSection = () => {
     switch (activeSection) {
       case "overview":
-        return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
+        return (
+          <OverviewSection dashboardData={dashboardData} navigate={navigate} />
+        );
       case "inventory":
         return <InventorySection inventory={inventory} />;
       case "stock":
@@ -331,12 +383,19 @@ const StaffDashboard = () => {
       case "customers":
         return (
           <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 shadow-xl">
-            <h2 className="text-xl font-bold text-slate-100">Tính năng đang phát triển</h2>
-            <p className="text-slate-300 mt-2">Phần này sẽ sớm được triển khai.</p>
+            <h2 className="text-xl font-bold text-slate-100">
+              Tính năng đang phát triển
+            </h2>
+            <p className="text-slate-300 mt-2">
+              Phần này sẽ sớm được triển khai.
+            </p>
           </div>
         );
       case "pricing":
         return <PricingManagement />;
+      case "inventory-report":
+        return <InventoryTurnoverReport />;
+
       default:
         return null;
     }
@@ -367,8 +426,8 @@ const StaffDashboard = () => {
                 Staff Portal
               </h1>
               <p className="text-slate-300 text-base md:text-lg mt-1">
-                Chào mừng {currentUser?.name ?? "Nhân viên"} — quản lý nhiệm vụ và
-                hỗ trợ khách hàng
+                Chào mừng {currentUser?.name ?? "Nhân viên"} — quản lý nhiệm vụ
+                và hỗ trợ khách hàng
               </p>
             </div>
           </div>
