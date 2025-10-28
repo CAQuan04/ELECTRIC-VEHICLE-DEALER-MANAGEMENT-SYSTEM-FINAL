@@ -1,23 +1,22 @@
+import './index.css';
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Theme override CSS
-
-//import './styles/theme-variables.css';
+import './styles/theme-variables.css';
 
 // Modules
-import { 
-  Sidebar, 
-  Navbar, 
+import {
+  Sidebar,
+  Navbar,
   Header
 } from '@modules/layout';
 
-import { 
+import {
   DealerGuard,
-  DealerShopGuard, 
-  CustomerGuard, 
-  AdminGuard, 
-  StaffGuard,
+  DealerShopGuard,
+  CustomerGuard,
+  AdminGuard,
   AccessDenied
 } from '@modules/auth';
 
@@ -27,23 +26,23 @@ import { VehicleList } from '@modules/common';
 import { AuthService } from '@utils';
 
 // Loading system
-import { 
-  GlobalLoadingProvider, 
+import {
+  GlobalLoadingProvider,
   withRouteLoading,
   withFullPageLoading,
-  withDashboardLoading 
+  withDashboardLoading
 } from './modules/loading';
 
 // Notification system
 import { NotificationContainer } from '@modules/common';
 
 // Feature imports
-import { 
-  CustomerDashboard, 
-  CustomerList 
+import {
+  CustomerDashboard,
+  CustomerList
 } from './features/customer';
 
-import { 
+import {
   DealerDashboard,
   // Vehicles
   VehicleList as DealerVehicleList,
@@ -62,6 +61,7 @@ import {
   TestDriveForm,
   TestDriveCalendar,
   TestDriveDetail,
+  TestDriveCalendarDetail,
   // Sales
   QuotationList,
   CreateQuotation,
@@ -83,17 +83,17 @@ import {
   StaffList,
   StaffForm,
   // Theme
-  ThemeProvider, 
-  ThemeToggle 
+  ThemeProvider,
+  ThemeToggle
 } from './features/dealer';
 
-import { 
-  EvmDashboard, 
-  DealerList, 
-  ReportDashboard 
+import {
+  EvmDashboard,
+  DealerList,
+  ReportDashboard
 } from './features/admin';
 
-import { 
+import {
   Landing,
   Vehicles,
   ModelS,
@@ -178,7 +178,8 @@ const Model3WithLoading = withFullPageLoading(Model3, {
 });
 
 // Dealer Layout with Theme Support
-const DealerLayout = ({children}) => {
+// (Lưu ý: DealerLayout này đang không được sử dụng ở bất kỳ đâu trong file App.jsx)
+const DealerLayout = ({ children }) => {
   return (
     <ThemeProvider>
       <AppLayout>
@@ -189,18 +190,18 @@ const DealerLayout = ({children}) => {
   );
 };
 
-const AppLayout = ({children}) => {
+const AppLayout = ({ children }) => {
   const currentUser = AuthService.getCurrentUser();
-  
+
   // Check if user is logged in to determine if we should show dashboard layout or public layout
   if (currentUser && currentUser.role !== 'guest') {
     // For dashboard pages - show sidebar + navbar layout
     return (
-      <div style={{minHeight: '100vh'}}>
+      <div style={{ minHeight: '100vh' }}>
         <Sidebar />
         <div className="main-content-with-sidebar">
           <Navbar />
-  <main className="p-5 bg-gray-50 dark:bg-slate-900 transition-colors duration-300" style={{minHeight: 'calc(100vh - 70px)'}}>
+          <main className="p-5 bg-gray-50 dark:bg-slate-900 transition-colors duration-300" style={{ minHeight: 'calc(100vh - 70px)' }}>
             {children}
           </main>
         </div>
@@ -222,9 +223,9 @@ const AppLayout = ({children}) => {
   } else {
     // For public pages - simple layout with just header
     return (
-      <div style={{minHeight: '100vh'}}>
+      <div style={{ minHeight: '100vh' }}>
         <Header />
-        <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+        <main className="p-5 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{ minHeight: 'calc(100vh - 70px)' }}>
           {children}
         </main>
       </div>
@@ -233,11 +234,11 @@ const AppLayout = ({children}) => {
 };
 
 // Separate layout for public pages (always uses Header)
-const PublicLayout = ({children}) => {
+const PublicLayout = ({ children }) => {
   return (
-    <div style={{minHeight: '100vh'}}>
+    <div style={{ minHeight: '100vh' }}>
       <Header />
-      <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+      <main className="p-5 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{ minHeight: 'calc(100vh - 70px)' }}>
         {children}
       </main>
     </div>
@@ -248,38 +249,46 @@ const App = () => {
   return (
     <GlobalLoadingProvider>
       <ThemeProvider>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingWithLoading />} />
-        <Route path="/landing" element={<LandingWithLoading />} />
-        <Route path="/access-denied" element={<AccessDenied />} />
-        
-        {/* Role-based Dashboard Routes */}
-        <Route path="/dealer-dashboard" element={
-          <DealerGuard>
-            <DealerShopGuard>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingWithLoading />} />
+          <Route path="/landing" element={<LandingWithLoading />} />
+          <Route path="/access-denied" element={<AccessDenied />} />
+
+          {/* Role-based Dashboard Routes */}
+          <Route path="/dealer-dashboard" element={
+            <DealerGuard>
+              <DealerShopGuard>
+                <AppLayout>
+                  <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
+                </AppLayout>
+              </DealerShopGuard>
+            </DealerGuard>
+          } />
+
+          <Route path="/customer-dashboard" element={
+            <CustomerGuard>
               <AppLayout>
-                <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
+                <CustomerDashboardWithLoading isLoading={false} isDataLoading={false} />
               </AppLayout>
-            </DealerShopGuard>
-          </DealerGuard>
-        } />
-        
-        <Route path="/customer-dashboard" element={
-          <CustomerGuard>
-            <AppLayout>
-              <CustomerDashboardWithLoading isLoading={false} isDataLoading={false} />
-            </AppLayout>
-          </CustomerGuard>
-        } />
-        
-        <Route path="/evm-dashboard" element={
-          <AdminGuard>
-            <AppLayout>
-              <EvmDashboardWithLoading isLoading={false} isDataLoading={false} />
-            </AppLayout>
-          </AdminGuard>
-        } />
+            </CustomerGuard>
+          } />
+
+          <Route path="/evm-dashboard" element={
+            <AdminGuard>
+              <AppLayout>
+                <EvmDashboardWithLoading isLoading={false} isDataLoading={false} />
+              </AppLayout>
+            </AdminGuard>
+          } />
+
+          <Route path="/staff-dashboard" element={
+            <AdminGuard>
+              <AppLayout>
+                <StaffDashboardWithLoading isLoading={false} isDataLoading={false} />
+              </AppLayout>
+            </AdminGuard>
+          } />
 
         {/* Dealer-only Routes - Protected by DealerShopGuard */}
         <Route path="/catalog" element={
