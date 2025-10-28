@@ -8,7 +8,7 @@ import React from 'react';
  */
 export const InfoRow = ({ label, value, icon }) => {
   return (
-    <div className="flex justify-between items-center py-3 border-b last:border-0" style={{ borderColor: 'var(--border-default)' }}>
+    <div className="flex justify-between items-center py-3 border-b last:border-0 theme-border">
       <span className="theme-text-muted flex items-center gap-2">
         {icon && <span>{icon}</span>}
         {label}
@@ -188,51 +188,76 @@ export const StatusTimeline = ({ events = [] }) => {
 };
 
 /**
- * MetricCard - Card hiển thị metric với icon và trend
- * @param {string} icon - Icon emoji
- * @param {string} label - Nhãn
- * @param {string|number} value - Giá trị
- * @param {string} trend - up/down/neutral
- * @param {string} change - Mô tả thay đổi
- * @param {string} color - Color theme: emerald, blue, yellow, red
- */
-export const MetricCard = ({ icon, label, value, trend, change, color = 'emerald' }) => {
-  const colorClasses = {
-    emerald: 'dark:border-emerald-500/30 dark:bg-emerald-500/5 border-emerald-300 bg-emerald-50',
-    blue: 'dark:border-blue-500/30 dark:bg-blue-500/5 border-blue-300 bg-blue-50',
-    yellow: 'dark:border-yellow-500/30 dark:bg-yellow-500/5 border-yellow-300 bg-yellow-50',
-    red: 'dark:border-red-500/30 dark:bg-red-500/5 border-red-300 bg-red-50',
-    gray: 'dark:border-gray-500/30 dark:bg-gray-500/5 border-gray-300 bg-gray-50'
-  };
+ * MetricCard - Card hiển thị metric với icon và trend
+ * @param {string} icon - Icon emoji
+ * @param {string} title - Nhãn
+ * @param {string|number} value - Giá trị
+ * @param {string} trend - up/down/neutral
+ * @param {string} change - Mô tả thay đổi
+ * @param {string} color - Color theme: emerald, blue, yellow, red
+ */
+export const MetricCard = ({ icon, title, value, trend, change, color = 'emerald' }) => {
+  const colorClasses = {
+    emerald: 'dark:border-emerald-500/30 dark:bg-emerald-500/5 border-emerald-300 bg-emerald-50',
+    blue: 'dark:border-blue-500/30 dark:bg-blue-500/5 border-blue-300 bg-blue-50',
+    yellow: 'dark:border-yellow-500/30 dark:bg-yellow-500/5 border-yellow-300 bg-yellow-50',
+    red: 'dark:border-red-500/30 dark:bg-red-500/5 border-red-300 bg-red-50',
+    gray: 'dark:border-gray-500/30 dark:bg-gray-500/5 border-gray-300 bg-gray-50'
+  };
 
-  const trendIcons = {
-    up: '📈',
-    down: '📉',
-    neutral: '➡️'
-  };
+  const trendIcons = {
+    up: '📈',
+    down: '📉',
+    neutral: '➡️'
+  };
 
-  const trendColors = {
-    up: 'dark:text-emerald-400 text-emerald-600',
-    down: 'dark:text-red-400 text-red-600',
-    neutral: 'dark:text-gray-400 text-gray-600'
-  };
+  const trendColors = {
+    up: 'dark:text-emerald-400 text-emerald-600',
+    down: 'dark:text-red-400 text-red-600',
+    neutral: 'dark:text-gray-400 text-gray-600'
+  };
 
-  return (
-    <div className={`backdrop-blur-xl rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${colorClasses[color]}`}>
-      <div className="flex items-start justify-between mb-4">
-        <span className="text-4xl">{icon}</span>
-        {trend && <span className="text-xl">{trendIcons[trend]}</span>}
-      </div>
-      <div className="theme-text-muted text-sm mb-1">{label}</div>
-      <div className="theme-text-primary text-3xl font-bold mb-2">{value}</div>
-      {change && (
-        <div className={`text-sm ${trendColors[trend] || 'theme-text-muted'}`}>
-          {change}
+  return (
+    // Lớp "flex flex-col" đảm bảo các phần tử bên trong xếp chồng lên nhau
+    <div className={`backdrop-blur-xl rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${colorClasses[color]} flex flex-col justify-between h-full`}>
+      
+      {/* START: Bố cục mới với Flexbox */}
+      {/* Container chính chia 2 cột: Trái (Icon/Text) và Phải (Value) */}
+      <div className="flex justify-between items-start">
+        
+        {/* CỘT BÊN TRÁI: Icon và Text */}
+        <div className="flex flex-col">
+          {/* Icon và Trend Icon */}
+          <div className="flex items-start justify-between mb-4">
+            <span className="text-4xl">{icon}</span>
+            {/* Bỏ trend icon ở đây nếu muốn nó ở cạnh 'change', hoặc giữ lại nếu muốn ở góc trên */}
+            {/* {trend && <span className="text-xl ml-2">{trendIcons[trend]}</span>} */}
+          </div>
+          {/* Title */}
+          <div className="theme-text-muted text-sm mb-1">{title}</div>
+          {/* Change (Nếu có) */}
+          {change && (
+            <div className={`text-sm ${trendColors[trend] || 'theme-text-muted'}`}>
+              {/* Thêm trend icon vào đây để đi cùng text */}
+              {trend && <span className="mr-1">{trendIcons[trend]}</span>} 
+              {change}
+            </div>
+          )}
         </div>
-      )}
-    </div>
-  );
+
+        {/* CỘT BÊN PHẢI: Value */}
+        <div className="flex-shrink-0 pl-4">
+          <div className="theme-text-primary text-4xl font-bold text-right">{value}</div>
+        </div>
+
+      </div>
+    </div>
+  );
 };
+
+
+
+
 
 /**
  * TabPanel - Tab navigation component

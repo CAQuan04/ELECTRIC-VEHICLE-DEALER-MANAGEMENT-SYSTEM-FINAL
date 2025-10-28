@@ -3,14 +3,16 @@ export const USER_ROLES = {
   DEALER: 'dealer',
   CUSTOMER: 'customer', 
   EVM_ADMIN: 'evm_admin',
-  GUEST: 'guest'
+  GUEST: 'guest',
+  STAFF: 'staff'
 };
 
 export const DASHBOARD_ROUTES = {
   [USER_ROLES.DEALER]: '/dealer-dashboard',
   [USER_ROLES.CUSTOMER]: '/customer-dashboard', 
   [USER_ROLES.EVM_ADMIN]: '/evm-dashboard',
-  [USER_ROLES.GUEST]: '/landing'
+  [USER_ROLES.GUEST]: '/landing',
+  [USER_ROLES.STAFF]: '/staff-dashboard'
 };
 
 // Mock user data - Replace with real authentication
@@ -60,19 +62,34 @@ export const AuthService = {
         return false;
     }
   },
+
+  // Kiểm tra dealer có quyền truy cập cửa hàng cụ thể không
+  canAccessDealerShop: (shopId) => {
+    if (currentUser?.role !== USER_ROLES.DEALER) {
+      return false;
+    }
+    return currentUser?.dealerShopId === shopId;
+  },
+
+  // Lấy ID cửa hàng của dealer hiện tại
+  getDealerShopId: () => {
+    return currentUser?.dealerShopId || null;
+  },
   
   getDefaultDashboard: () => {
     return DASHBOARD_ROUTES[currentUser?.role] || '/landing';
   },
   
   // Mock login functions for testing
-  loginAsDealer: () => {
+  loginAsDealer: (dealerShopId = 'SHOP001') => {
     const user = {
       id: 1,
       name: 'Nguyễn Văn Dealer',
       email: 'dealer@evm.com',
       role: USER_ROLES.DEALER,
       dealerId: 'DL001',
+      dealerShopId: dealerShopId, // ID của cửa hàng mà dealer này quản lý
+      shopName: `Cửa hàng ${dealerShopId}`,
       permissions: ['view_sales', 'manage_inventory', 'view_customers', 'create_offers']
     };
     AuthService.setCurrentUser(user);

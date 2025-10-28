@@ -21,7 +21,7 @@ namespace EVDealer.BE.API.Controllers
         {
             // Ghi chú: Sau khi được xác thực, thông tin từ Token sẽ được lưu trong đối tượng `User`.
             // Chúng ta có thể đọc các claim từ đó một cách an toàn để cá nhân hóa trải nghiệm.
-            var username = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var username = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var role = User.FindFirstValue(ClaimTypes.Role);
             var dealerId = User.FindFirstValue("dealerId"); // Lấy dealerId (nếu có)
 

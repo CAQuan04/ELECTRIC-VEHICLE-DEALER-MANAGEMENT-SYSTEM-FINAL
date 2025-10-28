@@ -60,7 +60,7 @@ namespace EVDealer.BE.Services.Auth
             // Sử dụng List<Claim> để có thể thêm các claim một cách linh hoạt.
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Username),
+                new Claim(ClaimTypes.NameIdentifier, user.Username),
                 new Claim("userId", user.UserId.ToString()),
                 new Claim(ClaimTypes.Role, user.Role.RoleName)
             };

@@ -980,7 +980,8 @@ index 9ee693d..f8f65f7 100644
 +    <link rel="stylesheet" crossorigin href="/assets/index-B0X-zkqY.css">
    </head>
    <body>
-     <div id="root"></div>
+     <div id="root"></div>
+
 diff --git a/frontend/node_modules/.package-lock.json b/frontend/node_modules/.package-lock.json
 index 6f65f13..9ef06c2 100644
 --- a/frontend/node_modules/.package-lock.json
@@ -2290,7 +2291,7 @@ index b75b524..b70e1f3 100644
          <div className="main-content-with-sidebar">
            <Navbar />
 -          <main style={{padding: '20px', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)', minHeight: 'calc(100vh - 70px)'}}>
-+          <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
++          <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
              {children}
            </main>
          </div>
@@ -2299,7 +2300,7 @@ index b75b524..b70e1f3 100644
        <div style={{minHeight: '100vh'}}>
          <Header />
 -        <main style={{padding: '20px', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100)', minHeight: 'calc(100vh - 70px)'}}>
-+        <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
++        <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
            {children}
          </main>
        </div>
@@ -2308,7 +2309,7 @@ index b75b524..b70e1f3 100644
      <div style={{minHeight: '100vh'}}>
        <Header />
 -      <main style={{padding: '20px', background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100)', minHeight: 'calc(100vh - 70px)'}}>
-+      <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
++      <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
          {children}
        </main>
      </div>

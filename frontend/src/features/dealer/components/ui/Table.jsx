@@ -1,46 +1,56 @@
 import React from 'react';
+import EmptyState from './EmptyState'; // Sử dụng EmptyState component
 
 /**
  * Table - Responsive table component
- * @param {array} columns - Array of column definitions: [{ key, label, render }]
+ * @param {array} columns - Array of column definitions: [{ key, label, render, className, tdClassName }]
  * @param {array} data - Array of data objects
  * @param {function} onRowClick - Click handler for rows (optional)
  */
 const Table = ({ columns, data, onRowClick, className = '' }) => {
   return (
-    <div className={`theme-card rounded-2xl border overflow-hidden ${className}`}>
+    
+    <div className={`shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead style={{ background: 'var(--bg-table-header)' }}>
+        {/* Màu nền và viền cho Dark Mode */}
+        {/* SỬA: Đổi dark:divide-gray-500 -> dark:divide-gray-700 */}
+        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          
+          {/* THEAD - Background tối, chữ sáng */}
+          {/* SỬA: Dùng màu nền nhất quán hơn */}
+          <thead className="bg-cyan-100 dark:bg-gray-700/50"> 
             <tr>
               {columns.map((column) => (
                 <th 
                   key={column.key}
-                  className={`px-6 py-4 text-left text-sm font-bold theme-text-primary ${column.className || ''}`}
+                  // Tăng kích thước chữ từ text-xs lên text-sm
+                  className={`px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 ${column.className || ''}`}
                 >
                   {column.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody style={{ borderColor: 'var(--border-default)' }} className="divide-y">
-            {data.map((row, rowIndex) => (
+          
+          {/* TBODY - Background tối, chữ sáng */}
+          {/* SỬA: Đổi dark:bg-gray-900 -> dark:bg-gray-800 và dark:divide-gray-700 */}
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {data.length > 0 && data.map((row, rowIndex) => (
               <tr 
                 key={row.id || rowIndex}
-                className={`transition-all duration-200 ${onRowClick ? 'cursor-pointer' : ''}`}
-                style={{ 
-                  '--hover-bg': 'var(--hover-bg)',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--hover-bg)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
+                // Hiệu ứng hover cho cả Light/Dark Mode
+                // SỬA: Đổi dark:hover:bg-gray-700 -> dark:hover:bg-gray-700/50
+                className={`transition duration-200 ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700/50' : ''}`}
                 onClick={() => onRowClick && onRowClick(row)}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={`px-6 py-4 theme-text-primary ${column.tdClassName || ''}`}>
+                  <td 
+                    key={column.key} 
+                    
+                    // Màu chữ: Dark mode đổi thành trắng/xám sáng
+                    // SỬA: Đổi text-gray-900 dark:text-gray-100 -> text-gray-800 dark:text-gray-200
+                    className={`px-6 py-4 whitespace-nowrap text-base text-gray-800 dark:text-gray-200 ${column.tdClassName || ''}`}
+                  >
                     {column.render ? column.render(row) : row[column.key]}
                   </td>
                 ))}
@@ -51,11 +61,14 @@ const Table = ({ columns, data, onRowClick, className = '' }) => {
       </div>
       
       {/* Empty State */}
+      {/* SỬA: Dùng component EmptyState thay vì code inline */}
       {data.length === 0 && (
-        <div className="text-center py-20">
-          <div className="text-6xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold mb-2 theme-text-primary">Không có dữ liệu</h3>
-          <p className="theme-text-muted">Chưa có dữ liệu để hiển thị</p>
+        <div className="bg-white dark:bg-gray-800">
+          <EmptyState
+            title="Không có dữ liệu"
+            message="Chưa có dữ liệu để hiển thị"
+            icon="📭"
+          />
         </div>
       )}
     </div>

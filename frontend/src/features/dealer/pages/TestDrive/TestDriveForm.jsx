@@ -1,6 +1,71 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { 
+  PageContainer, 
+  PageHeader, 
+  Button, 
+  Card 
+} from '../../components'; // Giả sử import từ components
+
+// Component con cho Input (để tái sử dụng)
+const FormInput = ({ label, name, type = 'text', ...props }) => (
+  <div className="form-group">
+    <label 
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
+      {label}
+    </label>
+    <input
+      type={type}
+      id={name}
+      name={name}
+      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+      {...props}
+    />
+  </div>
+);
+
+// Component con cho Select (để tái sử dụng)
+const FormSelect = ({ label, name, children, ...props }) => (
+  <div className="form-group">
+    <label 
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
+      {label}
+    </label>
+    <select
+      id={name}
+      name={name}
+      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+      {...props}
+    >
+      {children}
+    </select>
+  </div>
+);
+
+// Component con cho Textarea (để tái sử dụng)
+const FormTextarea = ({ label, name, ...props }) => (
+  <div className="form-group">
+    <label 
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+    >
+      {label}
+    </label>
+    <textarea
+      id={name}
+      name={name}
+      rows="4"
+      className="w-full rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 shadow-sm focus:border-cyan-500 focus:ring-cyan-500"
+      {...props}
+    />
+  </div>
+);
+
 
 const TestDriveForm = () => {
   const navigate = useNavigate();
@@ -24,7 +89,7 @@ const TestDriveForm = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       alert('Đăng ký lái thử thành công!');
-      navigate('/dealer/test-drive');
+      navigate('/dealer/test-drives'); // Sửa: Dùng /dealer/test-drives thay vì /dealer/test-drive
     } catch (error) {
       console.error('Error creating test drive:', error);
       alert('Có lỗi xảy ra. Vui lòng thử lại!');
@@ -42,112 +107,122 @@ const TestDriveForm = () => {
   };
 
   return (
-    <div className="test-drive-form-page">
-      <button className="btn-back" onClick={() => navigate(-1)}>
-        ← Quay lại
-      </button>
+    <PageContainer>
+      <PageHeader
+        title="📝 Đăng ký lái thử mới"
+        actions={
+          <Button variant="outline" onClick={() => navigate(-1)}>
+            ← Quay lại
+          </Button>
+        }
+      />
 
-      <div className="page-header">
-        <h1>📝 Đăng ký lái thử mới</h1>
-      </div>
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+          {/* Cột trái: Thông tin khách hàng */}
+          <Card className="lg:col-span-2">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5 border-b border-gray-200 dark:border-gray-700 pb-4">
+              Thông tin khách hàng
+            </h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+              <FormInput
+                label="Tên khách hàng *"
+                type="text"
+                name="customerName"
+                value={formData.customerName}
+                onChange={handleChange}
+                required
+                placeholder="Nguyễn Văn A"
+              />
+              <FormInput
+                label="Số điện thoại *"
+                type="tel"
+                name="customerPhone"
+                value={formData.customerPhone}
+                onChange={handleChange}
+                required
+                placeholder="0901234567"
+              />
+            </div>
 
-      <form onSubmit={handleSubmit} className="test-drive-form">
-        <h3>Thông tin khách hàng</h3>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Tên khách hàng *</label>
-            <input
-              type="text"
-              name="customerName"
-              value={formData.customerName}
+            <FormInput
+              label="Email"
+              type="email"
+              name="customerEmail"
+              value={formData.customerEmail}
               onChange={handleChange}
-              required
-              placeholder="Nguyễn Văn A"
+              placeholder="email@example.com"
             />
-          </div>
+          </Card>
 
-          <div className="form-group">
-            <label>Số điện thoại *</label>
-            <input
-              type="tel"
-              name="customerPhone"
-              value={formData.customerPhone}
+          {/* Cột phải: Thông tin lái thử */}
+          <Card className="lg:col-span-1">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-5 border-b border-gray-200 dark:border-gray-700 pb-4">
+              Thông tin lái thử
+            </h3>
+
+            <div className="space-y-4">
+              <FormSelect 
+                label="Chọn xe *" 
+                name="vehicle" 
+                value={formData.vehicle} 
+                onChange={handleChange} 
+                required
+              >
+                <option value="">-- Chọn xe --</option>
+                <option value="model3">Model 3</option>
+                <option value="modelY">Model Y</option>
+                <option value="modelS">Model S</option>
+                <option value="modelX">Model X</option>
+              </FormSelect>
+
+              <FormInput
+                label="Ngày *"
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                required
+                min={new Date().toISOString().split('T')[0]}
+              />
+
+              <FormInput
+                label="Giờ *"
+                type="time"
+                name="time"
+                value={formData.time}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </Card>
+
+          {/* Ghi chú (Full width) */}
+          <Card className="lg:col-span-3">
+            <FormTextarea
+              label="Ghi chú"
+              name="notes"
+              value={formData.notes}
               onChange={handleChange}
-              required
-              placeholder="0901234567"
+              placeholder="Yêu cầu đặc biệt hoặc ghi chú..."
             />
-          </div>
+          </Card>
+
         </div>
 
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            name="customerEmail"
-            value={formData.customerEmail}
-            onChange={handleChange}
-            placeholder="email@example.com"
-          />
-        </div>
-
-        <h3>Thông tin lái thử</h3>
-        <div className="form-group">
-          <label>Chọn xe *</label>
-          <select name="vehicle" value={formData.vehicle} onChange={handleChange} required>
-            <option value="">-- Chọn xe --</option>
-            <option value="model3">Model 3</option>
-            <option value="modelY">Model Y</option>
-            <option value="modelS">Model S</option>
-            <option value="modelX">Model X</option>
-          </select>
-        </div>
-
-        <div className="form-row">
-          <div className="form-group">
-            <label>Ngày *</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-              min={new Date().toISOString().split('T')[0]}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Giờ *</label>
-            <input
-              type="time"
-              name="time"
-              value={formData.time}
-              onChange={handleChange}
-              required
-            />
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>Ghi chú</label>
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            rows="4"
-            placeholder="Yêu cầu đặc biệt hoặc ghi chú..."
-          />
-        </div>
-
-        <div className="form-actions">
-          <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>
+        {/* Nút Action */}
+        <div className="flex justify-end gap-3 mt-6">
+          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Hủy
-          </button>
-          <button type="submit" className="btn-primary">
+          </Button>
+          <Button type="submit" variant="primary">
             Đăng ký
-          </button>
+          </Button>
         </div>
       </form>
-    </div>
+    </PageContainer>
   );
 };
 

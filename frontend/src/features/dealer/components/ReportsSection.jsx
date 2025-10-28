@@ -45,8 +45,8 @@ const formatCurrency = (value) => {
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
     return (
-      <div className="dark:bg-gray-900 bg-white border dark:border-emerald-500/30 border-cyan-500/30 rounded-lg p-4 shadow-xl">
-        <p className="font-semibold dark:text-white text-gray-900 mb-2">{label}</p>
+      <div className="bg-white dark:bg-gray-900 border border-cyan-500/30 dark:border-emerald-500/30 rounded-lg p-4 shadow-xl">
+        <p className="font-semibold text-gray-900 dark:text-white mb-2">{label}</p>
         {payload.map((entry, index) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {entry.name}: {entry.value.toFixed(2)} tỷ
@@ -63,7 +63,7 @@ const ReportsSection = () => {
   const [selectedAging, setSelectedAging] = useState('all');
 
   const currentDebtData = debtType === 'AR' ? arData : apData;
-  
+
   // Calculate aging summary
   const agingSummary = {
     '0-30': 0,
@@ -78,8 +78,8 @@ const ReportsSection = () => {
     }
   });
 
-  const filteredDebtData = selectedAging === 'all' 
-    ? currentDebtData 
+  const filteredDebtData = selectedAging === 'all'
+    ? currentDebtData
     : currentDebtData.filter(item => item.aging === selectedAging);
 
   const totalOutstanding = currentDebtData.reduce((sum, item) => sum + item.outstanding, 0);
@@ -95,10 +95,10 @@ const ReportsSection = () => {
   };
 
   const exportToCSV = () => {
-    const headers = debtType === 'AR' 
+    const headers = debtType === 'AR'
       ? ['Mã', 'Khách hàng', 'Hóa đơn', 'Tổng tiền', 'Đã thanh toán', 'Còn nợ', 'Hạn thanh toán', 'Trạng thái']
       : ['Mã', 'Nhà cung cấp', 'Đơn hàng', 'Tổng tiền', 'Đã thanh toán', 'Còn nợ', 'Hạn thanh toán', 'Trạng thái'];
-    
+
     const rows = currentDebtData.map(item => [
       item.id,
       debtType === 'AR' ? item.customer : item.supplier,
@@ -120,11 +120,11 @@ const ReportsSection = () => {
 
   return (
     <div className="space-y-8">
-      
+
       {/* Sales Performance Chart */}
-      <div className="dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200 shadow-lg">
+      <div className="bg-white dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-bold flex items-center gap-3 dark:text-white text-gray-900">
+          <h2 className="text-2xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">
             📈 Báo cáo doanh số theo nhân viên
           </h2>
           <div className="flex gap-2">
@@ -170,11 +170,10 @@ const ReportsSection = () => {
                     <td className="py-3 px-4 text-right dark:text-emerald-400 text-emerald-600 font-semibold">{emp.sales} tỷ</td>
                     <td className="py-3 px-4 text-right dark:text-gray-400 text-gray-600">{emp.target} tỷ</td>
                     <td className="py-3 px-4 text-right">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                        parseFloat(completion) >= 100 ? 'dark:bg-emerald-500/20 bg-emerald-100 dark:text-emerald-400 text-emerald-600' : 
-                        parseFloat(completion) >= 80 ? 'dark:bg-yellow-500/20 bg-yellow-100 dark:text-yellow-400 text-yellow-600' : 
-                        'dark:bg-red-500/20 bg-red-100 dark:text-red-400 text-red-600'
-                      }`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${parseFloat(completion) >= 100 ? 'dark:bg-emerald-500/20 bg-emerald-100 dark:text-emerald-400 text-emerald-600' :
+                          parseFloat(completion) >= 80 ? 'dark:bg-yellow-500/20 bg-yellow-100 dark:text-yellow-400 text-yellow-600' :
+                            'dark:bg-red-500/20 bg-red-100 dark:text-red-400 text-red-600'
+                        }`}>
                         {completion}%
                       </span>
                     </td>
@@ -188,37 +187,35 @@ const ReportsSection = () => {
       </div>
 
       {/* Debt Management Section */}
-      <div className="dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl p-6 border dark:border-white/10 border-gray-200 shadow-lg">
-        
+      <div className="bg-white dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg">
+
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-bold flex items-center gap-3 dark:text-white text-gray-900">
+          <h2 className="text-2xl font-bold flex items-center gap-3 text-gray-900 dark:text-white">
             💸 Báo cáo công nợ & Aging
           </h2>
           <div className="flex gap-3">
-<button
-    onClick={() => setDebtType('AR')}
-    className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 backdrop-blur-md border
-      ${
-        debtType === 'AR'
-          ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent shadow-md shadow-emerald-500/30 scale-[1.03]'
-          : 'bg-white/70 dark:bg-white/10 border-gray-300/30 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-white/20'
-      }`}
-  >
-    👥 AR - Công nợ khách hàng
-  </button>
+            <button
+              onClick={() => setDebtType('AR')}
+              className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 backdrop-blur-md border
+      ${debtType === 'AR'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent shadow-md shadow-emerald-500/30 scale-[1.03]'
+                  : 'bg-white/70 dark:bg-white/10 border-gray-300/30 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-white/20'
+                }`}
+            >
+              👥 AR - Công nợ khách hàng
+            </button>
 
-  <button
-    onClick={() => setDebtType('AP')}
-    className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 backdrop-blur-md border
-      ${
-        debtType === 'AP'
-          ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-transparent shadow-md shadow-blue-500/30 scale-[1.03]'
-          : 'bg-white/70 dark:bg-white/10 border-gray-300/30 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-white/20'
-      }`}
-  >
-    🏢 AP - Công nợ nhà cung cấp
-  </button>
+            <button
+              onClick={() => setDebtType('AP')}
+              className={`px-6 py-2 rounded-xl font-medium transition-all duration-300 backdrop-blur-md border
+      ${debtType === 'AP'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-transparent shadow-md shadow-blue-500/30 scale-[1.03]'
+                  : 'bg-white/70 dark:bg-white/10 border-gray-300/30 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:bg-gray-100/80 dark:hover:bg-white/20'
+                }`}
+            >
+              🏢 AP - Công nợ nhà cung cấp
+            </button>
           </div>
         </div>
 
@@ -238,156 +235,154 @@ const ReportsSection = () => {
           </div>
         </div>
 
-{/* Aging Buckets */}
-<div className="mb-6">
-  <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-black dark:text-white">
-    📊 Phân tích theo Aging Buckets
-  </h3>
+        {/* Aging Buckets */}
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2 text-black dark:text-white">
+            📊 Phân tích theo Aging Buckets
+          </h3>
 
-  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-    {Object.entries(agingSummary).map(([bucket, amount]) => (
-      <button
-        key={bucket}
-        onClick={() => setSelectedAging(selectedAging === bucket ? 'all' : bucket)}
-        className={`p-5 rounded-2xl border backdrop-blur-md transition-all duration-300 transform
-          ${
-            selectedAging === bucket
-              ? 'bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border-emerald-400/60 dark:border-emerald-500/70 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)] scale-[1.02]'
-              : 'bg-white dark:bg-white/5 border-gray-500 dark:border-white/10 hover:border-emerald-400/40 hover:shadow-[0_0_12px_-4px_rgba(16,185,129,0.25)] hover:scale-[1.01]'
-          }`}
-      >
-        <div className="text-sm text-black dark:text-gray-900 mb-1">
-          {bucket} ngày
-        </div>
-        <div className="text-2xl font-bold text-black dark:text-black-500">
-          {formatCurrency(amount)}
-        </div>
-        <div className="text-xs text-black/80 dark:text-gray-400 mt-1">
-          {
-            currentDebtData.filter(
-              item => item.aging === bucket && item.outstanding > 0
-            ).length
-          } hóa đơn
-        </div>
-      </button>
-    ))}
-  </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Object.entries(agingSummary).map(([bucket, amount]) => (
+              <button
+                key={bucket}
+                onClick={() => setSelectedAging(selectedAging === bucket ? 'all' : bucket)}
+                className={`p-5 rounded-2xl border backdrop-blur-md transition-all duration-300 transform
+          ${selectedAging === bucket
+                    ? 'bg-gradient-to-br from-emerald-500/15 to-teal-500/5 border-emerald-400/60 dark:border-emerald-500/70 shadow-[0_0_15px_-3px_rgba(16,185,129,0.25)] scale-[1.02]'
+                    : 'bg-white dark:bg-white/5 border-gray-500 dark:border-white/10 hover:border-emerald-400/40 hover:shadow-[0_0_12px_-4px_rgba(16,185,129,0.25)] hover:scale-[1.01]'
+                  }`}
+              >
+                <div className="text-sm text-black dark:text-gray-900 mb-1">
+                  {bucket} ngày
+                </div>
+                <div className="text-2xl font-bold text-black dark:text-black-500">
+                  {formatCurrency(amount)}
+                </div>
+                <div className="text-xs text-black/80 dark:text-gray-400 mt-1">
+                  {
+                    currentDebtData.filter(
+                      item => item.aging === bucket && item.outstanding > 0
+                    ).length
+                  } hóa đơn
+                </div>
+              </button>
+            ))}
+          </div>
 
-  {selectedAging !== 'all' && (
-    <button
-      onClick={() => setSelectedAging('all')}
-      className="mt-4 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors flex items-center gap-1"
-    >
-      <span>←</span> <span>Xem tất cả</span>
-    </button>
-  )}
-</div>
+          {selectedAging !== 'all' && (
+            <button
+              onClick={() => setSelectedAging('all')}
+              className="mt-4 text-sm font-medium text-emerald-700 dark:text-emerald-400 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors flex items-center gap-1"
+            >
+              <span>←</span> <span>Xem tất cả</span>
+            </button>
+          )}
+        </div>
 
-{/* Action Buttons */}
-<div className="flex gap-3 mb-6">
-  <button
-    onClick={exportToCSV}
-    className="px-6 py-2 rounded-lg font-semibold flex items-center gap-2 
+        {/* Action Buttons */}
+        <div className="flex gap-3 mb-6">
+          <button
+            onClick={exportToCSV}
+            className="px-6 py-2 rounded-lg font-semibold flex items-center gap-2 
                bg-black text-white hover:bg-neutral-800 
                dark:bg-emerald-600 dark:hover:bg-emerald-700 
                transition-colors shadow-md"
-  >
-    📥 Export CSV
-  </button>
-</div>
-
-{/* Debt Table */}
-<div className="overflow-x-auto rounded-2xl shadow-md border border-gray-200 dark:border-gray-100 bg-white dark:bg-gray-100">
-  <table className="w-full rounded-2xl overflow-hidden">
-    <thead>
-      <tr className="border-b-2 border-gray-200 dark:border-gray-700 bg-sky-50 dark:bg-sky-900/30">
-        {[
-          "Mã",
-          debtType === "AR" ? "Khách hàng" : "Nhà cung cấp",
-          "Hóa đơn",
-          "Tổng tiền",
-          "Đã thanh toán",
-          "Còn nợ",
-          "Hạn TT",
-          "Aging",
-          "Trạng thái",
-        ].map((header, i) => (
-          <th
-            key={i}
-            className="text-left py-4 px-4 text-black-100 dark:text-black-200 font-semibold text-sm uppercase tracking-wider"
           >
-            {header}
-          </th>
-        ))}
-      </tr>
-    </thead>
+            📥 Export CSV
+          </button>
+        </div>
 
-    <tbody className="divide-y divide-gray-200 dark:divide-gray-300">
-      {filteredDebtData.map((item, idx) => (
-        <tr
-          key={idx}
-          className="hover:bg-sky-50/60 dark:hover:bg-sky-900/20 transition-all"
-        >
-          <td className="py-4 px-4 font-semibold text-black">
-            {item.id}
-          </td>
+        {/* Debt Table */}
+        <div className="overflow-x-auto rounded-2xl shadow-md border border-gray-200 dark:border-gray-100 bg-white dark:bg-gray-100">
+          <table className="w-full rounded-2xl overflow-hidden">
+            <thead>
+              <tr className="border-b-2 border-gray-200 dark:border-gray-700 bg-sky-50 dark:bg-sky-900/30">
+                {[
+                  "Mã",
+                  debtType === "AR" ? "Khách hàng" : "Nhà cung cấp",
+                  "Hóa đơn",
+                  "Tổng tiền",
+                  "Đã thanh toán",
+                  "Còn nợ",
+                  "Hạn TT",
+                  "Aging",
+                  "Trạng thái",
+                ].map((header, i) => (
+                  <th
+                    key={i}
+                    className="text-left py-4 px-4 text-black-100 dark:text-black-200 font-semibold text-sm uppercase tracking-wider"
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
-          <td className="py-4 px-4 text-gray-800 dark:text-gray-600 font-medium">
-            {debtType === "AR" ? item.customer : item.supplier}
-          </td>
+            <tbody className="divide-y divide-gray-200 dark:divide-gray-300">
+              {filteredDebtData.map((item, idx) => (
+                <tr
+                  key={idx}
+                  className="hover:bg-sky-50/60 dark:hover:bg-sky-900/20 transition-all"
+                >
+                  <td className="py-4 px-4 font-semibold text-black">
+                    {item.id}
+                  </td>
 
-          <td className="py-4 px-4">
-            <span className="text-sky-600 dark:text-sky-400 font-semibold hover:underline cursor-pointer">
-              {item.invoice}
-            </span>
-          </td>
+                  <td className="py-4 px-4 text-gray-800 dark:text-gray-600 font-medium">
+                    {debtType === "AR" ? item.customer : item.supplier}
+                  </td>
 
-          <td className="py-4 px-4 text-right text-gray-900 dark:text-gray-700 font-semibold">
-            {formatCurrency(item.amount)}
-          </td>
+                  <td className="py-4 px-4">
+                    <span className="text-sky-600 dark:text-sky-400 font-semibold hover:underline cursor-pointer">
+                      {item.invoice}
+                    </span>
+                  </td>
 
-          <td className="py-4 px-4 text-right">
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
-              {formatCurrency(item.paid)}
-            </span>
-          </td>
+                  <td className="py-4 px-4 text-right text-gray-900 dark:text-gray-700 font-semibold">
+                    {formatCurrency(item.amount)}
+                  </td>
 
-          <td className="py-4 px-4 text-right">
-            <span
-              className={`font-bold ${
-                item.outstanding > 0
-                  ? "text-red-600 dark:text-red-600"
-                  : "text-gray-500 dark:text-gray-400"
-              }`}
-            >
-              {formatCurrency(item.outstanding)}
-            </span>
-          </td>
+                  <td className="py-4 px-4 text-right">
+                    <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                      {formatCurrency(item.paid)}
+                    </span>
+                  </td>
 
-          <td className="py-4 px-4 text-center text-sm text-gray-700 dark:text-gray-400">
-            {item.dueDate}
-          </td>
+                  <td className="py-4 px-4 text-right">
+                    <span
+                      className={`font-bold ${item.outstanding > 0
+                          ? "text-red-600 dark:text-red-600"
+                          : "text-gray-500 dark:text-gray-400"
+                        }`}
+                    >
+                      {formatCurrency(item.outstanding)}
+                    </span>
+                  </td>
 
-          <td className="py-4 px-4 text-center">
-            <span className="inline-flex items-center px-3 py-1.5 bg-sky-100 dark:bg-sky-800/40 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-semibold border border-sky-200 dark:border-sky-700">
-              {item.aging}
-            </span>
-          </td>
+                  <td className="py-4 px-4 text-center text-sm text-gray-700 dark:text-gray-400">
+                    {item.dueDate}
+                  </td>
 
-          <td className="py-4 px-4 text-center">
-            <span
-              className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${getStatusColor(
-                item.status
-              )}`}
-            >
-              {item.status}
-            </span>
-          </td>
-        </tr>
-      ))}
-    </tbody>
-  </table>
-</div>
+                  <td className="py-4 px-4 text-center">
+                    <span className="inline-flex items-center px-3 py-1.5 bg-sky-100 dark:bg-sky-800/40 text-sky-700 dark:text-sky-300 rounded-lg text-xs font-semibold border border-sky-200 dark:border-sky-700">
+                      {item.aging}
+                    </span>
+                  </td>
+
+                  <td className="py-4 px-4 text-center">
+                    <span
+                      className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold ${getStatusColor(
+                        item.status
+                      )}`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
 
       </div>
 

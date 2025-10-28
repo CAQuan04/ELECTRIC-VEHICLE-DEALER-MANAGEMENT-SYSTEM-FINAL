@@ -21,5 +21,35 @@ namespace EVDealer.BE.DAL.Repositories
             return await _context.Users.Include(u => u.Role).ThenInclude(r => r.RolePermissions).ThenInclude(rp => rp.Permission).FirstOrDefaultAsync(u => u.Username == username);
 
         }
+
+        //Phần chức năng quản lý user cho Admin
+        public async Task<User> GetByIdAsync(int userId)
+        {
+            //Khi lấy một user, luôn kèm theo thông tin Role và Dealer của họ
+            return await _context.Users.Include(u => u.Role)
+                .Include(u => u.Dealer)
+                .FirstOrDefaultAsync(u => u.UserId == userId);
+        }
+        public async Task<IEnumerable<User>> GetAllAsync()
+        {
+            //Lấy tất cả user và thông tin liên quan
+            return await _context.Users
+                .Include(u => u.Role)
+                .Include(u => u.Dealer)
+                .ToListAsync();
+        }
+        public async Task AddAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+        }
+        public void Update(User user)
+        {
+            _context.Users.Update(user);
+        }
+        public async Task<bool> SaveChangesAsync()
+        {
+            return await _context.SaveChangesAsync() > 0;
+        }
+
     }
 }
