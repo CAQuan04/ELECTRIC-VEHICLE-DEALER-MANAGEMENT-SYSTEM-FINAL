@@ -1,154 +1,123 @@
+import React, { useState, useEffect } from "react";
 
-import React, { useState } from "react";
-import { Button } from "../../components";
-
-const VehicleForm = ({ onSaved }) => {
+const VehicleForm = ({ initial = null, onSaved, canDelete = false, onDelete }) => {
   const [form, setForm] = useState({
-    brand: "Tesla",
+    vehicle_id: "",
+    brand: "",
     model: "",
-    variant: "",
-    trim: "",
+    version: "",
     base_price: "",
     status: "active",
-    battery_kwh: "",
     features: [],
   });
-  const [saving, setSaving] = useState(false);
 
-  // Mock vehicle list for demonstration
-  const mockVehicles = [];
+  useEffect(() => {
+    if (initial) setForm(initial);
+  }, [initial]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSave = (e) => {
     e.preventDefault();
-    setSaving(true);
-    try {
-      const payload = {
-        brand: form.brand,
-        model: form.model,
-        variant: form.variant,
-        trim: form.trim || null,
-        price: Number(form.base_price || 0),
-        status: form.status,
-        specifications: {
-          battery: Number(form.battery_kwh || 0),
-        },
-        features: form.features,
-      };
-
-      // Adding the new vehicle to mock data
-      const newVehicle = {
-        id: `vehicle_${Date.now()}`,
-        ...payload,
-      };
-
-      mockVehicles.push(newVehicle);
-
-      // Mock response
-      const res = { success: true, data: newVehicle };
-
-      if (res?.success) {
-        onSaved?.(res.data);
-        alert("✅ Đã tạo xe mới!");
-        setForm({
-          ...form,
-          model: "",
-          variant: "",
-          trim: "",
-          base_price: "",
-          battery_kwh: "",
-          features: [],
-        });
-      } else {
-        alert("❌ Tạo xe thất bại: " + (res?.error || "UNKNOWN"));
-      }
-    } catch (err) {
-      console.error(err);
-      alert("❌ Lỗi khi tạo xe");
-    } finally {
-      setSaving(false);
-    }
+    if (!form.brand.trim() || !form.model.trim()) return alert("Nhập brand và model");
+    onSaved &&
+      onSaved({
+        ...form,
+        base_price: Number(form.base_price || 0),
+        features: Array.isArray(form.features) ? form.features : [],
+      });
+    if (!initial)
+      setForm({
+        vehicle_id: "",
+        brand: "",
+        model: "",
+        version: "",
+        base_price: "",
+        status: "active",
+        features: [],
+      });
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <label className="flex flex-col text-sm">
-          Hãng
+    <form onSubmit={handleSave} className="space-y-3 text-sm text-slate-200">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div>
+          <label className="text-slate-500">Brand</label>
           <input
-            name="brand"
             value={form.brand}
-            onChange={handleChange}
-            className="input"
+            onChange={(e) => setForm({ ...form, brand: e.target.value })}
+            className="w-full rounded-xl border border-slate-700 bg-[#0f172a]/70 px-3 py-2 text-slate-100"
           />
-        </label>
-        <label className="flex flex-col text-sm">
-          Model
+        </div>
+        <div>
+          <label className="text-slate-500">Model</label>
           <input
-            name="model"
             value={form.model}
-            onChange={handleChange}
-            className="input"
-            placeholder="Model 3"
-            required
+            onChange={(e) => setForm({ ...form, model: e.target.value })}
+            className="w-full rounded-xl border border-slate-700 bg-[#0f172a]/70 px-3 py-2 text-slate-100"
           />
-        </label>
-        <label className="flex flex-col text-sm">
-          Phiên bản
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div>
+          <label className="text-slate-500">Version</label>
           <input
-            name="variant"
-            value={form.variant}
-            onChange={handleChange}
-            className="input"
-            placeholder="Performance"
+            value={form.version}
+            onChange={(e) => setForm({ ...form, version: e.target.value })}
+            className="w-full rounded-xl border border-slate-700 bg-[#0f172a]/70 px-3 py-2 text-slate-100"
           />
-        </label>
-        <label className="flex flex-col text-sm">
-          Trim
+        </div>
+        <div>
+          <label className="text-slate-500">Giá (VND)</label>
           <input
-            name="trim"
-            value={form.trim}
-            onChange={handleChange}
-            className="input"
-            placeholder="Long Range"
-          />
-        </label>
-        <label className="flex flex-col text-sm">
-          Giá cơ bản (VND)
-          <input
-            name="base_price"
             type="number"
             value={form.base_price}
-            onChange={handleChange}
-            className="input"
-            placeholder="Enter base price"
+            onChange={(e) => setForm({ ...form, base_price: e.target.value })}
+            className="w-full rounded-xl border border-slate-700 bg-[#0f172a]/70 px-3 py-2 text-slate-100"
           />
-        </label>
-        <label className="flex flex-col text-sm">
-          Pin (kWh)
-          <input
-            name="battery_kwh"
-            type="number"
-            value={form.battery_kwh}
-            onChange={handleChange}
-            className="input"
-            placeholder="Enter battery capacity"
-          />
-        </label>
+        </div>
+        <div>
+          <label className="text-slate-500">Trạng thái</label>
+          <select
+            value={form.status}
+            onChange={(e) => setForm({ ...form, status: e.target.value })}
+            className="w-full rounded-xl border border-slate-700 bg-[#0f172a]/70 px-3 py-2 text-slate-100"
+          >
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
       </div>
-      <div className="flex gap-4">
-        <Button
+
+      <div>
+        <label className="text-slate-500">Tính năng (phân tách bằng dấu phẩy)</label>
+        <input
+          value={(form.features || []).join(", ")}
+          onChange={(e) =>
+            setForm({
+              ...form,
+              features: e.target.value.split(",").map((s) => s.trim()).filter(Boolean),
+            })
+          }
+          className="w-full rounded-xl border border-slate-700 bg-[#0f172a]/70 px-3 py-2 text-slate-100"
+        />
+      </div>
+
+      <div className="flex justify-end gap-2">
+        {canDelete && (
+          <button
+            type="button"
+            onClick={() => confirm("Xoá xe này?") && onDelete(form)}
+            className="px-4 py-2 rounded-xl border border-rose-600 text-rose-300 hover:bg-rose-600/10"
+          >
+            Xoá
+          </button>
+        )}
+        <button
           type="submit"
-          variant="primary"
-          disabled={saving}
-          className="w-full p-4 rounded-lg bg-green-500 hover:bg-green-600 text-white font-bold"
+          className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-semibold"
         >
-          {saving ? "Đang lưu..." : "➕ Tạo xe"}
-        </Button>
+          {initial ? "Lưu xe" : "Tạo xe"}
+        </button>
       </div>
     </form>
   );
