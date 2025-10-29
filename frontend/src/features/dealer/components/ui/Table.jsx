@@ -1,30 +1,36 @@
 import React from 'react';
-import EmptyState from './EmptyState'; // Sử dụng EmptyState component
+import EmptyState from './EmptyState';
 
 /**
- * Table - Responsive table component
+ * Table - Modern responsive table component with enhanced dark mode
  * @param {array} columns - Array of column definitions: [{ key, label, render, className, tdClassName }]
  * @param {array} data - Array of data objects
  * @param {function} onRowClick - Click handler for rows (optional)
  */
 const Table = ({ columns, data, onRowClick, className = '' }) => {
   return (
-    
-    <div className={`shadow-xl rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden ${className}`}>
+    <div className={`
+      relative overflow-hidden
+      bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90
+      backdrop-blur-xl rounded-3xl 
+      border border-gray-200 dark:border-gray-700/50
+      shadow-xl dark:shadow-emerald-500/5
+      ${className}
+    `}>
       <div className="overflow-x-auto">
-        {/* Màu nền và viền cho Dark Mode */}
-        {/* SỬA: Đổi dark:divide-gray-500 -> dark:divide-gray-700 */}
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          
-          {/* THEAD - Background tối, chữ sáng */}
-          {/* SỬA: Dùng màu nền nhất quán hơn */}
-          <thead className="bg-cyan-100 dark:bg-gray-700/50"> 
-            <tr>
+        <table className="min-w-full">
+          {/* Table Header */}
+          <thead className="bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-gray-700/80 dark:to-gray-800/80 backdrop-blur-sm">
+            <tr className="border-b-2 border-gray-200 dark:border-gray-600">
               {columns.map((column) => (
                 <th 
                   key={column.key}
-                  // Tăng kích thước chữ từ text-xs lên text-sm
-                  className={`px-6 py-4 text-left text-sm font-semibold uppercase tracking-wider text-gray-700 dark:text-gray-300 ${column.className || ''}`}
+                  className={`
+                    px-8 py-5 text-left 
+                    text-sm font-black uppercase tracking-wider
+                    text-gray-800 dark:text-gray-200
+                    ${column.className || ''}
+                  `}
                 >
                   {column.label}
                 </th>
@@ -32,24 +38,29 @@ const Table = ({ columns, data, onRowClick, className = '' }) => {
             </tr>
           </thead>
           
-          {/* TBODY - Background tối, chữ sáng */}
-          {/* SỬA: Đổi dark:bg-gray-900 -> dark:bg-gray-800 và dark:divide-gray-700 */}
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          {/* Table Body */}
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700/50">
             {data.length > 0 && data.map((row, rowIndex) => (
               <tr 
                 key={row.id || rowIndex}
-                // Hiệu ứng hover cho cả Light/Dark Mode
-                // SỬA: Đổi dark:hover:bg-gray-700 -> dark:hover:bg-gray-700/50
-                className={`transition duration-200 ${onRowClick ? 'cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700/50' : ''}`}
+                className={`
+                  group transition-all duration-300
+                  ${onRowClick ? 'cursor-pointer hover:bg-cyan-50 dark:hover:bg-emerald-500/10 hover:scale-[1.01]' : ''}
+                  hover:shadow-lg
+                `}
                 onClick={() => onRowClick && onRowClick(row)}
               >
                 {columns.map((column) => (
                   <td 
                     key={column.key} 
-                    
-                    // Màu chữ: Dark mode đổi thành trắng/xám sáng
-                    // SỬA: Đổi text-gray-900 dark:text-gray-100 -> text-gray-800 dark:text-gray-200
-                    className={`px-6 py-4 whitespace-nowrap text-base text-gray-800 dark:text-gray-200 ${column.tdClassName || ''}`}
+                    className={`
+                      px-8 py-5 whitespace-nowrap 
+                      text-base font-medium
+                      text-gray-800 dark:text-gray-200
+                      group-hover:text-cyan-700 dark:group-hover:text-emerald-300
+                      transition-colors duration-300
+                      ${column.tdClassName || ''}
+                    `}
                   >
                     {column.render ? column.render(row) : row[column.key]}
                   </td>
@@ -61,9 +72,8 @@ const Table = ({ columns, data, onRowClick, className = '' }) => {
       </div>
       
       {/* Empty State */}
-      {/* SỬA: Dùng component EmptyState thay vì code inline */}
       {data.length === 0 && (
-        <div className="bg-white dark:bg-gray-800">
+        <div className="p-8">
           <EmptyState
             title="Không có dữ liệu"
             message="Chưa có dữ liệu để hiển thị"

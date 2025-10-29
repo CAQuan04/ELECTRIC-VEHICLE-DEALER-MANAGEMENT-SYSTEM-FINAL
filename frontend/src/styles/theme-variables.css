@@ -1,5 +1,6 @@
 /* ========================================
    THEME VARIABLES - Centralized Theme System
+   Đã cập nhật: Dark Mode dùng tông Blue/Indigo
    ======================================== */
 
 :root {
@@ -33,7 +34,7 @@
 }
 
 html.dark {
-  /* Dark Mode Colors */
+  /* Dark Mode Colors - ĐÃ THAY THẾ EMERALD BẰNG BLUE */
   --bg-page: rgb(3, 7, 18);
   --bg-page-gradient: linear-gradient(to bottom right, rgb(3, 7, 18), rgb(17, 24, 39), rgb(3, 7, 18));
   
@@ -44,22 +45,22 @@ html.dark {
   --bg-input-focus: rgb(31, 41, 55);
   
   --bg-table-header: rgba(17, 24, 39, 0.6);
-  --hover-bg: rgba(16, 185, 129, 0.1);
+  --hover-bg: rgba(59, 130, 246, 0.1); /* Thay đổi từ Emerald -> Blue */
   
   --border-default: rgba(55, 65, 81, 0.5);
-  --border-hover: rgba(16, 185, 129, 0.5);
-  --border-focus: rgb(16, 185, 129);
+  --border-hover: rgba(59, 130, 246, 0.5); /* Thay đổi từ Emerald -> Blue */
+  --border-focus: rgb(59, 130, 246); /* Thay đổi từ Emerald -> Blue */
   
   --text-primary: rgb(255, 255, 255);
   --text-secondary: rgb(209, 213, 219);
   --text-muted: rgb(156, 163, 175);
   
   --shadow-default: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  --shadow-hover: 0 25px 50px -12px rgba(16, 185, 129, 0.3);
+  --shadow-hover: 0 25px 50px -12px rgba(59, 130, 246, 0.3); /* Thay đổi từ Emerald -> Blue */
   
-  --accent-primary: rgb(16, 185, 129);
-  --accent-secondary: rgb(5, 150, 105);
-  --accent-gradient: linear-gradient(to right, rgb(16, 185, 129), rgb(5, 150, 105));
+  --accent-primary: rgb(59, 130, 246); /* Thay đổi từ Emerald -> Blue (Blue-500) */
+  --accent-secondary: rgb(30, 64, 175); /* Thay đổi từ Emerald -> Blue (Blue-800) */
+  --accent-gradient: linear-gradient(to right, rgb(59, 130, 246), rgb(30, 64, 175)); /* Thay đổi từ Emerald -> Blue */
 }
 
 /* ========================================

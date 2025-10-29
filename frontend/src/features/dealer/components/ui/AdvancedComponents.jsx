@@ -2,36 +2,61 @@ import React from 'react';
 
 /**
  * InfoRow - Component hiển thị thông tin dạng key-value
- * @param {string} label - Nhãn (key)
- * @param {string|ReactNode} value - Giá trị (value)
- * @param {string} icon - Icon emoji (optional)
  */
 export const InfoRow = ({ label, value, icon }) => {
   return (
-    <div className="flex justify-between items-center py-3 border-b last:border-0 theme-border">
-      <span className="theme-text-muted flex items-center gap-2">
-        {icon && <span>{icon}</span>}
+    <div className="group flex justify-between items-center py-4 border-b last:border-0 border-gray-200/50 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-transparent dark:hover:from-emerald-500/5 dark:hover:to-transparent transition-all duration-300 rounded-lg px-2">
+      <span className="flex items-center gap-3 text-gray-600 dark:text-gray-400 font-medium">
+        {icon && <span className="text-xl group-hover:scale-110 transition-transform duration-300">{icon}</span>}
         {label}
       </span>
-      <span className="theme-text-primary font-semibold">{value}</span>
+      <span className="font-bold text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-emerald-400 transition-colors duration-300">{value}</span>
     </div>
   );
 };
 
 /**
  * InfoSection - Card wrapper cho nhóm InfoRow
- * @param {string} title - Tiêu đề section
- * @param {string} icon - Icon emoji
- * @param {ReactNode} children - InfoRow components
  */
 export const InfoSection = ({ title, icon, children }) => {
   return (
-    <div className="group theme-card rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.01]">
-      <h3 className="text-xl font-bold mb-4 flex items-center gap-2 theme-text-primary">
-        {icon && <span className="group-hover:scale-110 transition-transform duration-300">{icon}</span>}
-        {title}
-      </h3>
-      <div className="space-y-0">
+    <div className="group relative overflow-hidden bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-500 hover:shadow-2xl hover:scale-[1.01] hover:border-cyan-300 dark:hover:border-emerald-500/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 dark:from-emerald-500/5 dark:to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <div className="relative z-10">
+        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-900 dark:text-white">
+          {icon && <span className="text-3xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">{icon}</span>}
+          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent">{title}</span>
+        </h3>
+        <div className="space-y-0">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * GridCard - Card cho grid layout
+ */
+export const GridCard = ({ children, onClick, className = '' }) => {
+  return (
+    <div
+      onClick={onClick}
+      className={`
+        group relative overflow-hidden
+        bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90
+        backdrop-blur-xl rounded-3xl p-8 
+        border border-gray-200 dark:border-gray-700/50
+        shadow-lg dark:shadow-emerald-500/5
+        hover:shadow-2xl hover:scale-105 hover:-translate-y-2
+        hover:border-cyan-400 dark:hover:border-emerald-500
+        transition-all duration-500 cursor-pointer
+        ${className}
+      `}
+    >
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-emerald-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      <div className="relative z-10">
         {children}
       </div>
     </div>
@@ -39,54 +64,30 @@ export const InfoSection = ({ title, icon, children }) => {
 };
 
 /**
- * GridCard - Card cho grid layout (dùng cho PromotionList, VehicleList...)
- * @param {ReactNode} children - Nội dung card
- * @param {function} onClick - Xử lý click
- * @param {string} className - Custom classes
- */
-export const GridCard = ({ children, onClick, className = '' }) => {
-  return (
-    <div
-      onClick={onClick}
-      className={`
-        group theme-card rounded-2xl p-6 border
-        hover:scale-105 
-        transition-all duration-300 cursor-pointer
-        ${className}
-      `}
-    >
-      {children}
-    </div>
-  );
-};
-
-/**
- * DetailHeader - Header cho detail pages với back button
- * @param {string} title - Tiêu đề
- * @param {string} subtitle - Phụ đề (optional)
- * @param {function} onBack - Xử lý back
- * @param {ReactNode} badge - Badge component (optional)
- * @param {ReactNode} actions - Action buttons (optional)
+ * DetailHeader - Header cho detail pages
  */
 export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
   return (
-    <div className="mb-8">
+    <div className="mb-10">
       {onBack && (
         <button
           onClick={onBack}
-          className="theme-text-muted hover:text-primary mb-4 flex items-center gap-2 transition-colors"
+          className="group flex items-center gap-2 mb-6 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-emerald-400 hover:bg-cyan-50 dark:hover:bg-emerald-500/10 transition-all duration-300"
         >
-          ← Quay lại
+          <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span>
+          <span className="font-semibold">Quay lại</span>
         </button>
       )}
       <div className="flex items-start justify-between">
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-4xl font-bold theme-text-primary">{title}</h1>
+          <div className="flex items-center gap-4 mb-3">
+            <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent">
+              {title}
+            </h1>
             {badge}
           </div>
           {subtitle && (
-            <p className="theme-text-muted text-lg">{subtitle}</p>
+            <p className="text-lg text-gray-600 dark:text-gray-400 font-medium">{subtitle}</p>
           )}
         </div>
         {actions && (
@@ -100,35 +101,33 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
 };
 
 /**
- * ListSection - Section wrapper cho danh sách (bullet list)
- * @param {string} title - Tiêu đề
- * @param {string} icon - Icon emoji
- * @param {array} items - Mảng các items (strings)
- * @param {string} itemIcon - Icon cho mỗi item (default: ✓)
+ * ListSection - Section wrapper cho danh sách
  */
 export const ListSection = ({ title, icon, items = [], itemIcon = '✓' }) => {
   return (
-    <div className="theme-card rounded-2xl p-6 border transition-colors duration-300">
-      <h3 className="text-xl font-bold theme-text-primary mb-4 flex items-center gap-2">
-        {icon && <span>{icon}</span>}
-        {title}
-      </h3>
-      <ul className="space-y-3">
-        {items.map((item, index) => (
-          <li key={index} className="flex items-start gap-3 theme-text-secondary">
-            <span style={{ color: 'var(--accent-primary)' }} className="flex-shrink-0">{itemIcon}</span>
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
+    <div className="group relative overflow-hidden bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-500 hover:shadow-2xl hover:border-cyan-300 dark:hover:border-emerald-500/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 dark:from-emerald-500/5 dark:to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <div className="relative z-10">
+        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+          {icon && <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{icon}</span>}
+          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent">{title}</span>
+        </h3>
+        <ul className="space-y-4">
+          {items.map((item, index) => (
+            <li key={index} className="group/item flex items-start gap-4 text-gray-700 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-emerald-400 transition-colors duration-300">
+              <span className="flex-shrink-0 text-cyan-600 dark:text-emerald-400 text-xl group-hover/item:scale-125 transition-transform duration-300">{itemIcon}</span>
+              <span className="font-medium">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
 
 /**
- * ActionBar - Bar chứa action buttons (thường ở cuối trang)
- * @param {ReactNode} children - Button components
- * @param {string} align - Alignment: left, center, right (default: left)
+ * ActionBar - Bar chứa action buttons
  */
 export const ActionBar = ({ children, align = 'left' }) => {
   const alignClass = {
@@ -138,7 +137,7 @@ export const ActionBar = ({ children, align = 'left' }) => {
   }[align];
 
   return (
-    <div className="theme-card rounded-2xl p-6 border transition-colors duration-300">
+    <div className="bg-white/80 dark:bg-gradient-to-r dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-300">
       <div className={`flex gap-4 ${alignClass}`}>
         {children}
       </div>
@@ -148,36 +147,35 @@ export const ActionBar = ({ children, align = 'left' }) => {
 
 /**
  * StatusTimeline - Timeline cho các status/events
- * @param {array} events - Mảng events {date, title, description, status}
  */
 export const StatusTimeline = ({ events = [] }) => {
   const getStatusColor = (status) => {
     const colors = {
-      success: 'dark:bg-emerald-500 bg-emerald-600',
-      warning: 'dark:bg-yellow-500 bg-yellow-600',
-      info: 'dark:bg-blue-500 bg-blue-600',
-      danger: 'dark:bg-red-500 bg-red-600',
-      default: 'dark:bg-gray-500 bg-gray-600'
+      success: 'bg-emerald-500 shadow-emerald-500/50',
+      warning: 'bg-yellow-500 shadow-yellow-500/50',
+      info: 'bg-blue-500 shadow-blue-500/50',
+      danger: 'bg-red-500 shadow-red-500/50',
+      default: 'bg-gray-500 shadow-gray-500/50'
     };
     return colors[status] || colors.default;
   };
 
   return (
-    <div className="theme-card rounded-2xl p-6 border transition-colors duration-300">
-      <div className="space-y-6">
+    <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-300">
+      <div className="space-y-8">
         {events.map((event, index) => (
-          <div key={index} className="flex gap-4">
+          <div key={index} className="group flex gap-6">
             <div className="flex flex-col items-center">
-              <div className={`w-3 h-3 rounded-full ${getStatusColor(event.status)}`} />
+              <div className={`w-4 h-4 rounded-full shadow-lg ${getStatusColor(event.status)} group-hover:scale-125 transition-transform duration-300`} />
               {index < events.length - 1 && (
-                <div className="w-px h-full mt-2" style={{ backgroundColor: 'var(--border-default)' }} />
+                <div className="w-0.5 h-full mt-2 bg-gradient-to-b from-gray-300 to-gray-200 dark:from-gray-600 dark:to-gray-700" />
               )}
             </div>
-            <div className="flex-1 pb-6">
-              <div className="theme-text-muted text-sm mb-1">{event.date}</div>
-              <div className="theme-text-primary font-semibold mb-1">{event.title}</div>
+            <div className="flex-1 pb-8">
+              <div className="text-sm font-semibold text-cyan-600 dark:text-emerald-400 mb-2">{event.date}</div>
+              <div className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-cyan-600 dark:group-hover:text-emerald-400 transition-colors duration-300">{event.title}</div>
               {event.description && (
-                <div className="theme-text-muted text-sm">{event.description}</div>
+                <div className="text-gray-600 dark:text-gray-400">{event.description}</div>
               )}
             </div>
           </div>
@@ -188,100 +186,75 @@ export const StatusTimeline = ({ events = [] }) => {
 };
 
 /**
- * MetricCard - Card hiển thị metric với icon và trend
- * @param {string} icon - Icon emoji
- * @param {string} title - Nhãn
- * @param {string|number} value - Giá trị
- * @param {string} trend - up/down/neutral
- * @param {string} change - Mô tả thay đổi
- * @param {string} color - Color theme: emerald, blue, yellow, red
- */
+ * MetricCard - Card hiển thị metric với icon và trend
+ */
 export const MetricCard = ({ icon, title, value, trend, change, color = 'emerald' }) => {
-  const colorClasses = {
-    emerald: 'dark:border-emerald-500/30 dark:bg-emerald-500/5 border-emerald-300 bg-emerald-50',
-    blue: 'dark:border-blue-500/30 dark:bg-blue-500/5 border-blue-300 bg-blue-50',
-    yellow: 'dark:border-yellow-500/30 dark:bg-yellow-500/5 border-yellow-300 bg-yellow-50',
-    red: 'dark:border-red-500/30 dark:bg-red-500/5 border-red-300 bg-red-50',
-    gray: 'dark:border-gray-500/30 dark:bg-gray-500/5 border-gray-300 bg-gray-50'
-  };
+  const colorClasses = {
+    emerald: 'border-emerald-300/50 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-emerald-600/5 shadow-emerald-500/20',
+    blue: 'border-blue-300/50 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-500/10 dark:to-blue-600/5 shadow-blue-500/20',
+    yellow: 'border-yellow-300/50 dark:border-yellow-500/30 bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-500/10 dark:to-yellow-600/5 shadow-yellow-500/20',
+    red: 'border-red-300/50 dark:border-red-500/30 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-500/10 dark:to-red-600/5 shadow-red-500/20',
+    gray: 'border-gray-300/50 dark:border-gray-500/30 bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-gray-500/10 dark:to-gray-600/5 shadow-gray-500/20'
+  };
 
-  const trendIcons = {
-    up: '📈',
-    down: '📉',
-    neutral: '➡️'
-  };
+  const trendIcons = {
+    up: '📈',
+    down: '📉',
+    neutral: '➡️'
+  };
 
-  const trendColors = {
-    up: 'dark:text-emerald-400 text-emerald-600',
-    down: 'dark:text-red-400 text-red-600',
-    neutral: 'dark:text-gray-400 text-gray-600'
-  };
+  const trendColors = {
+    up: 'text-emerald-600 dark:text-emerald-400',
+    down: 'text-red-600 dark:text-red-400',
+    neutral: 'text-gray-600 dark:text-gray-400'
+  };
 
-  return (
-    // Lớp "flex flex-col" đảm bảo các phần tử bên trong xếp chồng lên nhau
-    <div className={`backdrop-blur-xl rounded-2xl p-6 shadow-lg border transition-colors duration-300 ${colorClasses[color]} flex flex-col justify-between h-full`}>
-      
-      {/* START: Bố cục mới với Flexbox */}
-      {/* Container chính chia 2 cột: Trái (Icon/Text) và Phải (Value) */}
-      <div className="flex justify-between items-start">
-        
-        {/* CỘT BÊN TRÁI: Icon và Text */}
+  return (
+    <div className={`group relative overflow-hidden backdrop-blur-xl rounded-3xl p-8 shadow-xl border transition-all duration-500 hover:scale-105 hover:shadow-2xl ${colorClasses[color]} flex flex-col justify-between h-full`}>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      <div className="relative z-10 flex justify-between items-start">
         <div className="flex flex-col">
-          {/* Icon và Trend Icon */}
-          <div className="flex items-start justify-between mb-4">
-            <span className="text-4xl">{icon}</span>
-            {/* Bỏ trend icon ở đây nếu muốn nó ở cạnh 'change', hoặc giữ lại nếu muốn ở góc trên */}
-            {/* {trend && <span className="text-xl ml-2">{trendIcons[trend]}</span>} */}
-          </div>
-          {/* Title */}
-          <div className="theme-text-muted text-sm mb-1">{title}</div>
-          {/* Change (Nếu có) */}
+          <div className="flex items-start justify-between mb-6">
+            <span className="text-5xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">{icon}</span>
+          </div>
+          <div className="text-sm font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">{title}</div>
           {change && (
-            <div className={`text-sm ${trendColors[trend] || 'theme-text-muted'}`}>
-              {/* Thêm trend icon vào đây để đi cùng text */}
-              {trend && <span className="mr-1">{trendIcons[trend]}</span>} 
-              {change}
-            </div>
-          )}
+            <div className={`text-sm font-semibold ${trendColors[trend] || 'text-gray-600 dark:text-gray-400'} flex items-center gap-1`}>
+              {trend && <span>{trendIcons[trend]}</span>} 
+              {change}
+            </div>
+          )}
         </div>
 
-        {/* CỘT BÊN PHẢI: Value */}
-        <div className="flex-shrink-0 pl-4">
-          <div className="theme-text-primary text-4xl font-bold text-right">{value}</div>
+        <div className="flex-shrink-0 pl-6">
+          <div className="text-5xl font-black text-gray-900 dark:text-white text-right group-hover:scale-110 transition-transform duration-500">{value}</div>
         </div>
-
       </div>
-    </div>
-  );
+    </div>
+  );
 };
-
-
-
-
 
 /**
  * TabPanel - Tab navigation component
- * @param {array} tabs - Mảng {id, label, icon}
- * @param {string} activeTab - Active tab id
- * @param {function} onTabChange - Callback khi đổi tab
  */
 export const TabPanel = ({ tabs = [], activeTab, onTabChange }) => {
   return (
-    <div className="theme-card rounded-2xl p-2 border mb-6 transition-colors duration-300">
+    <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-3 border border-gray-200 dark:border-gray-700/50 mb-8 shadow-xl dark:shadow-emerald-500/5 transition-all duration-300">
       <div className="flex gap-2 overflow-x-auto">
         {tabs.map(tab => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`
-              px-6 py-3 rounded-xl font-semibold transition-all whitespace-nowrap
+              px-8 py-4 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap
               ${activeTab === tab.id
-                ? 'dark:bg-gradient-to-r dark:from-emerald-600 dark:to-emerald-700 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                : 'theme-text-muted hover:opacity-70 dark:hover:bg-gray-700/50 hover:bg-gray-100'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-emerald-500 dark:to-emerald-600 text-white shadow-lg scale-105'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
               }
             `}
           >
-            {tab.icon && <span className="mr-2">{tab.icon}</span>}
+            {tab.icon && <span className="mr-2 text-lg">{tab.icon}</span>}
             {tab.label}
           </button>
         ))}
@@ -292,19 +265,18 @@ export const TabPanel = ({ tabs = [], activeTab, onTabChange }) => {
 
 /**
  * QuickStats - Grid of quick stat cards
- * @param {array} stats - Mảng {icon, label, value, color}
  */
 export const QuickStats = ({ stats = [] }) => {
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="theme-card rounded-xl p-4 border transition-colors duration-300"
+          className="group bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-lg dark:shadow-emerald-500/5 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:border-cyan-400 dark:hover:border-emerald-500"
         >
-          <div className="text-2xl mb-2">{stat.icon}</div>
-          <div className="theme-text-muted text-xs mb-1">{stat.label}</div>
-          <div className={`text-xl font-bold ${stat.color || 'theme-text-primary'}`}>
+          <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{stat.icon}</div>
+          <div className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">{stat.label}</div>
+          <div className={`text-3xl font-black ${stat.color || 'text-gray-900 dark:text-white'}`}>
             {stat.value}
           </div>
         </div>
