@@ -1,7 +1,6 @@
 /* ============================================
    🎨 DEALER MODULE - UNIFIED THEME SYSTEM
-   Consolidated CSS for all dealer pages
-   Supports Light & Dark modes with modern design
+   Đã cập nhật: Dark Mode dùng tông Blue/Indigo
    ============================================ */
 
 /* ============================================
@@ -20,11 +19,12 @@
   letter-spacing: -0.02em;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng hiệu ứng glow màu Blue */
 .dark h1:not(.no-gradient),
 .dark h2:not(.no-gradient),
 .dark h3:not(.no-gradient) {
   color: #ffffff;
-  text-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
+  text-shadow: 0 0 30px rgba(59, 130, 246, 0.4); /* Blue-500 Glow */
   font-weight: 700;
   letter-spacing: -0.02em;
 }
@@ -39,10 +39,11 @@
   font-weight: 800;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue sáng và glow Blue */
 .dark .stat-value,
 .dark .metric-value {
-  color: #10b981;
-  text-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
+  color: #60a5fa; /* Blue-400 */
+  text-shadow: 0 0 20px rgba(59, 130, 246, 0.6); /* Blue-500 Glow */
   font-weight: 800;
 }
 
@@ -53,10 +54,11 @@
   text-shadow: none;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark ::selection {
-  background: rgba(16, 185, 129, 0.3);
+  background: rgba(59, 130, 246, 0.3); /* Blue-500 Alpha */
   color: #ffffff;
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* Blue-500 Glow */
 }
 
 /* ============================================
@@ -78,10 +80,11 @@
     0 0 0 1px rgba(6, 182, 212, 0.2) inset;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng shadow màu Blue */
 .dark .group:hover {
   box-shadow: 
-    0 20px 50px rgba(16, 185, 129, 0.2),
-    0 0 0 1px rgba(16, 185, 129, 0.3) inset;
+    0 20px 50px rgba(59, 130, 246, 0.2), /* Blue-500 Shadow */
+    0 0 0 1px rgba(59, 130, 246, 0.3) inset; /* Blue-500 Inset */
 }
 
 /* ============================================
@@ -100,10 +103,11 @@
 }
 
 /* Button hover effects - Dark mode */
+/* ĐÃ THAY ĐỔI: Dùng shadow màu Blue */
 .dark button:hover {
   box-shadow: 
-    0 10px 40px rgba(16, 185, 129, 0.3),
-    0 0 20px rgba(16, 185, 129, 0.2) inset;
+    0 10px 40px rgba(59, 130, 246, 0.3), /* Blue-500 Shadow */
+    0 0 20px rgba(59, 130, 246, 0.2) inset; /* Blue-500 Inset */
   transform: translateY(-2px);
 }
 
@@ -114,9 +118,10 @@
   text-shadow: 0 0 10px rgba(6, 182, 212, 0.3);
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark a:hover {
-  color: #10b981 !important;
-  text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  color: #60a5fa !important; /* Blue-400 */
+  text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); /* Blue-500 Glow */
 }
 
 /* ============================================
@@ -135,13 +140,14 @@
 }
 
 /* Input focus effects - Dark mode */
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark input:focus,
 .dark select:focus,
 .dark textarea:focus {
-  border-color: #10b981 !important;
+  border-color: #3b82f6 !important; /* Blue-500 */
   box-shadow: 
-    0 0 0 3px rgba(16, 185, 129, 0.1),
-    0 0 20px rgba(16, 185, 129, 0.15) !important;
+    0 0 0 3px rgba(59, 130, 246, 0.1), /* Blue-500 Ring */
+    0 0 20px rgba(59, 130, 246, 0.15) !important; /* Blue-500 Glow */
   outline: none;
 }
 
@@ -158,10 +164,11 @@
 }
 
 /* Table row hover - Dark mode */
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark tr:hover {
   background: linear-gradient(90deg, 
-    rgba(16, 185, 129, 0.05) 0%,
-    rgba(5, 150, 105, 0.03) 100%) !important;
+    rgba(59, 130, 246, 0.05) 0%, /* Blue-500 Alpha */
+    rgba(30, 64, 175, 0.03) 100%) !important; /* Blue-800 Alpha */
   transition: background 0.2s ease;
 }
 
@@ -193,13 +200,14 @@
   font-weight: 600;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark .active,
 .dark [aria-current="page"] {
   background: linear-gradient(135deg,
-    rgba(16, 185, 129, 0.15) 0%,
-    rgba(5, 150, 105, 0.1) 100%) !important;
-  border-color: #10b981 !important;
-  color: #34d399 !important;
+    rgba(59, 130, 246, 0.15) 0%, /* Blue-500 Alpha */
+    rgba(30, 64, 175, 0.1) 100%) !important; /* Blue-800 Alpha */
+  border-color: #3b82f6 !important; /* Blue-500 */
+  color: #60a5fa !important; /* Blue-400 */
   font-weight: 600;
 }
 
@@ -234,20 +242,23 @@
   height: 8px;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark ::-webkit-scrollbar-track {
-  background: rgba(16, 185, 129, 0.05);
+  background: rgba(59, 130, 246, 0.05); /* Blue-500 Alpha */
   border-radius: 4px;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark ::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); /* Blue-500 -> Blue-800 */
   border-radius: 4px;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); /* Blue-500 Glow */
 }
 
+/* ĐÃ THAY ĐỔI: Dùng màu Blue */
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%); /* Blue-400 -> Blue-500 */
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); /* Blue-500 Glow */
 }
 
 /* ============================================
@@ -305,10 +316,11 @@
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+/* ĐÃ THAY ĐỔI: Dùng glow Blue */
 .dark .stat-value:hover,
 .dark .metric-value:hover {
   animation: pulse-glow 2s ease-in-out infinite;
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); /* Blue-500 Glow */
 }
 
 /* ============================================
@@ -326,8 +338,9 @@
   background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%);
 }
 
-.gradient-emerald {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+/* ĐÃ THAY ĐỔI: Đổi 'gradient-emerald' thành 'gradient-blue-dark' */
+.gradient-blue-dark {
+  background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
 }
 
 /* Text gradients */
@@ -338,8 +351,9 @@
   background-clip: text;
 }
 
-.text-gradient-emerald {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+/* ĐÃ THAY ĐỔI: Đổi 'text-gradient-emerald' thành 'text-gradient-blue-dark' */
+.text-gradient-blue-dark {
+  background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -350,8 +364,9 @@
   box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
 }
 
-.glow-emerald {
-  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+/* ĐÃ THAY ĐỔI: Đổi 'glow-emerald' thành 'glow-blue' */
+.glow-blue {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
 }
 
 /* ============================================
