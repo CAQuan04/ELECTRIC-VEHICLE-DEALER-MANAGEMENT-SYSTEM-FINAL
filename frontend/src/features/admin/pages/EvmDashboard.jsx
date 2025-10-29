@@ -6,7 +6,6 @@ import "@modules/loading/GlobalLoading.css";
 import DashboardWithLogo from "./DashboardWithLogo";
 import DealerManagement from "./DealerManagement";
 
-
 /* ========== Inline SVG Logo (sang, gradient xanh biển) ========== */
 const Logo = ({ size = 44, className = "" }) => (
   <svg
@@ -61,7 +60,7 @@ const initialUsers = [
     username: "tranbao",
     password: "abc123",
     email: "tran.bao@example.com",
-    role: "Manager",
+    role: "Dealer Manager",
     dealer: "DL002",
     active: true,
     createdAt: "2025-09-10",
@@ -73,7 +72,7 @@ const initialUsers = [
     username: "lekien",
     password: "kien789",
     email: "le.kien@example.com",
-    role: "Staff",
+    role: "EVM Staff",
     dealer: "DL005",
     active: false,
     createdAt: "2025-10-02",
@@ -85,7 +84,7 @@ const initialUsers = [
     username: "phamtri",
     password: "tri123",
     email: "pham.tri@example.com",
-    role: "Staff",
+    role: "Dealer Staff",
     dealer: "DL008",
     active: true,
     createdAt: "2025-10-10",
@@ -108,36 +107,114 @@ const emptyForm = {
 
 // --- Các icon SVG nhỏ (React components) ---
 const IconClipboard = ({ className = "w-6 h-6" }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg" aria-hidden>
-    <rect x="9" y="2" width="6" height="4" rx="1" stroke="currentColor" strokeWidth="1.5" />
-    <rect x="4" y="7" width="16" height="14" rx="2" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M8 12h8" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
-    <path d="M8 16h5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden
+  >
+    <rect
+      x="9"
+      y="2"
+      width="6"
+      height="4"
+      rx="1"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <rect
+      x="4"
+      y="7"
+      width="16"
+      height="14"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M8 12h8"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <path
+      d="M8 16h5"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
 const IconBackup = ({ className = "w-6 h-6" }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg" aria-hidden>
-    <path d="M21 10a8 8 0 1 0-1.6 4.8L21 18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M21 6v6h-6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden
+  >
+    <path
+      d="M21 10a8 8 0 1 0-1.6 4.8L21 18"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M21 6v6h-6"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const IconBox = ({ className = "w-6 h-6" }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg" aria-hidden>
-    <path d="M21 16V8a2 2 0 0 0-1-1.73L13 3.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 3.46a2 2 0 0 0 2 0l7-3.46A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M3.27 6.96l8.73 4.5 8.73-4.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden
+  >
+    <path
+      d="M21 16V8a2 2 0 0 0-1-1.73L13 3.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 3.46a2 2 0 0 0 2 0l7-3.46A2 2 0 0 0 21 16z"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    <path
+      d="M3.27 6.96l8.73 4.5 8.73-4.5"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
 const IconUser = ({ className = "w-6 h-6" }) => (
-  <svg viewBox="0 0 24 24" fill="none" className={className} xmlns="http://www.w3.org/2000/svg" aria-hidden>
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+    aria-hidden
+  >
     <circle cx="12" cy="8" r="3" stroke="currentColor" strokeWidth="1.5" />
-    <path d="M4 20c0-4 4-6 8-6s8 2 8 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+    <path
+      d="M4 20c0-4 4-6 8-6s8 2 8 6"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
-
-
 
 /* ========== Dashboard Component ========== */
 const EvmDashboard = () => {
@@ -246,29 +323,29 @@ const EvmDashboard = () => {
   };
 
   const saveUser = (e) => {
-  e.preventDefault();
-  if (!form.name.trim()) return alert("Vui lòng nhập họ tên.");
-  if (!form.username.trim()) return alert("Vui lòng nhập username.");
-  if (!form.password.trim()) return alert("Vui lòng nhập mật khẩu.");
-  if (!isValidEmail(form.email)) return alert("Email không hợp lệ.");
+    e.preventDefault();
+    if (!form.name.trim()) return alert("Vui lòng nhập họ tên.");
+    if (!form.username.trim()) return alert("Vui lòng nhập username.");
+    if (!form.password.trim()) return alert("Vui lòng nhập mật khẩu.");
+    if (!isValidEmail(form.email)) return alert("Email không hợp lệ.");
 
-  const now = new Date().toISOString().slice(0, 10);
+    const now = new Date().toISOString().slice(0, 10);
 
-  if (isEdit) {
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === form.id ? { ...u, ...form, updatedAt: now } : u
-      )
-    );
-  } else {
-    setUsers((prev) => [
-      { ...form, createdAt: now, updatedAt: now },
-      ...prev,
-    ]);
-  }
-  setShowModal(false);
-  setForm(emptyForm);
-};
+    if (isEdit) {
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.id === form.id ? { ...u, ...form, updatedAt: now } : u
+        )
+      );
+    } else {
+      setUsers((prev) => [
+        { ...form, createdAt: now, updatedAt: now },
+        ...prev,
+      ]);
+    }
+    setShowModal(false);
+    setForm(emptyForm);
+  };
 
   const toggleActive = (id) =>
     setUsers((prev) =>
@@ -308,21 +385,40 @@ const EvmDashboard = () => {
         <div className="absolute -bottom-10 -right-10 h-72 w-72 rounded-full bg-sky-700/20 blur-3xl" />
         <div className="relative p-6 md:p-8">
           <div className="flex items-center gap-4">
-          <div className="rounded-xl bg-white/3 p-2 shadow-sm flex items-center">
-            <div className="text-sky-400">
-              {/* main app logo could go here */}
-              <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
-                <circle cx="50" cy="50" r="44" stroke="currentColor" strokeWidth="6" fill="rgba(255,255,255,0.02)" />
-                <path d="M30 60 C30 45, 45 36, 50 36 C55 36, 70 45, 70 60 C70 72, 60 80, 50 80 C40 80, 30 72, 30 60 Z" fill="currentColor" opacity="0.95" />
-              </svg>
+            <div className="rounded-xl bg-white/3 p-2 shadow-sm flex items-center">
+              <div className="text-sky-400">
+                {/* main app logo could go here */}
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 100 100"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  aria-hidden
+                >
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="44"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    fill="rgba(255,255,255,0.02)"
+                  />
+                  <path
+                    d="M30 60 C30 45, 45 36, 50 36 C55 36, 70 45, 70 60 C70 72, 60 80, 50 80 C40 80, 30 72, 30 60 Z"
+                    fill="currentColor"
+                    opacity="0.95"
+                  />
+                </svg>
+              </div>
             </div>
 
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">
+                EVM Admin
+              </h1>
+            </div>
           </div>
-
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">EVM Admin</h1>
-          </div>
-        </div>
           <p className="text-slate-300 text-base md:text-lg">
             Chào mừng {currentUser?.name ?? "Admin"} – quản lý toàn bộ hệ thống
             EVM
@@ -486,13 +582,11 @@ const EvmDashboard = () => {
               </div>
             </div>
           </div>
-
         </div>
       )}
 
       {/* DEALERS placeholder */}
       {activeSection === "dealers" && <DealerManagement />}
-
 
       {/* USERS: CRUD */}
       {activeSection === "users" && (
@@ -523,9 +617,10 @@ const EvmDashboard = () => {
               onChange={(e) => setRoleFilter(e.target.value)}
             >
               <option value="ALL">Tất cả vai trò</option>
-              <option>Admin</option>
-              <option>Manager</option>
-              <option>Staff</option>
+                        <option>Admin</option>
+                        <option>EVM Staff</option>
+                        <option>Dealer Manager</option>                        
+                        <option>Dealer Staff</option>
             </select>
             <select
               className="rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 outline-none focus:border-sky-500/60"
@@ -539,89 +634,87 @@ const EvmDashboard = () => {
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-  <table className="min-w-full border-collapse text-sm md:text-base">
-    <thead className="bg-slate-800/60 text-sky-300">
-      <tr>
-        <th className="p-3 text-left">ID</th>
-        <th className="p-3 text-left">Họ và tên</th>
-        <th className="p-3 text-left">Username</th>
-        <th className="p-3 text-left">Mật khẩu</th>
-        <th className="p-3 text-left">Gmail</th>
-        <th className="p-3 text-left">Vai trò</th>
-        <th className="p-3 text-left">Đại lý</th>
-        <th className="p-3 text-left">Ngày tạo</th>
-        <th className="p-3 text-left">Ngày cập nhật</th>
-        <th className="p-3 text-left">Trạng thái</th>
-        <th className="p-3 text-center">Hành động</th>
-      </tr>
-    </thead>
-    <tbody>
-      {filteredUsers.map((u) => (
-        <tr
-          key={u.id}
-          className="border-t border-slate-800 hover:bg-slate-800/30"
-        >
-          <td className="p-3">{u.id}</td>
-          <td className="p-3 font-medium">{u.name}</td>
-          <td className="p-3">{u.username}</td>
-          <td className="p-3">{u.password}</td>
-          <td className="p-3">{u.email}</td>
-          <td className="p-3">{u.role}</td>
-          <td className="p-3">{u.dealer}</td>
-          <td className="p-3">{u.createdAt}</td>
-          <td className="p-3">{u.updatedAt}</td>
-          <td className="p-3">
-            <span
-              className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                u.active
-                  ? "bg-emerald-500/20 text-emerald-300"
-                  : "bg-rose-500/20 text-rose-300"
-              }`}
-            >
-              {u.active ? "Hoạt động" : "Ngưng"}
-            </span>
-          </td>
-          <td className="p-3 text-center space-x-2">
-            <button
-              className="px-2 py-1 rounded-lg bg-sky-600/40 hover:bg-sky-600 text-white"
-              onClick={() => openEdit(u)}
-            >
-              Sửa
-            </button>
-            <button
-              className="px-2 py-1 rounded-lg bg-rose-600/40 hover:bg-rose-600 text-white"
-              onClick={() => askDelete(u)}
-            >
-              Xóa
-            </button>
-            <button
-              className={`px-2 py-1 rounded-lg ${
-                u.active
-                  ? "bg-slate-700 hover:bg-slate-600"
-                  : "bg-emerald-600/40 hover:bg-emerald-600"
-              }`}
-              onClick={() => toggleActive(u.id)}
-            >
-              {u.active ? "Tắt" : "Bật"}
-            </button>
-          </td>
-        </tr>
-      ))}
-      {filteredUsers.length === 0 && (
-        <tr>
-          <td
-            colSpan="11"
-            className="text-center text-slate-400 p-4 italic"
-          >
-            Không có người dùng phù hợp
-          </td>
-        </tr>
-      )}
-    </tbody>
-  </table>
-</div>
-
-
+            <table className="min-w-full border-collapse text-sm md:text-base">
+              <thead className="bg-slate-800/60 text-sky-300">
+                <tr>
+                  <th className="p-3 text-left">ID</th>
+                  <th className="p-3 text-left">Họ và tên</th>
+                  <th className="p-3 text-left">Username</th>
+                  <th className="p-3 text-left">Mật khẩu</th>
+                  <th className="p-3 text-left">Gmail</th>
+                  <th className="p-3 text-left">Vai trò</th>
+                  <th className="p-3 text-left">Đại lý</th>
+                  <th className="p-3 text-left">Ngày tạo</th>
+                  <th className="p-3 text-left">Ngày cập nhật</th>
+                  <th className="p-3 text-left">Trạng thái</th>
+                  <th className="p-3 text-center">Hành động</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map((u) => (
+                  <tr
+                    key={u.id}
+                    className="border-t border-slate-800 hover:bg-slate-800/30"
+                  >
+                    <td className="p-3">{u.id}</td>
+                    <td className="p-3 font-medium">{u.name}</td>
+                    <td className="p-3">{u.username}</td>
+                    <td className="p-3">{u.password}</td>
+                    <td className="p-3">{u.email}</td>
+                    <td className="p-3">{u.role}</td>
+                    <td className="p-3">{u.dealer}</td>
+                    <td className="p-3">{u.createdAt}</td>
+                    <td className="p-3">{u.updatedAt}</td>
+                    <td className="p-3">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          u.active
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : "bg-rose-500/20 text-rose-300"
+                        }`}
+                      >
+                        {u.active ? "Hoạt động" : "Ngưng"}
+                      </span>
+                    </td>
+                    <td className="p-3 text-center space-x-2">
+                      <button
+                        className="px-2 py-1 rounded-lg bg-sky-600/40 hover:bg-sky-600 text-white"
+                        onClick={() => openEdit(u)}
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        className="px-2 py-1 rounded-lg bg-rose-600/40 hover:bg-rose-600 text-white"
+                        onClick={() => askDelete(u)}
+                      >
+                        Xóa
+                      </button>
+                      <button
+                        className={`px-2 py-1 rounded-lg ${
+                          u.active
+                            ? "bg-slate-700 hover:bg-slate-600"
+                            : "bg-emerald-600/40 hover:bg-emerald-600"
+                        }`}
+                        onClick={() => toggleActive(u.id)}
+                      >
+                        {u.active ? "Tắt" : "Bật"}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+                {filteredUsers.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan="11"
+                      className="text-center text-slate-400 p-4 italic"
+                    >
+                      Không có người dùng phù hợp
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {/* Modal Create/Edit */}
           {showModal && (
@@ -645,8 +738,30 @@ const EvmDashboard = () => {
                   </button>
                 </div>
 
-                <form onSubmit={saveUser} className="px-5 py-4 space-y-4">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+
+                    const now = new Date().toISOString().split("T")[0];
+                    const updatedForm = {
+                      ...form,
+                      updated_at: now,
+                      created_at: form.created_at || now,
+                    };
+
+                    if (isEdit) {
+                      setUsers((prev) =>
+                        prev.map((u) => (u.id === form.id ? updatedForm : u))
+                      );
+                    } else {
+                      setUsers((prev) => [updatedForm, ...prev]);
+                    }
+                    setShowModal(false);
+                  }}
+                  className="px-5 py-4 space-y-4"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {/* ID */}
                     <div className="space-y-1">
                       <label className="text-base text-slate-300">ID</label>
                       <input
@@ -655,42 +770,99 @@ const EvmDashboard = () => {
                         disabled
                       />
                     </div>
+
+                    {/* Họ tên */}
                     <div className="space-y-1">
-                      <label className="text-base text-slate-300">Họ tên</label>
+                      <label className="text-base text-slate-300">
+                        Họ và tên
+                      </label>
                       <input
                         className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
                         value={form.name}
                         onChange={(e) =>
                           setForm({ ...form, name: e.target.value })
                         }
+                        required
                       />
                     </div>
+
+                    {/* Username */}
+                    <div className="space-y-1">
+                      <label className="text-base text-slate-300">
+                        Username
+                      </label>
+                      <input
+                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
+                        value={form.username || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, username: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+
+                    {/* Password */}
+                    <div className="space-y-1">
+                      <label className="text-base text-slate-300">
+                        Mật khẩu
+                      </label>
+                      <input
+                        type="password"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
+                        value={form.password || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, password: e.target.value })
+                        }
+                        required={!isEdit}
+                        placeholder={isEdit ? "Giữ nguyên nếu không đổi" : ""}
+                      />
+                    </div>
+
+                    {/* Email */}
                     <div className="space-y-1">
                       <label className="text-base text-slate-300">Email</label>
                       <input
+                        type="email"
                         className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                        value={form.email}
+                        value={form.email || ""}
                         onChange={(e) =>
                           setForm({ ...form, email: e.target.value })
                         }
                       />
                     </div>
+
+                    {/* Vai trò */}
                     <div className="space-y-1">
                       <label className="text-base text-slate-300">
                         Vai trò
                       </label>
                       <select
                         className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                        value={form.role}
+                        value={form.role || "Staff"}
                         onChange={(e) =>
                           setForm({ ...form, role: e.target.value })
                         }
                       >
                         <option>Admin</option>
-                        <option>Manager</option>
-                        <option>Staff</option>
+                        <option>EVM Staff</option>
+                        <option>Dealer Manager</option>                        
+                        <option>Dealer Staff</option>
                       </select>
                     </div>
+
+                    {/* Đại lý */}
+                    <div className="space-y-1">
+                      <label className="text-base text-slate-300">Đại lý</label>
+                      <input
+                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
+                        value={form.dealer || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, dealer: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    {/* Trạng thái */}
                     <div className="space-y-1">
                       <label className="text-base text-slate-300">
                         Trạng thái
@@ -699,13 +871,42 @@ const EvmDashboard = () => {
                         <input
                           type="checkbox"
                           className="h-4 w-4 accent-sky-500"
-                          checked={form.active}
+                          checked={form.active || false}
                           onChange={() =>
                             setForm({ ...form, active: !form.active })
                           }
                         />
                         <span>Active</span>
                       </label>
+                    </div>
+
+                    {/* Ngày tạo / cập nhật */}
+                    <div className="space-y-1">
+                      <label className="text-base text-slate-300">
+                        Ngày tạo
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-slate-200"
+                        value={form.created_at || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, created_at: e.target.value })
+                        }
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-base text-slate-300">
+                        Cập nhật gần nhất
+                      </label>
+                      <input
+                        type="date"
+                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-slate-200"
+                        value={form.updated_at || ""}
+                        onChange={(e) =>
+                          setForm({ ...form, updated_at: e.target.value })
+                        }
+                      />
                     </div>
                   </div>
 
