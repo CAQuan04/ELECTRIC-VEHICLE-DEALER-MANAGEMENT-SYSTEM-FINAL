@@ -28,6 +28,12 @@ namespace EVDealer.BE.Services.Users
             {
                 Username = userCreateDto.Username,
                 PasswordHash = passwordHash,
+                // === PHẦN BỔ SUNG: GÁN CÁC GIÁ TRỊ MỚI TỪ DTO ===
+                FullName = userCreateDto.FullName,
+                Email = userCreateDto.Email,
+                PhoneNumber = userCreateDto.PhoneNumber,
+                DateOfBirth = userCreateDto.DateOfBirth,
+                CreatedAt = DateTime.UtcNow, // Ghi nhận thời gian tạo
                 RoleId = userCreateDto.RoleId,
                 DealerId = userCreateDto.DealerId,
                 Status = "active"
@@ -48,6 +54,12 @@ namespace EVDealer.BE.Services.Users
 
             userToUpdate.RoleId = userUpdateDto.RoleId;
             userToUpdate.DealerId = userUpdateDto.DealerId;
+            // === PHẦN BỔ SUNG: CẬP NHẬT CÁC THÔNG TIN MỚI TỪ DTO ===
+            userToUpdate.FullName = userUpdateDto.FullName;
+            userToUpdate.Email = userUpdateDto.Email;
+            userToUpdate.PhoneNumber = userUpdateDto.PhoneNumber;
+            userToUpdate.DateOfBirth = userUpdateDto.DateOfBirth;
+            userToUpdate.UpdatedAt = DateTime.UtcNow; // Ghi nhận thời gian cập nhật
 
             _userRepository.Update(userToUpdate);
             return await _userRepository.SaveChangesAsync();
@@ -59,6 +71,7 @@ namespace EVDealer.BE.Services.Users
             if (userToUpdate == null) return false;
 
             userToUpdate.Status = statusUpdateDto.Status;
+            userToUpdate.UpdatedAt = DateTime.UtcNow;
 
             _userRepository.Update(userToUpdate);
             return await _userRepository.SaveChangesAsync();
@@ -83,6 +96,12 @@ namespace EVDealer.BE.Services.Users
             {
                 UserId = user.UserId,
                 Username = user.Username,
+                // === PHẦN BỔ SUNG: MAPPING CÁC TRƯỜNG MỚI SANG DTO ===
+                FullName = user.FullName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                DateOfBirth = user.DateOfBirth,
+
                 RoleId = user.RoleId,
                 RoleName = user.Role?.RoleName,
                 DealerId = user.DealerId,

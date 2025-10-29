@@ -12,6 +12,7 @@ public partial class Distribution
     public int ToDealerId { get; set; }
 
     public int VehicleId { get; set; }
+    public int ConfigId { get; set; }
 
     public int Quantity { get; set; }
 
@@ -22,4 +23,5 @@ public partial class Distribution
     public virtual Dealer ToDealer { get; set; } = null!;
 
     public virtual Vehicle Vehicle { get; set; } = null!;
+    public virtual VehicleConfig Config { get; set; } = null!;
 }

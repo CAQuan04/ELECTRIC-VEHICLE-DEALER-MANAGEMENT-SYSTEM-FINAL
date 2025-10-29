@@ -1,6 +1,5 @@
 ﻿using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.Services.Users;
-using EVDealer.BE.Services.Users;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

@@ -15,6 +15,7 @@ import {
   DealerGuard, 
   CustomerGuard, 
   AdminGuard, 
+  StaffGuard,
   AccessDenied
 } from '@modules/auth';
 
@@ -102,6 +103,9 @@ import {
   Discover
 } from './features/public';
 
+import {StaffDashboard} from './features/staff'
+import { CatalogueManager } from './features/admin'
+
 // Pages from public features
 import LoadingDemo from './features/public/pages/LoadingDemo';
 import RegisterSuccess from './features/public/pages/RegisterSuccess';
@@ -137,6 +141,14 @@ const DealerDashboardWithLoading = withDashboardLoading(DealerDashboard, {
 const EvmDashboardWithLoading = withDashboardLoading(EvmDashboard, {
   loadingMessage: 'Đang khởi tạo Admin Dashboard...',
   dataLoadingMessage: 'Đang tải dữ liệu hệ thống...',
+  loadingVariant: 'dashboard',
+  showLogo: true,
+  enableSkeleton: true
+});
+
+const StaffDashboardWithLoading = withDashboardLoading(StaffDashboard, {
+  loadingMessage: 'Đang khởi tạo Staff Dashboard...',
+  dataLoadingMessage: 'Đang tải dữ liệu nhân viên...',
   loadingVariant: 'dashboard',
   showLogo: true,
   enableSkeleton: true
@@ -187,7 +199,7 @@ const AppLayout = ({children}) => {
         <Sidebar />
         <div className="main-content-with-sidebar">
           <Navbar />
-          <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+          <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
             {children}
           </main>
         </div>
@@ -211,7 +223,7 @@ const AppLayout = ({children}) => {
     return (
       <div style={{minHeight: '100vh'}}>
         <Header />
-        <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+        <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
           {children}
         </main>
       </div>
@@ -224,7 +236,7 @@ const PublicLayout = ({children}) => {
   return (
     <div style={{minHeight: '100vh'}}>
       <Header />
-      <main className="theme-main dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
+      <main className="theme-main bg-black text-white transition-colors duration-300" style={{padding: '20px', minHeight: 'calc(100vh - 70px)'}}>
         {children}
       </main>
     </div>
@@ -263,6 +275,14 @@ const App = () => {
               <EvmDashboardWithLoading isLoading={false} isDataLoading={false} />
             </AppLayout>
           </AdminGuard>
+        } />
+
+        <Route path="/staff-dashboard" element={
+          <StaffGuard>
+            <AppLayout>
+              <StaffDashboardWithLoading isLoading={false} isDataLoading={false} />
+            </AppLayout>
+          </StaffGuard>
         } />
 
         {/* Dealer-only Routes */}
@@ -459,6 +479,11 @@ const App = () => {
         <Route path="/admin/dealers" element={
           <AdminGuard>
             <AppLayout><DealerList /></AppLayout>
+          </AdminGuard>
+        } />
+        <Route path="/admin/catalog" element={
+          <AdminGuard>
+            <AppLayout><CatalogueManager /></AppLayout>
           </AdminGuard>
         } />
         

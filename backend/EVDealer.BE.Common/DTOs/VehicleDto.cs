@@ -9,6 +9,7 @@ public class VehicleListDto
     public decimal? BasePrice { get; set; }
     public List<VehicleConfigDto> Configs { get; set; } = new();
     public InventorySummaryDto InventorySummary { get; set; } = new();
+    public string Status { get; set; }
 }
 
 public class VehicleConfigDto
@@ -17,6 +18,7 @@ public class VehicleConfigDto
     public string Color { get; set; } = string.Empty;
     public int? BatteryKwh { get; set; }
     public int? RangeKm { get; set; }
+    public string Status { get; set; }
 }
 
 public class InventorySummaryDto

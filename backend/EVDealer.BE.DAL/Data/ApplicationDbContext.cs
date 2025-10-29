@@ -48,6 +48,14 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Permission> Permissions { get; set; }
     public virtual DbSet<RolePermission> RolePermissions { get; set; }
+
+    public virtual DbSet<DealerContract> DealerContracts { get; set; }
+    public virtual DbSet<DealerTarget> DealerTargets { get; set; }
+    public virtual DbSet<Debt> Debts { get; set; }
+
+    public virtual DbSet<WholesalePrice> WholesalePrices { get; set; }
+
+    public virtual DbSet<PromotionPolicy> PromotionPolicies { get; set; }
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
 
@@ -420,6 +428,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.RoleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Role");
+
+            entity.HasIndex(e => e.Email, "UQ_User_Email").IsUnique()
+                    .HasFilter("[email] IS NOT NULL");
+
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>
@@ -439,6 +452,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasMaxLength(100)
                 .HasColumnName("model");
             entity.Property(e => e.Year).HasColumnName("year");
+            entity.Property(e => e.Status)
+           .IsRequired()
+           .HasMaxLength(20)
+           .IsUnicode(false)
+           .HasDefaultValue("Active");
         });
 
         modelBuilder.Entity<VehicleConfig>(entity =>
@@ -459,6 +477,11 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.VehicleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_VehicleConfig_Vehicle");
+            entity.Property(e => e.Status)
+            .IsRequired()
+            .HasMaxLength(20)
+            .IsUnicode(false)
+            .HasDefaultValue("Active");
         });
 
         modelBuilder.Entity<Permission>(entity =>
