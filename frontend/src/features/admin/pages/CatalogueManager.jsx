@@ -116,7 +116,7 @@ const CatalogueManager = () => {
   return (
     <PageContainer className="bg-gradient-to-br from-[#0f172a] to-[#1e293b] min-h-screen text-slate-100">
       <PageHeader
-        title="🚗 Quản lý Danh Mục Xe"
+        title=" Quản lý Danh Mục Xe"
         subtitle={`Quyền hiện tại: ${role}`}
         className="text-white"
       />
