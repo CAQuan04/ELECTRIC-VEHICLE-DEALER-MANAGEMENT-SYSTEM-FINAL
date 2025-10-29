@@ -8,6 +8,7 @@ import InventoryManagement from "./InventoryManagement";
 import PricingManagement from "./PricingManagement";
 import ReportsSection from "../components/ReportsSection";
 import InventoryTurnoverReport from "./InventoryTurnoverReport";
+import CatalogueViewer from "../pages/CatalogueViewer";
 
 /* =======================
    MOCK / ORIGINAL DATA
@@ -60,7 +61,7 @@ const MOCK_DASHBOARD_DATA = {
 
 const NAV_SECTIONS = [
   { id: "overview", icon: "📊", label: "Tổng quan" },
-  { id: "inventory", icon: "🚗", label: "Kho xe" },
+  { id: "catalogue", icon: "🚘", label: "Danh mục xe" },
   { id: "stock", icon: "🏭", label: "Tồn kho & Điều phối" },
   { id: "pricing", icon: "💵", label: "Giá sỉ & Khuyến mãi" },
   { id: "orders", icon: "📋", label: "Đơn hàng" },
@@ -395,6 +396,8 @@ const StaffDashboard = () => {
         return <PricingManagement />;
       case "inventory-report":
         return <InventoryTurnoverReport />;
+        case "catalogue":
+  return <CatalogueViewer />;
 
       default:
         return null;
