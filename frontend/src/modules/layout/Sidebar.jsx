@@ -142,7 +142,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           },
           { path: "/reports", icon: icons.report, label: "Reports" },
           { path: "/admin/dealers", icon: icons.car, label: "Đại Lý" },
-          { path: "/catalog", icon: icons.car, label: "Catalog Xe" },
+          { path: "/admin/catalog", icon: icons.car, label: "Catalog Xe" },
           { path: "/inventory", icon: icons.warehouse, label: "Tổng Kho" },
           { path: "/admin/users", icon: icons.users, label: "Người Dùng" },
           { path: "/", icon: icons.home, label: "Trang Chủ" },
