@@ -20,7 +20,7 @@ const Table = ({ columns, data, onRowClick, className = '' }) => {
       <div className="overflow-x-auto">
         <table className="min-w-full">
           {/* Table Header */}
-          <thead className="bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-gray-700/80 dark:to-gray-800/80 backdrop-blur-sm">
+          <thead className="bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-gray-600/80 dark:to-gray-700/80 backdrop-blur-sm">
             <tr className="border-b-2 border-gray-200 dark:border-gray-600">
               {columns.map((column) => (
                 <th 

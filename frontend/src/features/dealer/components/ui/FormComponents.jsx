@@ -42,15 +42,16 @@ export const Input = ({
       onChange={onChange}
       className={`
         w-full px-6 py-4 rounded-2xl 
-        bg-white dark:bg-gray-800/50
+        dark:bg-gray-800/50
         border-2 border-gray-200 dark:border-gray-700
-        text-gray-900 dark:text-white
+        dark:text-white
         placeholder:text-gray-400 dark:placeholder:text-gray-500
-        focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20
-        focus:border-cyan-500 dark:focus:border-emerald-500
+        focus:outline-none focus:ring-4 
+        focus:ring-cyan-500/20 dark:focus:ring-cyan-500/20  /* ĐÃ SỬA */
+        focus:border-cyan-500 dark:focus:border-cyan-500      /* ĐÃ SỬA */
         transition-all duration-300
         backdrop-blur-sm
-        hover:border-cyan-400 dark:hover:border-emerald-600
+        hover:border-cyan-400 dark:hover:border-cyan-600        /* ĐÃ SỬA */
         ${error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}
         ${className}
       `}
@@ -75,14 +76,15 @@ export const Select = ({ value, onChange, options, placeholder, error, className
       onChange={onChange}
       className={`
         w-full px-6 py-4 rounded-2xl 
-        bg-white dark:bg-gray-800/50
+        dark:bg-gray-800/50
         border-2 border-gray-200 dark:border-gray-700
         text-gray-900 dark:text-white
-        focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20
-        focus:border-cyan-500 dark:focus:border-emerald-500
+        focus:outline-none focus:ring-4 
+        focus:ring-cyan-500/20 dark:focus:ring-cyan-500/20  /* ĐÃ SỬA */
+        focus:border-cyan-500 dark:focus:border-cyan-500      /* ĐÃ SỬA */
         transition-all duration-300
         backdrop-blur-sm
-        hover:border-cyan-400 dark:hover:border-emerald-600
+        hover:border-cyan-400 dark:hover:border-cyan-600        /* ĐÃ SỬA */
         cursor-pointer
         ${error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}
         ${className}
@@ -125,16 +127,17 @@ export const Textarea = ({ placeholder, value, onChange, rows = 4, error, classN
       rows={rows}
       className={`
         w-full px-6 py-4 rounded-2xl 
-        bg-white dark:bg-gray-800/50
+        dark:bg-gray-800/50
         border-2 border-gray-200 dark:border-gray-700
         text-gray-900 dark:text-white
         placeholder:text-gray-400 dark:placeholder:text-gray-500
-        focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20
-        focus:border-cyan-500 dark:focus:border-emerald-500
+        focus:outline-none focus:ring-4 
+        focus:ring-cyan-500/20 dark:focus:ring-cyan-500/20  /* ĐÃ SỬA */
+        focus:border-cyan-500 dark:focus:border-cyan-500      /* ĐÃ SỬA */
         transition-all duration-300
         backdrop-blur-sm
         resize-none
-        hover:border-cyan-400 dark:hover:border-emerald-600
+        hover:border-cyan-400 dark:hover:border-cyan-600        /* ĐÃ SỬA */
         ${error ? 'border-red-500 dark:border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''}
         ${className}
       `}

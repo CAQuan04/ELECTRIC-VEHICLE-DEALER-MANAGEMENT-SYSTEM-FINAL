@@ -5,12 +5,12 @@ import React from 'react';
  */
 export const InfoRow = ({ label, value, icon }) => {
   return (
-    <div className="group flex justify-between items-center py-4 border-b last:border-0 border-gray-200/50 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-transparent dark:hover:from-emerald-500/5 dark:hover:to-transparent transition-all duration-300 rounded-lg px-2">
+    <div className="group flex justify-between items-center py-4 border-b last:border-0 border-gray-200/50 dark:border-gray-700/50 hover:bg-gradient-to-r hover:from-cyan-50/50 hover:to-transparent dark:hover:from-rose-500/5 dark:hover:to-transparent transition-all duration-300 rounded-lg px-2">
       <span className="flex items-center gap-3 text-gray-600 dark:text-gray-400 font-medium">
         {icon && <span className="text-xl group-hover:scale-110 transition-transform duration-300">{icon}</span>}
         {label}
       </span>
-      <span className="font-bold text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-emerald-400 transition-colors duration-300">{value}</span>
+      <span className="font-bold text-gray-900 dark:text-white group-hover:text-cyan-600 dark:group-hover:text-rose-400 transition-colors duration-300">{value}</span>
     </div>
   );
 };
@@ -20,13 +20,13 @@ export const InfoRow = ({ label, value, icon }) => {
  */
 export const InfoSection = ({ title, icon, children }) => {
   return (
-    <div className="group relative overflow-hidden bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-500 hover:shadow-2xl hover:scale-[1.01] hover:border-cyan-300 dark:hover:border-emerald-500/50">
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 dark:from-emerald-500/5 dark:to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="group relative overflow-hidden bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-rose-500/5 transition-all duration-500 hover:shadow-2xl hover:scale-[1.01] hover:border-cyan-300 dark:hover:border-rose-500/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 dark:from-rose-500/5 dark:to-rose-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <div className="relative z-10">
         <h3 className="text-2xl font-bold mb-6 flex items-center gap-3 text-gray-900 dark:text-white">
           {icon && <span className="text-3xl group-hover:scale-110 group-hover:rotate-12 transition-all duration-500">{icon}</span>}
-          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent">{title}</span>
+          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-rose-400 dark:to-rose-500 bg-clip-text text-transparent">{title}</span>
         </h3>
         <div className="space-y-0">
           {children}
@@ -48,14 +48,14 @@ export const GridCard = ({ children, onClick, className = '' }) => {
         bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90
         backdrop-blur-xl rounded-3xl p-8 
         border border-gray-200 dark:border-gray-700/50
-        shadow-lg dark:shadow-emerald-500/5
+        shadow-lg dark:shadow-rose-500/5
         hover:shadow-2xl hover:scale-105 hover:-translate-y-2
-        hover:border-cyan-400 dark:hover:border-emerald-500
+        hover:border-cyan-400 dark:hover:border-rose-500
         transition-all duration-500 cursor-pointer
         ${className}
       `}
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-emerald-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent dark:via-rose-500/10 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
       <div className="relative z-10">
         {children}
       </div>
@@ -72,7 +72,7 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
       {onBack && (
         <button
           onClick={onBack}
-          className="group flex items-center gap-2 mb-6 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-emerald-400 hover:bg-cyan-50 dark:hover:bg-emerald-500/10 transition-all duration-300"
+          className="group flex items-center gap-2 mb-6 px-4 py-2 rounded-xl text-gray-600 dark:text-gray-400 hover:text-cyan-600 dark:hover:text-rose-400 hover:bg-cyan-50 dark:hover:bg-rose-500/10 transition-all duration-300"
         >
           <span className="group-hover:-translate-x-1 transition-transform duration-300">←</span>
           <span className="font-semibold">Quay lại</span>
@@ -81,7 +81,7 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-4 mb-3">
-            <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent">
+            <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-rose-400 dark:to-rose-500 bg-clip-text text-transparent">
               {title}
             </h1>
             {badge}
@@ -105,18 +105,18 @@ export const DetailHeader = ({ title, subtitle, onBack, badge, actions }) => {
  */
 export const ListSection = ({ title, icon, items = [], itemIcon = '✓' }) => {
   return (
-    <div className="group relative overflow-hidden bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-500 hover:shadow-2xl hover:border-cyan-300 dark:hover:border-emerald-500/50">
-      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 dark:from-emerald-500/5 dark:to-emerald-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="group relative overflow-hidden bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-rose-500/5 transition-all duration-500 hover:shadow-2xl hover:border-cyan-300 dark:hover:border-rose-500/50">
+      <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 dark:from-rose-500/5 dark:to-rose-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       
       <div className="relative z-10">
         <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
           {icon && <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{icon}</span>}
-          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent">{title}</span>
+          <span className="bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-rose-400 dark:to-rose-500 bg-clip-text text-transparent">{title}</span>
         </h3>
         <ul className="space-y-4">
           {items.map((item, index) => (
-            <li key={index} className="group/item flex items-start gap-4 text-gray-700 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-emerald-400 transition-colors duration-300">
-              <span className="flex-shrink-0 text-cyan-600 dark:text-emerald-400 text-xl group-hover/item:scale-125 transition-transform duration-300">{itemIcon}</span>
+            <li key={index} className="group/item flex items-start gap-4 text-gray-700 dark:text-gray-300 hover:text-cyan-600 dark:hover:text-rose-400 transition-colors duration-300">
+              <span className="flex-shrink-0 text-cyan-600 dark:text-rose-400 text-xl group-hover/item:scale-125 transition-transform duration-300">{itemIcon}</span>
               <span className="font-medium">{item}</span>
             </li>
           ))}
@@ -137,7 +137,7 @@ export const ActionBar = ({ children, align = 'left' }) => {
   }[align];
 
   return (
-    <div className="bg-white/80 dark:bg-gradient-to-r dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-300">
+    <div className="bg-white/80 dark:bg-gradient-to-r dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-rose-500/5 transition-all duration-300">
       <div className={`flex gap-4 ${alignClass}`}>
         {children}
       </div>
@@ -151,7 +151,7 @@ export const ActionBar = ({ children, align = 'left' }) => {
 export const StatusTimeline = ({ events = [] }) => {
   const getStatusColor = (status) => {
     const colors = {
-      success: 'bg-emerald-500 shadow-emerald-500/50',
+      success: 'bg-rose-500 shadow-rose-500/50', // ĐÃ SỬA
       warning: 'bg-yellow-500 shadow-yellow-500/50',
       info: 'bg-blue-500 shadow-blue-500/50',
       danger: 'bg-red-500 shadow-red-500/50',
@@ -161,7 +161,7 @@ export const StatusTimeline = ({ events = [] }) => {
   };
 
   return (
-    <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5 transition-all duration-300">
+    <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-rose-500/5 transition-all duration-300">
       <div className="space-y-8">
         {events.map((event, index) => (
           <div key={index} className="group flex gap-6">
@@ -172,8 +172,8 @@ export const StatusTimeline = ({ events = [] }) => {
               )}
             </div>
             <div className="flex-1 pb-8">
-              <div className="text-sm font-semibold text-cyan-600 dark:text-emerald-400 mb-2">{event.date}</div>
-              <div className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-cyan-600 dark:group-hover:text-emerald-400 transition-colors duration-300">{event.title}</div>
+              <div className="text-sm font-semibold text-cyan-600 dark:text-rose-400 mb-2">{event.date}</div>
+              <div className="text-lg font-bold text-gray-900 dark:text-white mb-1 group-hover:text-cyan-600 dark:group-hover:text-rose-400 transition-colors duration-300">{event.title}</div>
               {event.description && (
                 <div className="text-gray-600 dark:text-gray-400">{event.description}</div>
               )}
@@ -188,9 +188,10 @@ export const StatusTimeline = ({ events = [] }) => {
 /**
  * MetricCard - Card hiển thị metric với icon và trend
  */
-export const MetricCard = ({ icon, title, value, trend, change, color = 'emerald' }) => {
+export const MetricCard = ({ icon, title, value, trend, change, color = 'rose' }) => { // ĐÃ SỬA default
   const colorClasses = {
-    emerald: 'border-emerald-300/50 dark:border-emerald-500/30 bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-500/10 dark:to-emerald-600/5 shadow-emerald-500/20',
+    // ĐÃ SỬA: Thay 'emerald' bằng 'rose'
+    rose: 'border-rose-300/50 dark:border-rose-500/30 bg-gradient-to-br from-rose-50 to-rose-100/50 dark:from-rose-500/10 dark:to-rose-600/5 shadow-rose-500/20',
     blue: 'border-blue-300/50 dark:border-blue-500/30 bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-500/10 dark:to-blue-600/5 shadow-blue-500/20',
     yellow: 'border-yellow-300/50 dark:border-yellow-500/30 bg-gradient-to-br from-yellow-50 to-yellow-100/50 dark:from-yellow-500/10 dark:to-yellow-600/5 shadow-yellow-500/20',
     red: 'border-red-300/50 dark:border-red-500/30 bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-500/10 dark:to-red-600/5 shadow-red-500/20',
@@ -204,7 +205,7 @@ export const MetricCard = ({ icon, title, value, trend, change, color = 'emerald
   };
 
   const trendColors = {
-    up: 'text-emerald-600 dark:text-emerald-400',
+    up: 'text-rose-600 dark:text-rose-400', // ĐÃ SỬA
     down: 'text-red-600 dark:text-red-400',
     neutral: 'text-gray-600 dark:text-gray-400'
   };
@@ -240,7 +241,7 @@ export const MetricCard = ({ icon, title, value, trend, change, color = 'emerald
  */
 export const TabPanel = ({ tabs = [], activeTab, onTabChange }) => {
   return (
-    <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-3 border border-gray-200 dark:border-gray-700/50 mb-8 shadow-xl dark:shadow-emerald-500/5 transition-all duration-300">
+    <div className="bg-white/80 dark:bg-gray-800/90 backdrop-blur-xl rounded-3xl p-3 border border-gray-200 dark:border-gray-700/50 mb-8 shadow-xl dark:shadow-rose-500/5 transition-all duration-300">
       <div className="flex gap-2 overflow-x-auto">
         {tabs.map(tab => (
           <button
@@ -249,7 +250,7 @@ export const TabPanel = ({ tabs = [], activeTab, onTabChange }) => {
             className={`
               px-8 py-4 rounded-2xl font-bold transition-all duration-300 whitespace-nowrap
               ${activeTab === tab.id
-                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-emerald-500 dark:to-emerald-600 text-white shadow-lg scale-105'
+                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-rose-500 dark:to-rose-600 text-white shadow-lg scale-105' // ĐÃ SỬA
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700/50'
               }
             `}
@@ -272,7 +273,7 @@ export const QuickStats = ({ stats = [] }) => {
       {stats.map((stat, index) => (
         <div
           key={index}
-          className="group bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-lg dark:shadow-emerald-500/5 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:border-cyan-400 dark:hover:border-emerald-500"
+          className="group bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-2xl p-6 border border-gray-200 dark:border-gray-700/50 shadow-lg dark:shadow-rose-500/5 transition-all duration-500 hover:scale-105 hover:shadow-2xl hover:border-cyan-400 dark:hover:border-rose-500" // ĐÃ SỬA
         >
           <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{stat.icon}</div>
           <div className="text-xs font-bold text-gray-600 dark:text-gray-400 mb-2 uppercase tracking-wide">{stat.label}</div>

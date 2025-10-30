@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@utils/api';
-// LƯU Ý: Sửa lại tên biến này cho đúng với file mockData.js của bạn
+
 import { MOCK_TEST_DRIVE_APPOINTMENTS as MOCK_TEST_DRIVE_DETAIL_APPOINTMENTS } from '../../data/mockData'; 
-// import './TestDriveCalendarDetail.css'; // <- Đã xóa
+
 
 const TestDriveCalendarDetail = () => {
   const navigate = useNavigate();

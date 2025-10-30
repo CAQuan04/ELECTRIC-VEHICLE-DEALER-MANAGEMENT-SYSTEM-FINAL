@@ -9,7 +9,7 @@ import  Badge from '@/features/dealer/components/ui/Badge.jsx';
 import  StatCard  from '@/features/dealer/components/ui/StatCard.jsx';
 import  Card  from '@/features/dealer/components/ui/Card.jsx';
 import  Table  from '@/features/dealer/components/ui/Table.jsx'; // Giả sử bạn có
-import  DetailHeader  from '@/features/dealer/components/ui/AdvancedComponents.jsx';
+import { DetailHeader } from '@/features/dealer/components/ui/AdvancedComponents.jsx';
 import  SearchBar  from '@/features/dealer/components/ui/SearchBar.jsx';
 import  EmptyState  from '@/features/dealer/components/ui/EmptyState.jsx';
 
