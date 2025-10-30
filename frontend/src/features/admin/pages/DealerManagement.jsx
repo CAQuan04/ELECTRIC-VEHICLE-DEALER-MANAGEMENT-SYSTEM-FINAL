@@ -174,15 +174,15 @@ const UserManagement = () => {
                 <td className="p-3">{formatDate(u.created_at)}</td>
                 <td className="p-3">{formatDate(u.updated_at)}</td>
                 <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      u.status === "Active"
-                        ? "bg-emerald-500/20 text-emerald-300"
-                        : "bg-rose-500/20 text-rose-300"
-                    }`}
-                  >
-                    {u.status === "Active" ? "Hoạt động" : "Ngưng"}
-                  </span>
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                          u.active
+                            ? "bg-emerald-500/20 text-emerald-300"
+                            : "bg-rose-500/20 text-rose-300"
+                        }`}
+                      >
+                        {u.active ? "Hoạt động" : "Ngưng"}
+                      </span>
                 </td>
                 <td className="p-3 text-center space-x-2">
                   <button
@@ -197,6 +197,16 @@ const UserManagement = () => {
                   >
                     Xoá
                   </button>
+                  <button
+                        className={`px-2 py-1 rounded-lg ${
+                          u.active
+                            ? "bg-slate-700 hover:bg-slate-600"
+                            : "bg-emerald-600/40 hover:bg-emerald-600"
+                        }`}
+                        onClick={() => toggleActive(u.id)}
+                      >
+                        {u.active ? "Tắt" : "Bật"}
+                      </button>
                 </td>
               </tr>
             ))}

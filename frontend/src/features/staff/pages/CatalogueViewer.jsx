@@ -9,7 +9,7 @@ const CatalogueViewer = () => {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 p-8">
-      <h1 className="text-3xl font-bold text-sky-400 mb-6">🚗 Catalogue sản phẩm</h1>
+      <h1 className="text-3xl font-bold text-sky-400 mb-6">Catalogue sản phẩm</h1>
 
       {vehicles.length === 0 ? (
         <p className="text-slate-400">Chưa có dữ liệu xe nào được cấu hình.</p>
