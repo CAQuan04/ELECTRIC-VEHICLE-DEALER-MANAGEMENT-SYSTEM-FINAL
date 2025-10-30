@@ -117,7 +117,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         return [
           { path: '/dealer-dashboard', icon: '🏢', label: 'Dashboard Đại Lý' },
           { path: '/dealer/vehicles', icon: '🚗', label: 'Catalog Xe' },
-          { path: '/inventory', icon: '📦', label: 'Quản Lý Kho' },
+          { path: '/dealer/inventory', icon: '📦', label: 'Quản Lý Kho' },
           { path: '/dealer/customers', icon: '👥', label: 'Khách Hàng' },
           { path: '/sales/orders', icon: '🛒', label: 'Đơn Hàng' },
           { path: '/', icon: '🏠', label: 'Trang Chủ' }

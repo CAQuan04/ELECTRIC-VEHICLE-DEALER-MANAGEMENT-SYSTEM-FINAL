@@ -36,7 +36,7 @@ const PageHeader = ({
 
   // Variant styles
   const variantStyles = {
-    default: 'bg-gradient-to-br from-purple-900 via-blue-900 to-teal-800',
+    default: 'bg-gradient-to-br from-slate-900 via-slate-600 to-cyan-800',
     gradient: 'bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800',
     minimal: 'bg-gradient-to-br from-gray-800 via-gray-900 to-gray-800',
     darkTheme: 'bg-gradient-to-r from-slate-900 to-slate-800 border-b border-slate-700',
@@ -89,7 +89,7 @@ const PageHeader = ({
         </div>
 
         {/* HÀNG 2: Content (Dùng FLEX, không dùng GRID) */}
-        {/* ✨ THAY ĐỔI: 'items-start' -> 'items-center' để căn giữa logo */}
+        {/* 'items-center' để căn giữa logo */}
         <div className="flex flex-col md:flex-row items-center gap-8">
 
           {/* CỘT TRÁI: Icon */}
@@ -113,12 +113,17 @@ const PageHeader = ({
           </div>
 
           {/* CỘT GIỮA: Title, Subtitle, Badge, Description */}
-          {/* Xóa 'md:pt-4' vì 'items-center' đã tự động căn chỉnh */}
           <div className="flex flex-col justify-center min-w-0 py-2">
             {/* Title + Badge */}
             <div className="flex items-center space-x-3 mb-3">
-              {/* Title đã là text-white */}
-              <h1 className="text-3xl lg:text-4xl font-serif text-cyan-50 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">
+              
+              {/* ✨ THAY ĐỔI: 
+                  - Đổi 'leading-tight' thành 'leading-normal'
+              */}
+              <h1 
+                className="text-3xl lg:text-4xl text-white leading-normal whitespace-nowrap overflow-hidden text-ellipsis no-gradient"
+                style={{ fontFamily: 'Michroma, sans-serif' }}
+              >
                 {title}
               </h1>
 
@@ -137,16 +142,26 @@ const PageHeader = ({
 
             {/* Subtitle */}
             {subtitle && (
-              /* ✨ THAY ĐỔI: 'text-lg' -> 'text-xl' và thêm 'pl-1.5' */
-              <p className="text-xl font-medium text-white/80 mb-2 pl-1.5">
+              /* ✨ THAY ĐỔI:
+                  - Thêm style={{ fontFamily: 'Newsreader, serif' }}
+              */
+              <p 
+                className="text-xl font-medium text-white/80 mb-2 pl-1.5"
+                style={{ fontFamily: 'Newsreader, serif' }}
+              >
                 {subtitle}
               </p>
             )}
 
             {/* Description */}
             {description && (
-              /* ✨ THAY ĐỔI: 'text-base' -> 'text-lg' và thêm 'pl-1.5' */
-              <p className="text-lg text-white/70 leading-relaxed max-w-3xl pl-1.5">
+              /* ✨ THAY ĐỔI:
+                  - Thêm style={{ fontFamily: 'Newsreader, serif' }}
+              */
+              <p 
+                className="text-lg text-white/70 leading-relaxed max-w-3xl pl-1.5"
+                style={{ fontFamily: 'Newsreader, serif' }}
+              >
                 {description}
               </p>
             )}
@@ -190,3 +205,4 @@ PageHeader.propTypes = {
 };
 
 export default PageHeader;
+

@@ -1,4 +1,4 @@
- import apiClient from '../client';
+import apiClient from '../client';
 
 /**
  * Dealer API Service
@@ -110,7 +110,19 @@ class DealerAPI {
    * @returns {Promise<Object>} Inventory list
    */
   async getInventory(filters = {}) {
-    return apiClient.get('/dealer/inventory', { params: filters });
+    // Sửa lại hàm này để trả về chuẩn success/data
+    try {
+      const response = await apiClient.get('/dealer/inventory', { params: filters });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy kho hàng'
+      };
+    }
   }
 
   /**
@@ -120,7 +132,19 @@ class DealerAPI {
    * @returns {Promise<Object>} Stock details
    */
   async getStockById(stockId) {
-    return apiClient.get(`/dealer/inventory/${stockId}`);
+    // Sửa lại hàm này để trả về chuẩn success/data
+    try {
+      const response = await apiClient.get(`/dealer/inventory/${stockId}`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho'
+      };
+    }
   }
 
   /**
@@ -130,7 +154,19 @@ class DealerAPI {
    * @returns {Promise<Object>} Request result
    */
   async requestStock(requestData) {
-    return apiClient.post('/dealer/inventory/request', requestData);
+    // Sửa lại hàm này để trả về chuẩn success/data
+    try {
+      const response = await apiClient.post('/dealer/inventory/request', requestData);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi yêu cầu nhập kho'
+      };
+    }
   }
 
   /**
@@ -471,16 +507,102 @@ class DealerAPI {
     return apiClient.post(`/dealer/orders/${orderId}/cancel`, { reason });
   }
 
+  // === START: PHẦN MỚI THÊM ===
+
+  // ==================== QUOTATION MANAGEMENT ====================
+  // (Cần cho CreateQuotation.jsx và QuotationList.jsx)
+  
+  /**
+   * Get all quotations
+   * GET /dealer/quotations
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} Quotation list
+   */
+  async getQuotations(params = {}) {
+    try {
+      const response = await apiClient.get('/dealer/quotations', { params });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy danh sách báo giá'
+      };
+    }
+  }
+
+  /**
+   * Create new quotation
+   * POST /dealer/quotations
+   * @param {Object} quotationData - Quotation data
+   * @returns {Promise<Object>} Created quotation
+   */
+  async createQuotation(quotationData) {
+    try {
+      const response = await apiClient.post('/dealer/quotations', quotationData);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi tạo báo giá'
+      };
+    }
+  }
+
+  // ==================== PAYMENT MANAGEMENT ====================
+  // (Cần cho PaymentForm.jsx và PaymentList.jsx)
+
+  /**
+   * Get all payments
+   * GET /dealer/payments
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} Payment list
+   */
+  async getPayments(params = {}) {
+    try {
+      const response = await apiClient.get('/dealer/payments', { params });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy danh sách thanh toán'
+      };
+    }
+  }
+  
   /**
    * Process payment for order
+   * (ĐÃ DI CHUYỂN TỪ ORDER MANAGEMENT SANG ĐÂY)
    * POST /dealer/orders/:id/payment
    * @param {string|number} orderId - Order ID
    * @param {Object} paymentData - Payment information
    * @returns {Promise<Object>} Payment result
    */
   async processPayment(orderId, paymentData) {
-    return apiClient.post(`/dealer/orders/${orderId}/payment`, paymentData);
+    // Sửa lại hàm này để trả về chuẩn success/data
+    try {
+      const response = await apiClient.post(`/dealer/orders/${orderId}/payment`, paymentData);
+       return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi xử lý thanh toán'
+      };
+    }
   }
+
+  // === END: PHẦN MỚI THÊM ===
 
   // ==================== ANALYTICS & REPORTS ====================
 
