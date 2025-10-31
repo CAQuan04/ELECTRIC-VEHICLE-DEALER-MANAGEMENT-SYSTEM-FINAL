@@ -37,24 +37,26 @@ const availableOptions = [
 // Các dịch vụ bổ sung
 const servicePrices = {
   registration: { 'tự đăng ký': 0, 'trọn gói': 20000000 },
-  interiorTrim: { 'gỗ tiêu chuẩn': 0, 'nhôm': 60000000, 'carbon': 75000000 },
-  extendedWarranty: { 'không': 0, '1 năm': 30000000, '3 năm': 80000000 }
+  interiorTrim: { 'Vải nỉ & Nhựa nhám': 0, 'Da thật': 20000000, 'Da cao cấp & Gỗ': 100000000, 'Da cao cấp & carbon fiber': 75000000 },
+  extendedWarranty: { 'không': 0, '1 năm': 30000000, '2 năm': 50000000, '3 năm': 80000000 }
 };
 
 const registrationOptions = [
   { value: 'tự đăng ký', label: 'Tự đăng ký' },
-  { value: 'trọn gói', label: 'Dịch vụ trọn gói (Đã bao gồm phí)' }
+  { value: 'trọn gói', label: 'Dịch vụ trọn gói đăng ký ra biển cho xe' }
 ];
 
 const interiorTrimOptions = [
-  { value: 'gỗ tiêu chuẩn', label: 'Gỗ tiêu chuẩn (Mặc định)' },
-  { value: 'nhôm', label: 'Ốp nhôm (60 triệu)' },
-  { value: 'carbon', label: 'Ốp Carbon (75 triệu)' }
+  { value: 'Vải nỉ & Nhựa nhám', label: 'Ghế nỉ và ốp nhựa nhám (Mặc định)' },
+  { value: 'Da thật', label: 'Ốp da thật (20 triệu)' },
+  { value: 'Da cao cấp & Gỗ', label: 'Ghế da cao cấp và nội thất ốp gỗ, vân gỗ (100 triệu)' },
+  { value: 'Da cao cấp & carbon fiber', label: 'Ghế da cao cấp và nội thất ốp carbon fiber (75 triệu)' }
 ];
 
 const warrantyOptions = [
   { value: 'không', label: 'Không' },
   { value: '1 năm', label: 'Bảo hành mở rộng 1 năm (30 triệu)' },
+  { value: '2 năm', label: 'Bảo hành mở rộng 2 năm (50 triệu)' },
   { value: '3 năm', label: 'Bảo hành mở rộng 3 năm (80 triệu)' }
 ];
 const batteryPolicyOptions = [
@@ -92,12 +94,13 @@ const CreateOrder = () => {
   // --- THÊM STATE DỊCH VỤ ---
   const [selectedServices, setSelectedServices] = useState({
     registration: 'tự đăng ký',
-    interiorTrim: 'gỗ tiêu chuẩn',
+    interiorTrim: 'Vải nỉ & Nhựa nhám',
     extendedWarranty: 'không'
   });
   //-----------------------
   const [isCustomerSectionOpen, setIsCustomerSectionOpen] = useState(true);
   const [isVehicleSectionOpen, setIsVehicleSectionOpen] = useState(true);
+  const [sendEmail, setSendEmail] = useState(false);
   // Tải dữ liệu (Khách hàng & Xe trong kho)
   useEffect(() => {
     const loadPrerequisites = async () => {
@@ -245,7 +248,8 @@ const CreateOrder = () => {
         ...formData,
         additionalOptions: selectedOptions,
         additionalServices: selectedServices,
-        priceBreakdown: priceBreakdown // Gửi toàn bộ cấu trúc giá
+        priceBreakdown: priceBreakdown, // Gửi toàn bộ cấu trúc giá
+        sendEmail: sendEmail // Gửi email báo giá cho khách hàng
       };
 
       const result = await dealerAPI.createQuotation(quotationData);
@@ -638,6 +642,23 @@ const CreateOrder = () => {
 
         {/* SỬA 3: Thêm padding 'mt-8' cho ActionBar */}
         <ActionBar align="right" className="mt-8 p-2.5">
+          {/* --- THÊM CHECKBOX --- */}
+          <div className="flex items-center mr-auto">
+            <input
+              id="sendEmail"
+              type="checkbox"
+              checked={sendEmail}
+              onChange={(e) => setSendEmail(e.target.checked)}
+              className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
+            />
+            <label 
+              htmlFor="sendEmail" 
+              className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300"
+            >
+              Gửi PDF cho khách hàng ngay
+            </label>
+          </div>
+          {/* ------------------- */}
           <Button
             type="button"
             variant="ghost"
@@ -667,9 +688,7 @@ const CreateOrder = () => {
               {({ blob, url, loading, error }) => {
                 // Chúng ta phải render một thẻ <a> thật
                 // và tự style nó cho giống <Button variant="outline">
-                
-                // (Tôi lấy các class này từ file Button.jsx của bạn,
-                // và đã đổi 'emerald' thành 'rose' như bạn yêu cầu)
+               
                 const buttonClasses = `
                   font-semibold rounded-xl transition-all duration-300 
                   flex items-center justify-center gap-2 

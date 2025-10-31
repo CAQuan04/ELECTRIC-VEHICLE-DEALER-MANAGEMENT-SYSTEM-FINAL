@@ -215,7 +215,7 @@ const PaymentList = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="💳 Quản lý thanh toán"
+        title="Quản lý thanh toán"
         subtitle="Theo dõi và quản lý thanh toán của khách hàng"
         icon={<CreditCard className="w-16 h-16" />}
         actions={

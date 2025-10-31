@@ -32,7 +32,7 @@ const availableOptions = [
 // Các dịch vụ bổ sung
 const servicePrices = {
   registration: { 'tự đăng ký': 0, 'trọn gói': 20000000 },
-  interiorTrim: { 'gỗ tiêu chuẩn': 0, 'nhôm': 60000000, 'carbon': 75000000 },
+  interiorTrim: { 'Vải nỉ & Nhựa nhám': 0, 'Da thật': 20000000, 'Da cao cấp & Gỗ': 100000000, 'Da cao cấp & carbon fiber': 75000000 },
   extendedWarranty: { 'không': 0, '1 năm': 30000000, '3 năm': 80000000 }
 };
 
@@ -42,15 +42,17 @@ const registrationOptions = [
 ];
 
 const interiorTrimOptions = [
-  { value: 'gỗ tiêu chuẩn', label: 'Gỗ tiêu chuẩn (Mặc định)' },
-  { value: 'nhôm', label: 'Ốp nhôm (60 triệu)' },
-  { value: 'carbon', label: 'Ốp Carbon (75 triệu)' }
+  { value: 'Vải nỉ & Nhựa nhám ', label: 'Ghế nỉ và ốp nhựa nhám (Mặc định)' },
+  { value: 'Da thật', label: 'Ốp da thật (20 triệu)' },
+  { value: 'Da cao cấp & Gỗ', label: 'Ghế da cao cấp và nội thất ốp gỗ, vân gỗ (100 triệu)' },
+  { value: 'Da cao cấp & carbon fiber', label: 'Ghế da cao cấp và nội thất ốp carbon fiber (75 triệu)' }
 ];
 
 const warrantyOptions = [
   { value: 'không', label: 'Không' },
   { value: '1 năm', label: 'Bảo hành mở rộng 1 năm (30 triệu)' },
-  { value: '3 năm', label: 'Bảo hành mở rộng 3 năm (80 triệu)' }
+  { value: '2 năm', label: 'Bảo hành mở rộng 2 năm (50 triệu)' },
+  { value: '3 năm', label: 'Bảo hành mở rộng 3 năm (70 triệu)' }
 ];
 // ------------------------------------------------
 
@@ -84,7 +86,7 @@ const CreateOrder = () => {
   // --- THÊM STATE DỊCH VỤ ---
   const [selectedServices, setSelectedServices] = useState({
     registration: 'tự đăng ký',
-    interiorTrim: 'gỗ tiêu chuẩn',
+    interiorTrim: 'Vải nỉ & Nhựa nhám',
     extendedWarranty: 'không'
   });
   //-----------------------
@@ -461,7 +463,7 @@ const CreateOrder = () => {
                   />
                 </FormGroup>
                 <FormGroup className="mb-0">
-                  <Label htmlFor="interiorTrim" className="dark:text-gray-300">Ốp nội thất</Label>
+                  <Label htmlFor="interiorTrim" className="dark:text-gray-300">Tùy chọn cho ốp nội thất</Label>
                   <Select
                     id="interiorTrim"
                     name="interiorTrim"
