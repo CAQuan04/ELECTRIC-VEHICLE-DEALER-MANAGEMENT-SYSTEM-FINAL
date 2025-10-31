@@ -211,19 +211,10 @@ const AppLayout = ({ children }) => {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-
-            /* === DÒNG QUAN TRỌNG NHẤT === */
-            /* Đặt chiều rộng bằng 100% trừ đi chiều rộng của sidebar */
-            width: calc(100% - 220px);
-            
-            /* Dòng này vẫn giữ lại để ngăn lỗi tràn nhỏ nhất */
-            overflow-x: hidden; 
           }
-          
           @media (max-width: 768px) {
             .main-content-with-sidebar {
               margin-left: 0;
-              width: 100%; /* Trả lại 100% width khi sidebar ẩn đi */
             }
           }
         `}</style>
@@ -447,6 +438,16 @@ const App = () => {
             </DealerShopGuard>
           </DealerGuard>
         } />
+<<<<<<< Updated upstream
+=======
+        <Route path="/dealer/quotations/edit/:quotationId" element={
+          <DealerGuard>
+            <DealerShopGuard>
+              <AppLayout><CreateQuotation /></AppLayout>
+            </DealerShopGuard>
+          </DealerGuard>
+        } />
+>>>>>>> Stashed changes
         <Route path="/dealer/orders" element={
           <DealerGuard>
             <DealerShopGuard>
