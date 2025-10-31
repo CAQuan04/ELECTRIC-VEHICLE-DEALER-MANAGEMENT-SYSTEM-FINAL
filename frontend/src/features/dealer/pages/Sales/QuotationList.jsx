@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
-import { 
-  PageContainer, 
-  PageHeader, 
-  Card, 
-  Button, 
-  Badge, 
+import {
+  PageContainer,
+  PageHeader,
+  Card,
+  Button,
+  Badge,
   Table,
   SearchBar,
   EmptyState
 } from '../../components';
-import { FileText } from 'lucide-react';
+import { FileText, Edit } from 'lucide-react';
 
 const QuotationList = () => {
   const navigate = useNavigate();
@@ -66,93 +66,107 @@ const QuotationList = () => {
     return `${(price / 1000000).toLocaleString('vi-VN')} triệu VNĐ`;
   };
 
-  const filteredQuotations = quotations.filter(q => 
+  const filteredQuotations = quotations.filter(q =>
     q.customerName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     q.vehicle?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     q.id?.toString().includes(searchQuery)
   );
 
   const quotationColumns = [
-    { 
-      key: 'id', 
-      label: 'Mã báo giá', 
+    {
+      key: 'id',
+      label: 'Mã báo giá',
       render: (item) => (
         <span className="font-bold text-emerald-400">
           QUO-{String(item.id).padStart(4, '0')}
         </span>
       )
     },
-    { 
-      key: 'customerName', 
+    {
+      key: 'customerName',
       label: 'Khách hàng',
       render: (item) => (
         <span className="font-semibold">{item.customerName}</span>
       )
     },
-    { 
-      key: 'vehicle', 
-      label: 'Xe', 
+    {
+      key: 'vehicle',
+      label: 'Xe',
       render: (item) => (
         <span className="font-semibold text-cyan-600 dark:text-cyan-400">
           {item.vehicle}
         </span>
-      ) 
+      )
     },
-    { 
-      key: 'totalAmount', 
-      label: 'Giá trị', 
+    {
+      key: 'totalAmount',
+      label: 'Giá trị',
       render: (item) => (
         <span className="text-emerald-400 font-bold">
           {formatPrice(item.totalAmount)}
         </span>
       )
     },
-    { 
-      key: 'createdAt', 
-      label: 'Ngày tạo', 
+    {
+      key: 'createdAt',
+      label: 'Ngày tạo',
       render: (item) => (
         <span className="text-gray-400">
           {new Date(item.createdAt).toLocaleDateString('vi-VN')}
         </span>
       )
     },
-    { 
-      key: 'validUntil', 
-      label: 'Hiệu lực đến', 
+    {
+      key: 'validUntil',
+      label: 'Hiệu lực đến',
       render: (item) => (
         <span className="text-gray-400">
           {new Date(item.validUntil).toLocaleDateString('vi-VN')}
         </span>
       )
     },
-    { 
-      key: 'status', 
-      label: 'Trạng thái', 
+    {
+      key: 'status',
+      label: 'Trạng thái',
       render: (item) => (
         <Badge variant={getStatusBadge(item.status)}>
           {getStatusLabel(item.status)}
         </Badge>
       )
     },
-    { 
-      key: 'actions', 
-      label: 'Thao tác', 
+    {
+      key: 'actions',
+      label: 'Thao tác',
       render: (item) => (
         <div className="flex gap-2">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => navigate(`/dealer/quotations/${item.id}`)}
           >
             👁️ Xem
           </Button>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => handlePrint(item.id)}
-          >
-            🖨️ In
-          </Button>
+          {/* Chỉ cho phép sửa nếu trạng thái là 'pending' (Chờ duyệt) */}
+          {item.status === 'pending' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate(`/dealer/quotations/edit/${item.id}`)}
+            >
+              <Edit className="w-4 h-4" /> {/* Dùng icon */}
+            </Button>
+          )}
+          {/* Chỉ cho phép chuyển đổi nếu trạng thái là 'accepted' (Đã chấp nhận) */}
+          {item.status === 'accepted' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              // Chuyển đến trang Tạo Đơn hàng mới, mang theo ID báo giá
+              onClick={() => navigate(`/dealer/orders/create?quotationId=${item.id}`)}
+            >
+              ➡️ Tạo Đơn hàng
+            </Button>
+          )}
         </div>
       )
     }
@@ -190,8 +204,8 @@ const QuotationList = () => {
         subtitle="Theo dõi và quản lý báo giá cho khách hàng"
         icon={<FileText className="w-16 h-16" />}
         actions={
-          <Button 
-            variant="gradient" 
+          <Button
+            variant="gradient"
             onClick={() => navigate('/dealer/quotations/create')}
           >
             + Tạo báo giá mới

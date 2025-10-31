@@ -121,7 +121,7 @@ const PageHeader = ({
                   - Đổi 'leading-tight' thành 'leading-normal'
               */}
               <h1 
-                className="text-3xl lg:text-4xl text-white leading-normal whitespace-nowrap overflow-hidden text-ellipsis no-gradient"
+                className="text-2xl lg:text-3xl text-white leading-normal whitespace-nowrap overflow-hidden text-ellipsis no-gradient"
                 style={{ fontFamily: 'Michroma, sans-serif' }}
               >
                 {title}

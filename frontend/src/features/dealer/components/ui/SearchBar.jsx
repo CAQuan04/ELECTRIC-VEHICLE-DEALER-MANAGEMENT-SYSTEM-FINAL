@@ -23,15 +23,15 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', value, onChange, className 
         className="
           w-full pl-16 pr-6 py-5 
           rounded-2xl 
-          bg-white dark:bg-gray-800/50
-          border-2 border-gray-200 dark:border-gray-700
+           dark:bg-gray-800/50
+          border-2 border-gray-200 dark:border-cyan-700
           text-gray-900 dark:text-white
           placeholder:text-gray-400 dark:placeholder:text-gray-500
-          focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20
-          focus:border-cyan-500 dark:focus:border-emerald-500
+          focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-cyan-500/20
+          focus:border-cyan-500 dark:focus:border-cyan-500
           transition-all duration-300
           backdrop-blur-sm
-          hover:border-cyan-400 dark:hover:border-emerald-600
+          hover:border-cyan-400 dark:hover:border-cyan-600
           shadow-lg hover:shadow-xl
           font-medium
         "

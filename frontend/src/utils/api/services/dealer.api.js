@@ -553,7 +553,50 @@ class DealerAPI {
       };
     }
   }
+  // --- Get quotation details (CHO UC4) ---
+  /**
+   * Get quotation details by ID
+   * GET /dealer/quotations/:id
+   * @param {string|number} id - Quotation ID
+   * @returns {Promise<Object>} Quotation details
+   */
+  async getQuotationById(id) {
+    try {
+      const response = await apiClient.get(`/dealer/quotations/${id}`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy thông tin báo giá'
+      };
+    }
+  }
 
+  // --- Update quotation (CHO UC4) ---
+  /**
+   * Update existing quotation
+   * PUT /dealer/quotations/:id
+   * @param {string|number} id - Quotation ID
+   * @param {Object} quotationData - Updated quotation data
+   * @returns {Promise<Object>} Updated quotation
+   */
+  async updateQuotation(id, quotationData) {
+    try {
+      const response = await apiClient.put(`/dealer/quotations/${id}`, quotationData);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi cập nhật báo giá'
+      };
+    }
+  }
   // ==================== PAYMENT MANAGEMENT ====================
   // (Cần cho PaymentForm.jsx và PaymentList.jsx)
 
@@ -843,7 +886,164 @@ class DealerAPI {
   async markAllNotificationsRead() {
     return apiClient.put('/dealer/notifications/read-all');
   }
+
+// ==================== DEBT & REPORTS MANAGEMENT ====================
+// (UC 1.D.2 - Báo cáo công nợ khách hàng / nhà cung cấp)
+
+/**
+ * Get customer debt report (Accounts Receivable)
+ * GET /dealer/reports/customer-debt?status=...
+ * @param {Object} params - Query parameters (status, customerId, etc.)
+ * @returns {Promise<Object>} Customer debt report
+ */
+async getCustomerDebtReport(params = {}) {
+  try {
+    const response = await apiClient.get('/dealer/reports/customer-debt', { params });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi lấy báo cáo công nợ khách hàng'
+    };
+  }
 }
+
+/**
+ * Get supplier debt report (Accounts Payable)
+ * GET /dealer/reports/supplier-debt?status=...
+ * @param {Object} params - Query parameters (status, supplierId, etc.)
+ * @returns {Promise<Object>} Supplier debt report
+ */
+async getSupplierDebtReport(params = {}) {
+  try {
+    const response = await apiClient.get('/dealer/reports/supplier-debt', { params });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi lấy báo cáo công nợ nhà cung cấp'
+    };
+  }
+}
+
+/**
+ * Get aging report (phân tích tuổi nợ)
+ * GET /dealer/reports/aging?entityType=CUSTOMER|SUPPLIER
+ * @param {string} entityType - CUSTOMER or SUPPLIER
+ * @param {Object} params - Query parameters
+ * @returns {Promise<Object>} Aging report with buckets (0-30, 31-60, 61-90, >90 days)
+ */
+async getAgingReport(entityType, params = {}) {
+  try {
+    const response = await apiClient.get('/dealer/reports/aging', { 
+      params: { entityType, ...params } 
+    });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi lấy báo cáo phân tích tuổi nợ'
+    };
+  }
+}
+
+/**
+ * Send debt reminder to customer
+ * POST /dealer/debts/:debtId/remind
+ * @param {string|number} debtId - Debt ID
+ * @returns {Promise<Object>} Reminder result
+ */
+async sendDebtReminder(debtId) {
+  try {
+    const response = await apiClient.post(`/dealer/debts/${debtId}/remind`);
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi gửi nhắc nợ'
+    };
+  }
+}
+
+/**
+ * Send bulk debt reminders
+ * POST /dealer/debts/remind-bulk
+ * @param {Object} filters - Filter criteria for bulk reminders
+ * @returns {Promise<Object>} Bulk reminder result
+ */
+async sendBulkDebtReminders(filters = {}) {
+  try {
+    const response = await apiClient.post('/dealer/debts/remind-bulk', filters);
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi gửi nhắc nợ hàng loạt'
+    };
+  }
+}
+
+/**
+ * Calculate outstanding balance for a customer
+ * GET /dealer/customers/:customerId/outstanding
+ * @param {string|number} customerId - Customer ID
+ * @returns {Promise<Object>} Outstanding balance
+ */
+async calculateCustomerOutstanding(customerId) {
+  try {
+    const response = await apiClient.get(`/dealer/customers/${customerId}/outstanding`);
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi tính công nợ khách hàng'
+    };
+  }
+}
+
+/**
+ * Export debt report
+ * GET /dealer/reports/debt/export?format=pdf|excel&type=customer|supplier
+ * @param {string} format - Export format (pdf or excel)
+ * @param {string} type - Report type (customer or supplier)
+ * @param {Object} params - Additional parameters
+ * @returns {Promise<Object>} Export result with file URL
+ */
+async exportDebtReport(format, type, params = {}) {
+  try {
+    const response = await apiClient.get('/dealer/reports/debt/export', { 
+      params: { format, type, ...params },
+      responseType: 'blob'
+    });
+    return {
+      success: true,
+      data: response.data
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: error.response?.data?.message || 'Lỗi khi xuất báo cáo'
+    };
+  }
+}}
 
 // Export singleton instance
 export const dealerAPI = new DealerAPI();

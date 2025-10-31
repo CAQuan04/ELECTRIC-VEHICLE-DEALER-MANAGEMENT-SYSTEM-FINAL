@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 
 // Import các UI Component chuẩn
@@ -18,7 +18,7 @@ import {
   InfoRow
 } from '../../components';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { ShoppingCart, ChevronDown, Printer } from 'lucide-react';
+import { ShoppingCart, ChevronDown, Printer, Edit, FileText } from 'lucide-react';
 import QuotationDocument from './QuotationDocument';
 // --- DỮ LIỆU CẤU HÌNH (Nên lấy từ API nếu có) ---
 
@@ -67,7 +67,8 @@ const batteryPolicyOptions = [
 
 const CreateOrder = () => {
   const navigate = useNavigate();
-
+  const { quotationId } = useParams();
+  const isEditMode = !!quotationId; // true nếu có ID, false nếu không
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customers, setCustomers] = useState([]);
@@ -106,6 +107,7 @@ const CreateOrder = () => {
     const loadPrerequisites = async () => {
       setIsDataLoading(true);
       try {
+        // Luôn tải Customers và Inventory
         const [customerResult, inventoryResult] = await Promise.all([
           dealerAPI.getCustomers(),
           dealerAPI.getInventory()
@@ -120,17 +122,49 @@ const CreateOrder = () => {
           const inventoryList = Array.isArray(inventoryResult.data) ? inventoryResult.data : inventoryResult.data.data || [];
           setInventory(inventoryList.filter(v => v.available > 0));
         }
-
+        // --- Logic cho Chế độ SỬA ---
+        if (isEditMode) {
+          const quotationResult = await dealerAPI.getQuotationById(quotationId);
+          if (quotationResult.success && quotationResult.data) {
+            const data = quotationResult.data;
+            // Điền dữ liệu cũ vào form
+            setFormData({
+              customerId: data.customerId || '',
+              customerName: data.customerName || '',
+              customerPhone: data.customerPhone || '',
+              customerEmail: data.customerEmail || '',
+              vehicleId: data.vehicleId || '',
+              basePrice: data.priceBreakdown?.basePrice || 0,
+              discount: data.discount || 0,
+              voucherCode: data.voucherCode || '',
+              voucherDiscount: data.voucherDiscount || 0,
+              paymentMethod: data.paymentMethod || 'financing',
+              validUntil: data.validUntil ? new Date(data.validUntil).toISOString().split('T')[0] : '',
+              batteryPolicy: data.batteryPolicy || 'thuê pin',
+              notes: data.notes || ''
+            });
+            setSelectedOptions(data.additionalOptions || []);
+            setSelectedServices(data.additionalServices || {
+              registration: 'tự đăng ký',
+              interiorTrim: 'gỗ tiêu chuẩn',
+              extendedWarranty: 'không'
+            });
+          } else {
+            throw new Error(quotationResult.message || 'Không tìm thấy báo giá');
+          }
+        }
+        // --- Kết thúc logic Sửa ---
       } catch (error) {
         console.error('Error loading prerequisites:', error);
         alert('Lỗi: không thể tải dữ liệu khách hàng hoặc kho xe.');
+        navigate('/dealer/quotations');// Về danh sách nếu lỗi
       } finally {
         setIsDataLoading(false);
       }
     };
 
     loadPrerequisites();
-  }, []);
+  }, [isEditMode, quotationId, navigate]);
 
   // Xử lý logic nghiệp vụ
   const handleChange = (e) => {
@@ -251,19 +285,25 @@ const CreateOrder = () => {
         priceBreakdown: priceBreakdown, // Gửi toàn bộ cấu trúc giá
         sendEmail: sendEmail // Gửi email báo giá cho khách hàng
       };
-
-      const result = await dealerAPI.createQuotation(quotationData);
+      let result;
+      if (isEditMode) {
+        // Gọi API Cập nhật
+        result = await dealerAPI.updateQuotation(quotationId, quotationData);
+      } else {
+        // Gọi API Tạo mới
+        result = await dealerAPI.createQuotation(quotationData);
+      }
       // -----------------------------
 
       if (result.success) {
-        alert('Tạo báo giá thành công!');
+        alert(isEditMode ? 'Cập nhật báo giá thành công!' : 'Tạo báo giá thành công!');
         navigate('/dealer/quotations');
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
     } catch (error) {
       console.error('Error creating quotation:', error);
-      alert('Có lỗi xảy ra khi tạo báo giá: ' + error.message);
+      alert('Có lỗi xảy ra: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }
@@ -295,11 +335,11 @@ const CreateOrder = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="Tạo đơn báo giá mới"
-        subtitle="Tạo đơn báo giá xe cho khách hàng từ kho có sẵn"
-        icon={<ShoppingCart className="w-16 h-16" />}
+        title={isEditMode ? 'Sửa báo giá' : 'Tạo báo giá mới'}
+        subtitle={isEditMode ? `Đang chỉnh sửa Báo giá ID: ${quotationId}` : 'Tạo báo giá chi tiết cho khách hàng'}
+        icon={isEditMode ? <Edit className="w-16 h-16" /> : <FileText className="w-16 h-16" />}
         showBackButton
-        onBack={() => navigate('/dealer/orders')}
+        onBack={() => navigate('/dealer/quotations')}
       />
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -651,8 +691,8 @@ const CreateOrder = () => {
               onChange={(e) => setSendEmail(e.target.checked)}
               className="h-4 w-4 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
             />
-            <label 
-              htmlFor="sendEmail" 
+            <label
+              htmlFor="sendEmail"
               className="ml-2 block text-sm font-medium text-gray-900 dark:text-gray-300"
             >
               Gửi PDF cho khách hàng ngay
@@ -672,13 +712,13 @@ const CreateOrder = () => {
           {/* Lưu ý: PDFDownloadLink chỉ render khi có đủ dữ liệu. 
             Nếu validUntil chưa có, nó sẽ báo lỗi.
           */}
-         {/* --- NÚT PDF MỚI (ĐÃ SỬA) --- */}
+          {/* --- NÚT PDF MỚI (ĐÃ SỬA) --- */}
           {formData.validUntil && (
             <PDFDownloadLink
               document={
-                <QuotationDocument 
-                  formData={formData} 
-                  priceBreakdown={priceBreakdown} 
+                <QuotationDocument
+                  formData={formData}
+                  priceBreakdown={priceBreakdown}
                   selectedOptions={selectedOptions}
                   selectedServices={selectedServices}
                 />
@@ -688,7 +728,7 @@ const CreateOrder = () => {
               {({ blob, url, loading, error }) => {
                 // Chúng ta phải render một thẻ <a> thật
                 // và tự style nó cho giống <Button variant="outline">
-               
+
                 const buttonClasses = `
                   font-semibold rounded-xl transition-all duration-300 
                   flex items-center justify-center gap-2 
@@ -698,9 +738,9 @@ const CreateOrder = () => {
                   bg-transparent border border-gray-300 text-gray-700 
                   hover:bg-cyan-50 hover:border-cyan-500 hover:text-cyan-700
                 `;
-                
-                const disabledClasses = (loading || isLoading) 
-                  ? 'opacity-50 cursor-not-allowed' 
+
+                const disabledClasses = (loading || isLoading)
+                  ? 'opacity-50 cursor-not-allowed'
                   : '';
 
                 return (
@@ -724,7 +764,10 @@ const CreateOrder = () => {
             variant="gradient"
             disabled={isLoading}
           >
-            {isSubmitting ? 'Đang tạo...' : 'Tạo báo giá'}
+            {isSubmitting
+              ? (isEditMode ? 'Đang cập nhật...' : 'Đang tạo...')
+              : (isEditMode ? 'Lưu thay đổi' : 'Tạo báo giá')
+            }
           </Button>
         </ActionBar>
       </form>
@@ -733,3 +776,20 @@ const CreateOrder = () => {
 };
 
 export default CreateOrder;
+
+//-------------------------- BACKEND LOGIC (Node.js/Express) --------------------------
+//"Khi API POST /dealer/quotations (hàm createQuotation) được gọi:
+
+//Hãy kiểm tra xem có trường sendEmail: true trong request body hay không.
+
+///Nếu KHÔNG có, chỉ cần lưu báo giá vào CSDL như bình thường.
+
+//Nếu CÓ (sendEmail: true):
+
+//Bước 1: Vẫn lưu báo giá vào CSDL.
+
+//Bước 2: Lấy customerEmail từ request body.
+
+//Bước 3: Dùng dữ liệu (priceBreakdown, formData...) để tạo file PDF ở phía server (dùng thư viện như pdf-lib hoặc puppeteer).
+
+//Bước 4: Dùng dịch vụ email (SendGrid, Nodemailer...) để gửi email đến customerEmail với file PDF vừa tạo được đính kèm."
