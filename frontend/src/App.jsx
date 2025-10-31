@@ -439,7 +439,10 @@ const App = () => {
           </DealerGuard>
         } />
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
         <Route path="/dealer/quotations/edit/:quotationId" element={
           <DealerGuard>
             <DealerShopGuard>
@@ -447,6 +450,9 @@ const App = () => {
             </DealerShopGuard>
           </DealerGuard>
         } />
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
         <Route path="/dealer/orders" element={
           <DealerGuard>
