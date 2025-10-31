@@ -20,6 +20,7 @@ const CustomerDebtReport = () => {
   const navigate = useNavigate();
   const [debtData, setDebtData] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all'); // all, ontime, upcoming, overdue
 
@@ -98,8 +99,47 @@ const CustomerDebtReport = () => {
     }
   };
 
-  const handleExportReport = async () => {
-    alert('Chức năng xuất báo cáo đang được phát triển');
+// ---LOGIC XUẤT BÁO CÁO (UC 1.D.2) ---
+  const handleExportReport = async (format = 'excel') => {
+    setIsExporting(true);
+    try {
+      // 1. Chuẩn bị params (giống hệt params đang lọc)
+      const params = {
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        search: searchQuery || undefined
+      };
+      
+      // 2. Gọi API export
+      // (Dựa theo file dealer.api.js, hàm này trả về { success: true, data: blob })
+      const result = await dealerAPI.exportDebtReport(format, 'customer', params);
+
+      if (result.success && result.data) {
+        // 3. Tạo URL tạm thời từ blob
+        const url = window.URL.createObjectURL(new Blob([result.data]));
+        
+        // 4. Tạo 1 thẻ <a> ẩn để kích hoạt tải file
+        const link = document.createElement('a');
+        link.href = url;
+        const fileExtension = format === 'pdf' ? 'pdf' : 'xlsx';
+        const fileName = `BaoCao_CongNo_KhachHang_${new Date().toISOString().split('T')[0]}.${fileExtension}`;
+        link.setAttribute('download', fileName);
+        
+        // 5. Kích hoạt
+        document.body.appendChild(link);
+        link.click();
+        
+        // 6. Dọn dẹp
+        link.parentNode.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } else {
+        throw new Error(result.message || 'Không thể xuất file');
+      }
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      alert('Lỗi khi xuất báo cáo: ' + error.message);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const filteredDebtData = debtData.filter(debt => 
@@ -147,7 +187,7 @@ const CustomerDebtReport = () => {
       />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+     <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
         <StatCard
           icon="👥"
           title="Khách hàng còn nợ"
@@ -176,7 +216,7 @@ const CustomerDebtReport = () => {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
         <SearchBar
           placeholder="Tìm kiếm theo khách hàng hoặc mã đơn..."
           value={searchQuery}
@@ -193,7 +233,7 @@ const CustomerDebtReport = () => {
       </div>
 
       {/* Debt Table */}
-      <Card className="mb-8">
+      <Card className="mt-6">
         {filteredDebtData.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -288,13 +328,14 @@ const CustomerDebtReport = () => {
       </Card>
 
       {/* Actions */}
-      <div className="flex gap-4 justify-end">
-        <Button 
+      <div className="flex gap-4 justify-end mt-6">
+<Button 
           variant="primary"
-          onClick={handleExportReport}
+          onClick={() => handleExportReport('excel')} // Sửa: Chỉ rõ là excel
           icon={<Download className="w-5 h-5" />}
+          disabled={isExporting} // Vô hiệu hóa khi đang xuất
         >
-          Xuất báo cáo
+          {isExporting ? 'Đang xuất...' : 'Xuất Excel'}
         </Button>
         <Button 
           variant="secondary"

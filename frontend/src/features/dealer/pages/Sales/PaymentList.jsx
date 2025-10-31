@@ -201,8 +201,8 @@ const PaymentList = () => {
           icon={<CreditCard className="w-16 h-16" />}
         />
         <Card>
-          <div className="text-center py-16">
-            <div className="animate-spin text-6xl mb-4">⚙️</div>
+          <div className="text-center py-16 mt-8">
+            <div className="animate-spin text-6xl mb-4 ">⚙️</div>
             <p className="text-xl font-bold text-gray-600 dark:text-gray-400">
               Đang tải danh sách thanh toán...
             </p>
@@ -228,7 +228,7 @@ const PaymentList = () => {
         }
       />
 
-      <div className="mb-6">
+      <div className="mb-6 mt-8">
         <SearchBar
           placeholder="Tìm kiếm theo khách hàng, mã đơn hoặc mã thanh toán..."
           value={searchQuery}
