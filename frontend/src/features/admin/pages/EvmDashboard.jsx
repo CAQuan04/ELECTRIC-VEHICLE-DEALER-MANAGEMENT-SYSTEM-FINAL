@@ -5,6 +5,7 @@ import "@modules/loading/GlobalLoading.css";
 import DealerManagement from "./DealerManagement";
 import DealerContractManagement from "./DealerContractManagement";
 import SalesReport from "./SalesReport";
+import ForecastReport from "../../shared/pages/ForecastReport";
 
 /* ========== Mock data ========== */
 const initialUsers = [
@@ -171,7 +172,8 @@ const EvmDashboard = () => {
           { key: "users", label: "Quản lý người dùng" },
           { key: "contracts", label: "Hợp đồng & KPI đại lý" },
           { key: "system", label: "Hệ thống" },
-          { key: "sales", label: "Báo cáo doanh số" }
+          { key: "sales", label: "Báo cáo doanh số" },
+          { key: "forecast", label: "Dự báo nhu cầu (AI)" }
         ].map((tab) => (
           <button
             key={tab.key}
@@ -190,6 +192,8 @@ const EvmDashboard = () => {
       {activeSection === "contracts" && <DealerContractManagement />}
 
       {activeSection === "sales" && <SalesReport />}
+
+      {activeSection === "forecast" && <ForecastReport />}
 
       {/* DEALER */}
       {activeSection === "dealers" && <DealerManagement />}
