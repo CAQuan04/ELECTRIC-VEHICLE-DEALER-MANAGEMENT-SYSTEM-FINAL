@@ -94,10 +94,7 @@ const InventoryManagement = () => {
         )
       );
     } else {
-      setInventories((prev) => [
-        { ...form, updated_at: now },
-        ...prev,
-      ]);
+      setInventories((prev) => [{ ...form, updated_at: now }, ...prev]);
     }
     setShowModal(false);
   };
@@ -137,9 +134,7 @@ const InventoryManagement = () => {
       return alert("Vui lòng nhập đầy đủ thông tin điều phối.");
     if (isEdit) {
       setDistributions((prev) =>
-        prev.map((x) =>
-          x.dist_id === form.dist_id ? { ...form } : x
-        )
+        prev.map((x) => (x.dist_id === form.dist_id ? { ...form } : x))
       );
     } else {
       setDistributions((prev) => [{ ...form }, ...prev]);
@@ -364,9 +359,7 @@ const InventoryManagement = () => {
 
             <form
               onSubmit={
-                activeTab === "inventory"
-                  ? saveInventory
-                  : saveDistribution
+                activeTab === "inventory" ? saveInventory : saveDistribution
               }
               className="px-5 py-4 space-y-3"
             >
@@ -427,11 +420,7 @@ const InventoryManagement = () => {
             </div>
             <div className="px-5 py-4 text-slate-200">
               Bạn có chắc muốn xoá bản ghi{" "}
-              <b>
-                {confirmDelete.inventory_id ||
-                  confirmDelete.dist_id}
-              </b>
-              ?
+              <b>{confirmDelete.inventory_id || confirmDelete.dist_id}</b>?
             </div>
             <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-800">
               <button

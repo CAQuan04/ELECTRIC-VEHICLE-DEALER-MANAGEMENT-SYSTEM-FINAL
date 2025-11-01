@@ -17,14 +17,17 @@
     "@tailwindcss/vite": "^4.1.13",
     "axios": "^1.13.0",
     "bezier-easing": "^2.1.0",
+    "file-saver": "^2.0.5",
     "gsap": "^3.13.0",
+    "jspdf": "^3.0.3",
     "lucide-react": "^0.548.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.23.0",
     "react-transition-group": "^4.4.5",
-    "recharts": "^3.3.0"
+    "recharts": "^3.3.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.16",

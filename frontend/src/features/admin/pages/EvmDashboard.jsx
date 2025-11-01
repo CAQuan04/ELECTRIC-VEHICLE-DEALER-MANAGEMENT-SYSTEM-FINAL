@@ -3,6 +3,8 @@ import { AuthService } from "@utils";
 import { usePageLoading } from "@modules/loading";
 import "@modules/loading/GlobalLoading.css";
 import DealerManagement from "./DealerManagement";
+import DealerContractManagement from "./DealerContractManagement";
+import SalesReport from "./SalesReport";
 
 /* ========== Mock data ========== */
 const initialUsers = [
@@ -167,8 +169,9 @@ const EvmDashboard = () => {
           { key: "overview", label: "Tổng quan" },
           { key: "dealers", label: "Quản lý đại lý" },
           { key: "users", label: "Quản lý người dùng" },
+          { key: "contracts", label: "Hợp đồng & KPI đại lý" },
           { key: "system", label: "Hệ thống" },
-          { key: "reports", label: "Báo cáo" },
+          { key: "sales", label: "Báo cáo doanh số" }
         ].map((tab) => (
           <button
             key={tab.key}
@@ -183,6 +186,10 @@ const EvmDashboard = () => {
           </button>
         ))}
       </div>
+
+      {activeSection === "contracts" && <DealerContractManagement />}
+
+      {activeSection === "sales" && <SalesReport />}
 
       {/* DEALER */}
       {activeSection === "dealers" && <DealerManagement />}
