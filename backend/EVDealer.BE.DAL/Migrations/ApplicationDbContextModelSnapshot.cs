@@ -92,6 +92,9 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("varchar(20)")
                         .HasColumnName("phone");
 
+                    b.Property<int>("SafetyStockLevel")
+                        .HasColumnType("int");
+
                     b.HasKey("DealerId")
                         .HasName("PK__Dealer__019990C0196E5CEB");
 
@@ -301,6 +304,49 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("VehicleId");
 
                     b.ToTable("Distribution", (string)null);
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DistributionSuggestion", b =>
+                {
+                    b.Property<int>("SuggestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SuggestionId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CurrentInventory")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ForecastedDemand")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SafetyStock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("SuggestedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SuggestionId");
+
+                    b.HasIndex("DealerId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("DistributionSuggestions");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Inventory", b =>
@@ -999,6 +1045,25 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Config");
 
                     b.Navigation("ToDealer");
+
+                    b.Navigation("Vehicle");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DistributionSuggestion", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
 
                     b.Navigation("Vehicle");
                 });

@@ -14,6 +14,8 @@ public interface IDealerRepository
     Task<bool> ExistsAsync(int dealerId);
     Task<Dealer?> GetByPhoneAsync(string phone);
     Task<Dealer?> GetByNameAsync(string name);
+
+    Task<IEnumerable<Dealer>> GetAllBasicAsync();
 }
 
 #region Query DTO
