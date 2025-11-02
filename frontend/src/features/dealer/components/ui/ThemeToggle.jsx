@@ -19,7 +19,7 @@ const ThemeToggle = () => {
         dark:from-emerald-500 dark:to-emerald-600
         hover:from-cyan-600 hover:to-blue-700
         dark:hover:from-emerald-600 dark:hover:to-emerald-700
-        
+        shadow-2xl hover:shadow-3xl
         border-2 border-white/20 dark:border-white/10
         transform hover:scale-110 active:scale-95
         transition-all duration-500

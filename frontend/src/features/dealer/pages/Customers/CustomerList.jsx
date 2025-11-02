@@ -205,7 +205,7 @@ const CustomerList = () => {
             value={customerMetrics.total}
             icon="⭐"
             color="bg-indigo-50 border-indigo-100 dark:bg-gray-800 dark:border-indigo-100"
-            className="rounded-xl" // (Đã xóa chữ 't' bị dư ở đây)
+            className="rounded-xl" 
           />
           <MetricCard
             title="Khách hàng tiềm năng"
