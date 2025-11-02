@@ -5,16 +5,11 @@ using System.Threading.Tasks;
 
 namespace EVDealer.BE.Services.Analytics
 {
-    // Ghi chú: "Hợp đồng" cho các dịch vụ phân tích, đã được cập nhật.
+    // Ghi chú: "Hợp đồng" cho dịch vụ phân tích (Phiên bản GỐC).
     public interface IAnalyticsService
     {
-        // ===================================================================================
-        // === PHẦN ĐÃ SỬA ĐỔI: SỬ DỤNG DTO LÀM THAM SỐ ===
-        // Ghi chú: Hợp đồng yêu cầu phương thức này phải nhận MỘT tham số duy nhất là SalesReportQueryDto.
-        Task<SalesReportResponseDto> GenerateSalesReportByDealerAsync(SalesReportQueryDto query);
-        // ===================================================================================
+        Task<SalesReportResponseDto> GenerateSalesReportByDealerAsync(DateOnly startDate, DateOnly endDate);
 
-        // Ghi chú: Phương thức cho báo cáo tồn kho cũng sử dụng cùng một DTO.
-        Task<IEnumerable<InventoryTurnoverReportItemDto>> GenerateInventoryTurnoverReportAsync(SalesReportQueryDto query);
+        Task<IEnumerable<InventoryTurnoverReportItemDto>> GenerateInventoryTurnoverReportAsync(DateOnly startDate, DateOnly endDate);
     }
 }

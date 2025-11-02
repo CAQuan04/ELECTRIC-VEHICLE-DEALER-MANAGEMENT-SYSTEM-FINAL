@@ -1,5 +1,7 @@
 ﻿using EVDealer.BE.Common.DTOs;
+using EVDealer.BE.Services.AI;
 using EVDealer.BE.Services.Analytics;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -13,22 +15,20 @@ namespace EVDealer.BE.API.Controllers
     public class AnalyticsController : ControllerBase
     {
         private readonly IAnalyticsService _analyticsService;
-        public AnalyticsController(IAnalyticsService analyticsService) => _analyticsService = analyticsService;
+        private readonly IDemandForecastService _forecastService;
 
-        // Endpoint: GET /api/analytics/sales-by-dealer?StartDate=...&EndDate=...&DealerId=...
+        public AnalyticsController(IAnalyticsService analyticsService, IDemandForecastService forecastService)
+        {
+            _analyticsService = analyticsService;
+            _forecastService = forecastService;
+        }
+
         [HttpGet("sales-by-dealer")]
-        public async Task<IActionResult> GetSalesReportByDealer([FromQuery] SalesReportQueryDto query)
+        public async Task<IActionResult> GetSalesReportByDealer([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
         {
             try
             {
-                // ===================================================================================
-                // === PHẦN ĐÃ SỬA ĐỔI: TRUYỀN TOÀN BỘ DTO XUỐNG SERVICE ===
-                // Ghi chú: Chúng ta truyền nguyên cả đối tượng 'query' xuống cho Service.
-                // Service sẽ tự chịu trách nhiệm đọc các thuộc tính bên trong nó (StartDate, EndDate, DealerId,...).
-                // Điều này giúp Controller luôn gọn gàng, ngay cả khi chúng ta thêm nhiều bộ lọc mới.
-                var report = await _analyticsService.GenerateSalesReportByDealerAsync(query);
-                // ===================================================================================
-
+                var report = await _analyticsService.GenerateSalesReportByDealerAsync(startDate, endDate);
                 return Ok(report);
             }
             catch (ArgumentException ex)
@@ -37,19 +37,34 @@ namespace EVDealer.BE.API.Controllers
             }
         }
 
-        // Ghi chú: Phương thức này đã được viết đúng ngay từ đầu và không cần thay đổi.
         [HttpGet("inventory-turnover")]
-        public async Task<IActionResult> GetInventoryTurnoverReport([FromQuery] SalesReportQueryDto query)
+        public async Task<IActionResult> GetInventoryTurnoverReport([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
         {
             try
             {
-                var report = await _analyticsService.GenerateInventoryTurnoverReportAsync(query);
+                var report = await _analyticsService.GenerateInventoryTurnoverReportAsync(startDate, endDate);
                 return Ok(report);
             }
             catch (Exception ex)
             {
                 return StatusCode(500, "Đã xảy ra lỗi trong quá trình xử lý báo cáo.");
             }
+        }
+
+        [HttpGet("demand-forecasts")]
+        public async Task<IActionResult> GetDemandForecasts()
+        {
+            var forecasts = await _forecastService.GetLatestForecastsAsync();
+            // Trình đóng gói JSON sẽ xử lý DTO một cách hoàn hảo vì không có vòng lặp.
+            return Ok(forecasts);
+        }
+
+        [HttpPost("run-demand-forecast")]
+        [Authorize(Roles = "Admin")]
+        public IActionResult RunDemandForecast()
+        {
+            var jobId = BackgroundJob.Enqueue<IDemandForecastService>(service => service.RunDemandForecastProcessAsync());
+            return Accepted(new { message = "Yêu cầu chạy quy trình dự báo đã được tiếp nhận...", jobId });
         }
     }
 }

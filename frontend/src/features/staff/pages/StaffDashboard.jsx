@@ -9,6 +9,8 @@ import PricingManagement from "./PricingManagement";
 import ReportsSection from "../components/ReportsSection";
 import InventoryTurnoverReport from "./InventoryTurnoverReport";
 import CatalogueViewer from "../pages/CatalogueViewer";
+import SalesReport from "../pages/SalesReport";
+import ForecastReport from "../../shared/pages/ForecastReport";
 
 /* =======================
    MOCK / ORIGINAL DATA
@@ -67,7 +69,8 @@ const NAV_SECTIONS = [
   { id: "orders", icon: "📋", label: "Đơn hàng" },
   { id: "customers", icon: "👥", label: "Khách hàng" },
   { id: "inventory-report", icon: "📊", label: "Báo cáo tồn kho" },
-  { id: "reports", icon: "📈", label: "Báo cáo" },
+  { id: "salesreport", icon: "📈", label: "Báo cáo" },
+  { id: "forecast", icon: "📈", label: "Dự báo như cầu(AI)" },
 ];
 
 const getStatusClasses = (status) => {
@@ -396,8 +399,12 @@ const StaffDashboard = () => {
         return <PricingManagement />;
       case "inventory-report":
         return <InventoryTurnoverReport />;
-        case "catalogue":
-  return <CatalogueViewer />;
+      case "catalogue":
+        return <CatalogueViewer />;
+      case "salesreport":
+        return <SalesReport />;
+      case "forecast":
+        return <ForecastReport />;
 
       default:
         return null;
