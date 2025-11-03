@@ -120,7 +120,7 @@ const SupplierDebtReport = () => {
       />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 mt-5">
         <StatCard
           icon="🏢"
           title="Nhà cung cấp"
@@ -252,7 +252,7 @@ const SupplierDebtReport = () => {
             </table>
           </div>
         ) : (
-          <EmptyState
+          <EmptyState className="mt-8"
             icon="🏭"
             title="Không có công nợ nhà cung cấp"
             message={searchQuery ? "Không tìm thấy công nợ phù hợp với từ khóa tìm kiếm" : "Tất cả hóa đơn nhà cung cấp đã được thanh toán"}

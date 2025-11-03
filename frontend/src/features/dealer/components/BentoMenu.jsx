@@ -1,6 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react';
 import { gsap } from 'gsap';
 import { useNavigate } from 'react-router-dom';
+import { useDealerRole } from './auth/DealerRoleGuard';
 
 const DEFAULT_PARTICLE_COUNT = 8;
 const DEFAULT_SPOTLIGHT_RADIUS = 300;
@@ -16,6 +17,7 @@ const menuData = [
     description: 'Danh mục xe, so sánh mẫu xe',
     tag: 'UC 1.a',
     color: 'emerald',
+    requiredRole: null, // Accessible by all dealer users
     subModules: [
       { icon: '📋', title: 'Danh mục xe', path: '/dealer/vehicles', tag: 'UC 1.a.1' },
       { icon: '⚖️', title: 'So sánh xe', path: '/dealer/vehicles/compare', tag: 'UC 1.a.2' }
@@ -28,13 +30,14 @@ const menuData = [
     description: 'Báo giá, đơn hàng, khuyến mãi',
     tag: 'UC 1.b',
     color: 'purple',
+    requiredRole: null, // Accessible by all dealer users
     subModules: [
       { icon: '💰', title: 'Quản lý báo giá', path: '/dealer/quotations', tag: 'UC 1.b.1' },
       { icon: '📄', title: 'Đơn hàng & Hợp đồng', path: '/dealer/orders', tag: 'UC 1.b.2' },
       { icon: '🎁', title: 'Khuyến mãi', path: '/dealer/promotions', tag: 'UC 1.b.3' },
-      { icon: '🏭', title: 'Đặt xe từ hãng', path: '/dealer/purchase-requests', tag: 'UC 1.b.4' },
+      { icon: '🏭', title: 'Đặt xe từ hãng', path: '/dealer/purchase-requests', tag: 'UC 1.b.4', managerOnly: true },
       { icon: '🚚', title: 'Theo dõi giao xe', path: '/dealer/deliveries', tag: 'UC 1.b.5' },
-      { icon: '💳', title: 'Quản lý thanh toán', path: '/dealer/payments', tag: 'UC 1.b.6' }
+      { icon: '💳', title: 'Quản lý thanh toán', path: '/dealer/payments', tag: 'UC 1.b.6', managerOnly: true }
     ]
   },
   {
@@ -44,6 +47,7 @@ const menuData = [
     description: 'Hồ sơ, lái thử, phản hồi',
     tag: 'UC 1.c',
     color: 'blue',
+    requiredRole: null, // Accessible by all dealer users
     subModules: [
       { icon: '📇', title: 'Hồ sơ khách hàng', path: '/dealer/customers', tag: 'UC 1.c.1' },
       { icon: '🚙', title: 'Lịch hẹn lái thử', path: '/dealer/test-drives', tag: 'UC 1.c.2' },
@@ -57,10 +61,11 @@ const menuData = [
     description: 'Doanh số, công nợ',
     tag: 'UC 1.d',
     color: 'pink',
+    requiredRole: 'dealer_manager', // Manager only
     subModules: [
-      { icon: '📈', title: 'Doanh số nhân viên', path: '/dealer/reports/sales-performance', tag: 'UC 1.d.1' },
-      { icon: '💸', title: 'Công nợ khách hàng', path: '/dealer/reports/customer-debt', tag: 'UC 1.d.2 (AR)' },
-      { icon: '🏢', title: 'Công nợ nhà cung cấp', path: '/dealer/reports/supplier-debt', tag: 'UC 1.d.2 (AP)' }
+      { icon: '📈', title: 'Doanh số nhân viên', path: '/dealer/reports/sales-performance', tag: 'UC 1.d.1', managerOnly: true },
+      { icon: '💸', title: 'Công nợ khách hàng', path: '/dealer/reports/customer-debt', tag: 'UC 1.d.2 (AR)', managerOnly: true },
+      { icon: '🏢', title: 'Công nợ nhà cung cấp', path: '/dealer/reports/supplier-debt', tag: 'UC 1.d.2 (AP)', managerOnly: true }
     ]
   }
 ];
@@ -215,6 +220,7 @@ const ParticleCard = ({ children, className = '', onClick, disableAnimations = f
 const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
   const navigate = useNavigate();
   const gridRef = useRef(null);
+  const { isManager, isStaff } = useDealerRole();
 
   const handleSubModuleClick = (path) => {
     if (onModuleClick) {
@@ -259,6 +265,60 @@ const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
       {menuData.map((module) => {
         const colors = getColorClasses(module.color);
         
+        // Hide entire module if user doesn't have required role
+        if (module.requiredRole === 'dealer_manager' && !isManager) {
+          return (
+            <div key={module.id} className="mb-10">
+              {/* Locked Module Header */}
+              <div className="relative flex items-center gap-3 border-l-4 border-gray-400 dark:border-gray-600 pl-4 bg-gray-100 dark:bg-gray-800/50 py-3 rounded-r-xl mb-6 opacity-60">
+                <span className="text-3xl grayscale">{module.icon}</span>
+                <div className="flex-1">
+                  <h4 className="text-2xl font-bold text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    {module.title}
+                    <span className="text-sm px-2 py-1 bg-red-500/20 text-red-600 dark:text-red-400 rounded-full border border-red-500/30">
+                      🔒 Chỉ Quản lý
+                    </span>
+                  </h4>
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">
+                    {module.description}
+                  </p>
+                </div>
+                <span className="px-3 py-1.5 text-xs font-bold rounded-full border bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 border-gray-400 dark:border-gray-600">
+                  {module.tag}
+                </span>
+              </div>
+
+              {/* Locked Sub-modules */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {module.subModules.map((subModule, idx) => (
+                  <div
+                    key={idx}
+                    className="relative cursor-not-allowed theme-card border border-gray-300 dark:border-gray-700 rounded-2xl p-6 flex gap-4 backdrop-blur-sm opacity-50"
+                  >
+                    <div className="absolute inset-0 bg-gray-900/30 dark:bg-gray-900/50 backdrop-blur-sm flex items-center justify-center rounded-2xl">
+                      <div className="text-center">
+                        <span className="text-3xl mb-2 block">🔒</span>
+                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300">Bị khóa</p>
+                      </div>
+                    </div>
+                    <div className="text-4xl flex-shrink-0 grayscale blur-sm">
+                      {subModule.icon}
+                    </div>
+                    <div className="flex-1 blur-sm">
+                      <h5 className="text-lg font-bold mb-2 theme-text-primary">
+                        {subModule.title}
+                      </h5>
+                      <span className="inline-block px-3 py-1.5 text-xs font-bold rounded-full border bg-gray-200 dark:bg-gray-700 text-gray-500">
+                        {subModule.tag}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        }
+        
         return (
           <div key={module.id} className="mb-10">
             {/* Module Header */}
@@ -279,26 +339,61 @@ const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
 
             {/* Sub-modules Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {module.subModules.map((subModule, idx) => (
-                <ParticleCard
-                  key={idx}
-                  className={`group cursor-pointer theme-card border rounded-2xl p-6 ${colors.hover} hover:scale-[1.02] transition-all duration-300 flex gap-4 backdrop-blur-sm`}
-                  onClick={() => handleSubModuleClick(subModule.path)}
-                  disableAnimations={disableAnimations}
-                >
-                  <div className="text-4xl flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
-                    {subModule.icon}
-                  </div>
-                  <div className="flex-1">
-                    <h5 className="text-lg font-bold mb-2 theme-text-primary">
-                      {subModule.title}
-                    </h5>
-                    <span className={`inline-block px-3 py-1.5 text-xs font-bold rounded-full border shadow-md ${colors.tag}`}>
-                      {subModule.tag}
-                    </span>
-                  </div>
-                </ParticleCard>
-              ))}
+              {module.subModules.map((subModule, idx) => {
+                // Lock manager-only items for staff
+                if (subModule.managerOnly && !isManager) {
+                  return (
+                    <div
+                      key={idx}
+                      className="relative cursor-not-allowed theme-card border border-orange-300 dark:border-orange-700/50 rounded-2xl p-6 flex gap-4 backdrop-blur-sm"
+                      title="Chỉ Quản lý mới có quyền truy cập"
+                    >
+                      <div className="absolute top-2 right-2 z-10">
+                        <span className="px-2 py-1 text-xs bg-orange-500/80 text-white rounded-full font-bold shadow-lg flex items-center gap-1">
+                          🔒 Manager
+                        </span>
+                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-br from-orange-900/20 to-red-900/20 backdrop-blur-[2px] flex items-center justify-center rounded-2xl">
+                        <div className="text-center">
+                          <span className="text-4xl mb-2 block animate-pulse">🛡️</span>
+                        </div>
+                      </div>
+                      <div className="text-4xl flex-shrink-0 opacity-40">
+                        {subModule.icon}
+                      </div>
+                      <div className="flex-1 opacity-40">
+                        <h5 className="text-lg font-bold mb-2 theme-text-primary">
+                          {subModule.title}
+                        </h5>
+                        <span className={`inline-block px-3 py-1.5 text-xs font-bold rounded-full border shadow-md ${colors.tag}`}>
+                          {subModule.tag}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <ParticleCard
+                    key={idx}
+                    className={`group cursor-pointer theme-card border rounded-2xl p-6 ${colors.hover} hover:scale-[1.02] transition-all duration-300 flex gap-4 backdrop-blur-sm`}
+                    onClick={() => handleSubModuleClick(subModule.path)}
+                    disableAnimations={disableAnimations}
+                  >
+                    <div className="text-4xl flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                      {subModule.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h5 className="text-lg font-bold mb-2 theme-text-primary">
+                        {subModule.title}
+                      </h5>
+                      <span className={`inline-block px-3 py-1.5 text-xs font-bold rounded-full border shadow-md ${colors.tag}`}>
+                        {subModule.tag}
+                      </span>
+                    </div>
+                  </ParticleCard>
+                );
+              })}
             </div>
           </div>
         );

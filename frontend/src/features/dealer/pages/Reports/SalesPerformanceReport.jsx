@@ -77,13 +77,13 @@ const SalesPerformanceReport = () => {
     return (
       <PageContainer>
         <PageHeader
-          title="📊 Báo cáo hiệu suất bán hàng"
+          title="Báo cáo hiệu suất bán hàng"
           subtitle="Theo dõi doanh thu và hiệu suất kinh doanh"
           icon={<TrendingUp className="w-16 h-16" />}
           actions={periodButtons}
         />
         <Card>
-          <div className="text-center py-16">
+          <div className="text-center py-16 mb-8">
             <div className="animate-spin text-6xl mb-4">⚙️</div>
             <p className="text-xl font-bold text-gray-600 dark:text-gray-400">
               Đang tải báo cáo...
@@ -98,14 +98,15 @@ const SalesPerformanceReport = () => {
     return (
       <PageContainer>
         <PageHeader
-          title="📊 Báo cáo hiệu suất bán hàng"
+          title="Báo cáo hiệu suất bán hàng"
           subtitle="Theo dõi doanh thu và hiệu suất kinh doanh"
           icon={<TrendingUp className="w-16 h-16" />}
           actions={periodButtons}
         />
-        <Card>
+        <Card className="mt-8">
           <EmptyState
-            icon="📊"
+          icon={<TrendingUp className= "w-12 h-12" />}
+            
             title="Không có dữ liệu báo cáo"
             message="Chưa có dữ liệu bán hàng trong kỳ được chọn"
           />
@@ -121,7 +122,7 @@ const SalesPerformanceReport = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="📊 Báo cáo hiệu suất bán hàng"
+        title="Báo cáo hiệu suất bán hàng"
         subtitle="Theo dõi doanh thu và hiệu suất kinh doanh"
         icon={<TrendingUp className="w-16 h-16" />}
         actions={periodButtons}

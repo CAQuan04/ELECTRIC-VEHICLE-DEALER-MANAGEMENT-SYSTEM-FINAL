@@ -203,7 +203,7 @@ const OrderList = () => {
         }
       />
 
-      <div className="mb-6">
+      <div className="mb-6 mt-8">
         <SearchBar
           placeholder="Tìm kiếm theo khách hàng, xe hoặc mã đơn hàng..."
           value={searchQuery}

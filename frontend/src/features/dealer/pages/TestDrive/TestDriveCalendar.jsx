@@ -9,7 +9,7 @@ import {
   StatCard,
   EmptyState
 } from '../../components';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, BarChart3, Clock, CheckCircle, PartyPopper, Inbox } from 'lucide-react';
 
 const WEEKDAYS = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
 
@@ -138,7 +138,7 @@ const TestDriveCalendar = () => {
     return (
       <PageContainer>
         <PageHeader
-          title="📅 Lịch lái thử"
+          title="Lịch lái thử"
           subtitle="Quản lý và theo dõi lịch hẹn lái thử"
           icon={<CalendarIcon className="w-16 h-16" />}
         />
@@ -155,7 +155,7 @@ const TestDriveCalendar = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="📅 Lịch lái thử"
+        title="Lịch lái thử"
         subtitle="Quản lý và theo dõi lịch hẹn lái thử"
         icon={<CalendarIcon className="w-16 h-16" />}
         actions={
@@ -234,23 +234,23 @@ const TestDriveCalendar = () => {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-8">
         <StatCard
-          icon="📊"
+          icon={<BarChart3 className="w-6 h-6" />}
           title="Tổng lịch hẹn"
           value={stats.total}
         />
         <StatCard
-          icon="⏳"
+          icon={<Clock className="w-6 h-6" />}
           title="Chờ xác nhận"
           value={stats.pending}
           trend={stats.pending > 0 ? 'neutral' : 'up'}
         />
         <StatCard
-          icon="✅"
+          icon={<CheckCircle className="w-6 h-6" />}
           title="Đã xác nhận"
           value={stats.confirmed}
         />
         <StatCard
-          icon="🎉"
+          icon={<PartyPopper className="w-6 h-6" />}
           title="Hoàn thành"
           value={stats.completed}
           trend="up"
@@ -383,7 +383,7 @@ const DayView = ({ selectedDate, appointments, onBackToMonth, getStatusVariant, 
             ))
         ) : (
           <EmptyState
-            icon="📭"
+            icon={<Inbox className="w-12 h-12" />}
             title="Không có lịch hẹn"
             message="Không có lịch hẹn nào trong ngày này"
           />

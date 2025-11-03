@@ -1,6 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+
+// Import Lucide icons
+import {
+  UserPlus,
+  Filter,
+  SortAsc,
+  SortDesc,
+  X,
+  Search,
+  Users,
+  Zap,
+  MessageSquare,
+  CheckCircle,
+  TrendingUp,
+  AlertCircle
+} from 'lucide-react';
+
 import {
   PageContainer,
   PageHeader,
@@ -17,48 +35,35 @@ const CustomerList = () => {
   const { startLoading, stopLoading } = usePageLoading();
   const [customers, setCustomers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // START: Thêm state cho Lọc và Sắp xếp
-  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'Tiềm năng', 'Đã mua', 'Đang tư vấn'
-  const [sortOrder, setSortOrder] = useState('none'); // 'none', 'asc', 'desc'
-  // END: Thêm state
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortOrder, setSortOrder] = useState('none');
 
   useEffect(() => {
     loadCustomers();
   }, []);
 
   const loadCustomers = async () => {
-    // Logic tải dữ liệu... (Giữ nguyên)
     try {
       startLoading('Đang tải danh sách khách hàng...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      const mockCustomers = [
-        { id: 1, name: 'Nguyễn Văn A', email: 'nguyenvana@email.com', phone: '0901234567', status: 'Tiềm năng', lastContact: '2025-10-10' },
-        { id: 2, name: 'Trần Thị B', email: 'tranthib@email.com', phone: '0902345678', status: 'Đã mua', lastContact: '2025-09-15' },
-        { id: 3, name: 'Lê Văn C', email: 'levanc@email.com', phone: '0903456789', status: 'Đang tư vấn', lastContact: '2025-10-12' },
-        { id: 4, name: 'Phạm Thị D', email: 'phamthid@email.com', phone: '0904567890', status: 'Tiềm năng', lastContact: '2025-10-08' },
-        { id: 5, name: 'Võ Thành E', email: 'vothanhe@email.com', phone: '0905678901', status: 'Đang tư vấn', lastContact: '2025-10-11' },
-        { id: 6, name: 'Nguyễn Văn A', email: 'nguyenvana@email.com', phone: '0901234567', status: 'Tiềm năng', lastContact: '2025-10-10' },
-        { id: 7, name: 'Trần Thị B', email: 'tranthib@email.com', phone: '0902345678', status: 'Đã mua', lastContact: '2025-09-15' },
-        { id: 8, name: 'Lê Văn C', email: 'levanc@email.com', phone: '0903456789', status: 'Đang tư vấn', lastContact: '2025-10-12' },
-        { id: 9, name: 'Phạm Thị D', email: 'phamthid@email.com', phone: '0904567890', status: 'Tiềm năng', lastContact: '2025-10-08' },
-        { id: 10, name: 'Võ Thành E', email: 'vothanhe@email.com', phone: '0905678901', status: 'Đang tư vấn', lastContact: '2025-10-11' },
-      ];
-
-      setCustomers(mockCustomers);
+      const response = await dealerAPI.getCustomers();
+      if (response.success) {
+        setCustomers(response.data);
+      } else {
+        alert('Lỗi: ' + response.message);
+      }
     } catch (error) {
       console.error('Error loading customers:', error);
+      alert('Lỗi: ' + (error.response?.data?.message || error.message));
     } finally {
       stopLoading();
     }
   };
 
-  // START: Cập nhật logic lọc và sắp xếp, bọc trong useMemo
+  // Filter and sort logic
   const filteredCustomers = useMemo(() => {
     let processedCustomers = [...customers];
 
-    // 1. Lọc theo Search Term
+    // Search filter
     if (searchTerm) {
       processedCustomers = processedCustomers.filter(customer =>
         customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,41 +72,38 @@ const CustomerList = () => {
       );
     }
 
-    // 2. Lọc theo Trạng thái
+    // Status filter
     if (statusFilter !== 'all') {
       processedCustomers = processedCustomers.filter(
         customer => customer.status === statusFilter
       );
     }
 
-    // 3. Sắp xếp theo Tên
+    // Sort
     if (sortOrder !== 'none') {
       processedCustomers.sort((a, b) => {
         if (sortOrder === 'asc') {
           return a.name.localeCompare(b.name);
-        } else { // 'desc'
+        } else {
           return b.name.localeCompare(a.name);
         }
       });
     }
 
     return processedCustomers;
-  }, [customers, searchTerm, statusFilter, sortOrder]); // Thêm dependencies
-  // END: Cập nhật logic
+  }, [customers, searchTerm, statusFilter, sortOrder]);
 
+  // Metrics
   const customerMetrics = useMemo(() => {
     const total = customers.length;
     const purchased = customers.filter(c => c.status === 'Đã mua').length;
     const potential = customers.filter(c => c.status === 'Tiềm năng').length;
+    const consulting = customers.filter(c => c.status === 'Đang tư vấn').length;
 
-    return {
-      total,
-      purchased,
-      potential,
-    };
+    return { total, purchased, potential, consulting };
   }, [customers]);
 
-  // START: Thêm helpers cho Sắp xếp
+  // Sort toggle handler
   const handleSortToggle = () => {
     if (sortOrder === 'none') {
       setSortOrder('asc');
@@ -112,40 +114,75 @@ const CustomerList = () => {
     }
   };
 
-  const getSortButtonLabel = () => {
-    if (sortOrder === 'asc') return 'Tên (A-Z) 🔼';
-    if (sortOrder === 'desc') return 'Tên (Z-A) 🔽';
-    return 'Sắp xếp theo tên';
+  const getSortIcon = () => {
+    if (sortOrder === 'asc') return <SortAsc className="w-4 h-4" />;
+    if (sortOrder === 'desc') return <SortDesc className="w-4 h-4" />;
+    return <Filter className="w-4 h-4" />;
   };
-  // END: Thêm helpers
 
-  // Định nghĩa lại cột (Giữ nguyên)
+  const getSortLabel = () => {
+    if (sortOrder === 'asc') return 'Tên (A-Z)';
+    if (sortOrder === 'desc') return 'Tên (Z-A)';
+    return 'Sắp xếp';
+  };
+
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setSortOrder('none');
+  };
+
+  const hasActiveFilters = searchTerm || statusFilter !== 'all' || sortOrder !== 'none';
+
+  // Table columns
   const columns = [
     {
       key: 'name',
       label: 'Tên khách hàng',
-      render: (row) => <span className="font-semibold text-gray-800 dark:text-gray-800">{row.name}</span>
+      render: (row) => (
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-emerald-500 dark:to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            {row.name.charAt(0)}
+          </div>
+          <span className="font-bold text-gray-800 dark:text-gray-200">
+            {row.name}
+          </span>
+        </div>
+      )
     },
-    // ... (Các cột khác giữ nguyên) ...
     {
       key: 'email',
       label: 'Email',
-      render: (row) => <span className="text-gray-600 dark:text-gray-400">{row.email}</span>
+      render: (row) => (
+        <span className="text-gray-600 dark:text-gray-400">{row.email}</span>
+      )
     },
     {
       key: 'phone',
       label: 'Số điện thoại',
-      render: (row) => <span className="text-gray-600 dark:text-gray-400">{row.phone}</span>
+      render: (row) => (
+        <a
+          href={`tel:${row.phone}`}
+          className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+        >
+          {row.phone}
+        </a>
+      )
     },
     {
       key: 'status',
       label: 'Trạng thái',
       render: (row) => (
-        <Badge variant={
-          row.status === 'Đã mua' ? 'success' :
-            row.status === 'Đang tư vấn' ? 'warning' :
-              'info'
-        }>
+        <Badge
+          variant={
+            row.status === 'Đã mua'
+              ? 'success'
+              : row.status === 'Đang tư vấn'
+              ? 'warning'
+              : 'info'
+          }
+        >
           {row.status}
         </Badge>
       )
@@ -153,7 +190,11 @@ const CustomerList = () => {
     {
       key: 'lastContact',
       label: 'Liên hệ gần nhất',
-      render: (row) => <span className="text-gray-600 dark:text-gray-400 text-2sm">{row.lastContact}</span>
+      render: (row) => (
+        <span className="text-gray-600 dark:text-gray-400 text-sm">
+          {row.lastContact || 'N/A'}
+        </span>
+      )
     },
     {
       key: 'actions',
@@ -166,130 +207,192 @@ const CustomerList = () => {
           variant="primary"
           onClick={() => navigate(`/dealer/customers/${row.id}`)}
         >
-          Xem chi tiết KH
+          Xem chi tiết
         </Button>
       )
     }
   ];
 
   return (
-    <PageContainer>
-      {/* 1. HEADER BANNER (Giữ nguyên) */}
-      <PageHeader
-        title="👥 Quản lý khách hàng"
-        subtitle="Tổng quan về cơ sở dữ liệu khách hàng và các hành động nhanh"
-        actions={
-          <Button
-            variant="gradient"
-            icon="+"
-            onClick={() => navigate('/dealer/customers/new')}
-          >
-            Thêm khách hàng
-          </Button>
-        }
-      />
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+      <PageContainer>
+        {/* Header */}
+        <PageHeader
+          title={
+            <div className="flex items-center gap-3">
+              <Users className="w-10 h-10" />
+              <span>Quản lý khách hàng</span>
+            </div>
+          }
+          subtitle="Tổng quan về cơ sở dữ liệu khách hàng và các hành động nhanh"
+          actions={
+            <Button
+              variant="gradient"
+              icon={<UserPlus className="w-5 h-5" />}
+              onClick={() => navigate('/dealer/customers/new')}
+            >
+              Thêm khách hàng
+            </Button>
+          }
+        />
 
-      {/* 2. METRIC CARDS - Đã thêm tiêu đề khu vực */}
-      <div className="mb-8">
-
-        {/* --- TIÊU ĐỀ --- */}
-        <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
-          📊 Tổng quan nhanh
-        </h2>
-
-
-        {/* Lưới các thẻ số liệu */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          <MetricCard
-            title="Tổng số khách hàng"
-            value={customerMetrics.total}
-            icon="⭐"
-            color="bg-indigo-50 border-indigo-100 dark:bg-gray-800 dark:border-indigo-100"
-            className="rounded-xl" 
-          />
-          <MetricCard
-            title="Khách hàng tiềm năng"
-            value={customerMetrics.potential}
-            icon="⚡"
-            color="bg-blue-50 border-blue-500 dark:bg-gray-800 dark:border-blue-600"
-            className="rounded-xl"
-          />
-          <MetricCard
-            title="Đã chốt (Mua hàng)"
-            value={customerMetrics.purchased}
-            icon="✅"
-            color="bg-green-50 border-green-500 dark:bg-gray-800 dark:border-green-600"
-            className="rounded-xl"
-          />
-        </div>
-      </div>
-
-      {/* 3. CONTROLS (Search Bar và các bộ lọc khác) - ĐÃ CẬP NHẬT */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 p-4 
-                      dark:bg-slate-600 rounded-xl shadow-md 
-                      border border-gray-100 dark:border-gray-400">
-        <div className="w-full md:w-1/3 mb-4 md:mb-0">
-          <SearchBar
-            placeholder="Tìm kiếm khách hàng (tên, email, số điện thoại)..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="!mb-0 text-gray-800 dark:text-gray-200 border-gray-300 dark:border-gray-600 focus:ring-blue-500 focus:border-blue-500"
-          />
+        {/* Metrics Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-black mb-6 bg-gradient-to-r from-cyan-600 to-blue-600 dark:from-emerald-400 dark:to-emerald-500 bg-clip-text text-transparent flex items-center gap-3">
+            <TrendingUp className="w-7 h-7 text-cyan-600 dark:text-emerald-400" />
+            Tổng quan nhanh
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <MetricCard
+              title="Tổng số khách hàng"
+              value={customerMetrics.total}
+              icon={<Users className="w-12 h-12" />}
+              color="gray"
+            />
+            <MetricCard
+              title="Khách hàng tiềm năng"
+              value={customerMetrics.potential}
+              icon={<Zap className="w-12 h-12" />}
+              color="blue"
+            />
+            <MetricCard
+              title="Đang tư vấn"
+              value={customerMetrics.consulting}
+              icon={<MessageSquare className="w-12 h-12" />}
+              color="yellow"
+            />
+            <MetricCard
+              title="Đã chốt (Mua hàng)"
+              value={customerMetrics.purchased}
+              icon={<CheckCircle className="w-12 h-12" />}
+              color="rose"
+            />
+          </div>
         </div>
 
-        {/* START: Cập nhật UI Lọc và Sắp xếp */}
-        <div className="flex space-x-3">
-          {/* Lọc theo Trạng thái */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="h-10 text-sm dark:text-gray-300 !rounded-lg bg-stone-50 dark:bg-gray-700 border border-blue-600 dark:border-gray-300 text-gray-800 dark:text-gray-200 focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="Tiềm năng">Tiềm năng</option>
-            <option value="Đã mua">Đã mua</option>
-            <option value="Đang tư vấn">Đang tư vấn</option>
-          </select>
+        {/* Controls Section */}
+        <div className="bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90 backdrop-blur-xl rounded-3xl p-6 mb-8 border border-gray-200 dark:border-gray-700/50 shadow-xl dark:shadow-emerald-500/5">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            {/* Search Bar */}
+            <div className="w-full md:w-1/2">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 dark:text-gray-500" />
+                <SearchBar
+                  placeholder="Tìm kiếm khách hàng (tên, email, số điện thoại)..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="!mb-0 pl-12"
+                />
+              </div>
+            </div>
 
-          {/* Sắp xếp theo Tên */}
-          <Button
-            size="sm"
-            variant="secondary"
-            className="!rounded-lg"
-            onClick={handleSortToggle}
-          >
-            {getSortButtonLabel()}
-          </Button>
+            {/* Filters */}
+            <div className="flex flex-wrap gap-3 items-center">
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-6 py-3 rounded-2xl bg-white dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20 focus:border-cyan-500 dark:focus:border-emerald-500 transition-all duration-300 font-medium cursor-pointer"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="Tiềm năng">Tiềm năng</option>
+                <option value="Đã mua">Đã mua</option>
+                <option value="Đang tư vấn">Đang tư vấn</option>
+              </select>
+
+              {/* Sort Button */}
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={handleSortToggle}
+                icon={getSortIcon()}
+              >
+                {getSortLabel()}
+              </Button>
+
+              {/* Clear Filters */}
+              {hasActiveFilters && (
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={clearFilters}
+                  icon={<X className="w-4 h-4" />}
+                >
+                  Xóa bộ lọc
+                </Button>
+              )}
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {hasActiveFilters && (
+            <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-sm font-bold text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                  <Filter className="w-4 h-4" />
+                  Bộ lọc đang áp dụng:
+                </span>
+                {searchTerm && (
+                  <Badge variant="info">
+                    <Search className="w-3 h-3 mr-1" />
+                    Tìm kiếm: "{searchTerm}"
+                  </Badge>
+                )}
+                {statusFilter !== 'all' && (
+                  <Badge variant="warning">
+                    <AlertCircle className="w-3 h-3 mr-1" />
+                    Trạng thái: {statusFilter}
+                  </Badge>
+                )}
+                {sortOrder !== 'none' && (
+                  <Badge variant="purple">
+                    {sortOrder === 'asc' ? (
+                      <SortAsc className="w-3 h-3 mr-1" />
+                    ) : (
+                      <SortDesc className="w-3 h-3 mr-1" />
+                    )}
+                    {sortOrder === 'asc' ? 'Sắp xếp: A-Z' : 'Sắp xếp: Z-A'}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          )}
         </div>
-        {/* END: Cập nhật UI */}
 
-      </div>
+        {/* Results Count */}
+        {filteredCustomers.length > 0 && (
+          <div className="mb-4 text-right">
+            <span className="text-sm font-bold text-gray-600 dark:text-gray-400 flex items-center justify-end gap-2">
+              <Users className="w-4 h-4" />
+              Hiển thị {filteredCustomers.length} / {customers.length} khách hàng
+            </span>
+          </div>
+        )}
 
-      {/* 4. TABLE / EMPTY STATE (Giữ nguyên) */}
-      {filteredCustomers.length > 0 ? (
-        <div className="rounded-2xl shadow-xl overflow-hidden">
+        {/* Table / Empty State */}
+        {filteredCustomers.length > 0 ? (
           <Table
             columns={columns}
             data={filteredCustomers}
+            onRowClick={(row) => navigate(`/dealer/customers/${row.id}`)}
           />
-        </div>
-      ) : (
-        <EmptyState
-          icon="📭"
-          title="Không tìm thấy khách hàng"
-          message={
-            searchTerm || statusFilter !== 'all'
-              ? "Không tìm thấy khách hàng nào phù hợp với tiêu chí."
-              : "Chưa có khách hàng nào. Hãy thêm khách hàng mới."
-          }
-          action={{
-            label: '+ Thêm khách hàng',
-            onClick: () => navigate('/dealer/customers/new')
-          }}
-          className="rounded-xl bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-100"
-        />
-      )}
-    </PageContainer>
+        ) : (
+          <EmptyState
+            icon={<Search className="w-20 h-20 text-gray-400 dark:text-gray-600" />}
+            title="Không tìm thấy khách hàng"
+            message={
+              hasActiveFilters
+                ? 'Không tìm thấy khách hàng nào phù hợp với tiêu chí. Thử điều chỉnh bộ lọc hoặc tìm kiếm.'
+                : 'Chưa có khách hàng nào. Hãy thêm khách hàng mới để bắt đầu.'
+            }
+            action={{
+              label: hasActiveFilters ? 'Xóa bộ lọc' : '+ Thêm khách hàng',
+              onClick: hasActiveFilters ? clearFilters : () => navigate('/dealer/customers/new')
+            }}
+          />
+        )}
+      </PageContainer>
+    </div>
   );
 };
 

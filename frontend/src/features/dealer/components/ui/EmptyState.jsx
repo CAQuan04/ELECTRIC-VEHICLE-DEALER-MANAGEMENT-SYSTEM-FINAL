@@ -10,7 +10,7 @@ import Button from './Button';
  */
 const EmptyState = ({ icon = '📭', title, message, action, className = '' }) => {
   return (
-    <div className={`text-center py-24 ${className}`}>
+    <div className={`text-center py-24 mt-8 ${className}`}>
       <div className="inline-block mb-8 animate-bounce">
         <div className="text-8xl drop-shadow-2xl">{icon}</div>
       </div>

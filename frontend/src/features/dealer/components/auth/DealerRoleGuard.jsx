@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import { AuthService } from '@utils';
-import { DEALER_ROLES } from '../config/permissions';
+import { DEALER_ROLES } from '../../config/permissions';
 
 /**
  * DealerRoleGuard Component

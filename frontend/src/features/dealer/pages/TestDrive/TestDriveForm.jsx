@@ -14,7 +14,7 @@ import {
   ActionBar,
   Card
 } from '../../components';
-import { Calendar } from 'lucide-react';
+import { Calendar, User, Car, FileText } from 'lucide-react';
 
 const TestDriveForm = () => {
   const navigate = useNavigate();
@@ -194,9 +194,9 @@ const TestDriveForm = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="📝 Đăng ký lái thử mới"
+        title="Đăng ký lái thử mới"
         subtitle="Đặt lịch hẹn lái thử xe điện cho khách hàng"
-        icon={<Calendar className="w-16 h-16" />}
+        icon={<FileText className="w-16 h-16" />}
         showBackButton
         onBack={() => navigate('/dealer/test-drives')}
       />
@@ -207,7 +207,7 @@ const TestDriveForm = () => {
           <div className="lg:col-span-2 space-y-6">
             <InfoSection 
               title="1. Thông tin khách hàng" 
-              icon="👤"
+              icon={<User className="w-5 h-5" />}
               className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
             >
               <div className="space-y-4">
@@ -266,7 +266,7 @@ const TestDriveForm = () => {
 
             <InfoSection 
               title="2. Thông tin xe" 
-              icon="🚗"
+              icon={<Car className="w-5 h-5" />}
               className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
             >
               <div className="space-y-4">
@@ -287,7 +287,7 @@ const TestDriveForm = () => {
 
             <InfoSection 
               title="3. Ghi chú" 
-              icon="📝"
+              icon={<FileText className="w-5 h-5" />}
               className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
             >
               <FormGroup className="mb-0">
@@ -308,7 +308,7 @@ const TestDriveForm = () => {
           <div className="lg:col-span-1 space-y-6">
             <InfoSection 
               title="4. Lịch hẹn" 
-              icon="📅"
+              icon={<Calendar className="w-5 h-5" />}
               className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
             >
               <div className="space-y-4">

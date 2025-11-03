@@ -11,7 +11,7 @@ const SearchBar = ({ placeholder = 'Tìm kiếm...', value, onChange, className 
     <div className={`relative group ${className}`}>
       {/* Search Icon */}
       <span className="absolute left-6 top-1/2 -translate-y-1/2 text-2xl transition-all duration-300 group-focus-within:text-cyan-600 dark:group-focus-within:text-emerald-400 group-focus-within:scale-110">
-        🔍
+        
       </span>
       
       {/* Input Field */}

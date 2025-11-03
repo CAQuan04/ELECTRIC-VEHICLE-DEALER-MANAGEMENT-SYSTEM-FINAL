@@ -3,6 +3,26 @@ import { useNavigate } from 'react-router-dom';
 import { AuthService } from '@utils';
 import { usePageLoading } from '@modules/loading';
 import '@modules/loading/GlobalLoading.css';
+import {
+  BarChart3,
+  Car,
+  ClipboardList,
+  Users,
+  TrendingUp,
+  FileText,
+  Calendar,
+  ShoppingCart,
+  UserPlus,
+  Rocket,
+  Package,
+  TrendingUpIcon,
+  Construction,
+  Shield,
+  Settings
+} from 'lucide-react';
+
+// Import role guards
+import { ForManager, ForStaff, useDealerRole } from '../components/auth/DealerRoleGuard';
 
 // Import PageContainer for theme support
 import PageContainer from '../components/layout/PageContainer';
@@ -13,11 +33,11 @@ import BentoMenu from '../components/BentoMenu';
 import { MOCK_DASHBOARD_DATA } from '../data/mockData';
 
 const NAV_SECTIONS = [
-  { id: 'overview', icon: '📊', label: 'Tổng quan' },
-  { id: 'inventory', icon: '🚗', label: 'Kho xe' },
-  { id: 'orders', icon: '📋', label: 'Đơn hàng' },
-  { id: 'customers', icon: '👥', label: 'Khách hàng' },
-  { id: 'reports', icon: '📈', label: 'Báo cáo' }
+  { id: 'overview', icon: BarChart3, label: 'Tổng quan' },
+  { id: 'inventory', icon: Car, label: 'Kho xe' },
+  { id: 'orders', icon: ClipboardList, label: 'Đơn hàng' },
+  { id: 'customers', icon: Users, label: 'Khách hàng' },
+  { id: 'reports', icon: TrendingUp, label: 'Báo cáo' }
 ];
 
 const getStatusClasses = (status) => {
@@ -68,11 +88,20 @@ const HeroStats = ({ dashboardData }) => {
 };
 
 const QuickActions = ({ navigate }) => {
-  const actions = [
-    { icon: '📋', label: 'Tạo báo giá', color: 'emerald', path: '/dealer/quotations/create' },
-    { icon: '📅', label: 'Đặt lịch lái thử', color: 'blue', path: '/dealer/test-drives/new' },
-    { icon: '🛒', label: 'Tạo đơn hàng', color: 'purple', path: '/dealer/orders/create' },
-    { icon: '👤', label: 'Thêm khách hàng', color: 'pink', path: '/dealer/customers/new' }
+  // Staff actions - basic operations
+  const staffActions = [
+    { icon: FileText, label: 'Tạo báo giá', color: 'emerald', path: '/dealer/quotations/create' },
+    { icon: Calendar, label: 'Đặt lịch lái thử', color: 'blue', path: '/dealer/test-drives/new' },
+    { icon: ShoppingCart, label: 'Tạo đơn hàng', color: 'purple', path: '/dealer/orders/create' },
+    { icon: UserPlus, label: 'Thêm khách hàng', color: 'pink', path: '/dealer/customers/new' }
+  ];
+
+  // Manager-only actions - advanced operations
+  const managerActions = [
+    { icon: Settings, label: 'Quản lý nhân viên', color: 'indigo', path: '/dealer/staff' },
+    { icon: TrendingUp, label: 'Phân tích doanh thu', color: 'orange', path: '/dealer/reports/sales-performance' },
+    { icon: Shield, label: 'Phê duyệt đơn hàng', color: 'red', path: '/dealer/orders' },
+    { icon: Package, label: 'Quản lý kho', color: 'teal', path: '/dealer/inventory' }
   ];
 
   const colorMap = {
@@ -80,30 +109,79 @@ const QuickActions = ({ navigate }) => {
     blue: 'dark:from-blue-600 dark:to-blue-700 from-blue-500 to-blue-600 dark:hover:shadow-blue-500/50 hover:shadow-blue-500/60',
     purple: 'dark:from-purple-600 dark:to-purple-700 from-purple-500 to-purple-600 dark:hover:shadow-purple-500/50 hover:shadow-purple-500/60',
     pink: 'dark:from-pink-600 dark:to-pink-700 from-pink-500 to-pink-600 dark:hover:shadow-pink-500/50 hover:shadow-pink-500/60',
+    indigo: 'dark:from-indigo-400 dark:to-indigo-500 from-indigo-300 to-indigo-400 dark:hover:shadow-indigo-300/50 hover:shadow-indigo-300/60',
+    orange: 'dark:from-orange-600 dark:to-orange-700 from-orange-500 to-orange-600 dark:hover:shadow-orange-500/50 hover:shadow-orange-500/60',
+    red: 'dark:from-red-600 dark:to-red-700 from-red-500 to-red-600 dark:hover:shadow-red-500/50 hover:shadow-red-500/60',
+    teal: 'dark:from-teal-600 dark:to-teal-700 from-teal-500 to-teal-600 dark:hover:shadow-teal-500/50 hover:shadow-teal-500/60',
   };
 
   return (
     <div>
-      <h3 className="text-2xl font-bold mb-6 dark:text-white text-gray-900">🚀 Thao tác nhanh</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {actions.map((action, idx) => (
-          <button
-            key={idx}
-            className={`group flex flex-col items-center gap-3 p-6 bg-gradient-to-br ${colorMap[action.color]} rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl text-white font-bold border border-white/20`}
-            onClick={() => navigate(action.path)}
-          >
-            <span className="text-4xl group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300">{action.icon}</span>
-            <span className="font-bold text-base drop-shadow-lg">{action.label}</span>
-          </button>
-        ))}
+      <h3 className="text-3xl font-bold mb-6 dark:text-white text-gray-900 flex items-center gap-2">
+        <Rocket className="w-6 h-6" /> Thao tác nhanh
+      </h3>
+      
+      {/* Staff Actions - Available for all dealer users */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">📋 Thao tác cơ bản</span>
+          <span className="px-2 py-1 text-xs bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 rounded-full">
+            Tất cả nhân viên
+          </span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {staffActions.map((action, idx) => {
+            const IconComponent = action.icon;
+            return (
+              <button
+                key={idx}
+                className={`group flex flex-col items-center gap-3 p-6 bg-gradient-to-br ${colorMap[action.color]} rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl text-white font-bold border border-white/20`}
+                onClick={() => navigate(action.path)}
+              >
+                <IconComponent className="w-10 h-10 group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300" />
+                <span className="font-bold text-base drop-shadow-lg">{action.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
+
+      {/* Manager Actions - Only for managers */}
+      <ForManager>
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">👔 Thao tác quản lý</span>
+            <span className="px-2 py-1 text-xs bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-300 rounded-full flex items-center gap-1">
+              <Shield className="w-3 h-3" />
+              Chỉ Quản lý
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {managerActions.map((action, idx) => {
+              const IconComponent = action.icon;
+              return (
+                <button
+                  key={idx}
+                  className={`group flex flex-col items-center gap-3 p-6 bg-gradient-to-br ${colorMap[action.color]} rounded-2xl hover:scale-105 transition-all duration-300 shadow-xl hover:shadow-2xl text-white font-bold border border-white/20`}
+                  onClick={() => navigate(action.path)}
+                >
+                  <IconComponent className="w-10 h-10 group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300" />
+                  <span className="font-bold text-base drop-shadow-lg">{action.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </ForManager>
     </div>
   );
 };
 
 const RecentOrdersList = ({ orders }) => (
   <div className="bg-cyan dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg transition-all duration-300">
-    <h3 className="text-2xl font-bold mb-6">📋 Đơn hàng gần đây</h3>
+    <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+      <ClipboardList className="w-6 h-6" /> Đơn hàng gần đây
+    </h3>
     <div className="space-y-3">
       {orders.map((order) => (
         <div key={order.id} className="group flex items-center justify-between p-4 bg-gray-50 dark:bg-white/5 rounded-xl hover:bg-cyan-50 dark:hover:bg-emerald-500/10 hover:border-cyan-500/30 dark:hover:border-emerald-500/30 border border-transparent transition-all duration-300 cursor-pointer hover:scale-[1.02]">
@@ -128,11 +206,16 @@ const RecentOrdersList = ({ orders }) => (
 const OverviewSection = ({ dashboardData, navigate }) => {
   const { dealer, performance } = dashboardData;
 
-  const overviewStatsConfig = [
-    { icon: '🚗', title: 'Xe có sẵn', value: dealer.vehicles, change: '+5 xe trong tuần' },
-    { icon: '📋', title: 'Đơn hàng', value: dealer.orders, change: '+18% so với tháng trước' },
-    { icon: '👥', title: 'Khách hàng', value: dealer.customers, change: '+12 khách mới' },
-    { icon: '💰', title: 'Doanh thu', value: `${dealer.revenue} tỷ`, change: '+25% so với tháng trước' }
+  // Basic stats - visible to all
+  const basicStatsConfig = [
+    { icon: Car, title: 'Xe có sẵn', value: dealer.vehicles, change: '+5 xe trong tuần' },
+    { icon: ClipboardList, title: 'Đơn hàng', value: dealer.orders, change: '+18% so với tháng trước' },
+  ];
+
+  // Manager-only stats - sensitive business data
+  const managerStatsConfig = [
+    { icon: Users, title: 'Khách hàng', value: dealer.customers, change: '+12 khách mới' },
+    { icon: TrendingUp, title: 'Doanh thu', value: `${dealer.revenue} tỷ`, change: '+25% so với tháng trước' }
   ];
 
   const performanceMetrics = [
@@ -146,22 +229,67 @@ const OverviewSection = ({ dashboardData, navigate }) => {
     <div className="space-y-8">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {overviewStatsConfig.map((stat, idx) => (
-          <div key={idx} className="group dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:border-cyan-500 dark:hover:border-emerald-500/50 hover:bg-cyan-50/50 dark:hover:bg-white/10 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 hover:shadow-2xl dark:hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{stat.icon}</span>
-              <span className="text-lg font-bold dark:text-gray-300 text-gray-700">{stat.title}</span>
+        {/* Basic Stats - All users */}
+        {basicStatsConfig.map((stat, idx) => {
+          const IconComponent = stat.icon;
+          return (
+            <div key={idx} className="group dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 hover:border-cyan-500 dark:hover:border-emerald-500/50 hover:bg-cyan-50/50 dark:hover:bg-white/10 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 hover:shadow-2xl dark:hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-3 mb-4">
+                <IconComponent className="w-8 h-8 group-hover:scale-110 transition-transform duration-300 dark:text-sky-400 text-cyan-600" />
+                <span className="text-lg font-bold dark:text-gray-300 text-gray-700">{stat.title}</span>
+              </div>
+              <div className="stat-value text-4xl font-extrabold mb-2">{stat.value}</div>
+              <div className="text-sm font-semibold dark:text-white-400">{stat.change}</div>
             </div>
-            <div className="stat-value text-4xl font-extrabold mb-2">{stat.value}</div>
-            <div className="text-sm font-semibold dark:text-emerald-400 text-cyan-600">{stat.change}</div>
-          </div>
-        ))}
+          );
+        })}
+
+        {/* Manager-Only Stats */}
+        <ForManager>
+          {managerStatsConfig.map((stat, idx) => {
+            const IconComponent = stat.icon;
+            return (
+              <div key={idx} className="group dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border-2 border-red-500/30 dark:border-red-500/30 hover:border-red-500 dark:hover:border-red-500/70 hover:bg-red-50/50 dark:hover:bg-red-500/10 hover:shadow-red-500/30 dark:hover:shadow-red-500/30 hover:shadow-2xl dark:hover:shadow-2xl hover:scale-105 transition-all duration-300 shadow-lg relative">
+                <div className="absolute top-2 right-2">
+                  <Shield className="w-4 h-4 text-red-500" />
+                </div>
+                <div className="flex items-center gap-3 mb-4">
+                  <IconComponent className="w-8 h-8 group-hover:scale-110 transition-transform duration-300 text-red-600 dark:text-red-400" />
+                  <span className="text-lg font-bold dark:text-gray-300 text-gray-700">{stat.title}</span>
+                </div>
+                <div className="stat-value text-4xl font-extrabold mb-2">{stat.value}</div>
+                <div className="text-sm font-semibold text-red-600 dark:text-red-400">{stat.change}</div>
+              </div>
+            );
+          })}
+        </ForManager>
+
+        {/* Staff sees placeholder for locked stats */}
+        <ForStaff>
+          {managerStatsConfig.map((stat, idx) => (
+            <div key={idx} className="group dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg relative overflow-hidden">
+              <div className="absolute inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center">
+                <div className="text-center">
+                  <Shield className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm font-bold text-gray-300">Chỉ Quản lý</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 mb-4 blur-sm">
+                <Users className="w-8 h-8" />
+                <span className="text-lg font-bold">{stat.title}</span>
+              </div>
+              <div className="stat-value text-4xl font-extrabold mb-2 blur-sm">***</div>
+            </div>
+          ))}
+        </ForStaff>
       </div>
 
       {/* Performance & Recent Orders */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-cyan dark:bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-gray-200 dark:border-white/10 shadow-lg transition-all duration-300">
-          <h3 className="text-2xl font-bold mb-6">📈 Hiệu suất kinh doanh</h3>
+          <h3 className="text-2xl font-bold mb-6 flex items-center gap-2">
+            <TrendingUpIcon className="w-6 h-6" /> Hiệu suất kinh doanh
+          </h3>
           <div className="space-y-4">
             {performanceMetrics.map((metric, idx) => (
               <div key={idx} className="group flex justify-between items-center p-4 bg-gradient-to-r from-gray-800 to-rose-500/30 dark:bg-white/5 rounded-xl hover:bg-cyan-100/50 dark:hover:bg-emerald-500/10 transition-all duration-300 border border-transparent hover:border-cyan-500/30 dark:hover:border-emerald-500/30">
@@ -178,7 +306,9 @@ const OverviewSection = ({ dashboardData, navigate }) => {
 
       {/* Feature Modules - Bento Grid Style */}
       <div className="mt-12">
-        <h3 className="text-3xl font-extrabold mb-8 bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 from-cyan-600 to-blue-600 bg-clip-text text-transparent">📦 Các chức năng chính</h3>
+        <h3 className="text-3xl font-extrabold mb-8 bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 from-cyan-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
+          <Package className="w-8 h-8 dark:text-emerald-400 text-cyan-600" /> Các chức năng chính
+        </h3>
         <BentoMenu onModuleClick={(path) => navigate(path)} />
       </div>
     </div>
@@ -188,7 +318,9 @@ const OverviewSection = ({ dashboardData, navigate }) => {
 const InventorySection = ({ inventory }) => (
   <div className="space-y-6">
     <div className="flex items-center justify-between flex-wrap gap-4">
-      <h2 className="text-3xl font-extrabold dark:text-white text-gray-900">🚗 Quản lý kho xe</h2>
+      <h2 className="text-3xl font-extrabold dark:text-white text-gray-900 flex items-center gap-2">
+        <Car className="w-8 h-8" /> Quản lý kho xe
+      </h2>
       <button className="px-6 py-3 bg-gradient-to-r dark:from-emerald-600 dark:to-emerald-700 from-cyan-500 to-blue-600 hover:scale-105 rounded-xl font-bold text-white shadow-lg dark:hover:shadow-emerald-500/50 hover:shadow-cyan-500/50 transition-all duration-300 border border-white/20">
         + Nhập xe mới
       </button>
@@ -219,16 +351,30 @@ const InventorySection = ({ inventory }) => (
 
 const PlaceholderSection = ({ activeSection, setActiveSection }) => {
   let title = '';
+  let IconComponent = Construction;
+  
   switch (activeSection) {
-    case 'orders': title = '📋 Quản lý đơn hàng'; break;
-    case 'customers': title = '👥 Quản lý khách hàng'; break;
-    default: title = 'Tính năng đang phát triển';
+    case 'orders': 
+      title = 'Quản lý đơn hàng';
+      IconComponent = ClipboardList;
+      break;
+    case 'customers': 
+      title = 'Quản lý khách hàng';
+      IconComponent = Users;
+      break;
+    default: 
+      title = 'Tính năng đang phát triển';
+      IconComponent = Construction;
   }
 
   return (
     <div className="text-center py-20 dark:bg-gradient-to-br dark:from-gray-900/50 dark:to-gray-800/50 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-3xl border-2 border-dashed dark:border-emerald-500/30 border-cyan-300 shadow-lg dark:shadow-emerald-500/20 shadow-cyan-500/20 backdrop-blur-sm transition-all duration-300">
-      <div className="text-6xl mb-4 animate-bounce drop-shadow-lg">🚧</div>
-      <h2 className="text-2xl font-bold mb-4 dark:text-white text-gray-900">{title}</h2>
+      <div className="mb-4 flex justify-center">
+        <Construction className="w-16 h-16 animate-bounce drop-shadow-lg dark:text-emerald-400 text-cyan-600" />
+      </div>
+      <h2 className="text-2xl font-bold mb-4 dark:text-white text-gray-900 flex items-center justify-center gap-2">
+        <IconComponent className="w-6 h-6" /> {title}
+      </h2>
       <p className="dark:text-gray-400 text-gray-600 font-medium">Tính năng đang được phát triển...</p>
       <button 
         className="mt-6 px-8 py-3 dark:bg-emerald-600 dark:hover:bg-emerald-700 bg-cyan-500 hover:bg-cyan-600 text-white rounded-xl font-semibold shadow-lg dark:shadow-emerald-500/50 shadow-cyan-500/50 hover:scale-105 transition-all duration-300"
@@ -249,6 +395,7 @@ const DealerDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const currentUser = AuthService.getCurrentUser();
+  const { dealerRole, isManager, isStaff } = useDealerRole();
 
   const loadDashboardData = useCallback(async () => {
     try {
@@ -278,6 +425,26 @@ const DealerDashboard = () => {
       case 'inventory':
         return <InventorySection inventory={inventory} />;
       case 'reports':
+        // Manager-only section
+        if (!isManager) {
+          return (
+            <div className="text-center py-20 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-3xl border-2 border-red-300 dark:border-red-500/30 shadow-lg">
+              <Shield className="w-20 h-20 text-red-500 mx-auto mb-6 animate-pulse" />
+              <h2 className="text-3xl font-bold text-red-700 dark:text-red-400 mb-4">
+                Quyền truy cập bị hạn chế
+              </h2>
+              <p className="text-red-600 dark:text-red-300 font-medium mb-6">
+                Chỉ Quản lý Đại Lý mới có quyền xem báo cáo
+              </p>
+              <button 
+                className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 transition-all duration-300"
+                onClick={() => setActiveSection('overview')}
+              >
+                ← Quay lại tổng quan
+              </button>
+            </div>
+          );
+        }
         return <ReportsSection />;
       case 'orders':
       case 'customers':
@@ -313,7 +480,16 @@ const DealerDashboard = () => {
           </div>
           
           <p className="text-base md:text-lg lg:text-xl text-white/95 mb-4 font-medium drop-shadow-md">
-            Chào mừng <span className="font-bold text-yellow-200 dark:text-emerald-300 px-2 py-1 bg-white/20 dark:bg-emerald-500/20 rounded-lg backdrop-blur-sm">{currentUser?.name || 'Quản lý'}</span> - Quản lý kinh doanh và bán hàng
+            Chào mừng <span className="font-bold text-yellow-200 dark:text-emerald-300 px-2 py-1 bg-white/20 dark:bg-emerald-500/20 rounded-lg backdrop-blur-sm">{currentUser?.name || 'Quản lý'}</span>
+            {dealerRole && (
+              <span className={`ml-3 px-3 py-1.5 text-sm font-bold rounded-full border shadow-lg ${
+                isManager 
+                  ? 'bg-red-500/30 text-red-100 border-red-300/50' 
+                  : 'bg-blue-500/30 text-blue-100 border-blue-300/50'
+              }`}>
+                {isManager ? '👔 Quản lý' : '🧑‍💼 Nhân viên'}
+              </span>
+            )}
           </p>
           
           {/* Shop Information */}
@@ -342,20 +518,42 @@ const DealerDashboard = () => {
 
       {/* Navigation Pills - Enhanced with theme support */}
       <div className="flex flex-wrap gap-3 mb-8">
-        {NAV_SECTIONS.map((section) => (
-          <button
-            key={section.id}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 border ${
-              activeSection === section.id
-                ? 'dark:bg-gradient-to-r dark:from-fuchsia-400 dark:to-fuchsia-500 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg dark:shadow-emerald-500/50 shadow-cyan-500/50 scale-105 dark:border-emerald-400/50 border-cyan-400/50'
-                : 'dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-white/10 border-gray-300 dark:border-white/10 hover:scale-105 hover:border-cyan-500/50 dark:hover:border-emerald-500/30 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 shadow-md'
-            }`}
-            onClick={() => setActiveSection(section.id)}
-          >
-            <span className="text-xl">{section.icon}</span>
-            <span>{section.label}</span>
-          </button>
-        ))}
+        {NAV_SECTIONS.map((section) => {
+          const IconComponent = section.icon;
+          
+          // Reports section is manager-only
+          if (section.id === 'reports' && !isManager) {
+            return (
+              <div
+                key={section.id}
+                className="relative flex items-center gap-2 px-6 py-3 rounded-full font-bold border border-gray-300 dark:border-white/10 bg-gray-200 dark:bg-white/5 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                title="Chỉ Quản lý mới có quyền truy cập"
+              >
+                <Shield className="w-4 h-4" />
+                <IconComponent className="w-5 h-5" />
+                <span>{section.label}</span>
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  🔒
+                </span>
+              </div>
+            );
+          }
+          
+          return (
+            <button
+              key={section.id}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold transition-all duration-300 border ${
+                activeSection === section.id
+                  ? 'dark:bg-gradient-to-r dark:from-fuchsia-400 dark:to-fuchsia-500 bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg dark:shadow-emerald-500/50 shadow-cyan-500/50 scale-105 dark:border-emerald-400/50 border-cyan-400/50'
+                  : 'dark:bg-white/5 text-gray-700 dark:text-gray-300 hover:bg-cyan-50 dark:hover:bg-white/10 border-gray-300 dark:border-white/10 hover:scale-105 hover:border-cyan-500/50 dark:hover:border-emerald-500/30 hover:shadow-cyan-500/20 dark:hover:shadow-emerald-500/20 shadow-md'
+              }`}
+              onClick={() => setActiveSection(section.id)}
+            >
+              <IconComponent className="w-5 h-5" />
+              <span>{section.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Dynamic Content Section */}

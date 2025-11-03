@@ -1115,9 +1115,35 @@
 }
 
 .test-list {
-  margin-top: 8px;
-  line-height: 1.6;
+  margin-top: 10px;
+  line-height: 1.8;
   color: #555;
+}
+
+.test-list .account-group {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  border-left: 3px solid #4A90E2;
+}
+
+.test-list .account-group:last-child {
+  margin-bottom: 0;
+}
+
+.test-list .account-group strong {
+  display: block;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.test-list .account-group div {
+  font-size: 11px;
+  color: #666;
+  padding-left: 8px;
+  line-height: 1.6;
 }
 
 /* Toggle Container Updates */

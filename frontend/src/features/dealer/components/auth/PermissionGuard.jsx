@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import { AuthService } from '@utils';
-import { hasPermission, hasAnyPermission, hasAllPermissions, canAccessFeature } from '../config/permissions';
+import { hasPermission, hasAnyPermission, hasAllPermissions, canAccessFeature } from '../../config/permissions';
 
 /**
  * PermissionGuard Component
