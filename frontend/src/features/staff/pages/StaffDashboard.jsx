@@ -66,8 +66,6 @@ const NAV_SECTIONS = [
   { id: "catalogue", icon: "🚘", label: "Danh mục xe" },
   { id: "stock", icon: "🏭", label: "Tồn kho & Điều phối" },
   { id: "pricing", icon: "💵", label: "Giá sỉ & Khuyến mãi" },
-  { id: "orders", icon: "📋", label: "Đơn hàng" },
-  { id: "customers", icon: "👥", label: "Khách hàng" },
   { id: "inventory-report", icon: "📊", label: "Báo cáo tồn kho" },
   { id: "salesreport", icon: "📈", label: "Báo cáo" },
   { id: "forecast", icon: "📈", label: "Dự báo như cầu(AI)" },

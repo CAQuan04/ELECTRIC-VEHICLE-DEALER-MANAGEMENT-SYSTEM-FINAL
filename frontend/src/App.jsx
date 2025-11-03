@@ -95,7 +95,7 @@ import {
 } from "./features/public";
 
 import { StaffDashboard } from "./features/staff";
-import { CatalogueManager } from "./features/admin";
+import { VehicleCatalogue } from "./features/admin";
 
 // Pages from public features
 import LoadingDemo from "./features/public/pages/LoadingDemo";
@@ -768,7 +768,7 @@ const App = () => {
             element={
               <AdminGuard>
                 <AppLayout>
-                  <CatalogueManager />
+                  <VehicleCatalogue />
                 </AppLayout>
               </AdminGuard>
             }

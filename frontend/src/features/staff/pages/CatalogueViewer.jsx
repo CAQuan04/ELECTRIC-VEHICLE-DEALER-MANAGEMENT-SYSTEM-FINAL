@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { initialVehicles, initialColors } from "../../admin/components/catalog/mockData";
+
 
 const CatalogueViewer = () => {
   const [vehicles] = useState(initialVehicles);

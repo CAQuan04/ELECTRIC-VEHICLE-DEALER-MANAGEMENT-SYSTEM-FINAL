@@ -1,8 +1,21 @@
 // InventoryManagement.jsx — Quản lý tồn kho & điều phối xe (EVM Staff)
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 
 const InventoryManagement = () => {
   const [activeTab, setActiveTab] = useState("inventory");
+
+  /* ========== BUTTON STYLES ========== */
+  const btnBase =
+    "px-3 py-1.5 rounded-xl font-semibold transition duration-150";
+  const btnAdd =
+    btnBase +
+    " bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:brightness-110";
+  const btnEdit =
+    btnBase + " bg-emerald-600/30 hover:bg-emerald-600 text-white";
+  const btnDelete =
+    btnBase + " bg-rose-600/30 hover:bg-rose-600 text-white";
+  const btnConfirm =
+    btnBase + " bg-sky-600/30 hover:bg-sky-600 text-white";
 
   /* ========== MOCK DATA ========== */
   const [inventories, setInventories] = useState([
@@ -47,13 +60,13 @@ const InventoryManagement = () => {
     },
   ]);
 
-  /* ========== FORM / MODAL STATE ========== */
+  /* ========== STATE ========== */
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState({});
   const [isEdit, setIsEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
-  /* ========== GENERATORS ========== */
+  /* ========== GENERATOR ========== */
   const genId = (prefix, list, key) => {
     const num =
       Math.max(0, ...list.map((i) => Number(i[key].replace(prefix, "")))) + 1;
@@ -160,7 +173,7 @@ const InventoryManagement = () => {
     );
   };
 
-  /* ========== UI RENDERING ========== */
+  /* ========== UI ========== */
   return (
     <div className="space-y-6">
       {/* Tabs */}
@@ -190,10 +203,7 @@ const InventoryManagement = () => {
             <h2 className="text-xl font-bold text-emerald-400">
               Quản lý tồn kho tổng
             </h2>
-            <button
-              onClick={openCreateInventory}
-              className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 shadow-lg hover:brightness-110"
-            >
+            <button onClick={openCreateInventory} className={btnAdd}>
               + Thêm kho
             </button>
           </div>
@@ -226,13 +236,13 @@ const InventoryManagement = () => {
                     <td className="p-3 text-center space-x-2">
                       <button
                         onClick={() => openEditInventory(i)}
-                        className="px-2 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-white"
+                        className={btnEdit}
                       >
                         Sửa
                       </button>
                       <button
                         onClick={() => setConfirmDelete(i)}
-                        className="px-2 py-1 rounded-lg bg-rose-600/30 hover:bg-rose-600 text-white"
+                        className={btnDelete}
                       >
                         Xoá
                       </button>
@@ -252,10 +262,7 @@ const InventoryManagement = () => {
             <h2 className="text-xl font-bold text-emerald-400">
               Điều phối xe cho đại lý
             </h2>
-            <button
-              onClick={openCreateDistribution}
-              className="rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 shadow-lg hover:brightness-110"
-            >
+            <button onClick={openCreateDistribution} className={btnAdd}>
               + Tạo phiếu điều phối
             </button>
           </div>
@@ -303,20 +310,20 @@ const InventoryManagement = () => {
                       {d.status !== "Hoàn tất" && (
                         <button
                           onClick={() => confirmDelivery(d.dist_id)}
-                          className="px-2 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-white"
+                          className={btnConfirm}
                         >
                           Xác nhận
                         </button>
                       )}
                       <button
                         onClick={() => openEditDistribution(d)}
-                        className="px-2 py-1 rounded-lg bg-sky-600/30 hover:bg-sky-600 text-white"
+                        className={btnEdit}
                       >
                         Sửa
                       </button>
                       <button
                         onClick={() => setConfirmDelete(d)}
-                        className="px-2 py-1 rounded-lg bg-rose-600/30 hover:bg-rose-600 text-white"
+                        className={btnDelete}
                       >
                         Xoá
                       </button>
@@ -329,7 +336,7 @@ const InventoryManagement = () => {
         </div>
       )}
 
-      {/* MODALS */}
+      {/* MODAL FORM */}
       {showModal && (
         <div
           className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 backdrop-blur-sm p-4"
@@ -376,8 +383,12 @@ const InventoryManagement = () => {
                         onChange={(e) =>
                           setForm({ ...form, [key]: e.target.value })
                         }
-                        disabled={key.endsWith("_id")}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
+                        disabled={
+                          (activeTab === "inventory" &&
+                            key === "inventory_id") ||
+                          (activeTab === "distribution" && key === "dist_id")
+                        }
+                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-slate-100 focus:border-emerald-500 focus:outline-none"
                       />
                     </div>
                   ))}
