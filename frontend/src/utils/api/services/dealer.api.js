@@ -110,18 +110,11 @@ class DealerAPI {
    * @returns {Promise<Object>} Inventory list
    */
   async getInventory(filters = {}) {
-    // Sửa lại hàm này để trả về chuẩn success/data
     try {
       const response = await apiClient.get('/dealer/inventory', { params: filters });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy kho hàng'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy kho hàng' };
     }
   }
 
@@ -132,18 +125,11 @@ class DealerAPI {
    * @returns {Promise<Object>} Stock details
    */
   async getStockById(stockId) {
-    // Sửa lại hàm này để trả về chuẩn success/data
     try {
       const response = await apiClient.get(`/dealer/inventory/${stockId}`);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho' };
     }
   }
 
@@ -154,18 +140,11 @@ class DealerAPI {
    * @returns {Promise<Object>} Request result
    */
   async requestStock(requestData) {
-    // Sửa lại hàm này để trả về chuẩn success/data
     try {
       const response = await apiClient.post('/dealer/inventory/request', requestData);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi yêu cầu nhập kho'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi yêu cầu nhập kho' };
     }
   }
 
@@ -177,7 +156,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Updated stock
    */
   async updateStock(stockId, updateData) {
-    return apiClient.put(`/dealer/inventory/${stockId}`, updateData);
+    try {
+      const response = await apiClient.put(`/dealer/inventory/${stockId}`, updateData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật kho' };
+    }
   }
 
   /**
@@ -190,15 +174,9 @@ class DealerAPI {
   async updateInventory(id, quantity) {
     try {
       const response = await apiClient.put(`/dealer/vehicles/${id}/inventory`, { quantity });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi cập nhật tồn kho'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật tồn kho' };
     }
   }
 
@@ -208,7 +186,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Inventory stats
    */
   async getInventoryStats() {
-    return apiClient.get('/dealer/inventory/stats');
+    try {
+      const response = await apiClient.get('/dealer/inventory/stats');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thống kê kho' };
+    }
   }
 
   // ==================== CUSTOMER MANAGEMENT ====================
@@ -222,15 +205,9 @@ class DealerAPI {
   async getCustomers(params = {}) {
     try {
       const response = await apiClient.get('/dealer/customers', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng' };
     }
   }
 
@@ -243,15 +220,9 @@ class DealerAPI {
   async getCustomerById(id) {
     try {
       const response = await apiClient.get(`/dealer/customers/${id}`);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy thông tin khách hàng'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khách hàng' };
     }
   }
 
@@ -262,7 +233,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Created customer
    */
   async createCustomer(customerData) {
-    return apiClient.post('/dealer/customers', customerData);
+    try {
+      const response = await apiClient.post('/dealer/customers', customerData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo khách hàng' };
+    }
   }
 
   /**
@@ -273,7 +249,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Updated customer
    */
   async updateCustomer(customerId, customerData) {
-    return apiClient.put(`/dealer/customers/${customerId}`, customerData);
+    try {
+      const response = await apiClient.put(`/dealer/customers/${customerId}`, customerData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật khách hàng' };
+    }
   }
 
   /**
@@ -283,7 +264,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Delete result
    */
   async deleteCustomer(customerId) {
-    return apiClient.delete(`/dealer/customers/${customerId}`);
+    try {
+      const response = await apiClient.delete(`/dealer/customers/${customerId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi xóa khách hàng' };
+    }
   }
 
   /**
@@ -293,10 +279,15 @@ class DealerAPI {
    * @returns {Promise<Object>} Purchase history
    */
   async getCustomerPurchaseHistory(customerId) {
-    return apiClient.get(`/dealer/customers/${customerId}/purchases`);
+    try {
+      const response = await apiClient.get(`/dealer/customers/${customerId}/purchases`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy lịch sử mua hàng' };
+    }
   }
 
-  // ==================== TEST DRIVE MANAGEMENT ====================
+  // ==================== TEST DRIVE MANAGEMENT (COMPLETE) ====================
 
   /**
    * Get all test drive appointments
@@ -307,15 +298,9 @@ class DealerAPI {
   async getTestDrives(params = {}) {
     try {
       const response = await apiClient.get('/dealer/test-drives', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy lịch lái thử'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy lịch lái thử' };
     }
   }
 
@@ -326,7 +311,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Test drive details
    */
   async getTestDriveById(testDriveId) {
-    return apiClient.get(`/dealer/test-drives/${testDriveId}`);
+    try {
+      const response = await apiClient.get(`/dealer/test-drives/${testDriveId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết lái thử' };
+    }
   }
 
   /**
@@ -336,18 +326,28 @@ class DealerAPI {
    * @returns {Promise<Object>} Created test drive
    */
   async createTestDrive(testDriveData) {
-    return apiClient.post('/dealer/test-drives', testDriveData);
+    try {
+      const response = await apiClient.post('/dealer/test-drives', testDriveData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo lịch lái thử' };
+    }
   }
 
   /**
-   * Update test drive status
+   * Update test drive
    * PUT /dealer/test-drives/:id
    * @param {string|number} testDriveId - Test drive ID
    * @param {Object} updateData - Update data
    * @returns {Promise<Object>} Updated test drive
    */
   async updateTestDrive(testDriveId, updateData) {
-    return apiClient.put(`/dealer/test-drives/${testDriveId}`, updateData);
+    try {
+      const response = await apiClient.put(`/dealer/test-drives/${testDriveId}`, updateData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật lái thử' };
+    }
   }
 
   /**
@@ -361,15 +361,9 @@ class DealerAPI {
   async updateTestDriveStatus(id, status, note = '') {
     try {
       const response = await apiClient.put(`/dealer/test-drives/${id}/status`, { status, note });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
     }
   }
 
@@ -381,7 +375,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Cancellation result
    */
   async cancelTestDrive(testDriveId, reason) {
-    return apiClient.post(`/dealer/test-drives/${testDriveId}/cancel`, { reason });
+    try {
+      const response = await apiClient.post(`/dealer/test-drives/${testDriveId}/cancel`, { reason });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi hủy lịch' };
+    }
   }
 
   /**
@@ -392,9 +391,50 @@ class DealerAPI {
    * @returns {Promise<Object>} Calendar events
    */
   async getTestDriveCalendar(startDate, endDate) {
-    return apiClient.get('/dealer/test-drives/calendar', { 
-      params: { startDate, endDate } 
-    });
+    try {
+      const response = await apiClient.get('/dealer/test-drives/calendar', { 
+        params: { startDate, endDate } 
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy lịch' };
+    }
+  }
+
+  /**
+   * Check test drive availability (NEW)
+   * GET /dealer/test-drives/availability?vehicleId=...&date=...
+   * @param {string|number} vehicleId - Vehicle ID
+   * @param {string} date - Date to check
+   * @returns {Promise<Object>} Availability data
+   */
+  async checkTestDriveAvailability(vehicleId, date) {
+    try {
+      const response = await apiClient.get('/dealer/test-drives/availability', {
+        params: { vehicleId, date }
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi kiểm tra khả dụng' };
+    }
+  }
+
+  /**
+   * Update test drive feedback (NEW)
+   * PUT /dealer/test-drives/:id/feedback
+   * @param {string|number} testDriveId - Test drive ID
+   * @param {Object} feedback - Feedback data
+   * @returns {Promise<Object>} Update result
+   */
+  async updateTestDriveFeedback(testDriveId, feedback) {
+    try {
+      const response = await apiClient.put(`/dealer/test-drives/${testDriveId}/feedback`, {
+        feedback
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật phản hồi' };
+    }
   }
 
   // ==================== ORDER MANAGEMENT ====================
@@ -408,15 +448,9 @@ class DealerAPI {
   async getOrders(params = {}) {
     try {
       const response = await apiClient.get('/dealer/orders', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng' };
     }
   }
 
@@ -429,15 +463,9 @@ class DealerAPI {
   async getOrderById(id) {
     try {
       const response = await apiClient.get(`/dealer/orders/${id}`);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy thông tin đơn hàng'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin đơn hàng' };
     }
   }
 
@@ -450,27 +478,26 @@ class DealerAPI {
   async createOrder(orderData) {
     try {
       const response = await apiClient.post('/dealer/orders', orderData);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi tạo đơn hàng'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo đơn hàng' };
     }
   }
 
   /**
-   * Update order status
+   * Update order
    * PUT /dealer/orders/:id
    * @param {string|number} orderId - Order ID
    * @param {Object} updateData - Update data
    * @returns {Promise<Object>} Updated order
    */
   async updateOrder(orderId, updateData) {
-    return apiClient.put(`/dealer/orders/${orderId}`, updateData);
+    try {
+      const response = await apiClient.put(`/dealer/orders/${orderId}`, updateData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật đơn hàng' };
+    }
   }
 
   /**
@@ -484,15 +511,9 @@ class DealerAPI {
   async updateOrderStatus(id, status, note = '') {
     try {
       const response = await apiClient.put(`/dealer/orders/${id}/status`, { status, note });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
     }
   }
 
@@ -504,14 +525,16 @@ class DealerAPI {
    * @returns {Promise<Object>} Cancellation result
    */
   async cancelOrder(orderId, reason) {
-    return apiClient.post(`/dealer/orders/${orderId}/cancel`, { reason });
+    try {
+      const response = await apiClient.post(`/dealer/orders/${orderId}/cancel`, { reason });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi hủy đơn hàng' };
+    }
   }
 
-  // === START: PHẦN MỚI THÊM ===
-
   // ==================== QUOTATION MANAGEMENT ====================
-  // (Cần cho CreateQuotation.jsx và QuotationList.jsx)
-  
+
   /**
    * Get all quotations
    * GET /dealer/quotations
@@ -521,15 +544,24 @@ class DealerAPI {
   async getQuotations(params = {}) {
     try {
       const response = await apiClient.get('/dealer/quotations', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy danh sách báo giá'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách báo giá' };
+    }
+  }
+
+  /**
+   * Get quotation details by ID
+   * GET /dealer/quotations/:id
+   * @param {string|number} id - Quotation ID
+   * @returns {Promise<Object>} Quotation details
+   */
+  async getQuotationById(id) {
+    try {
+      const response = await apiClient.get(`/dealer/quotations/${id}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin báo giá' };
     }
   }
 
@@ -542,40 +574,12 @@ class DealerAPI {
   async createQuotation(quotationData) {
     try {
       const response = await apiClient.post('/dealer/quotations', quotationData);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi tạo báo giá'
-      };
-    }
-  }
-  // --- Get quotation details (CHO UC4) ---
-  /**
-   * Get quotation details by ID
-   * GET /dealer/quotations/:id
-   * @param {string|number} id - Quotation ID
-   * @returns {Promise<Object>} Quotation details
-   */
-  async getQuotationById(id) {
-    try {
-      const response = await apiClient.get(`/dealer/quotations/${id}`);
-      return {
-        success: true,
-        data: response.data
-      };
-    } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy thông tin báo giá'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo báo giá' };
     }
   }
 
-  // --- Update quotation (CHO UC4) ---
   /**
    * Update existing quotation
    * PUT /dealer/quotations/:id
@@ -586,19 +590,13 @@ class DealerAPI {
   async updateQuotation(id, quotationData) {
     try {
       const response = await apiClient.put(`/dealer/quotations/${id}`, quotationData);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi cập nhật báo giá'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật báo giá' };
     }
   }
+
   // ==================== PAYMENT MANAGEMENT ====================
-  // (Cần cho PaymentForm.jsx và PaymentList.jsx)
 
   /**
    * Get all payments
@@ -609,45 +607,29 @@ class DealerAPI {
   async getPayments(params = {}) {
     try {
       const response = await apiClient.get('/dealer/payments', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy danh sách thanh toán'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách thanh toán' };
     }
   }
   
   /**
    * Process payment for order
-   * (ĐÃ DI CHUYỂN TỪ ORDER MANAGEMENT SANG ĐÂY)
    * POST /dealer/orders/:id/payment
    * @param {string|number} orderId - Order ID
    * @param {Object} paymentData - Payment information
    * @returns {Promise<Object>} Payment result
    */
   async processPayment(orderId, paymentData) {
-    // Sửa lại hàm này để trả về chuẩn success/data
     try {
       const response = await apiClient.post(`/dealer/orders/${orderId}/payment`, paymentData);
-       return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi xử lý thanh toán'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi xử lý thanh toán' };
     }
   }
 
-  // === END: PHẦN MỚI THÊM ===
-
-  // ==================== ANALYTICS & REPORTS ====================
+  // ==================== REPORTS & ANALYTICS ====================
 
   /**
    * Get dealer dashboard statistics
@@ -656,7 +638,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Dashboard stats
    */
   async getDashboardStats(dateRange = {}) {
-    return apiClient.get('/dealer/analytics/dashboard', { params: dateRange });
+    try {
+      const response = await apiClient.get('/dealer/analytics/dashboard', { params: dateRange });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thống kê' };
+    }
   }
 
   /**
@@ -668,15 +655,9 @@ class DealerAPI {
   async getSalesReport(params = {}) {
     try {
       const response = await apiClient.get('/dealer/analytics/sales', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy báo cáo'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy báo cáo' };
     }
   }
 
@@ -686,7 +667,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Inventory report
    */
   async getInventoryReport() {
-    return apiClient.get('/dealer/analytics/inventory');
+    try {
+      const response = await apiClient.get('/dealer/analytics/inventory');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy báo cáo tồn kho' };
+    }
   }
 
   /**
@@ -696,7 +682,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Customer insights data
    */
   async getCustomerInsights(filters = {}) {
-    return apiClient.get('/dealer/analytics/customers', { params: filters });
+    try {
+      const response = await apiClient.get('/dealer/analytics/customers', { params: filters });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy insights khách hàng' };
+    }
   }
 
   /**
@@ -706,7 +697,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Test drive analytics
    */
   async getTestDriveAnalytics(dateRange = {}) {
-    return apiClient.get('/dealer/analytics/test-drives', { params: dateRange });
+    try {
+      const response = await apiClient.get('/dealer/analytics/test-drives', { params: dateRange });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy analytics lái thử' };
+    }
   }
 
   /**
@@ -717,15 +713,122 @@ class DealerAPI {
   async getPerformanceStats() {
     try {
       const response = await apiClient.get('/dealer/analytics/performance');
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy thống kê'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thống kê' };
+    }
+  }
+
+  /**
+   * Get customer debt report (AR)
+   * GET /dealer/reports/customer-debt?status=...
+   * @param {Object} params - Query parameters (status, customerId, etc.)
+   * @returns {Promise<Object>} Customer debt report
+   */
+  async getCustomerDebtReport(params = {}) {
+    try {
+      const response = await apiClient.get('/dealer/reports/customer-debt', { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy báo cáo công nợ khách hàng' };
+    }
+  }
+
+  /**
+   * Get supplier debt report (AP)
+   * GET /dealer/reports/supplier-debt?status=...
+   * @param {Object} params - Query parameters (status, supplierId, etc.)
+   * @returns {Promise<Object>} Supplier debt report
+   */
+  async getSupplierDebtReport(params = {}) {
+    try {
+      const response = await apiClient.get('/dealer/reports/supplier-debt', { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy báo cáo công nợ nhà cung cấp' };
+    }
+  }
+
+  /**
+   * Get aging report (phân tích tuổi nợ)
+   * GET /dealer/reports/aging?entityType=CUSTOMER|SUPPLIER
+   * @param {string} entityType - CUSTOMER or SUPPLIER
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} Aging report with buckets (0-30, 31-60, 61-90, >90 days)
+   */
+  async getAgingReport(entityType, params = {}) {
+    try {
+      const response = await apiClient.get('/dealer/reports/aging', { 
+        params: { entityType, ...params } 
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy báo cáo phân tích tuổi nợ' };
+    }
+  }
+
+  /**
+   * Send debt reminder to customer
+   * POST /dealer/debts/:debtId/remind
+   * @param {string|number} debtId - Debt ID
+   * @returns {Promise<Object>} Reminder result
+   */
+  async sendDebtReminder(debtId) {
+    try {
+      const response = await apiClient.post(`/dealer/debts/${debtId}/remind`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi gửi nhắc nợ' };
+    }
+  }
+
+  /**
+   * Send bulk debt reminders
+   * POST /dealer/debts/remind-bulk
+   * @param {Object} filters - Filter criteria for bulk reminders
+   * @returns {Promise<Object>} Bulk reminder result
+   */
+  async sendBulkDebtReminders(filters = {}) {
+    try {
+      const response = await apiClient.post('/dealer/debts/remind-bulk', filters);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi gửi nhắc nợ hàng loạt' };
+    }
+  }
+
+  /**
+   * Calculate outstanding balance for a customer
+   * GET /dealer/customers/:customerId/outstanding
+   * @param {string|number} customerId - Customer ID
+   * @returns {Promise<Object>} Outstanding balance
+   */
+  async calculateCustomerOutstanding(customerId) {
+    try {
+      const response = await apiClient.get(`/dealer/customers/${customerId}/outstanding`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tính công nợ khách hàng' };
+    }
+  }
+
+  /**
+   * Export debt report
+   * GET /dealer/reports/debt/export?format=pdf|excel&type=customer|supplier
+   * @param {string} format - Export format (pdf or excel)
+   * @param {string} type - Report type (customer or supplier)
+   * @param {Object} params - Additional parameters
+   * @returns {Promise<Object>} Export result with file URL
+   */
+  async exportDebtReport(format, type, params = {}) {
+    try {
+      const response = await apiClient.get('/dealer/reports/debt/export', { 
+        params: { format, type, ...params },
+        responseType: 'blob'
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi xuất báo cáo' };
     }
   }
 
@@ -740,15 +843,9 @@ class DealerAPI {
   async getPromotions(params = {}) {
     try {
       const response = await apiClient.get('/dealer/promotions', { params });
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy khuyến mãi'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy khuyến mãi' };
     }
   }
 
@@ -761,15 +858,9 @@ class DealerAPI {
   async createPromotion(promotionData) {
     try {
       const response = await apiClient.post('/dealer/promotions', promotionData);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi tạo khuyến mãi'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo khuyến mãi' };
     }
   }
 
@@ -783,15 +874,9 @@ class DealerAPI {
   async updatePromotion(id, promotionData) {
     try {
       const response = await apiClient.put(`/dealer/promotions/${id}`, promotionData);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi cập nhật khuyến mãi'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật khuyến mãi' };
     }
   }
 
@@ -804,15 +889,9 @@ class DealerAPI {
   async deletePromotion(id) {
     try {
       const response = await apiClient.delete(`/dealer/promotions/${id}`);
-      return {
-        success: true,
-        data: response.data
-      };
+      return { success: true, data: response.data };
     } catch (error) {
-      return {
-        success: false,
-        message: error.response?.data?.message || 'Lỗi khi xóa khuyến mãi'
-      };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi xóa khuyến mãi' };
     }
   }
 
@@ -824,7 +903,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Dealer profile
    */
   async getDealerProfile() {
-    return apiClient.get('/dealer/profile');
+    try {
+      const response = await apiClient.get('/dealer/profile');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy profile' };
+    }
   }
 
   /**
@@ -834,7 +918,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Updated profile
    */
   async updateDealerProfile(profileData) {
-    return apiClient.put('/dealer/profile', profileData);
+    try {
+      const response = await apiClient.put('/dealer/profile', profileData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật profile' };
+    }
   }
 
   /**
@@ -843,7 +932,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Shop information
    */
   async getShopInfo() {
-    return apiClient.get('/dealer/shop');
+    try {
+      const response = await apiClient.get('/dealer/shop');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin shop' };
+    }
   }
 
   /**
@@ -853,7 +947,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Updated shop info
    */
   async updateShopInfo(shopData) {
-    return apiClient.put('/dealer/shop', shopData);
+    try {
+      const response = await apiClient.put('/dealer/shop', shopData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật shop' };
+    }
   }
 
   // ==================== NOTIFICATIONS ====================
@@ -865,7 +964,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Notification list
    */
   async getNotifications(filters = {}) {
-    return apiClient.get('/dealer/notifications', { params: filters });
+    try {
+      const response = await apiClient.get('/dealer/notifications', { params: filters });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông báo' };
+    }
   }
 
   /**
@@ -875,7 +979,12 @@ class DealerAPI {
    * @returns {Promise<Object>} Update result
    */
   async markNotificationRead(notificationId) {
-    return apiClient.put(`/dealer/notifications/${notificationId}/read`);
+    try {
+      const response = await apiClient.put(`/dealer/notifications/${notificationId}/read`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi đánh dấu đã đọc' };
+    }
   }
 
   /**
@@ -884,166 +993,14 @@ class DealerAPI {
    * @returns {Promise<Object>} Update result
    */
   async markAllNotificationsRead() {
-    return apiClient.put('/dealer/notifications/read-all');
-  }
-
-// ==================== DEBT & REPORTS MANAGEMENT ====================
-// (UC 1.D.2 - Báo cáo công nợ khách hàng / nhà cung cấp)
-
-/**
- * Get customer debt report (Accounts Receivable)
- * GET /dealer/reports/customer-debt?status=...
- * @param {Object} params - Query parameters (status, customerId, etc.)
- * @returns {Promise<Object>} Customer debt report
- */
-async getCustomerDebtReport(params = {}) {
-  try {
-    const response = await apiClient.get('/dealer/reports/customer-debt', { params });
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi lấy báo cáo công nợ khách hàng'
-    };
+    try {
+      const response = await apiClient.put('/dealer/notifications/read-all');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi đánh dấu tất cả đã đọc' };
+    }
   }
 }
-
-/**
- * Get supplier debt report (Accounts Payable)
- * GET /dealer/reports/supplier-debt?status=...
- * @param {Object} params - Query parameters (status, supplierId, etc.)
- * @returns {Promise<Object>} Supplier debt report
- */
-async getSupplierDebtReport(params = {}) {
-  try {
-    const response = await apiClient.get('/dealer/reports/supplier-debt', { params });
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi lấy báo cáo công nợ nhà cung cấp'
-    };
-  }
-}
-
-/**
- * Get aging report (phân tích tuổi nợ)
- * GET /dealer/reports/aging?entityType=CUSTOMER|SUPPLIER
- * @param {string} entityType - CUSTOMER or SUPPLIER
- * @param {Object} params - Query parameters
- * @returns {Promise<Object>} Aging report with buckets (0-30, 31-60, 61-90, >90 days)
- */
-async getAgingReport(entityType, params = {}) {
-  try {
-    const response = await apiClient.get('/dealer/reports/aging', { 
-      params: { entityType, ...params } 
-    });
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi lấy báo cáo phân tích tuổi nợ'
-    };
-  }
-}
-
-/**
- * Send debt reminder to customer
- * POST /dealer/debts/:debtId/remind
- * @param {string|number} debtId - Debt ID
- * @returns {Promise<Object>} Reminder result
- */
-async sendDebtReminder(debtId) {
-  try {
-    const response = await apiClient.post(`/dealer/debts/${debtId}/remind`);
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi gửi nhắc nợ'
-    };
-  }
-}
-
-/**
- * Send bulk debt reminders
- * POST /dealer/debts/remind-bulk
- * @param {Object} filters - Filter criteria for bulk reminders
- * @returns {Promise<Object>} Bulk reminder result
- */
-async sendBulkDebtReminders(filters = {}) {
-  try {
-    const response = await apiClient.post('/dealer/debts/remind-bulk', filters);
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi gửi nhắc nợ hàng loạt'
-    };
-  }
-}
-
-/**
- * Calculate outstanding balance for a customer
- * GET /dealer/customers/:customerId/outstanding
- * @param {string|number} customerId - Customer ID
- * @returns {Promise<Object>} Outstanding balance
- */
-async calculateCustomerOutstanding(customerId) {
-  try {
-    const response = await apiClient.get(`/dealer/customers/${customerId}/outstanding`);
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi tính công nợ khách hàng'
-    };
-  }
-}
-
-/**
- * Export debt report
- * GET /dealer/reports/debt/export?format=pdf|excel&type=customer|supplier
- * @param {string} format - Export format (pdf or excel)
- * @param {string} type - Report type (customer or supplier)
- * @param {Object} params - Additional parameters
- * @returns {Promise<Object>} Export result with file URL
- */
-async exportDebtReport(format, type, params = {}) {
-  try {
-    const response = await apiClient.get('/dealer/reports/debt/export', { 
-      params: { format, type, ...params },
-      responseType: 'blob'
-    });
-    return {
-      success: true,
-      data: response.data
-    };
-  } catch (error) {
-    return {
-      success: false,
-      message: error.response?.data?.message || 'Lỗi khi xuất báo cáo'
-    };
-  }
-}}
 
 // Export singleton instance
 export const dealerAPI = new DealerAPI();

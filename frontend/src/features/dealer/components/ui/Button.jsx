@@ -22,7 +22,7 @@ const Button = ({
       bg-gradient-to-r from-cyan-500 to-blue-600 
       dark:from-rose-500 dark:to-cyan-600 
       hover:from-cyan-600 hover:to-blue-700 
-      dark:hover:from-rose-600 dark:hover:to-emerald-700
+      dark:hover:from-rose-600 dark:hover:to-cyan-700
       text-white shadow-xl hover:shadow-2xl 
       hover:scale-105 active:scale-95
       shadow-cyan-500/30 dark:shadow-emerald-500/30
@@ -33,7 +33,7 @@ const Button = ({
       hover:bg-gray-200 dark:hover:bg-gray-600/50
       text-gray-800 dark:text-gray-200
       border-2 border-gray-300 dark:border-gray-600
-      hover:border-cyan-400 dark:hover:border-emerald-500
+      hover:border-cyan-400 dark:hover:border-cyan-500
       shadow-lg hover:shadow-xl
       hover:scale-105 active:scale-95
     `,
@@ -49,16 +49,16 @@ const Button = ({
       bg-transparent 
       hover:bg-cyan-50 dark:hover:bg-emerald-500/10
       text-gray-700 dark:text-gray-300
-      hover:text-cyan-600 dark:hover:text-emerald-400
+      hover:text-cyan-600 dark:hover:text-cyan-400
       hover:scale-105 active:scale-95
     `,
     outline: `
       bg-transparent 
       border-2 border-gray-300 dark:border-gray-600
-      hover:border-cyan-500 dark:hover:border-emerald-500
+      hover:border-cyan-500 dark:hover:border-cyan-500
       text-gray-700 dark:text-gray-300
-      hover:text-cyan-600 dark:hover:text-emerald-400
-      hover:bg-cyan-50 dark:hover:bg-emerald-500/10
+      hover:text-cyan-600 dark:hover:text-cyan-400
+      hover:bg-cyan-50 dark:hover:bg-cyan-500/10
       shadow-lg hover:shadow-xl
       hover:scale-105 active:scale-95
     `,
