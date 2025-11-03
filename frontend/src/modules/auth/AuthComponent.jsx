@@ -39,10 +39,12 @@ const AuthComponent = ({ onUserChange }) => {
   // Multi-step registration handlers
   // Mock user accounts for testing
   const mockUsers = [
-    { username: 'dealer01', password: 'dealer123', role: 'dealer', name: 'Dealer User', email: 'dealer@company.com' },
+ 
+    { username: 'Dstaff01', password: 'staff123', role: 'dealer', dealerRole: 'dealer_staff', name: 'Nguyễn Văn Staff', email: 'staff@tesladealers.com', dealerId: 'DEALER_HN001', dealerName: 'Tesla Hà Nội Center' },
+    { username: 'manager01', password: 'manager123', role: 'dealer', dealerRole: 'dealer_manager', name: 'Lê Văn Manager', email: 'manager@tesladealers.com', dealerId: 'DEALER_HN001', dealerName: 'Tesla Hà Nội Center' },
+    { username: 'dealer01', password: 'dealer123', role: 'dealer', dealerRole: 'dealer_staff', name: 'Dealer User', email: 'dealer@company.com' },
     { username: 'admin01', password: 'admin123', role: 'evm_admin', name: 'EVM Admin', email: 'admin@evm.com' },
     { username: 'customer01', password: 'customer123', role: 'customer', name: 'Customer User', email: 'customer@gmail.com' },
-    { username: 'dealer02', password: 'password', role: 'dealer', name: 'Dealer Manager', email: 'manager@dealer.com' },
     { username: 'evm01', password: 'password', role: 'evm_admin', name: 'EVM Director', email: 'director@evm.com' },
     { username: 'user01', password: 'password', role: 'customer', name: 'Regular User', email: 'user@example.com' },
     { username: 'staff01', password: 'staff123', role: 'staff', name: 'Regular Staff', email: 'staff@example.com' }
@@ -59,6 +61,9 @@ const AuthComponent = ({ onUserChange }) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        dealerRole: user.dealerRole || null,       // Add dealer role
+        dealerId: user.dealerId || null,           // Add dealer ID
+        dealerName: user.dealerName || null,       // Add dealer name
         provider: 'mock'
       };
       
@@ -68,7 +73,13 @@ const AuthComponent = ({ onUserChange }) => {
       if (onUserChange) {
         onUserChange(userData);
       }
-      alert(`Chào mừng ${user.name}! Đăng nhập thành công với role: ${user.role}`);
+      
+      // Show role-specific message
+      const roleDisplay = user.dealerRole === 'dealer_staff' ? 'Nhân Viên Bán Hàng' :
+                          user.dealerRole === 'dealer_manager' ? 'Quản Lý Đại Lý' :
+                          user.role === 'evm_admin' ? 'EVM Admin' : 'Customer';
+      
+      alert(`Chào mừng ${user.name}!\nĐăng nhập thành công với quyền: ${roleDisplay}`);
       toggleLogin();
       
       setTimeout(() => {
@@ -206,10 +217,21 @@ const AuthComponent = ({ onUserChange }) => {
                   <details>
                     <summary>📝 Test Accounts</summary>
                     <div className="test-list">
-                      <strong>Dealer:</strong> dealer01 / dealer123<br/>
-                      <strong>EVM:</strong> admin01 / admin123<br/>
-                      <strong>Customer:</strong> customer01 / customer123<br/>
-                      <strong>Staff:</strong> staff01 / staff123<br/>
+                      <div className="account-group">
+                        <strong>👔 Dealer Manager:</strong>
+                        <div>manager01 / manager123 (Tesla HN)</div>
+                        <div>manager02 / manager123 (Tesla SG)</div>
+                      </div>
+                      <div className="account-group">
+                        <strong>🧑‍💼 Dealer Staff:</strong>
+                        <div>staff01 / staff123 (Tesla HN)</div>
+                        <div>staff02 / staff123 (Tesla HN)</div>
+                      </div>
+                      <div className="account-group">
+                        <strong>🔧 Other Roles:</strong>
+                        <div>admin01 / admin123 (EVM Admin)</div>
+                        <div>customer01 / customer123 (Customer)</div>
+                      </div>
                     </div>
                   </details>
                 </div>

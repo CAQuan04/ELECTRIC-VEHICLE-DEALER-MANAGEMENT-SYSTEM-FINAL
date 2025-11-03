@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading'; // Giả sử path đúng
 import { dealerAPI } from '@/utils/api/services/dealer.api.js'; // Sửa path
+import { Package, Info, Ban } from 'lucide-react';
 
 // Import UI components
 import  Button  from '@/features/dealer/components/ui/Button.jsx';
@@ -101,13 +102,13 @@ const StockDetail = () => {
 
       {/* Thông tin tóm tắt */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <InfoSection title="Tổng quan số lượng" icon="📦">
+        <InfoSection title="Tổng quan số lượng" icon={<Package className="w-5 h-5" />}>
           <InfoRow label="Tổng số lượng" value={<span className="text-xl font-bold theme-text-primary">{stockDetail.total}</span>} />
           <InfoRow label="Sẵn sàng bán" value={<span className="text-xl font-bold text-emerald-500">{stockDetail.available}</span>} />
           <InfoRow label="Đã đặt cọc" value={<span className="text-xl font-bold text-yellow-500">{stockDetail.reserved}</span>} />
         </InfoSection>
 
-        <InfoSection title="Thông tin lô hàng" icon="ℹ️">
+        <InfoSection title="Thông tin lô hàng" icon={<Info className="w-5 h-5" />}>
           <InfoRow label="Mã sản phẩm" value={stockDetail.productId || stockId} />
           <InfoRow label="Trạng thái" value={<Badge variant={stockDetail.available > 0 ? 'success' : 'warning'}>{stockDetail.available > 0 ? 'Còn hàng' : 'Hết hàng'}</Badge>} />
           <InfoRow label="Lần cập nhật cuối" value={stockDetail.updatedAt ? new Date(stockDetail.updatedAt).toLocaleString('vi-VN') : 'N/A'} />
@@ -124,7 +125,7 @@ const StockDetail = () => {
         />
         {(!stockDetail.vehicles || stockDetail.vehicles.length === 0) && (
           <EmptyState
-            icon="🚫"
+            icon={<Ban className="w-12 h-12" />}
             title="Chưa có xe"
             message="Chưa có xe nào (VIN) được đăng ký cho lô hàng này."
             className="py-10"

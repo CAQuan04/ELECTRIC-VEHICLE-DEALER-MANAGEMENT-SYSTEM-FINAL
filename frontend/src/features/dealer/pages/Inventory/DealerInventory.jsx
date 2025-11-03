@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading'; // Giả sử path đúng
 import { dealerAPI } from '@/utils/api/services/dealer.api.js'; // Sửa path
+import { Package, CheckCircle, Tag, Archive } from 'lucide-react';
 
 // Import UI components
 import  Button  from '@/features/dealer/components/ui/Button.jsx';
@@ -98,18 +99,18 @@ const DealerInventory = () => {
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <StatCard
-          icon="📦"
+          icon={<Package className="w-6 h-6" />}
           title="Tổng xe trong kho"
           value={inventory.reduce((sum, item) => sum + (item.total || 0), 0)}
         />
         <StatCard
-          icon="✅"
+          icon={<CheckCircle className="w-6 h-6" />}
           title="Xe sẵn sàng bán"
           value={inventory.reduce((sum, item) => sum + (item.available || 0), 0)}
           trend="up"
         />
         <StatCard
-          icon="🔖"
+          icon={<Tag className="w-6 h-6" />}
           title="Xe đã đặt cọc"
           value={inventory.reduce((sum, item) => sum + (item.reserved || 0), 0)}
         />
@@ -131,7 +132,7 @@ const DealerInventory = () => {
         />
         {filteredInventory.length === 0 && (
           <EmptyState
-            icon="🗃️"
+            icon={<Archive className="w-12 h-12" />}
             title="Kho trống"
             message="Không tìm thấy xe nào trong kho. Hãy thử yêu cầu nhập xe mới."
             className="py-10"

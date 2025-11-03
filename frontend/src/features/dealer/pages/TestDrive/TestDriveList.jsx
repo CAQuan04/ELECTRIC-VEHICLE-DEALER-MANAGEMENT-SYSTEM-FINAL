@@ -11,7 +11,7 @@ import {
   EmptyState,
   StatCard
 } from '../../components';
-import { Calendar, Car } from 'lucide-react';
+import { Calendar, Car, BarChart3, Clock, CheckCircle, PartyPopper } from 'lucide-react';
 
 const TestDriveList = () => {
   const navigate = useNavigate();
@@ -246,7 +246,7 @@ const TestDriveList = () => {
 
   const FilterTab = ({ value, label, count }) => (
     <button
-      className={`px-6 py-3 font-semibold text-sm transition-all duration-300 relative
+      className={`px-6 py-3 font-semibold text-2sm transition-all duration-300 relative
         ${filter === value
           ? 'text-cyan-600 dark:text-cyan-400 border-b-2 border-cyan-600 dark:border-cyan-400'
           : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border-b-2 border-transparent'
@@ -258,7 +258,7 @@ const TestDriveList = () => {
         <span className={`ml-2 px-2 py-0.5 rounded-full text-xs font-bold ${
           filter === value 
             ? 'bg-cyan-100 dark:bg-cyan-900 text-cyan-700 dark:text-cyan-300'
-            : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+            : 'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
         }`}>
           {count}
         </span>
@@ -270,11 +270,11 @@ const TestDriveList = () => {
     return (
       <PageContainer>
         <PageHeader
-          title="🚗 Quản lý lái thử"
+          title="Quản lý lái thử"
           subtitle="Quản lý lịch hẹn và theo dõi buổi lái thử"
           icon={<Car className="w-16 h-16" />}
         />
-        <div className="text-center py-16">
+        <div className="text-center py-16 mt-8">
           <div className="animate-spin text-6xl mb-4">⚙️</div>
           <p className="text-xl font-bold text-gray-600 dark:text-gray-400">
             Đang tải danh sách lái thử...
@@ -287,7 +287,7 @@ const TestDriveList = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="🚗 Quản lý lái thử"
+        title="Quản lý lái thử"
         subtitle="Quản lý lịch hẹn và theo dõi buổi lái thử"
         icon={<Car className="w-16 h-16" />}
         actions={
@@ -310,25 +310,25 @@ const TestDriveList = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+      <div className="grid mt-8 grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         <StatCard
-          icon="📊"
+          icon={<BarChart3 className="w-6 h-6" />}
           title="Tổng số"
           value={stats.total}
         />
         <StatCard
-          icon="⏳"
+          icon={<Clock className="w-6 h-6" />}
           title="Chờ xác nhận"
           value={stats.pending}
           trend={stats.pending > 0 ? 'neutral' : 'up'}
         />
         <StatCard
-          icon="✅"
+          icon={<CheckCircle className="w-6 h-6" />}
           title="Đã xác nhận"
           value={stats.confirmed}
         />
         <StatCard
-          icon="🎉"
+          icon={<PartyPopper className="w-6 h-6" />}
           title="Hoàn thành"
           value={stats.completed}
           trend="up"
@@ -345,7 +345,7 @@ const TestDriveList = () => {
       </div>
 
       {/* Filter Tabs */}
-      <div className="mb-6 bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="mb-6 dark:bg-slate-800 rounded-2xl shadow-lg border border-gray-200 dark:border-blue-700 overflow-hidden">
         <nav className="flex flex-wrap" aria-label="Tabs">
           <FilterTab value="all" label="Tất cả" count={stats.total} />
           <FilterTab value="pending" label="Chờ xác nhận" count={stats.pending} />
@@ -363,7 +363,7 @@ const TestDriveList = () => {
         />
       ) : (
         <EmptyState
-          icon="🚗"
+          icon={<Car className="w-12 h-12" />}
           title="Chưa có lịch lái thử"
           message={searchQuery ? "Không tìm thấy lịch lái thử phù hợp" : "Chưa có lịch hẹn lái thử nào"}
           action={{

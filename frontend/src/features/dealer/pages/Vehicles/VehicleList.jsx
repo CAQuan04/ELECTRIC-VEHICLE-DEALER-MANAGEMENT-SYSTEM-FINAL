@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { Car } from 'lucide-react';
 import {
   PageContainer,
   PageHeader,
@@ -104,8 +105,9 @@ const VehicleList = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="🚗 Danh sách xe"
+        title="Danh sách xe"
         subtitle="Quản lý và xem thông tin các dòng xe"
+        icon={<Car className="w-16 h-16" />}
         actions={
           <Button 
             variant="gradient"

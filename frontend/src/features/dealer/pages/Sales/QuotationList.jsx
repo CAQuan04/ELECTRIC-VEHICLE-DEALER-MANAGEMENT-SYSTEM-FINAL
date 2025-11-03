@@ -11,7 +11,7 @@ import {
   SearchBar,
   EmptyState
 } from '../../components';
-import { FileText, Edit } from 'lucide-react';
+import { FileText, Edit, Inbox } from 'lucide-react';
 
 const QuotationList = () => {
   const navigate = useNavigate();
@@ -181,7 +181,7 @@ const QuotationList = () => {
     return (
       <PageContainer>
         <PageHeader
-          title="📄 Quản lý báo giá"
+          title="Quản lý báo giá"
           subtitle="Theo dõi và quản lý báo giá cho khách hàng"
           icon={<FileText className="w-16 h-16" />}
         />
@@ -200,7 +200,7 @@ const QuotationList = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="📄 Quản lý báo giá"
+        title="Quản lý báo giá"
         subtitle="Theo dõi và quản lý báo giá cho khách hàng"
         icon={<FileText className="w-16 h-16" />}
         actions={
@@ -213,7 +213,7 @@ const QuotationList = () => {
         }
       />
 
-      <div className="mb-6">
+      <div className="mb-6 mt-8">
         <SearchBar
           placeholder="Tìm kiếm theo khách hàng, xe hoặc mã báo giá..."
           value={searchQuery}
@@ -229,7 +229,7 @@ const QuotationList = () => {
           />
         ) : (
           <EmptyState
-            icon="📭"
+            icon={<Inbox className="w-12 h-12" />}
             title="Chưa có báo giá nào"
             message={searchQuery ? "Không tìm thấy báo giá phù hợp với từ khóa tìm kiếm" : "Hãy tạo báo giá đầu tiên cho khách hàng của bạn"}
             action={{

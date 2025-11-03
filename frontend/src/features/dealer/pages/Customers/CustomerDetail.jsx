@@ -1,273 +1,391 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 
-// --- Component Nút Tab (Helper) ---
-const TabButton = ({ label, isActive, onClick }) => (
-  <button
-    onClick={onClick}
-    className={`px-4 py-3 font-semibold text-sm transition-colors
-      ${
-        isActive
-          ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600'
-          : 'text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 border-b-2 border-transparent'
-      }`}
-  >
-    {label}
-  </button>
-);
+// Import Lucide icons
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Tag,
+  Briefcase,
+  ShoppingCart,
+  Car,
+  Clock,
+  FileText,
+  Edit,
+  ArrowLeft,
+  DollarSign,
+  TrendingUp,
+  CheckCircle,
+  Building2
+} from 'lucide-react';
 
+// Import enhanced components
+import {
+  DetailHeader,
+  InfoSection,
+  InfoRow,
+  TabPanel,
+  StatusTimeline,
+  ActionBar,
+  QuickStats,
+  Button,
+  Badge
+} from '../../components';
 
 const CustomerDetail = () => {
-  const { customerId } = useParams();
-  const navigate = useNavigate();
-  const { startLoading, stopLoading } = usePageLoading();
-  const [customer, setCustomer] = useState(null);
-  // Thêm state cho tab
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview', 'history', 'drives', 'notes'
+  const { customerId } = useParams();
+  const navigate = useNavigate();
+  const { startLoading, stopLoading } = usePageLoading();
+  const [customer, setCustomer] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
 
-  useEffect(() => {
-    loadCustomerDetail();
-  }, [customerId]);
+  useEffect(() => {
+    loadCustomerDetail();
+  }, [customerId]);
 
-  const loadCustomerDetail = async () => {
-    try {
-      startLoading('Đang tải thông tin khách hàng...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data (Giữ nguyên)
-      const mockCustomer = {
-        id: customerId,
-        name: 'Nguyễn Văn A',
-        email: 'nguyenvana@email.com',
-        phone: '0901234567',
-        address: '123 Đường ABC, Quận 1',
-        city: 'TP. Hồ Chí Minh',
-        status: 'Tiềm năng',
-        createdDate: '2025-09-01',
-        purchaseHistory: [
-          { id: 1, vehicle: 'Model 3', date: '2024-06-15', amount: 1200000000 }
-        ],
-        testDrives: [
-          { id: 1, vehicle: 'Model Y', date: '2025-10-05', status: 'Hoàn thành' }
-        ],
-        notes: 'Khách hàng quan tâm đến Model Y'
-      };
-      
-      setCustomer(mockCustomer);
-    } catch (error) {
-      console.error('Error loading customer:', error);
-    } finally {
-      stopLoading();
-    }
-  };
+  const loadCustomerDetail = async () => {
+    try {
+      startLoading('Đang tải thông tin khách hàng...');
+      const response = await dealerAPI.getCustomerById(customerId);
+      if (response.success) {
+        setCustomer(response.data);
+      } else {
+        alert('Lỗi: ' + response.message);
+        navigate('/dealer/customers');
+      }
+    } catch (error) {
+      console.error('Error loading customer:', error);
+      alert('Lỗi: ' + (error.response?.data?.message || error.message));
+      navigate('/dealer/customers');
+    } finally {
+      stopLoading();
+    }
+  };
 
-  // Helper function cho Badge (Cập nhật Dark Mode)
-  const getStatusBadgeClasses = (status) => {
-    switch (status) {
-      case 'Đã mua':
-        return 'bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300';
-      case 'Tiềm năng':
-        return 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-300';
-      case 'Đang tư vấn':
-        return 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-800 dark:text-yellow-300';
-      default:
-        return 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200';
-    }
-  };
+  const getStatusVariant = (status) => {
+    switch (status) {
+      case 'Đã mua':
+        return 'success';
+      case 'Tiềm năng':
+        return 'info';
+      case 'Đang tư vấn':
+        return 'warning';
+      default:
+        return 'gray';
+    }
+  };
 
-  if (!customer) return null;
+  if (!customer) return null;
 
-  // Cập nhật nền với Dark Mode
-  return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto bg-gray-50 dark:bg-gray-900 min-h-screen">
-      
-      {/* NÚT QUAY LẠI (Cập nhật Dark Mode) */}
-      <button
-        className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium mb-6 flex items-center transition duration-150"
-        onClick={() => navigate(-1)}
-      >
-        <span className="mr-2">&larr;</span> Quay lại danh sách
-      </button>
+  // Prepare tabs
+  const tabs = [
+    { 
+      id: 'overview', 
+      label: 'Tổng quan', 
+      icon: <User className="w-5 h-5" /> 
+    },
+    { 
+      id: 'history', 
+      label: 'Lịch sử Mua hàng', 
+      icon: <ShoppingCart className="w-5 h-5" /> 
+    },
+    { 
+      id: 'drives', 
+      label: 'Lịch sử Lái thử', 
+      icon: <Car className="w-5 h-5" /> 
+    },
+    { 
+      id: 'timeline', 
+      label: 'Dòng thời gian', 
+      icon: <Clock className="w-5 h-5" /> 
+    },
+    { 
+      id: 'notes', 
+      label: 'Ghi chú', 
+      icon: <FileText className="w-5 h-5" /> 
+    }
+  ];
 
-      {/* HEADER MỚI (Thiết kế lại, thêm Dark Mode) */}
-      <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl p-6 mb-8 border border-gray-200 dark:border-gray-700">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-          
-          {/* Thông tin chính */}
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <div className="w-16 h-16 rounded-full bg-blue-100 dark:bg-blue-900/50 flex items-center justify-center text-3xl font-bold text-blue-600 dark:text-blue-300 flex-shrink-0">
-              {customer.name.charAt(0)}
-            </div>
-            <div>
-              <div className="flex items-center flex-wrap space-x-3">
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{customer.name}</h1>
-                <span
-                  className={`px-3 py-1 text-xs font-semibold rounded-full uppercase tracking-wider ${getStatusBadgeClasses(customer.status)}`}
-                >
-                  {customer.status}
-                </span>
-              </div>
-              <p className="text-gray-500 dark:text-gray-400 mt-2 flex flex-col sm:flex-row sm:items-center sm:space-x-4 text-sm">
-                <span>📧 {customer.email}</span>
-                <span className="hidden sm:inline text-gray-300 dark:text-gray-600">|</span>
-                <span>📞 {customer.phone}</span>
-              </p>
-            </div>
-          </div>
+  // Prepare timeline events
+  const timelineEvents = [
+    {
+      date: customer.createdDate,
+      title: 'Tạo hồ sơ khách hàng',
+      description: 'Khách hàng được thêm vào hệ thống',
+      status: 'info'
+    },
+    ...(customer.testDrives || []).map(drive => ({
+      date: drive.date,
+      title: `Lái thử ${drive.vehicle}`,
+      description: drive.status,
+      status: 'warning'
+    })),
+    ...(customer.purchaseHistory || []).map(purchase => ({
+      date: purchase.date,
+      title: `Mua xe ${purchase.vehicle}`,
+      description: `Giá trị: ${(purchase.amount / 1000000).toLocaleString('vi-VN')} triệu VNĐ`,
+      status: 'success'
+    }))
+  ].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-          {/* Actions (Thiết kế lại nút) */}
-          <div className="flex space-x-3 w-full md:w-auto">
-            <button
-              className="w-full md:w-auto px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center justify-center"
-              onClick={() => navigate(`/dealer/customers/${customerId}/edit`)}
-            >
-              <span className="mr-2">✏️</span> Chỉnh sửa
-            </button>
-            <a
-              href={`tel:${customer.phone}`}
-              className="w-full md:w-auto px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors shadow-sm flex items-center justify-center border border-gray-200 dark:border-gray-600"
-            >
-              <span className="mr-2">📞</span> Gọi
-            </a>
-          </div>
-        </div>
-      </div>
-      
-      {/* === BỐ CỤC TAB MỚI === */}
-      
-      {/* THANH ĐIỀU HƯỚNG TAB */}
-      <div className="border-b border-gray-200 dark:border-gray-700 mb-6">
-        <nav className="flex flex-wrap -mb-px" aria-label="Tabs">
-          <TabButton label="Tổng quan" isActive={activeTab === 'overview'} onClick={() => setActiveTab('overview')} />
-          <TabButton label="Lịch sử Mua hàng" isActive={activeTab === 'history'} onClick={() => setActiveTab('history')} />
-          <TabButton label="Lịch sử Lái thử" isActive={activeTab === 'drives'} onClick={() => setActiveTab('drives')} />
-          <TabButton label="Ghi chú" isActive={activeTab === 'notes'} onClick={() => setActiveTab('notes')} />
-        </nav>
+  // Quick stats with Lucide icons
+  const quickStats = [
+    {
+      icon: <ShoppingCart className="w-8 h-8" />,
+      label: 'Tổng mua hàng',
+      value: customer.purchaseHistory?.length || 0,
+      color: 'text-emerald-600 dark:text-emerald-400'
+    },
+    {
+      icon: <Car className="w-8 h-8" />,
+      label: 'Lái thử',
+      value: customer.testDrives?.length || 0,
+      color: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      icon: <DollarSign className="w-8 h-8" />,
+      label: 'Tổng chi tiêu',
+      value: `${((customer.purchaseHistory || []).reduce((sum, p) => sum + p.amount, 0) / 1000000000).toFixed(1)}B`,
+      color: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      icon: <Clock className="w-8 h-8" />,
+      label: 'Liên hệ gần nhất',
+      value: customer.lastContact || 'N/A',
+      color: 'text-gray-600 dark:text-gray-400'
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <DetailHeader
+          title={customer.name}
+          subtitle={`ID: ${customer.id} • ${customer.email}`}
+          onBack={() => navigate('/dealer/customers')}
+          badge={
+            <Badge variant={getStatusVariant(customer.status)}>
+              {customer.status}
+            </Badge>
+          }
+          actions={
+            <>
+              <Button
+                variant="primary"
+                icon={<Edit className="w-5 h-5" />}
+                onClick={() => navigate(`/dealer/customers/${customerId}/edit`)}
+              >
+                Chỉnh sửa
+              </Button>
+              <a href={`tel:${customer.phone}`}>
+                <Button variant="secondary" icon={<Phone className="w-5 h-5" />}>
+                  Gọi ngay
+                </Button>
+              </a>
+            </>
+          }
+        />
+
+        {/* Quick Stats */}
+        <QuickStats stats={quickStats} />
+
+        {/* Tabs */}
+        <TabPanel
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
+
+        {/* Tab Content */}
+        <div className="space-y-6">
+          {/* Overview Tab */}
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <InfoSection title="Thông tin liên hệ" icon={<Mail className="w-6 h-6" />}>
+                <InfoRow 
+                  label="Email" 
+                  value={customer.email} 
+                  icon={<Mail className="w-5 h-5" />} 
+                />
+                <InfoRow 
+                  label="Số điện thoại" 
+                  value={customer.phone} 
+                  icon={<Phone className="w-5 h-5" />} 
+                />
+                <InfoRow 
+                  label="Địa chỉ" 
+                  value={customer.address} 
+                  icon={<MapPin className="w-5 h-5" />} 
+                />
+                <InfoRow 
+                  label="Thành phố" 
+                  value={customer.city} 
+                  icon={<Building2 className="w-5 h-5" />} 
+                />
+              </InfoSection>
+
+              <InfoSection title="Thông tin hệ thống" icon={<Briefcase className="w-6 h-6" />}>
+                <InfoRow 
+                  label="Mã khách hàng" 
+                  value={customer.id} 
+                  icon={<Tag className="w-5 h-5" />} 
+                />
+                <InfoRow 
+                  label="Ngày tạo hồ sơ" 
+                  value={customer.createdDate} 
+                  icon={<Calendar className="w-5 h-5" />} 
+                />
+                <InfoRow 
+                  label="Trạng thái" 
+                  value={customer.status} 
+                  icon={<TrendingUp className="w-5 h-5" />} 
+                />
+                <InfoRow 
+                  label="Tổng giao dịch" 
+                  value={`${(customer.purchaseHistory || []).length} lần`} 
+                  icon={<Briefcase className="w-5 h-5" />} 
+                />
+              </InfoSection>
+            </div>
+          )}
+
+          {/* Purchase History Tab */}
+          {activeTab === 'history' && (
+            <InfoSection title="Lịch sử mua hàng" icon={<ShoppingCart className="w-6 h-6" />}>
+              {customer.purchaseHistory && customer.purchaseHistory.length > 0 ? (
+                <div className="space-y-4">
+                  {customer.purchaseHistory.map((purchase, index) => (
+                    <div
+                      key={purchase.id}
+                      className="group flex justify-between items-center p-6 rounded-2xl bg-gradient-to-r from-emerald-50 to-transparent dark:from-emerald-500/10 dark:to-transparent border-l-4 border-emerald-500 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-500/20 flex items-center justify-center">
+                          <Car className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                            {purchase.vehicle}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            {purchase.date}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-3xl font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                          <DollarSign className="w-6 h-6" />
+                          {(purchase.amount / 1000000).toLocaleString('vi-VN')}
+                        </div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          triệu VNĐ
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <ShoppingCart className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+                  <p className="text-gray-500 dark:text-gray-400 italic">
+                    Chưa có lịch sử mua hàng
+                  </p>
+                </div>
+              )}
+            </InfoSection>
+          )}
+
+          {/* Test Drives Tab */}
+          {activeTab === 'drives' && (
+            <InfoSection title="Lịch sử lái thử" icon={<Car className="w-6 h-6" />}>
+              {customer.testDrives && customer.testDrives.length > 0 ? (
+                <div className="space-y-4">
+                  {customer.testDrives.map((drive) => (
+                    <div
+                      key={drive.id}
+                      className="group flex justify-between items-center p-6 rounded-2xl bg-gradient-to-r from-blue-50 to-transparent dark:from-blue-500/10 dark:to-transparent border-l-4 border-blue-500 hover:shadow-lg transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center">
+                          <Car className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                            {drive.vehicle}
+                          </h4>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            {drive.date}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="success">
+                        <CheckCircle className="w-4 h-4 mr-1" />
+                        {drive.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Car className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-600" />
+                  <p className="text-gray-500 dark:text-gray-400 italic">
+                    Chưa có lịch sử lái thử
+                  </p>
+                </div>
+              )}
+            </InfoSection>
+          )}
+
+          {/* Timeline Tab */}
+          {activeTab === 'timeline' && (
+            <StatusTimeline events={timelineEvents} />
+          )}
+
+          {/* Notes Tab */}
+          {activeTab === 'notes' && (
+            <InfoSection title="Ghi chú" icon={<FileText className="w-6 h-6" />}>
+              <div className="prose prose-lg dark:prose-invert max-w-none">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                  {customer.notes || (
+                    <span className="italic text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                      <FileText className="w-5 h-5" />
+                      Không có ghi chú
+                    </span>
+                  )}
+                </p>
+              </div>
+            </InfoSection>
+          )}
+        </div>
+
+        {/* Action Bar */}
+        <ActionBar align="right">
+          <Button
+            variant="ghost"
+            icon={<ArrowLeft className="w-5 h-5" />}
+            onClick={() => navigate('/dealer/customers')}
+          >
+            Quay lại danh sách
+          </Button>
+          <Button
+            variant="gradient"
+            icon={<Edit className="w-5 h-5" />}
+            onClick={() => navigate(`/dealer/customers/${customerId}/edit`)}
+          >
+            Chỉnh sửa thông tin
+          </Button>
+        </ActionBar>
       </div>
-
-      {/* NỘI DUNG TAB */}
-      <div className="tab-content">
-        
-        {/* --- TAB 1: TỔNG QUAN --- */}
-        {activeTab === 'overview' && (
-          <DetailCard title="Thông tin chi tiết">
-            <DetailItem label="Email" value={customer.email} />
-            <DetailItem label="Số điện thoại" value={customer.phone} />
-            <DetailItem label="Địa chỉ" value={customer.address} />
-            <DetailItem label="Thành phố" value={customer.city} />
-            <DetailItem label="Ngày tạo hồ sơ" value={customer.createdDate} />
-          </DetailCard>
-        )}
-        
-        {/* --- TAB 2: LỊCH SỬ MUA HÀNG --- */}
-        {activeTab === 'history' && (
-          <DetailCard title="Lịch sử mua hàng">
-            {customer.purchaseHistory.length > 0 ? (
-              <Table
-                headers={['Xe', 'Ngày mua', 'Giá trị']}
-                data={customer.purchaseHistory.map(purchase => ({
-                  vehicle: purchase.vehicle,
-                  date: purchase.date,
-                  amount: <span className="font-medium text-green-600 dark:text-green-400">{`${(purchase.amount / 1000000).toLocaleString('vi-VN')} triệu VNĐ`}</span>
-                }))}
-              />
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic text-sm">Chưa có lịch sử mua hàng</p>
-            )}
-          </DetailCard>
-        )}
-        
-        {/* --- TAB 3: LỊCH SỬ LÁI THỬ --- */}
-        {activeTab === 'drives' && (
-          <DetailCard title="Lịch sử lái thử">
-            {customer.testDrives.length > 0 ? (
-              <Table
-                headers={['Xe', 'Ngày lái thử', 'Trạng thái']}
-                data={customer.testDrives.map(testDrive => ({
-                  vehicle: testDrive.vehicle,
-                  date: testDrive.date,
-                  status: (
-                    <span key={testDrive.id} className="px-3 py-1 text-xs font-semibold rounded-full bg-green-100 dark:bg-green-900/50 text-green-800 dark:text-green-300">
-                      {testDrive.status}
-                    </span>
-                  )
-                }))}
-              />
-            ) : (
-              <p className="text-gray-500 dark:text-gray-400 italic text-sm">Chưa có lịch sử lái thử</p>
-            )}
-          </DetailCard>
-        )}
-
-        {/* --- TAB 4: GHI CHÚ --- */}
-        {activeTab === 'notes' && (
-          <DetailCard title="Ghi chú">
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-sm">
-              {customer.notes || <span className="italic text-gray-500 dark:text-gray-400">Không có ghi chú</span>}
-            </p>
-          </DetailCard>
-        )}
-      </div>
-
-    </div>
-  );
-};
-
-// --- Custom Components (Cập nhật Dark Mode) ---
-
-// Wrapper cho mỗi phần (Hiện đại hóa)
-const DetailCard = ({ title, children }) => (
-  <div className="bg-white dark:bg-gray-800 shadow-md rounded-xl border border-gray-200 dark:border-gray-700">
-    <h3 className="text-lg font-semibold text-gray-900 dark:text-white p-5 border-b border-gray-200 dark:border-gray-700">{title}</h3>
-    {/* Bỏ padding p-5 ở đây nếu children là Table */}
-    <div className={children.type === Table ? '' : 'p-5'}>
-      {children}
     </div>
-  </div>
-);
-
-// Hiển thị một mục chi tiết (Cập nhật Dark Mode)
-const DetailItem = ({ label, value }) => (
-  <div className="flex flex-col sm:flex-row sm:justify-between py-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-    <span className="text-sm font-medium text-gray-500 dark:text-gray-400">{label}:</span>
-    <span className="text-sm font-semibold text-gray-900 dark:text-white mt-1 sm:mt-0 text-left sm:text-right">{value}</span>
-  </div>
-);
-
-// Component Table (Cập nhật Dark Mode)
-const Table = ({ headers, data }) => (
-    <div className="overflow-x-auto rounded-b-xl">
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-            <thead className="bg-gray-50 dark:bg-gray-700/50">
-                <tr>
-                    {headers.map((header, index) => (
-                        <th
-                            key={index}
-                            className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider"
-                        >
-                            {header}
-                        </th>
-                     ))}
-                </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
-                {data.map((row, rowIndex) => (
-                    <tr key={rowIndex} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                        {Object.values(row).map((cell, cellIndex) => (
-                            <td
-                                key={cellIndex}
-                                className="px-4 py-3 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
-                            >
-                                {cell}
-                            </td>
-                        ))}
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-    </div>
-);
-
+  );
+};
 
 export default CustomerDetail;

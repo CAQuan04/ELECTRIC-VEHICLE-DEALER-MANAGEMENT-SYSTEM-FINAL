@@ -7,6 +7,11 @@ export const USER_ROLES = {
   STAFF: 'staff'
 };
 
+export const DEALER_ROLES = {
+  STAFF: 'dealer_staff',
+  MANAGER: 'dealer_manager',
+};
+
 export const DASHBOARD_ROUTES = {
   [USER_ROLES.DEALER]: '/dealer-dashboard',
   [USER_ROLES.CUSTOMER]: '/customer-dashboard', 
@@ -45,7 +50,17 @@ export const AuthService = {
   
   getUserRole: () => currentUser?.role || USER_ROLES.GUEST,
   
+  getDealerRole: () => currentUser?.dealerRole || null,
+  
   hasRole: (role) => currentUser?.role === role,
+  
+  hasDealerRole: (dealerRole) => currentUser?.dealerRole === dealerRole,
+  
+  isDealerStaff: () => currentUser?.dealerRole === DEALER_ROLES.STAFF,
+  
+  isDealerManager: () => currentUser?.dealerRole === DEALER_ROLES.MANAGER,
+  
+  isDealer: () => currentUser?.role === USER_ROLES.DEALER,
   
   hasPermission: (permission) => currentUser?.permissions?.includes(permission),
   
@@ -74,8 +89,24 @@ export const AuthService = {
       name: 'Nguyễn Văn Dealer',
       email: 'dealer@evm.com',
       role: USER_ROLES.DEALER,
+      dealerRole: DEALER_ROLES.STAFF,
       dealerId: 'DL001',
+      dealerName: 'Tesla Hà Nội Center',
       permissions: ['view_sales', 'manage_inventory', 'view_customers', 'create_offers']
+    };
+    AuthService.setCurrentUser(user);
+  },
+  
+  loginAsDealerManager: () => {
+    const user = {
+      id: 2,
+      name: 'Lê Văn Manager',
+      email: 'manager@evm.com',
+      role: USER_ROLES.DEALER,
+      dealerRole: DEALER_ROLES.MANAGER,
+      dealerId: 'DL001',
+      dealerName: 'Tesla Hà Nội Center',
+      permissions: ['view_sales', 'manage_inventory', 'view_customers', 'create_offers', 'approve_orders', 'manage_staff', 'view_reports']
     };
     AuthService.setCurrentUser(user);
   },

@@ -181,7 +181,7 @@ const CustomerDebtReport = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="💰 Báo cáo công nợ khách hàng"
+        title="Báo cáo công nợ khách hàng"
         subtitle="Theo dõi và quản lý công nợ khách hàng (Accounts Receivable)"
         icon={<DollarSign className="w-16 h-16" />}
       />
