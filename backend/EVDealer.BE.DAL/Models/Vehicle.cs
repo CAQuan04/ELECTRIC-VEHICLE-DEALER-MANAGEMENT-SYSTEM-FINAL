@@ -14,6 +14,8 @@ public partial class Vehicle
 
     public int? Year { get; set; }
 
+
+
     public decimal? BasePrice { get; set; }
 
     public virtual ICollection<DemandForecast> DemandForecasts { get; set; } = new List<DemandForecast>();
@@ -29,6 +31,12 @@ public partial class Vehicle
     public virtual ICollection<TestDrive> TestDrives { get; set; } = new List<TestDrive>();
 
     public virtual ICollection<VehicleConfig> VehicleConfigs { get; set; } = new List<VehicleConfig>();
+
+    // === PHẦN BỔ SUNG: THÊM THUỘC TÍNH LƯU LINK HÌNH ẢNH ===
+    // Ghi chú: Chúng ta sẽ lưu URL của hình ảnh dưới dạng một chuỗi.
+    // Dấu '?' cho biết thuộc tính này có thể là null (không bắt buộc phải có hình ảnh).
+    [Column(TypeName = "nvarchar(MAX)")] // Chỉ định kiểu dữ liệu trong SQL Server là nvarchar(MAX)
+    public string? ImageUrl { get; set; }
 
     [Required]
     [Column(TypeName = "varchar(20)")] // <-- Thử thêm attribute này để rõ ràng hơn

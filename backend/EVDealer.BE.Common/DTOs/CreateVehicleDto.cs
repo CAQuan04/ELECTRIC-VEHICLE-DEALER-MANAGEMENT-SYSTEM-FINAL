@@ -12,5 +12,6 @@ namespace EVDealer.BE.Common.DTOs
         public string Brand { get; set; }
         public int? Year { get; set; }
         public decimal? BasePrice { get; set; }
+        public string? ImageUrl { get; set; }
     }
 }
