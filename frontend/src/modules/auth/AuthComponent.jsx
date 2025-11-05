@@ -113,10 +113,10 @@ const LoginModal = ({ onClose }) => {
                             <details>
                                 <summary>📝 Test Accounts</summary>
                                 <div className="test-list">
-                                    <div><strong>Admin:</strong> admin / 12345</div>
-                                    <div><strong>Admin:</strong> TestEVMStaff / 123456</div>
-                                    <div><strong>Admin:</strong> TestDealerStaff / 12345</div>
-                                    <div><strong>Admin:</strong> TestDealerManager / 12346</div>
+                                    <div><strong>Admin:</strong> admin/12345</div>
+                                    <div><strong>EVMStaff:</strong> TestEVMStaff/123456</div>
+                                    <div><strong>DealerStaff:</strong> TestDealerStaff/12345</div>
+                                    <div><strong>DealerManager:</strong> TestDealerManager/12346</div>
                                     
                                 </div>
                             </details>

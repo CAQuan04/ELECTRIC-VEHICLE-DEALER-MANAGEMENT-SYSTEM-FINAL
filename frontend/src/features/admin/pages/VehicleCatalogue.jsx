@@ -1,14 +1,13 @@
 // File: src/features/admin/pages/VehicleCatalogue.jsx
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { Plus, Filter } from "lucide-react";
-// Ghi chú: Sửa lại đường dẫn import component con cho đúng
 import VehicleCard from "../components/catalog/VehicleCard";
 import ConfigModal from "../components/modals/ConfigModal";
 import VehicleModal from "../components/modals/VehicleModal";
 
-// Ghi chú: Sửa lại đường dẫn import cho đúng với cấu trúc mới
-import apiClient from "../../../utils/api/client";
-import { useAuth } from "../../../context/AuthContext";
+// --- CÁC THÀNH PHẦN TÍCH HỢP ---
+import apiClient from "../../../utils/api/client"; // Đảm bảo đường dẫn đúng
+import { useAuth } from "../../../context/AuthContext"; // Đảm bảo đường dẫn đúng
 
 const VehicleCatalogue = () => {
   const [vehicles, setVehicles] = useState([]);
@@ -21,6 +20,7 @@ const VehicleCatalogue = () => {
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [activeConfig, setActiveConfig] = useState(null);
 
+  // === HÀM LẤY DỮ LIỆU TỪ BACKEND ===
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
@@ -37,6 +37,7 @@ const VehicleCatalogue = () => {
     fetchVehicles();
   }, [fetchVehicles]);
   
+  // === LOGIC FILTER (KHÔNG THAY ĐỔI) ===
   const brands = useMemo(() => Array.from(new Set(vehicles.map((v) => v.brand))), [vehicles]);
   const colors = useMemo(() => Array.from(new Set(vehicles.flatMap((v) => v.configs?.flatMap((c) => c.color ?? []) ?? []).concat(vehicles.map((v) => v.color)))), [vehicles]);
   const filteredVehicles = useMemo(() => vehicles.filter((v) => 
@@ -44,6 +45,8 @@ const VehicleCatalogue = () => {
     (!filter.status || v.status === filter.status) &&
     (!filter.color || v.configs.some(c => c.color === filter.color) || v.color === filter.color)
   ), [vehicles, filter]);
+
+  // === CÁC HÀM XỬ LÝ SỰ KIỆN CRUD (ĐÃ TÍCH HỢP API) ===
 
   const handleAddVehicle = () => {
     setActiveVehicle(null);
@@ -70,7 +73,7 @@ const VehicleCatalogue = () => {
   };
 
   const handleDeleteVehicle = async (vehicleId) => {
-    if (window.confirm("Bạn có chắc muốn xóa mềm xe này?")) {
+    if (window.confirm("Bạn có chắc muốn xóa mềm (chuyển sang Inactive) xe này?")) {
       try {
         await apiClient.delete(`/admin/vehicles/${vehicleId}`);
         await fetchVehicles();
@@ -83,7 +86,8 @@ const VehicleCatalogue = () => {
   const handleReactivateVehicle = async (vehicle) => {
     if (window.confirm("Bạn có chắc muốn kích hoạt lại xe này?")) {
       try {
-        await apiClient.put(`/admin/vehicles/${vehicle.vehicleId}/status`, { status: "Active" });
+        // Ghi chú: Gọi đến API PUT status mới
+        await apiClient.put(`/admin/vehicles/${vehicle.vehicleId}/status`);
         await fetchVehicles();
       } catch (error) {
         console.error("Lỗi khi kích hoạt lại xe:", error);
@@ -106,11 +110,15 @@ const VehicleCatalogue = () => {
   const handleSaveConfig = async (configData) => {
     if (!activeVehicle) return;
     try {
-      if (configData.configId) {
+      // ===================================================================================
+      // === PHẦN SỬA ĐỔI: SỬ DỤNG ĐÚNG ROUTE MỚI CHO UPDATE CONFIG ===
+      if (configData.configId) { // Sửa cấu hình
+        // Ghi chú: URL bây giờ cần cả vehicleId và configId.
         await apiClient.put(`/admin/vehicles/${activeVehicle.vehicleId}/configs/${configData.configId}`, configData);
-      } else {
+      } else { // Thêm cấu hình mới
         await apiClient.post(`/admin/vehicles/${activeVehicle.vehicleId}/configs`, configData);
       }
+      // ===================================================================================
       setOpenConfigModal(false);
       await fetchVehicles();
     } catch (error) {
@@ -120,8 +128,7 @@ const VehicleCatalogue = () => {
 
   const handleToggleConfigStatus = async (vehicleId, config) => {
     try {
-      const newStatus = config.status === "Active" ? "Inactive" : "Active";
-      await apiClient.put(`/admin/vehicles/${vehicleId}/configs/${config.configId}/status`, { status: newStatus });
+      await apiClient.put(`/admin/vehicles/${vehicleId}/configs/${config.configId}/status`);
       await fetchVehicles();
     } catch (error) {
       console.error("Lỗi khi thay đổi trạng thái cấu hình:", error);
@@ -131,7 +138,11 @@ const VehicleCatalogue = () => {
   const handleDeleteConfig = async (vehicleId, configId) => {
     if (window.confirm("Bạn có chắc muốn xóa vĩnh viễn cấu hình này?")) {
       try {
+        // ===================================================================================
+        // === PHẦN SỬA ĐỔI: SỬ DỤNG ĐÚNG ROUTE MỚI CHO DELETE CONFIG ===
+        // Ghi chú: URL bây giờ cần cả vehicleId và configId.
         await apiClient.delete(`/admin/vehicles/${vehicleId}/configs/${configId}`);
+        // ===================================================================================
         await fetchVehicles();
       } catch (error) {
         console.error("Lỗi khi xóa cấu hình:", error);
@@ -141,6 +152,7 @@ const VehicleCatalogue = () => {
 
   const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
 
+  // === GIAO DIỆN ===
   return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
