@@ -27,14 +27,15 @@ namespace EVDealer.BE.API.Controllers
 
 
         }
-         [HttpGet("hash/{password}")]
+
+        // File: Controllers/AuthController.cs
+        [HttpGet("hash/{password}")]
         public IActionResult HashPassword(string password)
         {
-            // Dùng thư viện BCrypt để tạo "dấu vân tay" cho mật khẩu.
             var hashedPassword = BCrypt.Net.BCrypt.HashPassword(password);
-            // Trả về chuỗi hash này.
             return Ok(hashedPassword);
         }
+
     }
 
 }

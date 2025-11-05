@@ -19,5 +19,7 @@ namespace EVDealer.BE.Common.DTOs
         public int? Year { get; set; }
         // Ghi chú: Giá cơ bản cập nhật.
         public decimal? BasePrice { get; set; }
+
+        public string? ImageUrl { get; set; }
     }
 }
