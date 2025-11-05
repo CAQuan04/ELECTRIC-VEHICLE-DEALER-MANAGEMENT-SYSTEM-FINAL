@@ -5,6 +5,9 @@ import { Routes, Route } from "react-router-dom";
 // Theme override CSS
 import "./styles/theme-variables.css";
 
+// Contexts
+import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
+
 // Modules
 import { Sidebar, Navbar, Header } from "@modules/layout";
 
@@ -104,6 +107,9 @@ import RegisterSuccess from "./features/public/pages/RegisterSuccess";
 // Auth components
 import RegisterForm from "@modules/auth/RegisterForm";
 
+// Test components
+import APITestPage from "./pages/APITestPage";
+
 // Enhanced components with loading HOCs
 const LandingWithLoading = withRouteLoading(Landing, {
   loadingMessage: "Chào mừng đến với Tesla EVM...",
@@ -180,6 +186,7 @@ const DealerLayout = ({ children }) => {
 
 const AppLayout = ({ children }) => {
   const currentUser = AuthService.getCurrentUser();
+  const { isExpanded } = useSidebar(); // Lấy state từ context
 
   // Check if user is logged in to determine if we should show dashboard layout or public layout
   if (currentUser && currentUser.role !== "guest") {
@@ -198,23 +205,20 @@ const AppLayout = ({ children }) => {
         </div>
         <style>{`
           .main-content-with-sidebar {
-            margin-left: 220px;
+            padding-left: ${isExpanded ? '258px' : '80px'} !important;
+            margin-left: 0 !important;
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-
-            /* === DÒNG QUAN TRỌNG NHẤT === */
-            /* Đặt chiều rộng bằng 100% trừ đi chiều rộng của sidebar */
-            width: calc(100% - 220px);
+            width: 100vw !important;
+            max-width: 100vw !important;
+            box-sizing: border-box !important;
             
-            /* Dòng này vẫn giữ lại để ngăn lỗi tràn nhỏ nhất */
-            overflow-x: hidden; 
+            /* Smooth transition khi sidebar expand/collapse */
+            transition: padding-left 0.3s ease-in-out;
           }
           
-          @media (max-width: 768px) {
+          @media (max-width: 1024px) {
             .main-content-with-sidebar {
-              margin-left: 0;
-              width: 100%; /* Trả lại 100% width khi sidebar ẩn đi */
+              padding-left: 0 !important;
             }
           }
         `}</style>
@@ -253,13 +257,17 @@ const PublicLayout = ({ children }) => {
 
 const App = () => {
   return (
-    <GlobalLoadingProvider>
-      <ThemeProvider>
-        <Routes>
+    <SidebarProvider>
+      <GlobalLoadingProvider>
+        <ThemeProvider>
+          <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingWithLoading />} />
           <Route path="/landing" element={<LandingWithLoading />} />
           <Route path="/access-denied" element={<AccessDenied />} />
+          
+          {/* API Test Route */}
+          <Route path="/api-test" element={<APITestPage />} />
 
           {/* Role-based Dashboard Routes */}
           <Route
@@ -880,6 +888,7 @@ const App = () => {
         <NotificationContainer />
       </ThemeProvider>
     </GlobalLoadingProvider>
+    </SidebarProvider>
   );
 };
 export default App;

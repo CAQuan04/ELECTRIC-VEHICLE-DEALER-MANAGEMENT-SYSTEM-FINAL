@@ -4,6 +4,7 @@ import { handleGoogleAccessTokenLogin, redirectUserBasedOnRole } from '../../uti
 import { handleFacebookLoginSuccess, handleFacebookLoginError, redirectUserBasedOnRole as redirectUserBasedOnRoleFB } from '../../utils/facebookAuth';
 import { AuthService } from '../../utils/auth';
 import { AuthNotifications } from '../../utils/notifications';
+import { AuthAPI } from '../../services/api';
 import './AuthComponent.css';
 
 const AuthComponent = ({ onUserChange }) => {
@@ -13,6 +14,8 @@ const AuthComponent = ({ onUserChange }) => {
   const [loginForm, setLoginForm] = useState({ username: '', password: '' });
   const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '' });
   const [currentUser, setCurrentUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   // Check if user is already logged in on component mount
   useEffect(() => {
@@ -37,7 +40,85 @@ const AuthComponent = ({ onUserChange }) => {
   }, [onUserChange]);
 
   // Multi-step registration handlers
-  // Mock user accounts for testing
+  // Map role từ Backend sang Frontend
+  const mapRoleToFrontend = (backendRole) => {
+    // Backend roles: Admin, EVMStaff, DealerManager, DealerStaff, Customer
+    // Frontend roles: evm_admin, dealer, customer
+    const roleMap = {
+      'Admin': 'evm_admin',
+      'EVMStaff': 'evm_admin',
+      'DealerManager': 'dealer',
+      'DealerStaff': 'dealer',
+      'Customer': 'customer'
+    };
+    return roleMap[backendRole] || 'customer';
+  };
+
+  // Handle login with API
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setLoginError('');
+
+    try {
+      // Call API login
+      const response = await AuthAPI.login(loginForm.username, loginForm.password);
+      
+      if (response.isSuccess) {
+        // Store token
+        localStorage.setItem('accessToken', response.token);
+        
+        // Map role từ BE sang FE
+        const frontendRole = mapRoleToFrontend(response.role);
+        
+        // Create user data object
+        const userData = {
+          id: response.username,
+          name: response.username, // Backend doesn't return name, use username
+          username: response.username,
+          role: frontendRole, // Use mapped role
+          backendRole: response.role, // Keep original role for reference
+          dealerRole: response.role === 'DealerManager' ? 'dealer_manager' : 
+                     response.role === 'DealerStaff' ? 'dealer_staff' : null,
+          provider: 'backend-api',
+          token: response.token
+        };
+        
+        // Save user data
+        localStorage.setItem('user', JSON.stringify(userData));
+        setCurrentUser(userData);
+        AuthService.setCurrentUser(userData);
+        
+        if (onUserChange) {
+          onUserChange(userData);
+        }
+        
+        // Show success notification
+        AuthNotifications.loginSuccess(userData.name, response.role);
+        
+        // Close login modal
+        toggleLogin();
+        
+        // Redirect based on role
+        setTimeout(() => {
+          redirectUserBasedOnRole(frontendRole);
+        }, 1000);
+      } else {
+        // Login failed
+        setLoginError(response.message || 'Đăng nhập thất bại');
+        AuthNotifications.loginError(response.message);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      const errorMessage = error.message || 'Không thể kết nối đến server. Vui lòng thử lại sau.';
+      setLoginError(errorMessage);
+      AuthNotifications.loginError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Mock user accounts for testing (kept for reference)
   const mockUsers = [
  
     { username: 'Dstaff01', password: 'staff123', role: 'dealer', dealerRole: 'dealer_staff', name: 'Nguyễn Văn Staff', email: 'staff@tesladealers.com', dealerId: 'DEALER_HN001', dealerName: 'Tesla Hà Nội Center' },
@@ -50,7 +131,7 @@ const AuthComponent = ({ onUserChange }) => {
     { username: 'staff01', password: 'staff123', role: 'staff', name: 'Regular Staff', email: 'staff@example.com' }
   ];
 
-  // Handle mock login
+  // Handle mock login (kept for fallback/testing)
   const handleMockLogin = (e) => {
     e.preventDefault();
     const user = mockUsers.find(u => u.username === loginForm.username && u.password === loginForm.password);
@@ -186,8 +267,22 @@ const AuthComponent = ({ onUserChange }) => {
             
             {/* Login Form */}
             <div className="form-box login">
-              <form action="#" onSubmit={handleMockLogin}>
+              <form action="#" onSubmit={handleLogin}>
                 <h1>Login</h1>
+                
+                {loginError && (
+                  <div className="error-message" style={{
+                    color: '#ff4444',
+                    backgroundColor: '#ffeeee',
+                    padding: '10px',
+                    borderRadius: '5px',
+                    marginBottom: '15px',
+                    fontSize: '14px'
+                  }}>
+                    {loginError}
+                  </div>
+                )}
+                
                 <div className="input-box">
                   <input 
                     type="text" 
@@ -195,6 +290,7 @@ const AuthComponent = ({ onUserChange }) => {
                     required 
                     value={loginForm.username}
                     onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                    disabled={isLoading}
                   />
                   <i className="bx bxs-user"></i>
                 </div>
@@ -205,33 +301,31 @@ const AuthComponent = ({ onUserChange }) => {
                     required 
                     value={loginForm.password}
                     onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                    disabled={isLoading}
                   />
                   <i className="bx bxs-lock-alt"></i>
                 </div>
                 <div className="forgot-link">
                   <a href="#">Forgot Password?</a>
                 </div>
-                <button type="submit" className="auth-btn">Login</button>
+                <button type="submit" className="auth-btn" disabled={isLoading}>
+                  {isLoading ? 'Đang đăng nhập...' : 'Login'}
+                </button>
                 
                 <div className="test-accounts">
                   <details>
-                    <summary>📝 Test Accounts</summary>
+                    <summary>📝 Test Accounts (Backend API)</summary>
                     <div className="test-list">
-                      <div className="account-group">
-                        <strong>👔 Dealer Manager:</strong>
-                        <div>manager01 / manager123 (Tesla HN)</div>
-                        <div>manager02 / manager123 (Tesla SG)</div>
-                      </div>
-                      <div className="account-group">
-                        <strong>🧑‍💼 Dealer Staff:</strong>
-                        <div>staff01 / staff123 (Tesla HN)</div>
-                        <div>staff02 / staff123 (Tesla HN)</div>
-                      </div>
-                      <div className="account-group">
-                        <strong>🔧 Other Roles:</strong>
-                        <div>admin01 / admin123 (EVM Admin)</div>
-                        <div>customer01 / customer123 (Customer)</div>
-                      </div>
+                      
+                        <strong>🔧 Admin/EVM Staff:</strong>
+                        <div>admin / 12345</div>
+                        <div>TestEVMStaff / 123456</div>
+                      
+                      
+                        <strong>🏢 Dealer:</strong>
+                        <div>TestDealerStaff / 12345</div>
+                        <div>TestDealerManager / 12346</div>
+                      
                     </div>
                   </details>
                 </div>
