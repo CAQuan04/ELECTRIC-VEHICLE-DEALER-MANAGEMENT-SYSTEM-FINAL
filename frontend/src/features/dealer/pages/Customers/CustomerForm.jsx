@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 
 // Import Lucide icons
 import {
@@ -73,12 +74,12 @@ const CustomerForm = () => {
               setAvailableWards(filtered);
             }
           } else {
-            alert('Lỗi: ' + response.message);
+            notifications.error('Lỗi tải dữ liệu', response.message);
             navigate('/dealer/customers');
           }
         } catch (error) {
           console.error('Error loading customer:', error);
-          alert('Lỗi: ' + (error.response?.data?.message || error.message));
+          notifications.error('Lỗi tải dữ liệu', error.response?.data?.message || error.message);
           navigate('/dealer/customers');
         } finally {
           setIsDataLoading(false);
@@ -145,23 +146,23 @@ const CustomerForm = () => {
       if (isEditMode) {
         response = await dealerAPI.updateCustomer(customerId, formData);
         if (response.success) {
-          alert('✅ Cập nhật khách hàng thành công!');
+          notifications.success('Thành công', 'Cập nhật khách hàng thành công!');
           navigate('/dealer/customers');
         } else {
-          alert('❌ Lỗi: ' + response.message);
+          notifications.error('Lỗi cập nhật', response.message);
         }
       } else {
         response = await dealerAPI.createCustomer(formData);
         if (response.success) {
-          alert('✅ Thêm khách hàng thành công!');
+          notifications.success('Thành công', 'Thêm khách hàng thành công!');
           navigate('/dealer/customers');
         } else {
-          alert('❌ Lỗi: ' + response.message);
+          notifications.error('Lỗi tạo mới', response.message);
         }
       }
     } catch (error) {
       console.error('Error saving customer:', error);
-      alert('❌ Có lỗi xảy ra: ' + (error.response?.data?.message || error.message));
+      notifications.error('Lỗi', error.response?.data?.message || error.message);
     } finally {
       setIsSubmitting(false);
     }

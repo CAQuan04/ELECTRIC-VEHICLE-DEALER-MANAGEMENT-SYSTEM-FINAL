@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 
 // Import Lucide icons
 import {
@@ -55,12 +56,12 @@ const CustomerDetail = () => {
       if (response.success) {
         setCustomer(response.data);
       } else {
-        alert('Lỗi: ' + response.message);
+        notifications.error('Lỗi', response.message);
         navigate('/dealer/customers');
       }
     } catch (error) {
       console.error('Error loading customer:', error);
-      alert('Lỗi: ' + (error.response?.data?.message || error.message));
+      notifications.error('Lỗi', error.response?.data?.message || error.message);
       navigate('/dealer/customers');
     } finally {
       stopLoading();

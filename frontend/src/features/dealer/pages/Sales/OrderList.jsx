@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 import {
   PageContainer,
   PageHeader,
@@ -164,7 +165,7 @@ const OrderList = () => {
 
   const handleTrackDelivery = (orderId) => {
     console.log('Track delivery:', orderId);
-    alert(`Chức năng theo dõi giao hàng cho đơn ${orderId} đang được phát triển`);
+    notifications.info('Thông báo', `Chức năng theo dõi giao hàng cho đơn ${orderId} đang được phát triển`);
   };
 
   if (isLoading) {
@@ -190,7 +191,7 @@ const OrderList = () => {
   return (
     <PageContainer>
       <PageHeader
-        title="📋 Quản lý đơn hàng"
+        title="Quản lý đơn hàng"
         subtitle="Theo dõi và quản lý đơn hàng bán xe"
         icon={<ShoppingCart className="w-16 h-16" />}
         actions={

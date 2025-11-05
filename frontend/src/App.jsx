@@ -33,7 +33,8 @@ import {
 } from "./modules/loading";
 
 // Notification system
-import { NotificationContainer } from "@modules/common";
+import NotificationProvider from "@modules/common/notification/NotificationProvider";
+// import { NotificationContainer } from "@modules/common"; // Tắt notification cũ
 
 // Feature imports
 import { CustomerDashboard, CustomerList } from "./features/customer";
@@ -78,6 +79,10 @@ import {
   // Staff
   StaffList,
   StaffForm,
+  // Feedback
+  FeedbackList,
+  FeedbackForm,
+  FeedbackDetail,
   // Theme
   ThemeProvider,
   ThemeToggle,
@@ -259,8 +264,9 @@ const App = () => {
   return (
     <SidebarProvider>
       <GlobalLoadingProvider>
-        <ThemeProvider>
-          <Routes>
+        <NotificationProvider>
+          <ThemeProvider>
+            <Routes>
           {/* Public Routes */}
           <Route path="/" element={<LandingWithLoading />} />
           <Route path="/landing" element={<LandingWithLoading />} />
@@ -749,6 +755,48 @@ const App = () => {
             }
           />
 
+          {/* Dealer Routes - Feedback & Complaint Management */}
+          <Route
+            path="/dealer/feedback"
+            element={
+              <DealerGuard>
+                <AppLayout>
+                  <FeedbackList />
+                </AppLayout>
+              </DealerGuard>
+            }
+          />
+          <Route
+            path="/dealer/feedback/create"
+            element={
+              <DealerGuard>
+                <AppLayout>
+                  <FeedbackForm />
+                </AppLayout>
+              </DealerGuard>
+            }
+          />
+          <Route
+            path="/dealer/feedback/edit/:feedbackId"
+            element={
+              <DealerGuard>
+                <AppLayout>
+                  <FeedbackForm />
+                </AppLayout>
+              </DealerGuard>
+            }
+          />
+          <Route
+            path="/dealer/feedback/:feedbackId"
+            element={
+              <DealerGuard>
+                <AppLayout>
+                  <FeedbackDetail />
+                </AppLayout>
+              </DealerGuard>
+            }
+          />
+
           {/* Admin-only Routes */}
           <Route
             path="/reports"
@@ -884,10 +932,11 @@ const App = () => {
           />
         </Routes>
         <ThemeToggle />
-        {/* Global Notification Container */}
-        <NotificationContainer />
-      </ThemeProvider>
-    </GlobalLoadingProvider>
+        {/* Global Notification Container - Đã chuyển sang NotificationProvider mới */}
+        {/* <NotificationContainer /> */}
+          </ThemeProvider>
+        </NotificationProvider>
+      </GlobalLoadingProvider>
     </SidebarProvider>
   );
 };

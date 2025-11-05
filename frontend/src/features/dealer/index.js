@@ -59,6 +59,11 @@ export { default as PromotionDetail } from './pages/Promotion/PromotionDetail';
 export { default as StaffList } from './pages/StaffManagement/StaffList';
 export { default as StaffForm } from './pages/StaffManagement/StaffForm';
 
+// Feedback & Complaint Management
+export { default as FeedbackList } from './pages/Feedback/FeedbackList';
+export { default as FeedbackForm } from './pages/Feedback/FeedbackForm';
+export { default as FeedbackDetail } from './pages/Feedback/FeedbackDetail';
+
 // ============================================
 // HOOKS
 // ============================================

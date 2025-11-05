@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
   PageHeader, 
@@ -66,13 +67,17 @@ const SupplierDebtReport = () => {
   };
 
   const handlePayment = async (debtId, supplierName) => {
-    if (confirm(`Xác nhận thanh toán cho ${supplierName}?`)) {
-      navigate(`/dealer/payments/new?supplierId=${debtId}`);
-    }
+    notifications.confirm(
+      'Xác nhận thanh toán',
+      `Xác nhận thanh toán cho ${supplierName}?`,
+      () => {
+        navigate(`/dealer/payments/new?supplierId=${debtId}`);
+      }
+    );
   };
 
   const handleExportReport = async () => {
-    alert('Chức năng xuất báo cáo đang được phát triển');
+    notifications.info('Thông báo', 'Chức năng xuất báo cáo đang được phát triển');
   };
 
   const filteredDebts = supplierDebts.filter(debt => 
@@ -252,7 +257,7 @@ const SupplierDebtReport = () => {
             </table>
           </div>
         ) : (
-          <EmptyState className="mt-8"
+          <EmptyState
             icon="🏭"
             title="Không có công nợ nhà cung cấp"
             message={searchQuery ? "Không tìm thấy công nợ phù hợp với từ khóa tìm kiếm" : "Tất cả hóa đơn nhà cung cấp đã được thanh toán"}

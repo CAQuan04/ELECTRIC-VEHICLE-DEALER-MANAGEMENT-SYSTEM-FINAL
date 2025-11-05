@@ -1,4 +1,8 @@
 // Notification utility functions
+// Export notifications từ module mới
+export { notifications } from '@modules/common/notification/useNotification';
+
+// Giữ lại các function cũ để tương thích ngược
 export const showNotification = (title, message = '', type = 'info', duration = 5000) => {
   // Wait for notification system to be ready
   const tryShowNotification = () => {

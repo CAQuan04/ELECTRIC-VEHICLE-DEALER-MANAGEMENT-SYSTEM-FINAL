@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@utils/api/services';
+import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
   PageHeader, 
@@ -20,18 +22,35 @@ const CompareVehicles = () => {
   const loadAvailableVehicles = async () => {
     try {
       startLoading('Đang tải danh sách xe...');
-      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const mockVehicles = [
-        { id: 1, model: 'Model 3', price: 1200000000, range: '602 km', topSpeed: '261 km/h', acceleration: '3.1s' },
-        { id: 2, model: 'Model Y', price: 1500000000, range: '533 km', topSpeed: '217 km/h', acceleration: '3.5s' },
-        { id: 3, model: 'Model S', price: 2800000000, range: '652 km', topSpeed: '322 km/h', acceleration: '2.1s' },
-        { id: 4, model: 'Model X', price: 3200000000, range: '580 km', topSpeed: '250 km/h', acceleration: '2.6s' }
-      ];
+      const result = await dealerAPI.getVehicles({ limit: 100 });
       
-      setAvailableVehicles(mockVehicles);
+      if (result.success) {
+        // Transform backend data to match component format
+        const vehicles = result.data.items || result.data.data || [];
+        const transformedVehicles = vehicles.map(v => ({
+          id: v.vehicleId || v.id,
+          model: v.name || v.model,
+          price: v.basePrice || v.price || 0,
+          range: v.range || 'N/A',
+          topSpeed: v.topSpeed || 'N/A',
+          acceleration: v.acceleration || 'N/A'
+        }));
+        setAvailableVehicles(transformedVehicles);
+      } else {
+        notifications.error('Lỗi tải dữ liệu', result.message);
+        // Fallback to mock data
+        const mockVehicles = [
+          { id: 1, model: 'Model 3', price: 1200000000, range: '602 km', topSpeed: '261 km/h', acceleration: '3.1s' },
+          { id: 2, model: 'Model Y', price: 1500000000, range: '533 km', topSpeed: '217 km/h', acceleration: '3.5s' },
+          { id: 3, model: 'Model S', price: 2800000000, range: '652 km', topSpeed: '322 km/h', acceleration: '2.1s' },
+          { id: 4, model: 'Model X', price: 3200000000, range: '580 km', topSpeed: '250 km/h', acceleration: '2.6s' }
+        ];
+        setAvailableVehicles(mockVehicles);
+      }
     } catch (error) {
       console.error('Error loading vehicles:', error);
+      notifications.error('Lỗi hệ thống', 'Không thể tải danh sách xe');
     } finally {
       stopLoading();
     }

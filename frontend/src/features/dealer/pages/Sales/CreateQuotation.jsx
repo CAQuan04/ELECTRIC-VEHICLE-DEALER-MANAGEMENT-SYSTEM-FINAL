@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 
 // Import các UI Component chuẩn
 import {
@@ -156,7 +157,7 @@ const CreateOrder = () => {
         // --- Kết thúc logic Sửa ---
       } catch (error) {
         console.error('Error loading prerequisites:', error);
-        alert('Lỗi: không thể tải dữ liệu khách hàng hoặc kho xe.');
+        notifications.error('Lỗi', 'Không thể tải dữ liệu khách hàng hoặc kho xe.');
         navigate('/dealer/quotations');// Về danh sách nếu lỗi
       } finally {
         setIsDataLoading(false);
@@ -213,10 +214,10 @@ const CreateOrder = () => {
   // --- THÊM HÀM ÁP DỤNG VOUCHER (MOCK) ---
   const handleApplyVoucher = () => {
     if (formData.voucherCode.toUpperCase() === 'SALE50') {
-      alert('Áp dụng voucher thành công! Giảm 50 triệu.');
+      notifications.success('Thành công', 'Áp dụng voucher thành công! Giảm 50 triệu.');
       setFormData(prev => ({ ...prev, voucherDiscount: 50000000 }));
     } else {
-      alert('Mã voucher không hợp lệ.');
+      notifications.error('Lỗi', 'Mã voucher không hợp lệ.');
       setFormData(prev => ({ ...prev, voucherDiscount: 0 }));
     }
   };
@@ -296,14 +297,14 @@ const CreateOrder = () => {
       // -----------------------------
 
       if (result.success) {
-        alert(isEditMode ? 'Cập nhật báo giá thành công!' : 'Tạo báo giá thành công!');
+        notifications.success('Thành công', isEditMode ? 'Cập nhật báo giá thành công!' : 'Tạo báo giá thành công!');
         navigate('/dealer/quotations');
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
     } catch (error) {
       console.error('Error creating quotation:', error);
-      alert('Có lỗi xảy ra: ' + error.message);
+      notifications.error('Lỗi', 'Có lỗi xảy ra: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }

@@ -51,7 +51,7 @@ const menuData = [
     subModules: [
       { icon: '📇', title: 'Hồ sơ khách hàng', path: '/dealer/customers', tag: 'UC 1.c.1' },
       { icon: '🚙', title: 'Lịch hẹn lái thử', path: '/dealer/test-drives', tag: 'UC 1.c.2' },
-      { icon: '💬', title: 'Phản hồi & Khiếu nại', path: '/dealer/feedback-complaints', tag: 'UC 1.c.3' }
+      { icon: '💬', title: 'Phản hồi & Khiếu nại', path: '/dealer/feedback', tag: 'UC 1.c.4' }
     ]
   },
   {

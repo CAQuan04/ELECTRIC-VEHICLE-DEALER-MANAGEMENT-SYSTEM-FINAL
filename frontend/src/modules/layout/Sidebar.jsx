@@ -97,6 +97,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const { isExpanded, toggleSidebar } = useSidebar(); // Sử dụng context
   const { notifications, loading: notificationsLoading, markAsRead } = useNotifications(); // Lấy notifications thực tế
   const userMenuRef = useRef(null);
@@ -385,7 +386,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                       <button
                         onClick={() => {
                           setShowUserMenu(false);
-                          navigate('/profile');
+                          setShowProfileModal(true);
                         }}
                         className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-700/50 transition-colors text-left group"
                       >
@@ -502,6 +503,315 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           </div>
         </div>
       </aside>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fadeIn">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowProfileModal(false)}
+          />
+          
+          {/* Modal Content */}
+          <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-slate-700/50 w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slideUp">
+            {/* Header */}
+            <div className="relative bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 px-8 py-6">
+              <div className="absolute inset-0 bg-black/20" />
+              <div className="relative flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-white/30">
+                    {currentUser.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">
+                      Thông Tin Tài Khoản
+                    </h2>
+                    <p className="text-indigo-100 text-sm mt-1">
+                      Quản lý thông tin cá nhân của bạn
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="p-2 rounded-full hover:bg-white/20 transition-colors group"
+                  aria-label="Đóng"
+                >
+                  <FiX size={24} className="text-white group-hover:rotate-90 transition-transform duration-300" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="px-8 py-6 overflow-y-auto max-h-[calc(90vh-200px)]">
+              <div className="space-y-6">
+                {/* Thông tin cá nhân */}
+                <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FiUsers size={20} className="text-indigo-400" />
+                    Thông Tin Cá Nhân
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {currentUser.name && (
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                          Họ và tên
+                        </label>
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white font-medium">
+                          {currentUser.name}
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-400 mb-2">
+                        Tên đăng nhập
+                      </label>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white">
+                        {currentUser.username}
+                      </div>
+                    </div>
+                    {currentUser.email && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                          Email
+                        </label>
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white">
+                          {currentUser.email}
+                        </div>
+                      </div>
+                    )}
+                    {currentUser.phone && (
+                      <div>
+                        <label className="block text-sm font-medium text-slate-400 mb-2">
+                          Số điện thoại
+                        </label>
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white">
+                          {currentUser.phone}
+                        </div>
+                      </div>
+                    )}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-400 mb-2">
+                        Vai trò
+                      </label>
+                      <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
+                          {userRole === USER_ROLES.DEALER ? 'Đại Lý' :
+                           userRole === USER_ROLES.CUSTOMER ? 'Khách Hàng' :
+                           userRole === USER_ROLES.EVM_ADMIN ? 'Quản Trị Viên' :
+                           userRole === USER_ROLES.STAFF ? 'Nhân Viên' : userRole}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thông tin Đại lý - chỉ hiện với DEALER */}
+                {userRole === USER_ROLES.DEALER && (currentUser.dealerId || currentUser.shopName || currentUser.dealerShopId) && (
+                  <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/30">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <RiGroupLine size={20} className="text-indigo-400" />
+                      Thông Tin Đại Lý
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {currentUser.shopName && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-indigo-300 mb-2">
+                            Tên cửa hàng
+                          </label>
+                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white font-semibold">
+                            🏪 {currentUser.shopName}
+                          </div>
+                        </div>
+                      )}
+                      {currentUser.dealerId && (
+                        <div>
+                          <label className="block text-sm font-medium text-indigo-300 mb-2">
+                            Mã Đại Lý
+                          </label>
+                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
+                            #{currentUser.dealerId}
+                          </div>
+                        </div>
+                      )}
+                      {currentUser.dealerShopId && (
+                        <div>
+                          <label className="block text-sm font-medium text-indigo-300 mb-2">
+                            Mã Cửa Hàng
+                          </label>
+                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
+                            #{currentUser.dealerShopId}
+                          </div>
+                        </div>
+                      )}
+                      {currentUser.address && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-indigo-300 mb-2">
+                            Địa chỉ cửa hàng
+                          </label>
+                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white">
+                            📍 {currentUser.address}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Thông tin Khách hàng - chỉ hiện với CUSTOMER */}
+                {userRole === USER_ROLES.CUSTOMER && currentUser.customerId && (
+                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <FiUsers size={20} className="text-purple-400" />
+                      Thông Tin Khách Hàng
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-purple-300 mb-2">
+                          Mã Khách Hàng
+                        </label>
+                        <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-purple-300 font-mono font-semibold">
+                          #{currentUser.customerId}
+                        </div>
+                      </div>
+                      {currentUser.membershipTier && (
+                        <div>
+                          <label className="block text-sm font-medium text-purple-300 mb-2">
+                            Hạng thành viên
+                          </label>
+                          <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                              ⭐ {currentUser.membershipTier}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      {currentUser.address && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-purple-300 mb-2">
+                            Địa chỉ
+                          </label>
+                          <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white">
+                            📍 {currentUser.address}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Thông tin Nhân viên - chỉ hiện với STAFF */}
+                {userRole === USER_ROLES.STAFF && currentUser.staffId && (
+                  <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-500/30">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <FiUsers size={20} className="text-cyan-400" />
+                      Thông Tin Nhân Viên
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-cyan-300 mb-2">
+                          Mã Nhân Viên
+                        </label>
+                        <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-cyan-300 font-mono font-semibold">
+                          #{currentUser.staffId}
+                        </div>
+                      </div>
+                      {currentUser.department && (
+                        <div>
+                          <label className="block text-sm font-medium text-cyan-300 mb-2">
+                            Phòng ban
+                          </label>
+                          <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
+                            🏢 {currentUser.department}
+                          </div>
+                        </div>
+                      )}
+                      {currentUser.position && (
+                        <div>
+                          <label className="block text-sm font-medium text-cyan-300 mb-2">
+                            Chức vụ
+                          </label>
+                          <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
+                            👔 {currentUser.position}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quyền hạn */}
+                {currentUser.permissions && currentUser.permissions.length > 0 && (
+                  <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                      <FiSettings size={20} className="text-indigo-400" />
+                      Quyền Hạn
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {currentUser.permissions.map((permission, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 border border-slate-600/50"
+                        >
+                          ✓ {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Thống kê tài khoản */}
+                <div className="bg-gradient-to-br from-indigo-900/20 to-purple-900/20 rounded-xl p-6 border border-indigo-500/30">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <FiBarChart2 size={20} className="text-indigo-400" />
+                    Thống Kê Hoạt Động
+                  </h3>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+                        {Object.values(notifications).reduce((a, b) => a + b, 0)}
+                      </div>
+                      <div className="text-sm text-slate-400 mt-1">Thông báo</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                        {menuItems.length}
+                      </div>
+                      <div className="text-sm text-slate-400 mt-1">Tính năng</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent">
+                        {createMenuItems.length}
+                      </div>
+                      <div className="text-sm text-slate-400 mt-1">Hành động</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-8 py-4 bg-slate-800/50 border-t border-slate-700/50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="px-6 py-2.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-medium transition-colors"
+              >
+                Đóng
+              </button>
+              <button
+                onClick={() => {
+                  setShowProfileModal(false);
+                  // TODO: Navigate to edit profile page
+                  navigate('/profile/edit');
+                }}
+                className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium transition-all shadow-lg shadow-indigo-500/30"
+              >
+                Chỉnh sửa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

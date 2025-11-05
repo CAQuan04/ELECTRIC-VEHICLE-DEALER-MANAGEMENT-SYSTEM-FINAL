@@ -4,6 +4,7 @@ import { Plus, Filter } from "lucide-react";
 import VehicleCard from "../components/catalog/VehicleCard";
 import ConfigModal from "../components/modals/ConfigModal";
 import VehicleModal from "../components/modals/VehicleModal";
+import { notifications } from '@utils/notifications';
 
 // --- CÁC THÀNH PHẦN TÍCH HỢP ---
 import apiClient from "../../../utils/api/client"; // Đảm bảo đường dẫn đúng
@@ -71,26 +72,37 @@ const VehicleCatalogue = () => {
   };
 
   const handleDeleteVehicle = async (vehicleId) => {
-    if (window.confirm("Bạn có chắc muốn xóa mềm (chuyển sang Inactive) xe này?")) {
-      try {
-        await apiClient.delete(`/admin/vehicles/${vehicleId}`);
-        await fetchVehicles();
-      } catch (error) {
-        console.error("Lỗi khi xóa xe:", error);
+    notifications.confirm(
+      'Xóa xe',
+      'Bạn có chắc muốn xóa mềm (chuyển sang Inactive) xe này?',
+      async () => {
+        try {
+          await apiClient.delete(`/admin/vehicles/${vehicleId}`);
+          await fetchVehicles();
+          notifications.success('Thành công', 'Đã xóa xe thành công');
+        } catch (error) {
+          console.error("Lỗi khi xóa xe:", error);
+          notifications.error('Lỗi', 'Không thể xóa xe');
+        }
       }
-    }
+    );
   };
   
   const handleReactivateVehicle = async (vehicle) => {
-    if (window.confirm("Bạn có chắc muốn kích hoạt lại xe này?")) {
-      try {
-        // Ghi chú: Gọi đến API PUT status mới
-        await apiClient.put(`/admin/vehicles/${vehicle.vehicleId}/status`);
-        await fetchVehicles();
-      } catch (error) {
-        console.error("Lỗi khi kích hoạt lại xe:", error);
+    notifications.confirm(
+      'Kích hoạt lại xe',
+      'Bạn có chắc muốn kích hoạt lại xe này?',
+      async () => {
+        try {
+          await apiClient.put(`/admin/vehicles/${vehicle.vehicleId}/status`);
+          await fetchVehicles();
+          notifications.success('Thành công', 'Đã kích hoạt lại xe');
+        } catch (error) {
+          console.error("Lỗi khi kích hoạt lại xe:", error);
+          notifications.error('Lỗi', 'Không thể kích hoạt lại xe');
+        }
       }
-    }
+    );
   };
 
   const handleOpenAddConfig = (vehicle) => {
@@ -134,18 +146,24 @@ const VehicleCatalogue = () => {
   };
   
   const handleDeleteConfig = async (vehicleId, configId) => {
-    if (window.confirm("Bạn có chắc muốn xóa vĩnh viễn cấu hình này?")) {
-      try {
-        // ===================================================================================
-        // === PHẦN SỬA ĐỔI: SỬ DỤNG ĐÚNG ROUTE MỚI CHO DELETE CONFIG ===
-        // Ghi chú: URL bây giờ cần cả vehicleId và configId.
-        await apiClient.delete(`/admin/vehicles/${vehicleId}/configs/${configId}`);
-        // ===================================================================================
-        await fetchVehicles();
-      } catch (error) {
-        console.error("Lỗi khi xóa cấu hình:", error);
+    notifications.confirm(
+      'Xóa cấu hình',
+      'Bạn có chắc muốn xóa vĩnh viễn cấu hình này?',
+      async () => {
+        try {
+          // ===================================================================================
+          // === PHẦN SỬA ĐỔI: SỬ DỤNG ĐÚNG ROUTE MỚI CHO DELETE CONFIG ===
+          // Ghi chú: URL bây giờ cần cả vehicleId và configId.
+          await apiClient.delete(`/admin/vehicles/${vehicleId}/configs/${configId}`);
+          // ===================================================================================
+          await fetchVehicles();
+          notifications.success('Thành công', 'Đã xóa cấu hình');
+        } catch (error) {
+          console.error("Lỗi khi xóa cấu hình:", error);
+          notifications.error('Lỗi', 'Không thể xóa cấu hình');
+        }
       }
-    }
+    );
   };
 
   const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
