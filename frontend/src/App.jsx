@@ -11,7 +11,14 @@ import { AuthProvider, useAuth } from './context/AuthContext.jsx';
 
 // --- CÁC MODULES ---
 import { Sidebar, Navbar, Header } from "@modules/layout";
-import { AccessDenied, AdminGuard, DealerGuard, CustomerGuard, DealerShopGuard } from "@modules/auth";
+import { 
+    AccessDenied, 
+    AdminGuard, 
+    DealerGuard, 
+    CustomerGuard, 
+    StaffGuard,  // Make sure this is included
+    DealerShopGuard 
+} from "@modules/auth";
 import { GlobalLoadingProvider, withRouteLoading, withFullPageLoading, withDashboardLoading } from "./modules/loading";
 import { NotificationContainer } from "@modules/common";
 import RegisterForm from "@modules/auth/RegisterForm";
@@ -19,7 +26,7 @@ import RegisterForm from "@modules/auth/RegisterForm";
 // --- CÁC FEATURES VÀ PAGES ---
 import { CustomerDashboard } from "./features/customer";
 import { DealerDashboard, VehicleList as DealerVehicleList, VehicleDetail, CompareVehicles, DealerInventory, StockDetail, RequestStock, CustomerList as DealerCustomerList, CustomerForm, CustomerDetail, TestDriveList, TestDriveForm, TestDriveCalendar, TestDriveDetail, QuotationList, CreateQuotation, OrderList, CreateOrder, PaymentList, PaymentForm, PurchaseRequestList, CreatePurchaseRequest, SalesPerformanceReport, CustomerDebtReport, SupplierDebtReport, PromotionList, PromotionDetail, StaffList, StaffForm, ThemeProvider, ThemeToggle } from "./features/dealer";
-import { EvmDashboard, ReportDashboard, VehicleCatalogue, DealerList } from "./features/admin";
+import { EvmDashboard, ReportDashboard, VehicleCatalogue, DealerList, UserManagement } from "./features/admin";
 import { Landing, Vehicles, ModelS, Model3, Charging, Shop, Information, Discover } from "./features/public";
 import { StaffDashboard } from "./features/staff";
 import LoadingDemo from "./features/public/pages/LoadingDemo";
@@ -149,12 +156,19 @@ const App = () => {
             <Route element={<ProtectedRoute />}>
                 <Route element={<AppLayout />}>
                     
+                    {/* --- ADMIN ONLY ROUTES --- */}
                     <Route element={<AdminGuard />}>
                         <Route path="evm-dashboard" element={<EvmDashboardWithLoading isLoading={false} isDataLoading={false} />} />
-                        <Route path="reports" element={<ReportDashboard />} />
                         <Route path="admin/dealers" element={<DealerList />} />
-                        <Route path="admin/catalog" element={<VehicleCatalogue />} />
+                        <Route path="admin/users" element={<UserManagement />} />
+                    </Route>
+
+                    {/* --- STAFF ROUTES (Admin & EVMStaff) --- */}
+                    <Route element={<StaffGuard />}>
                         <Route path="staff-dashboard" element={<StaffDashboardWithLoading isLoading={false} isDataLoading={false} />} />
+                        <Route path="reports" element={<ReportDashboard />} />
+                        <Route path="admin/catalog" element={<VehicleCatalogue />} />
+                        <Route path="admin/inventory" element={<div>Trang Quản lý Tổng Kho</div>} />
                     </Route>
 
                     <Route element={<DealerGuard />}>

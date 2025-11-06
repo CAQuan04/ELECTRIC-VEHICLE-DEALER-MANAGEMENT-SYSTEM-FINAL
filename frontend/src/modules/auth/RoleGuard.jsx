@@ -49,7 +49,7 @@ export const AdminGuard = ({ children }) => (
 
 // Ghi chú: Guard này chỉ dành riêng cho EVMStaff (nếu có chức năng nào đó chỉ staff mới làm được).
 export const StaffGuard = ({ children }) => (
-  <RoleGuard allowedRoles={['EVMStaff']}>
+  <RoleGuard allowedRoles={['Admin', 'EVMStaff']}>
     {children}
   </RoleGuard>
 );

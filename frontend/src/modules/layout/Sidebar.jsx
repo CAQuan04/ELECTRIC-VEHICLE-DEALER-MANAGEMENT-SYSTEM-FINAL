@@ -43,16 +43,22 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         ];
       
       case 'Admin':
-      case 'EVMStaff':
         return [
           { path: "/evm-dashboard", icon: icons.dashboard, label: "EVM Dashboard" },
           { path: "/reports", icon: icons.report, label: "Reports & Analytics" },
           { path: "/admin/dealers", icon: '🏢', label: "Quản lý Đại Lý" },
+          { path: "/admin/users", icon: icons.users, label: "Quản lý Người Dùng" }, // Update this line
           { path: "/admin/catalog", icon: icons.car, label: "Quản lý Catalog Xe" },
           { path: "/admin/inventory", icon: icons.warehouse, label: "Quản lý Tổng Kho" },
-          { path: "/admin/users", icon: icons.users, label: "Quản lý Người Dùng" },
           { path: "/landing", icon: icons.home, label: "Trang Công khai" },
         ];
+
+      case 'EVMStaff':
+        return [
+          { path: "/staff-dasboard", icon: icons.dashboard, label: "Staff Dashboard" },
+          { path: "/reports", icon: icons.report, label: "Reports & Analytics" },
+          { path: "/landing", icon: icons.home, label: "Trang Công khai" },
+        ];  
 
       default:
         // Menu mặc định cho người chưa đăng nhập hoặc vai trò không xác định

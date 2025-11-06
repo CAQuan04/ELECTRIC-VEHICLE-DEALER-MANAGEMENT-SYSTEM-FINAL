@@ -55,8 +55,10 @@ const LoginModal = ({ onClose }) => {
 
             // Chuyển hướng người dùng dựa trên vai trò
             const role = response.role;
-            if (role === 'Admin' || role === 'EVMStaff') {
+            if (role === 'Admin') {
                 navigate('/evm-dashboard');
+            } else if (role === 'EVMStaff') {
+                navigate('/staff-dashboard'); // Fix the typo here
             } else if (role === 'DealerManager' || role === 'DealerStaff') {
                 navigate('/dealer-dashboard');
             } else {
