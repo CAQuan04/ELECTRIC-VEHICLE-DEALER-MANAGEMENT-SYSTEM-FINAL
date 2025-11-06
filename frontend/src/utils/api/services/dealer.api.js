@@ -1055,28 +1055,67 @@ class DealerAPI {
 
   /**
    * Get all promotions
-   * GET /dealer/promotions
-   * @param {Object} params - Query parameters
+   * GET /Promotions?Status=...&StartDate=...&EndDate=...
+   * @param {Object} params - Query parameters (Status, StartDate, EndDate)
    * @returns {Promise<Object>} Promotion list
    */
   async getPromotions(params = {}) {
     try {
-      const response = await apiClient.get('/dealer/promotions', { params });
+      const response = await apiClient.get('/Promotions', { params });
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy khuyến mãi' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khuyến mãi' };
+    }
+  }
+
+  /**
+   * Get promotion by ID
+   * GET /Promotions/{id}
+   * @param {number} promotionId - Promotion ID
+   * @returns {Promise<Object>} Promotion details
+   */
+  async getPromotionById(promotionId) {
+    try {
+      const response = await apiClient.get(`/Promotions/${promotionId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khuyến mãi' };
+    }
+  }
+
+  /**
+   * Get active promotions (currently valid)
+   * GET /Promotions/active
+   * @returns {Promise<Object>} Active promotions list
+   */
+  async getActivePromotions() {
+    try {
+      const response = await apiClient.get('/Promotions/active');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy khuyến mãi đang hiệu lực' };
     }
   }
 
   /**
    * Create new promotion
-   * POST /dealer/promotions
+   * POST /Promotions
    * @param {Object} promotionData - Promotion data
+   * {
+   *   name: string,
+   *   description: string,
+   *   discountType: 'Percentage' | 'FixedAmount' | 'Gift' | 'Bundle',
+   *   discountValue: number,
+   *   condition: string,
+   *   startDate: datetime,
+   *   endDate: datetime,
+   *   status: 'Active' | 'Inactive'
+   * }
    * @returns {Promise<Object>} Created promotion
    */
   async createPromotion(promotionData) {
     try {
-      const response = await apiClient.post('/dealer/promotions', promotionData);
+      const response = await apiClient.post('/Promotions', promotionData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo khuyến mãi' };
@@ -1085,14 +1124,14 @@ class DealerAPI {
 
   /**
    * Update promotion
-   * PUT /dealer/promotions/:id
-   * @param {string|number} id - Promotion ID
+   * PUT /Promotions/{id}
+   * @param {number} promotionId - Promotion ID
    * @param {Object} promotionData - Updated promotion data
    * @returns {Promise<Object>} Updated promotion
    */
-  async updatePromotion(id, promotionData) {
+  async updatePromotion(promotionId, promotionData) {
     try {
-      const response = await apiClient.put(`/dealer/promotions/${id}`, promotionData);
+      const response = await apiClient.put(`/Promotions/${promotionId}`, promotionData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật khuyến mãi' };
@@ -1100,17 +1139,79 @@ class DealerAPI {
   }
 
   /**
+   * Update promotion status
+   * PATCH /Promotions/{id}/status
+   * @param {number} promotionId - Promotion ID
+   * @param {string} status - New status (Active, Inactive, Expired)
+   * @returns {Promise<Object>} Update result
+   */
+  async updatePromotionStatus(promotionId, status) {
+    try {
+      const response = await apiClient.patch(`/Promotions/${promotionId}/status`, { status });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
+    }
+  }
+
+  /**
    * Delete promotion
-   * DELETE /dealer/promotions/:id
-   * @param {string|number} id - Promotion ID
+   * DELETE /Promotions/{id}
+   * @param {number} promotionId - Promotion ID
    * @returns {Promise<Object>} Delete result
    */
-  async deletePromotion(id) {
+  async deletePromotion(promotionId) {
     try {
-      const response = await apiClient.delete(`/dealer/promotions/${id}`);
+      const response = await apiClient.delete(`/Promotions/${promotionId}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi xóa khuyến mãi' };
+    }
+  }
+
+  /**
+   * Validate promotion for order
+   * POST /Promotions/{id}/validate
+   * @param {number} promotionId - Promotion ID
+   * @param {Object} orderData - Order data to validate against
+   * @returns {Promise<Object>} Validation result
+   */
+  async validatePromotion(promotionId, orderData) {
+    try {
+      const response = await apiClient.post(`/Promotions/${promotionId}/validate`, orderData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Khuyến mãi không hợp lệ' };
+    }
+  }
+
+  /**
+   * Apply promotion to order
+   * POST /Promotions/{id}/apply
+   * @param {number} promotionId - Promotion ID
+   * @param {number} orderId - Order ID
+   * @returns {Promise<Object>} Apply result with calculated discount
+   */
+  async applyPromotionToOrder(promotionId, orderId) {
+    try {
+      const response = await apiClient.post(`/Promotions/${promotionId}/apply`, { orderId });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi áp dụng khuyến mãi' };
+    }
+  }
+
+  /**
+   * Get promotion statistics
+   * GET /Promotions/statistics
+   * @returns {Promise<Object>} Promotion statistics
+   */
+  async getPromotionStatistics() {
+    try {
+      const response = await apiClient.get('/Promotions/statistics');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thống kê khuyến mãi' };
     }
   }
 

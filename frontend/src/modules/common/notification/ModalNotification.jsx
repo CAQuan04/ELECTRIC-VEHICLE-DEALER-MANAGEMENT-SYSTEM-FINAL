@@ -7,7 +7,7 @@ if (typeof document !== 'undefined') {
   Modal.setAppElement('#root');
 }
 
-const ModalNotification = ({ isOpen, onClose, type = 'info', title, message, duration = 3000, autoClose = true }) => {
+const ModalNotification = ({ isOpen, onClose, type = 'info', title, message, duration = 2000, autoClose = true }) => {
   const [isClosing, setIsClosing] = useState(false);
 
   useEffect(() => {
@@ -92,14 +92,16 @@ const ModalNotification = ({ isOpen, onClose, type = 'info', title, message, dur
 
   const customStyles = {
     overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.4)',
-      backdropFilter: 'blur(4px)',
+      backgroundColor: 'transparent', // Không làm tối nền
+      backdropFilter: 'none', // Không làm mờ
       zIndex: 9999,
       display: 'flex',
       alignItems: 'flex-start',
-      justifyContent: 'center',
+      justifyContent: 'flex-end', // Căn bên phải
       paddingTop: '100px',
+      paddingRight: '20px', // Khoảng cách từ mép phải
       animation: 'fadeIn 0.3s ease-in-out',
+      pointerEvents: 'none', // Cho phép click qua overlay
     },
     content: {
       position: 'relative',
@@ -112,8 +114,9 @@ const ModalNotification = ({ isOpen, onClose, type = 'info', title, message, dur
       overflow: 'visible',
       padding: 0,
       inset: 'auto',
-      maxWidth: '520px',
+      maxWidth: '420px',
       width: '90%',
+      pointerEvents: 'auto', // Chỉ notification box mới nhận click
     },
   };
 
