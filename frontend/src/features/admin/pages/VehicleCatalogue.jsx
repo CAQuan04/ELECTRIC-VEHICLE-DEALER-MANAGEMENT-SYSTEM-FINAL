@@ -14,6 +14,7 @@ import apiClient from "../../../utils/api/client"; // Đảm bảo đường d�
 const VehicleCatalogue = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   const [filter, setFilter] = useState({ brand: "", status: "", color: "" });
   const [openConfigModal, setOpenConfigModal] = useState(false);
@@ -21,7 +22,6 @@ const VehicleCatalogue = () => {
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [activeConfig, setActiveConfig] = useState(null);
 
-  // === HÀM LẤY DỮ LIỆU TỪ BACKEND ===
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
@@ -38,7 +38,6 @@ const VehicleCatalogue = () => {
     fetchVehicles();
   }, [fetchVehicles]);
   
-  // === LOGIC FILTER (KHÔNG THAY ĐỔI) ===
   const brands = useMemo(() => Array.from(new Set(vehicles.map((v) => v.brand))), [vehicles]);
   const colors = useMemo(() => Array.from(new Set(vehicles.flatMap((v) => v.configs?.flatMap((c) => c.color ?? []) ?? []).concat(vehicles.map((v) => v.color)))), [vehicles]);
   const filteredVehicles = useMemo(() => vehicles.filter((v) => 
@@ -46,8 +45,6 @@ const VehicleCatalogue = () => {
     (!filter.status || v.status === filter.status) &&
     (!filter.color || v.configs.some(c => c.color === filter.color) || v.color === filter.color)
   ), [vehicles, filter]);
-
-  // === CÁC HÀM XỬ LÝ SỰ KIỆN CRUD (ĐÃ TÍCH HỢP API) ===
 
   // === CÁC HÀM XỬ LÝ SỰ KIỆN CRUD (ĐÃ TÍCH HỢP API) ===
 
@@ -176,7 +173,7 @@ const VehicleCatalogue = () => {
   const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
 
   // === GIAO DIỆN ===
-  return (
+   return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
@@ -195,9 +192,9 @@ const VehicleCatalogue = () => {
       </div>
       
       
+      {/* === PHẦN THAY ĐỔI 3: THÊM INPUT TÌM KIẾM VÀO GIAO DIỆN === */}
       <div className="flex flex-wrap items-center gap-3 mb-6 bg-[#102032] p-3 rounded-2xl border border-slate-700">
         <Filter className="text-cyan-300" />
-        <select value={filter.brand} onChange={(e) => setFilter({ ...filter, brand: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
         <select value={filter.brand} onChange={(e) => setFilter({ ...filter, brand: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
           <option value="">Tất cả hãng</option>
           {brands.map((b) => (<option key={b} value={b}>{b}</option>))}
