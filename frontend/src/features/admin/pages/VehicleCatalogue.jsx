@@ -5,22 +5,24 @@ import VehicleCard from "../components/catalog/VehicleCard";
 import ConfigModal from "../components/modals/ConfigModal";
 import VehicleModal from "../components/modals/VehicleModal";
 
-// --- CÁC THÀNH PHẦN TÍCH HỢP ---
-import apiClient from "../../../utils/api/client"; // Đảm bảo đường dẫn đúng
-import { useAuth } from "../../../context/AuthContext"; // Đảm bảo đường dẫn đúng
+import apiClient from "../../../utils/api/client";
+import { useAuth } from "../../../context/AuthContext";
 
 const VehicleCatalogue = () => {
   const [vehicles, setVehicles] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
+  // === PHẦN THAY ĐỔI 1: THÊM STATE CHO THANH TÌM KIẾM ===
+  const [searchTerm, setSearchTerm] = useState(""); 
+  // =======================================================
+  
   const [filter, setFilter] = useState({ brand: "", status: "", color: "" });
   const [openConfigModal, setOpenConfigModal] = useState(false);
   const [openVehicleModal, setOpenVehicleModal] = useState(false);
   const [activeVehicle, setActiveVehicle] = useState(null);
   const [activeConfig, setActiveConfig] = useState(null);
 
-  // === HÀM LẤY DỮ LIỆU TỪ BACKEND ===
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
@@ -37,14 +39,29 @@ const VehicleCatalogue = () => {
     fetchVehicles();
   }, [fetchVehicles]);
   
-  // === LOGIC FILTER (KHÔNG THAY ĐỔI) ===
   const brands = useMemo(() => Array.from(new Set(vehicles.map((v) => v.brand))), [vehicles]);
   const colors = useMemo(() => Array.from(new Set(vehicles.flatMap((v) => v.configs?.flatMap((c) => c.color ?? []) ?? []).concat(vehicles.map((v) => v.color)))), [vehicles]);
-  const filteredVehicles = useMemo(() => vehicles.filter((v) => 
-    (!filter.brand || v.brand === filter.brand) &&
-    (!filter.status || v.status === filter.status) &&
-    (!filter.color || v.configs.some(c => c.color === filter.color) || v.color === filter.color)
-  ), [vehicles, filter]);
+
+  // === PHẦN THAY ĐỔI 2: CẬP NHẬT LOGIC LỌC ĐỂ BAO GỒM CẢ TÌM KIẾM ===
+  const filteredVehicles = useMemo(() => {
+    const lowercasedSearchTerm = searchTerm.toLowerCase().trim();
+
+    return vehicles.filter((v) => {
+      // Điều kiện lọc theo dropdowns (giữ nguyên)
+      const matchesBrand = !filter.brand || v.brand === filter.brand;
+      const matchesStatus = !filter.status || v.status === filter.status;
+      const matchesColor = !filter.color || v.configs.some(c => c.color === filter.color) || v.color === filter.color;
+
+      // Điều kiện tìm kiếm theo văn bản
+      const matchesSearch = lowercasedSearchTerm === "" ||
+        v.model.toLowerCase().includes(lowercasedSearchTerm) ||
+        v.brand.toLowerCase().includes(lowercasedSearchTerm) ||
+        v.year?.toString().includes(lowercasedSearchTerm);
+        
+      return matchesBrand && matchesStatus && matchesColor && matchesSearch;
+    });
+  }, [vehicles, filter, searchTerm]); // Quan trọng: Thêm searchTerm vào dependency array
+  // 
 
   // === CÁC HÀM XỬ LÝ SỰ KIỆN CRUD (ĐÃ TÍCH HỢP API) ===
 
@@ -153,7 +170,7 @@ const VehicleCatalogue = () => {
   const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
 
   // === GIAO DIỆN ===
-  return (
+   return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
@@ -166,8 +183,20 @@ const VehicleCatalogue = () => {
         )}
       </div>
       
+      {/* === PHẦN THAY ĐỔI 3: THÊM INPUT TÌM KIẾM VÀO GIAO DIỆN === */}
       <div className="flex flex-wrap items-center gap-3 mb-6 bg-[#102032] p-3 rounded-2xl border border-slate-700">
         <Filter className="text-cyan-300" />
+        
+        {/* Thanh tìm kiếm */}
+        <input
+            type="text"
+            placeholder="Tìm theo tên xe, hãng..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="flex-grow min-w-[200px] bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500 outline-none"
+        />
+
+        {/* Các dropdown lọc */}
         <select value={filter.brand} onChange={(e) => setFilter({ ...filter, brand: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
           <option value="">Tất cả hãng</option>
           {brands.map((b) => (<option key={b} value={b}>{b}</option>))}
