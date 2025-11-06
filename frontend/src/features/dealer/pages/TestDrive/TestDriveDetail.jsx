@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
   PageHeader, 
@@ -34,12 +35,12 @@ const TestDriveDetail = () => {
         setFeedback(result.data.feedback || '');
       } else {
         console.error('Failed to load test drive:', result.message);
-        alert('Không thể tải thông tin lịch lái thử');
+        notifications.error('Lỗi', 'Không thể tải thông tin lịch lái thử');
         navigate('/dealer/test-drives');
       }
     } catch (error) {
       console.error('Error loading test drive:', error);
-      alert('Có lỗi xảy ra khi tải dữ liệu');
+      notifications.error('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu');
       navigate('/dealer/test-drives');
     } finally {
       setIsLoading(false);
@@ -47,45 +48,48 @@ const TestDriveDetail = () => {
   };
 
   const handleStatusUpdate = async (newStatus) => {
-    if (!confirm(`Xác nhận cập nhật trạng thái thành "${getStatusLabel(newStatus)}"?`)) {
-      return;
-    }
-
-    try {
-      const result = await dealerAPI.updateTestDriveStatus(id, newStatus);
-      if (result.success) {
-        alert('Cập nhật trạng thái thành công!');
-        await loadTestDriveDetail();
-      } else {
-        alert('Lỗi: ' + result.message);
+    notifications.confirm(
+      'Xác nhận cập nhật',
+      `Xác nhận cập nhật trạng thái thành "${getStatusLabel(newStatus)}"?`,
+      async () => {
+        try {
+          const result = await dealerAPI.updateTestDriveStatus(id, newStatus);
+          if (result.success) {
+            notifications.success('Thành công', 'Cập nhật trạng thái thành công!');
+            await loadTestDriveDetail();
+          } else {
+            notifications.error('Lỗi', result.message);
+          }
+        } catch (error) {
+          console.error('Error updating status:', error);
+          notifications.error('Lỗi', 'Có lỗi xảy ra khi cập nhật trạng thái');
+        }
       }
-    } catch (error) {
-      console.error('Error updating status:', error);
-      alert('Có lỗi xảy ra khi cập nhật trạng thái');
-    }
+    );
   };
 
   const handleCancel = async () => {
+    // TODO: Có thể thay prompt bằng modal input
     const reason = prompt('Lý do hủy lịch:');
     if (!reason) return;
 
     try {
       const result = await dealerAPI.cancelTestDrive(id, reason);
       if (result.success) {
-        alert('Đã hủy lịch lái thử thành công!');
+        notifications.success('Thành công', 'Đã hủy lịch lái thử thành công!');
         await loadTestDriveDetail();
       } else {
-        alert('Lỗi: ' + result.message);
+        notifications.error('Lỗi', result.message);
       }
     } catch (error) {
       console.error('Error cancelling test drive:', error);
-      alert('Có lỗi xảy ra khi hủy lịch');
+      notifications.error('Lỗi', 'Có lỗi xảy ra khi hủy lịch');
     }
   };
 
   const handleSubmitFeedback = async () => {
     if (!feedback.trim()) {
-      alert('Vui lòng nhập phản hồi');
+      notifications.warning('Cảnh báo', 'Vui lòng nhập phản hồi');
       return;
     }
 
@@ -93,14 +97,14 @@ const TestDriveDetail = () => {
     try {
       const result = await dealerAPI.updateTestDriveFeedback(id, feedback);
       if (result.success) {
-        alert('Đã lưu phản hồi thành công!');
+        notifications.success('Thành công', 'Đã lưu phản hồi thành công!');
         await loadTestDriveDetail();
       } else {
-        alert('Lỗi: ' + result.message);
+        notifications.error('Lỗi', result.message);
       }
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      alert('Có lỗi xảy ra khi lưu phản hồi');
+      notifications.error('Lỗi', 'Có lỗi xảy ra khi lưu phản hồi');
     } finally {
       setIsSubmittingFeedback(false);
     }

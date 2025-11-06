@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthComponent from '../auth/AuthComponent';
 import { AuthService, USER_ROLES } from '../utils/auth';
+import Logo from '../../components/common/Logo';
 import './Header.css';
 
 const Header = () => {
@@ -144,11 +145,7 @@ const Header = () => {
         <div className="tesla-header__container">
           {/* Logo */}
           <Link to="/" className="tesla-header__logo">
-            <img 
-              src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/logoTesla.svg" 
-              alt="Tesla" 
-              className="tesla-logo"
-            />
+            <Logo size={40} className="tesla-logo" />
           </Link>
 
           {/* Desktop Navigation */}

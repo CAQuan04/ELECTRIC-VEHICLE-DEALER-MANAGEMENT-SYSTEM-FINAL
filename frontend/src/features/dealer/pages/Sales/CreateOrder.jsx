@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 // SỬA: Thêm useLocation (hoặc useSearchParams)
 import { useNavigate, useSearchParams } from 'react-router-dom'; 
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 
 import {
   PageContainer,
@@ -42,7 +43,7 @@ const CreateOrder = () => {
   // Tải dữ liệu BÁO GIÁ GỐC
   useEffect(() => {
     if (!quotationId) {
-      alert('Lỗi: Không tìm thấy báo giá. Vui lòng quay lại danh sách.');
+      notifications.error('Lỗi', 'Không tìm thấy báo giá. Vui lòng quay lại danh sách.');
       navigate('/dealer/quotations');
       return;
     }
@@ -63,7 +64,7 @@ const CreateOrder = () => {
         }
       } catch (error) {
         console.error('Error loading quotation:', error);
-        alert('Lỗi: ' + error.message);
+        notifications.error('Lỗi', error.message);
         navigate('/dealer/quotations');
       } finally {
         setIsLoading(false);
@@ -101,14 +102,14 @@ const CreateOrder = () => {
       const result = await dealerAPI.createOrder(orderData);
       
       if (result.success) {
-        alert('Tạo đơn hàng thành công!');
+        notifications.success('Thành công', 'Tạo đơn hàng thành công!');
         navigate('/dealer/orders');
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
     } catch (error) {
       console.error('Error creating order:', error);
-      alert('Có lỗi xảy ra khi tạo đơn hàng: ' + error.message);
+      notifications.error('Lỗi', 'Có lỗi xảy ra khi tạo đơn hàng: ' + error.message);
     } finally {
       setIsSubmitting(false);
     }

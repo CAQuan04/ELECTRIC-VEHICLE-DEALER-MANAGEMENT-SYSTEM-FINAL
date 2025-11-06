@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
   PageHeader, 
@@ -68,35 +69,43 @@ const CustomerDebtReport = () => {
   };
 
   const handleRemindDebt = async (debtId, customerName) => {
-    if (confirm(`Gửi nhắc nợ cho khách hàng ${customerName}?`)) {
-      try {
-        const result = await dealerAPI.sendDebtReminder(debtId);
-        if (result.success) {
-          alert('Đã gửi nhắc nợ thành công!');
-        } else {
-          alert('Lỗi: ' + result.message);
+    notifications.confirm(
+      'Gửi nhắc nợ',
+      `Gửi nhắc nợ cho khách hàng ${customerName}?`,
+      async () => {
+        try {
+          const result = await dealerAPI.sendDebtReminder(debtId);
+          if (result.success) {
+            notifications.success('Thành công', 'Đã gửi nhắc nợ thành công!');
+          } else {
+            notifications.error('Lỗi gửi nhắc nợ', result.message);
+          }
+        } catch (error) {
+          console.error('Error sending reminder:', error);
+          notifications.error('Lỗi', 'Có lỗi xảy ra khi gửi nhắc nợ');
         }
-      } catch (error) {
-        console.error('Error sending reminder:', error);
-        alert('Có lỗi xảy ra khi gửi nhắc nợ');
       }
-    }
+    );
   };
 
   const handleBulkReminder = async () => {
-    if (confirm('Gửi nhắc nợ hàng loạt cho tất cả khách hàng có nợ?')) {
-      try {
-        const result = await dealerAPI.sendBulkDebtReminders();
-        if (result.success) {
-          alert(`Đã gửi nhắc nợ cho ${result.data.count} khách hàng!`);
-        } else {
-          alert('Lỗi: ' + result.message);
+    notifications.confirm(
+      'Gửi nhắc nợ hàng loạt',
+      'Gửi nhắc nợ hàng loạt cho tất cả khách hàng có nợ?',
+      async () => {
+        try {
+          const result = await dealerAPI.sendBulkDebtReminders();
+          if (result.success) {
+            notifications.success('Thành công', `Đã gửi nhắc nợ cho ${result.data.count} khách hàng!`);
+          } else {
+            notifications.error('Lỗi gửi hàng loạt', result.message);
+          }
+        } catch (error) {
+          console.error('Error sending bulk reminders:', error);
+          notifications.error('Lỗi', 'Có lỗi xảy ra khi gửi nhắc nợ hàng loạt');
         }
-      } catch (error) {
-        console.error('Error sending bulk reminders:', error);
-        alert('Có lỗi xảy ra khi gửi nhắc nợ hàng loạt');
       }
-    }
+    );
   };
 
 // ---LOGIC XUẤT BÁO CÁO (UC 1.D.2) ---
@@ -136,7 +145,7 @@ const CustomerDebtReport = () => {
       }
     } catch (error) {
       console.error('Error exporting report:', error);
-      alert('Lỗi khi xuất báo cáo: ' + error.message);
+      notifications.error('Lỗi xuất báo cáo', error.message);
     } finally {
       setIsExporting(false);
     }

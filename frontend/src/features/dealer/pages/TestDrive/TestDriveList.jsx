@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 import {
   PageContainer,
   PageHeader,
@@ -48,31 +49,35 @@ const TestDriveList = () => {
       const result = await dealerAPI.updateTestDriveStatus(testId, newStatus);
       if (result.success) {
         await loadTestDrives();
-        alert('Cập nhật trạng thái thành công!');
+        notifications.success('Thành công', 'Cập nhật trạng thái thành công!');
       } else {
-        alert('Lỗi: ' + result.message);
+        notifications.error('Lỗi cập nhật', result.message);
       }
     } catch (error) {
       console.error('Error updating status:', error);
-      alert('Có lỗi xảy ra khi cập nhật trạng thái');
+      notifications.error('Lỗi', 'Có lỗi xảy ra khi cập nhật trạng thái');
     }
   };
 
   const handleCancelTestDrive = async (testId) => {
-    if (confirm('Bạn có chắc chắn muốn hủy lịch lái thử này?')) {
-      try {
-        const result = await dealerAPI.cancelTestDrive(testId, 'Hủy bởi nhân viên');
-        if (result.success) {
-          await loadTestDrives();
-          alert('Đã hủy lịch lái thử thành công!');
-        } else {
-          alert('Lỗi: ' + result.message);
+    notifications.confirm(
+      'Xác nhận hủy',
+      'Bạn có chắc chắn muốn hủy lịch lái thử này?',
+      async () => {
+        try {
+          const result = await dealerAPI.cancelTestDrive(testId, 'Hủy bởi nhân viên');
+          if (result.success) {
+            await loadTestDrives();
+            notifications.success('Thành công', 'Đã hủy lịch lái thử thành công!');
+          } else {
+            notifications.error('Lỗi hủy lịch', result.message);
+          }
+        } catch (error) {
+          console.error('Error cancelling test drive:', error);
+          notifications.error('Lỗi', 'Có lỗi xảy ra khi hủy lịch');
         }
-      } catch (error) {
-        console.error('Error cancelling test drive:', error);
-        alert('Có lỗi xảy ra khi hủy lịch');
       }
-    }
+    );
   };
 
   const filteredTestDrives = useMemo(() => {

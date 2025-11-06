@@ -16,12 +16,12 @@ class DealerAPI {
   
   /**
    * Get dealer dashboard data
-   * GET /dealer/dashboard
+   * GET /Dashboard/stats
    * @returns {Promise<Object>} Dashboard statistics
    */
   async getDashboard() {
     try {
-      const response = await apiClient.get('/dealer/dashboard');
+      const response = await apiClient.get('/Dashboard/stats');
       return {
         success: true,
         data: response.data
@@ -38,13 +38,13 @@ class DealerAPI {
 
   /**
    * Get all vehicles available for dealer
-   * GET /dealer/vehicles?page=1&limit=10&search=...
+   * GET /Vehicles?Search=...&Brand=...&Model=...&MinPrice=...&MaxPrice=...&Page=...&Size=...
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} List of vehicles
    */
   async getVehicles(params = {}) {
     try {
-      const response = await apiClient.get('/dealer/vehicles', { params });
+      const response = await apiClient.get('/Vehicles', { params });
       return {
         success: true,
         data: response.data
@@ -59,13 +59,13 @@ class DealerAPI {
 
   /**
    * Get vehicle details by ID
-   * GET /dealer/vehicles/:id
+   * GET /Vehicles/{vehicleId}
    * @param {string|number} id - Vehicle ID
    * @returns {Promise<Object>} Vehicle details
    */
   async getVehicleById(id) {
     try {
-      const response = await apiClient.get(`/dealer/vehicles/${id}`);
+      const response = await apiClient.get(`/Vehicles/${id}`);
       return {
         success: true,
         data: response.data
@@ -80,37 +80,63 @@ class DealerAPI {
 
   /**
    * Search vehicles
-   * GET /dealer/vehicles/search?query=...&filters=...
+   * GET /Vehicles?Search=...&Brand=...&Model=...
    * @param {string} query - Search query
    * @param {Object} filters - Additional filters
    * @returns {Promise<Object>} Search results
    */
   async searchVehicles(query, filters = {}) {
-    return apiClient.get('/dealer/vehicles/search', { 
-      params: { query, ...filters } 
-    });
+    try {
+      const response = await apiClient.get('/Vehicles', { 
+        params: { Search: query, ...filters } 
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tìm kiếm xe' };
+    }
   }
 
   /**
    * Compare multiple vehicles
-   * POST /dealer/vehicles/compare
+   * POST /Vehicles/compare
    * @param {Array<string|number>} vehicleIds - Array of vehicle IDs to compare
    * @returns {Promise<Object>} Comparison data
    */
   async compareVehicles(vehicleIds) {
-    return apiClient.post('/dealer/vehicles/compare', { vehicleIds });
+    try {
+      const response = await apiClient.post('/Vehicles/compare', vehicleIds);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi so sánh xe' };
+    }
+  }
+
+  /**
+   * Get available configurations for a vehicle
+   * GET /Vehicles/{vehicleId}/configs
+   * @param {string|number} vehicleId - Vehicle ID
+   * @returns {Promise<Object>} Vehicle configurations
+   */
+  async getVehicleConfigs(vehicleId) {
+    try {
+      const response = await apiClient.get(`/Vehicles/${vehicleId}/configs`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy cấu hình xe' };
+    }
   }
 
   // ==================== INVENTORY MANAGEMENT ====================
 
   /**
    * Get dealer's inventory
-   * GET /dealer/inventory?filters=...
+   * Note: Backend doesn't have a GET inventory list endpoint, using placeholder
    * @param {Object} filters - Filter options
    * @returns {Promise<Object>} Inventory list
    */
   async getInventory(filters = {}) {
     try {
+      // TODO: Update when backend provides inventory list endpoint
       const response = await apiClient.get('/dealer/inventory', { params: filters });
       return { success: true, data: response.data };
     } catch (error) {
@@ -134,14 +160,14 @@ class DealerAPI {
   }
 
   /**
-   * Request stock from EVM
-   * POST /dealer/inventory/request
-   * @param {Object} requestData - Stock request data
+   * Create distribution request
+   * POST /Inventory/distributions
+   * @param {Object} requestData - Distribution data {vehicleId, configId, quantity, fromLocation, toDealerId, scheduledDate}
    * @returns {Promise<Object>} Request result
    */
   async requestStock(requestData) {
     try {
-      const response = await apiClient.post('/dealer/inventory/request', requestData);
+      const response = await apiClient.post('/Inventory/distributions', requestData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi yêu cầu nhập kho' };
@@ -150,14 +176,13 @@ class DealerAPI {
 
   /**
    * Update stock information
-   * PUT /dealer/inventory/:id
-   * @param {string|number} stockId - Stock ID
-   * @param {Object} updateData - Update data
+   * POST /Inventory/stock
+   * @param {Object} updateData - Stock update data {vehicleId, configId, quantity, locationType, locationId}
    * @returns {Promise<Object>} Updated stock
    */
-  async updateStock(stockId, updateData) {
+  async updateStock(updateData) {
     try {
-      const response = await apiClient.put(`/dealer/inventory/${stockId}`, updateData);
+      const response = await apiClient.post('/Inventory/stock', updateData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật kho' };
@@ -165,18 +190,17 @@ class DealerAPI {
   }
 
   /**
-   * Update vehicle inventory quantity
-   * PUT /dealer/vehicles/:id/inventory
-   * @param {string|number} id - Vehicle ID
-   * @param {number} quantity - New quantity
-   * @returns {Promise<Object>} Update result
+   * Confirm distribution
+   * POST /api/Inventory/distributions/{id}/confirm
+   * @param {string|number} distributionId - Distribution ID
+   * @returns {Promise<Object>} Confirmation result
    */
-  async updateInventory(id, quantity) {
+  async confirmDistribution(distributionId) {
     try {
-      const response = await apiClient.put(`/dealer/vehicles/${id}/inventory`, { quantity });
+      const response = await apiClient.post(`/Inventory/distributions/${distributionId}/confirm`);
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật tồn kho' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi xác nhận phân phối' };
     }
   }
 
@@ -198,13 +222,13 @@ class DealerAPI {
 
   /**
    * Get all customers
-   * GET /dealer/customers?page=1&limit=10
+   * GET /api/Customers/paged?Search=...&Phone=...&Page=...&Size=...
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} Customer list
    */
   async getCustomers(params = {}) {
     try {
-      const response = await apiClient.get('/dealer/customers', { params });
+            const response = await apiClient.get('/Customers/paged', { params });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng' };
@@ -213,13 +237,13 @@ class DealerAPI {
 
   /**
    * Get customer details by ID
-   * GET /dealer/customers/:id
+   * GET /api/Customers/{customerId}
    * @param {string|number} id - Customer ID
    * @returns {Promise<Object>} Customer details
    */
   async getCustomerById(id) {
     try {
-      const response = await apiClient.get(`/dealer/customers/${id}`);
+      const response = await apiClient.get(`/Customers/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khách hàng' };
@@ -228,13 +252,13 @@ class DealerAPI {
 
   /**
    * Create new customer
-   * POST /dealer/customers
-   * @param {Object} customerData - Customer data
+   * POST /api/Customers
+   * @param {Object} customerData - Customer data {fullName, phone, address, idDocumentNumber}
    * @returns {Promise<Object>} Created customer
    */
   async createCustomer(customerData) {
     try {
-      const response = await apiClient.post('/dealer/customers', customerData);
+            const response = await apiClient.post('/Customers', customerData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo khách hàng' };
@@ -243,14 +267,14 @@ class DealerAPI {
 
   /**
    * Update customer information
-   * PUT /dealer/customers/:id
+   * PUT /api/Customers/{customerId}
    * @param {string|number} customerId - Customer ID
-   * @param {Object} customerData - Updated customer data
+   * @param {Object} customerData - Updated customer data {fullName, phone, address, idDocumentNumber}
    * @returns {Promise<Object>} Updated customer
    */
   async updateCustomer(customerId, customerData) {
     try {
-      const response = await apiClient.put(`/dealer/customers/${customerId}`, customerData);
+            const response = await apiClient.put(`/Customers/${customerId}`, customerData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật khách hàng' };
@@ -259,13 +283,13 @@ class DealerAPI {
 
   /**
    * Delete customer
-   * DELETE /dealer/customers/:id
+   * DELETE /api/Customers/{customerId}
    * @param {string|number} customerId - Customer ID
    * @returns {Promise<Object>} Delete result
    */
   async deleteCustomer(customerId) {
     try {
-      const response = await apiClient.delete(`/dealer/customers/${customerId}`);
+      const response = await apiClient.delete(`/Customers/${customerId}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi xóa khách hàng' };
@@ -290,14 +314,15 @@ class DealerAPI {
   // ==================== TEST DRIVE MANAGEMENT (COMPLETE) ====================
 
   /**
-   * Get all test drive appointments
-   * GET /dealer/test-drives?date=...&status=...
+   * Get test drives by dealer
+   * GET /api/TestDrives/by-dealer/{dealerId}?Status=...&FromDate=...&ToDate=...&Page=...&Size=...
+   * @param {string|number} dealerId - Dealer ID
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} Test drive list
    */
-  async getTestDrives(params = {}) {
+  async getTestDrives(dealerId, params = {}) {
     try {
-      const response = await apiClient.get('/dealer/test-drives', { params });
+            const response = await apiClient.get(`/TestDrives/by-dealer/${dealerId}`, { params });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy lịch lái thử' };
@@ -306,13 +331,13 @@ class DealerAPI {
 
   /**
    * Get test drive details by ID
-   * GET /dealer/test-drives/:id
+   * GET /api/TestDrives/{testId}
    * @param {string|number} testDriveId - Test drive ID
    * @returns {Promise<Object>} Test drive details
    */
   async getTestDriveById(testDriveId) {
     try {
-      const response = await apiClient.get(`/dealer/test-drives/${testDriveId}`);
+            const response = await apiClient.get(`/TestDrives/${testDriveId}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết lái thử' };
@@ -321,13 +346,13 @@ class DealerAPI {
 
   /**
    * Create test drive appointment
-   * POST /dealer/test-drives
-   * @param {Object} testDriveData - Test drive data
+   * POST /api/TestDrives
+   * @param {Object} testDriveData - Test drive data {customerId, vehicleId, dealerId, scheduleDatetime, status}
    * @returns {Promise<Object>} Created test drive
    */
   async createTestDrive(testDriveData) {
     try {
-      const response = await apiClient.post('/dealer/test-drives', testDriveData);
+      const response = await apiClient.post('/TestDrives', testDriveData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo lịch lái thử' };
@@ -335,32 +360,32 @@ class DealerAPI {
   }
 
   /**
-   * Update test drive
-   * PUT /dealer/test-drives/:id
-   * @param {string|number} testDriveId - Test drive ID
-   * @param {Object} updateData - Update data
-   * @returns {Promise<Object>} Updated test drive
+   * Get test drives by customer
+   * GET /api/TestDrives/by-customer/{customerId}?Status=...&FromDate=...&ToDate=...&Page=...&Size=...
+   * @param {string|number} customerId - Customer ID
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} Test drive list
    */
-  async updateTestDrive(testDriveId, updateData) {
+  async getTestDrivesByCustomer(customerId, params = {}) {
     try {
-      const response = await apiClient.put(`/dealer/test-drives/${testDriveId}`, updateData);
+            const response = await apiClient.get(`/TestDrives/by-customer/${customerId}`, { params });
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật lái thử' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy lịch lái thử' };
     }
   }
 
   /**
    * Update test drive status
-   * PUT /dealer/test-drives/:id/status
+   * PUT /api/TestDrives/{testId}/status
    * @param {string|number} id - Test drive ID
    * @param {string} status - New status
-   * @param {string} note - Optional note
+   * @param {string} feedback - Optional feedback
    * @returns {Promise<Object>} Update result
    */
-  async updateTestDriveStatus(id, status, note = '') {
+  async updateTestDriveStatus(id, status, feedback = '') {
     try {
-      const response = await apiClient.put(`/dealer/test-drives/${id}/status`, { status, note });
+      const response = await apiClient.put(`/TestDrives/${id}/status`, { status, feedback });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
@@ -369,14 +394,14 @@ class DealerAPI {
 
   /**
    * Cancel test drive
-   * POST /dealer/test-drives/:id/cancel
+   * PUT /api/TestDrives/{testId}/cancel
    * @param {string|number} testDriveId - Test drive ID
    * @param {string} reason - Cancellation reason
    * @returns {Promise<Object>} Cancellation result
    */
   async cancelTestDrive(testDriveId, reason) {
     try {
-      const response = await apiClient.post(`/dealer/test-drives/${testDriveId}/cancel`, { reason });
+      const response = await apiClient.put(`/TestDrives/${testDriveId}/cancel`, reason);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi hủy lịch' };
@@ -384,56 +409,250 @@ class DealerAPI {
   }
 
   /**
-   * Get test drive calendar
-   * GET /dealer/test-drives/calendar?startDate=...&endDate=...
-   * @param {string} startDate - Start date (YYYY-MM-DD)
-   * @param {string} endDate - End date (YYYY-MM-DD)
-   * @returns {Promise<Object>} Calendar events
+   * Get test drive statuses
+   * GET /api/TestDrives/statuses
+   * @returns {Promise<Object>} Available test drive statuses
    */
-  async getTestDriveCalendar(startDate, endDate) {
+  async getTestDriveStatuses() {
     try {
-      const response = await apiClient.get('/dealer/test-drives/calendar', { 
-        params: { startDate, endDate } 
-      });
+            const response = await apiClient.get('/TestDrives/statuses');
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy lịch' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách trạng thái' };
+    }
+  }
+
+  // ==================== USER/STAFF MANAGEMENT ====================
+
+  /**
+   * Get all users/staff
+   * GET /Users
+   * @returns {Promise<Object>} User list
+   */
+  async getUsers() {
+    try {
+      const response = await apiClient.get('/Users');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách nhân viên' };
     }
   }
 
   /**
-   * Check test drive availability (NEW)
-   * GET /dealer/test-drives/availability?vehicleId=...&date=...
-   * @param {string|number} vehicleId - Vehicle ID
-   * @param {string} date - Date to check
-   * @returns {Promise<Object>} Availability data
+   * Get user by ID
+   * GET /Users/{id}
+   * @param {string|number} userId - User ID
+   * @returns {Promise<Object>} User details
    */
-  async checkTestDriveAvailability(vehicleId, date) {
+  async getUserById(userId) {
     try {
-      const response = await apiClient.get('/dealer/test-drives/availability', {
-        params: { vehicleId, date }
-      });
+      const response = await apiClient.get(`/Users/${userId}`);
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi kiểm tra khả dụng' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin nhân viên' };
     }
   }
 
   /**
-   * Update test drive feedback (NEW)
-   * PUT /dealer/test-drives/:id/feedback
-   * @param {string|number} testDriveId - Test drive ID
-   * @param {Object} feedback - Feedback data
+   * Create new user/staff
+   * POST /Users
+   * @param {Object} userData - User data {username, password, fullName, email, phoneNumber, dateOfBirth, roleId, dealerId}
+   * @returns {Promise<Object>} Created user
+   */
+  async createUser(userData) {
+    try {
+      const response = await apiClient.post('/Users', userData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo nhân viên' };
+    }
+  }
+
+  /**
+   * Update user/staff
+   * PUT /Users/{id}
+   * @param {string|number} userId - User ID
+   * @param {Object} userData - Updated user data {roleId, dealerId, fullName, email, phoneNumber, dateOfBirth}
+   * @returns {Promise<Object>} Updated user
+   */
+  async updateUser(userId, userData) {
+    try {
+      const response = await apiClient.put(`/Users/${userId}`, userData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật nhân viên' };
+    }
+  }
+
+  /**
+   * Update user status (activate/deactivate)
+   * PATCH /Users/{id}/status
+   * @param {string|number} userId - User ID
+   * @param {string} status - New status (Active/Inactive)
    * @returns {Promise<Object>} Update result
    */
-  async updateTestDriveFeedback(testDriveId, feedback) {
+  async updateUserStatus(userId, status) {
     try {
-      const response = await apiClient.put(`/dealer/test-drives/${testDriveId}/feedback`, {
-        feedback
-      });
+      const response = await apiClient.patch(`/Users/${userId}/status`, { status });
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật phản hồi' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
+    }
+  }
+
+  // ==================== DEALER MANAGEMENT ====================
+
+  /**
+   * Get dealer contracts
+   * GET /api/manage/dealers/{dealerId}/contracts
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>} Dealer contracts
+   */
+  async getDealerContracts(dealerId) {
+    try {
+            const response = await apiClient.get(`/manage/dealers/${dealerId}/contracts`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy hợp đồng' };
+    }
+  }
+
+  /**
+   * Create dealer contract
+   * POST /api/manage/dealers/{dealerId}/contracts
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} contractData - Contract data {startDate, endDate, terms, status}
+   * @returns {Promise<Object>} Created contract
+   */
+  async createDealerContract(dealerId, contractData) {
+    try {
+            const response = await apiClient.post(`/manage/dealers/${dealerId}/contracts`, contractData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo hợp đồng' };
+    }
+  }
+
+  /**
+   * Get dealer targets
+   * GET /api/manage/dealers/{dealerId}/targets
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>} Dealer targets
+   */
+  async getDealerTargets(dealerId) {
+    try {
+            const response = await apiClient.get(`/manage/dealers/${dealerId}/targets`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy mục tiêu' };
+    }
+  }
+
+  /**
+   * Set dealer target
+   * POST /api/manage/dealers/{dealerId}/targets
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} targetData - Target data {periodStart, periodEnd, salesTarget}
+   * @returns {Promise<Object>} Created target
+   */
+  async setDealerTarget(dealerId, targetData) {
+    try {
+            const response = await apiClient.post(`/manage/dealers/${dealerId}/targets`, targetData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi đặt mục tiêu' };
+    }
+  }
+
+  /**
+   * Get dealer performance
+   * GET /api/manage/dealers/{dealerId}/performance?startDate=...&endDate=...
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} params - Query parameters {startDate, endDate}
+   * @returns {Promise<Object>} Dealer performance data
+   */
+  async getDealerPerformance(dealerId, params = {}) {
+    try {
+            const response = await apiClient.get(`/manage/dealers/${dealerId}/performance`, { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy hiệu suất' };
+    }
+  }
+
+  /**
+   * Get all dealers
+   * GET /api/Dealers/paged?Search=...&Phone=...&Page=...&Size=...
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} Dealer list
+   */
+  async getDealers(params = {}) {
+    try {
+            const response = await apiClient.get('/Dealers/paged', { params });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách đại lý' };
+    }
+  }
+
+  /**
+   * Get dealer by ID
+   * GET /api/Dealers/{dealerId}
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>} Dealer details
+   */
+  async getDealerById(dealerId) {
+    try {
+            const response = await apiClient.get(`/Dealers/${dealerId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin đại lý' };
+    }
+  }
+
+  /**
+   * Create dealer
+   * POST /api/Dealers
+   * @param {Object} dealerData - Dealer data {name, address, phone}
+   * @returns {Promise<Object>} Created dealer
+   */
+  async createDealer(dealerData) {
+    try {
+            const response = await apiClient.post('/Dealers', dealerData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo đại lý' };
+    }
+  }
+
+  /**
+   * Update dealer
+   * PUT /api/Dealers/{dealerId}
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} dealerData - Updated dealer data {name, address, phone}
+   * @returns {Promise<Object>} Updated dealer
+   */
+  async updateDealer(dealerId, dealerData) {
+    try {
+            const response = await apiClient.put(`/Dealers/${dealerId}`, dealerData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật đại lý' };
+    }
+  }
+
+  /**
+   * Delete dealer
+   * DELETE /api/Dealers/{dealerId}
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>} Delete result
+   */
+  async deleteDealer(dealerId) {
+    try {
+      const response = await apiClient.delete(`/Dealers/${dealerId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi xóa đại lý' };
     }
   }
 
@@ -836,28 +1055,67 @@ class DealerAPI {
 
   /**
    * Get all promotions
-   * GET /dealer/promotions
-   * @param {Object} params - Query parameters
+   * GET /Promotions?Status=...&StartDate=...&EndDate=...
+   * @param {Object} params - Query parameters (Status, StartDate, EndDate)
    * @returns {Promise<Object>} Promotion list
    */
   async getPromotions(params = {}) {
     try {
-      const response = await apiClient.get('/dealer/promotions', { params });
+      const response = await apiClient.get('/Promotions', { params });
       return { success: true, data: response.data };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy khuyến mãi' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khuyến mãi' };
+    }
+  }
+
+  /**
+   * Get promotion by ID
+   * GET /Promotions/{id}
+   * @param {number} promotionId - Promotion ID
+   * @returns {Promise<Object>} Promotion details
+   */
+  async getPromotionById(promotionId) {
+    try {
+      const response = await apiClient.get(`/Promotions/${promotionId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khuyến mãi' };
+    }
+  }
+
+  /**
+   * Get active promotions (currently valid)
+   * GET /Promotions/active
+   * @returns {Promise<Object>} Active promotions list
+   */
+  async getActivePromotions() {
+    try {
+      const response = await apiClient.get('/Promotions/active');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy khuyến mãi đang hiệu lực' };
     }
   }
 
   /**
    * Create new promotion
-   * POST /dealer/promotions
+   * POST /Promotions
    * @param {Object} promotionData - Promotion data
+   * {
+   *   name: string,
+   *   description: string,
+   *   discountType: 'Percentage' | 'FixedAmount' | 'Gift' | 'Bundle',
+   *   discountValue: number,
+   *   condition: string,
+   *   startDate: datetime,
+   *   endDate: datetime,
+   *   status: 'Active' | 'Inactive'
+   * }
    * @returns {Promise<Object>} Created promotion
    */
   async createPromotion(promotionData) {
     try {
-      const response = await apiClient.post('/dealer/promotions', promotionData);
+      const response = await apiClient.post('/Promotions', promotionData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo khuyến mãi' };
@@ -866,14 +1124,14 @@ class DealerAPI {
 
   /**
    * Update promotion
-   * PUT /dealer/promotions/:id
-   * @param {string|number} id - Promotion ID
+   * PUT /Promotions/{id}
+   * @param {number} promotionId - Promotion ID
    * @param {Object} promotionData - Updated promotion data
    * @returns {Promise<Object>} Updated promotion
    */
-  async updatePromotion(id, promotionData) {
+  async updatePromotion(promotionId, promotionData) {
     try {
-      const response = await apiClient.put(`/dealer/promotions/${id}`, promotionData);
+      const response = await apiClient.put(`/Promotions/${promotionId}`, promotionData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật khuyến mãi' };
@@ -881,17 +1139,79 @@ class DealerAPI {
   }
 
   /**
+   * Update promotion status
+   * PATCH /Promotions/{id}/status
+   * @param {number} promotionId - Promotion ID
+   * @param {string} status - New status (Active, Inactive, Expired)
+   * @returns {Promise<Object>} Update result
+   */
+  async updatePromotionStatus(promotionId, status) {
+    try {
+      const response = await apiClient.patch(`/Promotions/${promotionId}/status`, { status });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
+    }
+  }
+
+  /**
    * Delete promotion
-   * DELETE /dealer/promotions/:id
-   * @param {string|number} id - Promotion ID
+   * DELETE /Promotions/{id}
+   * @param {number} promotionId - Promotion ID
    * @returns {Promise<Object>} Delete result
    */
-  async deletePromotion(id) {
+  async deletePromotion(promotionId) {
     try {
-      const response = await apiClient.delete(`/dealer/promotions/${id}`);
+      const response = await apiClient.delete(`/Promotions/${promotionId}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi xóa khuyến mãi' };
+    }
+  }
+
+  /**
+   * Validate promotion for order
+   * POST /Promotions/{id}/validate
+   * @param {number} promotionId - Promotion ID
+   * @param {Object} orderData - Order data to validate against
+   * @returns {Promise<Object>} Validation result
+   */
+  async validatePromotion(promotionId, orderData) {
+    try {
+      const response = await apiClient.post(`/Promotions/${promotionId}/validate`, orderData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Khuyến mãi không hợp lệ' };
+    }
+  }
+
+  /**
+   * Apply promotion to order
+   * POST /Promotions/{id}/apply
+   * @param {number} promotionId - Promotion ID
+   * @param {number} orderId - Order ID
+   * @returns {Promise<Object>} Apply result with calculated discount
+   */
+  async applyPromotionToOrder(promotionId, orderId) {
+    try {
+      const response = await apiClient.post(`/Promotions/${promotionId}/apply`, { orderId });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi áp dụng khuyến mãi' };
+    }
+  }
+
+  /**
+   * Get promotion statistics
+   * GET /Promotions/statistics
+   * @returns {Promise<Object>} Promotion statistics
+   */
+  async getPromotionStatistics() {
+    try {
+      const response = await apiClient.get('/Promotions/statistics');
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thống kê khuyến mãi' };
     }
   }
 
@@ -998,6 +1318,181 @@ class DealerAPI {
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi đánh dấu tất cả đã đọc' };
+    }
+  }
+
+  // ==================== FEEDBACK & COMPLAINT MANAGEMENT ====================
+
+  /**
+   * Get all feedbacks with filters
+   * GET /Feedbacks?CustomerId=...&Type=...&Status=...&StartDate=...&EndDate=...
+   * @param {Object} params - Query parameters
+   * @returns {Promise<Object>} List of feedbacks
+   */
+  async getFeedbacks(params = {}) {
+    try {
+      const response = await apiClient.get('/Feedbacks', { params });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy danh sách phản hồi'
+      };
+    }
+  }
+
+  /**
+   * Get feedback by ID
+   * GET /Feedbacks/{id}
+   * @param {number} feedbackId - Feedback ID
+   * @returns {Promise<Object>} Feedback details
+   */
+  async getFeedbackById(feedbackId) {
+    try {
+      const response = await apiClient.get(`/Feedbacks/${feedbackId}`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy thông tin phản hồi'
+      };
+    }
+  }
+
+  /**
+   * Create new feedback
+   * POST /Feedbacks
+   * @param {Object} feedbackData - Feedback information
+   * @returns {Promise<Object>} Created feedback
+   */
+  async createFeedback(feedbackData) {
+    try {
+      const response = await apiClient.post('/Feedbacks', feedbackData);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi tạo phản hồi'
+      };
+    }
+  }
+
+  /**
+   * Update feedback status and notes
+   * PUT /Feedbacks/{id}
+   * @param {number} feedbackId - Feedback ID
+   * @param {Object} updateData - Update data (status, note)
+   * @returns {Promise<Object>} Updated feedback
+   */
+  async updateFeedback(feedbackId, updateData) {
+    try {
+      const response = await apiClient.put(`/Feedbacks/${feedbackId}`, updateData);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi cập nhật phản hồi'
+      };
+    }
+  }
+
+  /**
+   * Update feedback status only
+   * PATCH /Feedbacks/{id}/status
+   * @param {number} feedbackId - Feedback ID
+   * @param {string} status - New status (Pending, InProgress, Resolved)
+   * @param {string} note - Optional note
+   * @returns {Promise<Object>} Update result
+   */
+  async updateFeedbackStatus(feedbackId, status, note = '') {
+    try {
+      const response = await apiClient.patch(`/Feedbacks/${feedbackId}/status`, {
+        status,
+        note
+      });
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái'
+      };
+    }
+  }
+
+  /**
+   * Delete feedback
+   * DELETE /Feedbacks/{id}
+   * @param {number} feedbackId - Feedback ID
+   * @returns {Promise<Object>} Delete result
+   */
+  async deleteFeedback(feedbackId) {
+    try {
+      const response = await apiClient.delete(`/Feedbacks/${feedbackId}`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi xóa phản hồi'
+      };
+    }
+  }
+
+  /**
+   * Get feedback statistics
+   * GET /Feedbacks/statistics
+   * @returns {Promise<Object>} Feedback statistics
+   */
+  async getFeedbackStatistics() {
+    try {
+      const response = await apiClient.get('/Feedbacks/statistics');
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi lấy thống kê phản hồi'
+      };
+    }
+  }
+
+  /**
+   * Notify customer about feedback resolution
+   * POST /Feedbacks/{id}/notify
+   * @param {number} feedbackId - Feedback ID
+   * @returns {Promise<Object>} Notification result
+   */
+  async notifyCustomerFeedback(feedbackId) {
+    try {
+      const response = await apiClient.post(`/Feedbacks/${feedbackId}/notify`);
+      return {
+        success: true,
+        data: response.data
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Lỗi khi gửi thông báo'
+      };
     }
   }
 }

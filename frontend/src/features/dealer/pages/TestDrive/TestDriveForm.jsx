@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
   PageHeader, 
@@ -70,7 +71,7 @@ const TestDriveForm = () => {
 
     } catch (error) {
       console.error('Error loading prerequisites:', error);
-      alert('Lỗi: không thể tải dữ liệu');
+      notifications.error('Lỗi tải dữ liệu', 'Không thể tải dữ liệu');
     } finally {
       setIsDataLoading(false);
     }
@@ -159,14 +160,14 @@ const TestDriveForm = () => {
 
       const result = await dealerAPI.createTestDrive(testDriveData);
       if (result.success) {
-        alert('Đăng ký lái thử thành công! Thông báo xác nhận đã được gửi đến khách hàng.');
+        notifications.success('Thành công', 'Đăng ký lái thử thành công! Thông báo xác nhận đã được gửi đến khách hàng.');
         navigate('/dealer/test-drives');
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
     } catch (error) {
       console.error('Error creating test drive:', error);
-      alert('Có lỗi xảy ra khi đăng ký lái thử: ' + error.message);
+      notifications.error('Lỗi đăng ký lái thử', error.message);
     } finally {
       setIsSubmitting(false);
     }

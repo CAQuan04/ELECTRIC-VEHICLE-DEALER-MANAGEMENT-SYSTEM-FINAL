@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { notifications } from '@utils/notifications';
 
 // Import Lucide icons
 import {
@@ -47,13 +48,16 @@ const CustomerList = () => {
       startLoading('Đang tải danh sách khách hàng...');
       const response = await dealerAPI.getCustomers();
       if (response.success) {
-        setCustomers(response.data);
+        // Ensure data is an array
+        setCustomers(Array.isArray(response.data) ? response.data : []);
       } else {
-        alert('Lỗi: ' + response.message);
+        notifications.error('Lỗi tải dữ liệu', response.message);
+        setCustomers([]);
       }
     } catch (error) {
       console.error('Error loading customers:', error);
-      alert('Lỗi: ' + (error.response?.data?.message || error.message));
+      notifications.error('Lỗi tải dữ liệu', error.response?.data?.message || error.message);
+      setCustomers([]);
     } finally {
       stopLoading();
     }

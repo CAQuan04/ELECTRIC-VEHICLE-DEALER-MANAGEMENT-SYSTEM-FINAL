@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@utils/api/services';
+import { notifications } from '@utils/notifications';
 import { Car } from 'lucide-react';
 import {
   PageContainer,
@@ -11,7 +13,6 @@ import {
   Select,
   FormGroup
 } from '../../components';
-import VehicleApi from './vehicleApi';
 
 const VehicleList = () => {
   const navigate = useNavigate();
@@ -46,33 +47,37 @@ const VehicleList = () => {
       setError(null);
       startLoading('Đang tải danh sách xe...');
       
-      const params = {
-        search: filters.search || undefined,
-        brand: filters.brand || undefined,
-        model: filters.model || undefined,
-        minPrice: filters.minPrice || undefined,
-        maxPrice: filters.maxPrice || undefined,
-        page: filters.page,
-        size: filters.size
-      };
+      // Build params object, only include defined values
+      const params = {};
+      if (filters.search) params.Search = filters.search;
+      if (filters.brand) params.Brand = filters.brand;
+      if (filters.model) params.Model = filters.model;
+      if (filters.minPrice) params.MinPrice = filters.minPrice;
+      if (filters.maxPrice) params.MaxPrice = filters.maxPrice;
+      if (filters.page) params.Page = filters.page;
+      if (filters.size) params.Size = filters.size;
 
-      const result = await VehicleApi.getVehicles(params);
+      console.log('Calling API with params:', params); // Debug log
+
+      const result = await dealerAPI.getVehicles(params);
       
       if (result.success) {
-        setVehicles(result.data.items || []);
-        setPagination(result.data.pagination || {
-          page: 1,
-          size: 10,
-          total: 0,
-          totalPages: 0
+        const data = result.data;
+        setVehicles(data.items || data.data || []);
+        setPagination(data.pagination || {
+          page: filters.page,
+          size: filters.size,
+          total: data.total || 0,
+          totalPages: data.totalPages || 0
         });
       } else {
-        throw new Error(result.error || 'Có lỗi xảy ra khi tải dữ liệu');
+        notifications.error('Lỗi tải dữ liệu', result.message);
+        throw new Error(result.message || 'Có lỗi xảy ra khi tải dữ liệu');
       }
     } catch (error) {
       console.error('Error loading vehicles:', error);
       setError(error.message || 'Không thể tải danh sách xe');
-      setVehicles([]); // Clear vehicles on error
+      setVehicles([]);
     } finally {
       setLoading(false);
       stopLoading();
