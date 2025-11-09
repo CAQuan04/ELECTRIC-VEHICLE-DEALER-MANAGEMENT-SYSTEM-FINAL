@@ -7,6 +7,7 @@ import "./styles/theme-variables.css";
 
 // Contexts
 import { SidebarProvider, useSidebar } from "./contexts/SidebarContext";
+import { useAuth } from "./context/AuthContext";
 
 // Modules
 import { Sidebar, Navbar, Header } from "@modules/layout";
@@ -193,12 +194,16 @@ const DealerLayout = ({ children }) => {
 };
 
 const AppLayout = ({ children }) => {
-  const currentUser = AuthService.getCurrentUser();
+  const { user } = useAuth(); // Sử dụng context mới
   const { isExpanded } = useSidebar(); // Lấy state từ context
 
+  console.log('📐 AppLayout render - user:', user);
+
   // Check if user is logged in to determine if we should show dashboard layout or public layout
-  if (currentUser && currentUser.role !== "guest") {
+  // Backend roles: 'Admin', 'EVMStaff', 'DealerManager', 'DealerStaff', 'Customer'
+  if (user) {
     // For dashboard pages - show sidebar + navbar layout
+    console.log('✅ AppLayout: Hiển thị layout với sidebar');
     return (
       <div style={{ minHeight: "100vh" }}>
         <Sidebar />
@@ -213,7 +218,7 @@ const AppLayout = ({ children }) => {
         </div>
         <style>{`
           .main-content-with-sidebar {
-            padding-left: ${isExpanded ? '258px' : '80px'} !important;
+            padding-left: ${isExpanded ? '254px' : '60px'} !important;
             margin-left: 0 !important;
             min-height: 100vh;
             width: 100vw !important;
@@ -232,20 +237,11 @@ const AppLayout = ({ children }) => {
         `}</style>
       </div>
     );
-  } else {
-    // For public pages - simple layout with just header
-    return (
-      <div style={{ minHeight: "100vh" }}>
-        <Header />
-        <main
-          className="p-5 dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 bg-gradient-to-br from-gray-50 to-gray-100 transition-colors duration-300"
-          style={{ minHeight: "calc(100vh - 70px)" }}
-        >
-          {children}
-        </main>
-      </div>
-    );
   }
+  
+  // Nếu không có user, chỉ render children không có sidebar
+  console.log('ℹ️ AppLayout: Không có user, render children only');
+  return <>{children}</>;
 };
 
 // Separate layout for public pages (always uses Header)

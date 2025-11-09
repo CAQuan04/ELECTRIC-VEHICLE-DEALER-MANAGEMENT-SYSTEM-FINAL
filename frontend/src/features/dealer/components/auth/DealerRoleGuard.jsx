@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Navigate } from 'react-router-dom';
 import { AuthService } from '@utils';
+import { useAuth } from '../../../../context/AuthContext';
 import { DEALER_ROLES } from '../../config/permissions';
 
 /**
@@ -131,13 +132,24 @@ StaffAndManagerGuard.propTypes = {
  * Hook để check dealer role
  */
 export const useDealerRole = () => {
-  const currentUser = AuthService.getCurrentUser();
-  const dealerRole = currentUser?.dealerRole || DEALER_ROLES.STAFF;
+  const { user } = useAuth();
+  
+  // Map role từ backend: 'DealerStaff' -> 'dealer_staff', 'DealerManager' -> 'dealer_manager'
+  let dealerRole = DEALER_ROLES.STAFF; // Default
+  
+  if (user?.role === 'DealerManager') {
+    dealerRole = DEALER_ROLES.MANAGER;
+  } else if (user?.role === 'DealerStaff') {
+    dealerRole = DEALER_ROLES.STAFF;
+  }
+  
+  console.log('🎭 useDealerRole:', { userRole: user?.role, dealerRole });
 
   return {
     isStaff: dealerRole === DEALER_ROLES.STAFF,
     isManager: dealerRole === DEALER_ROLES.MANAGER,
-    role: dealerRole,
+    dealerRole: dealerRole,
+    role: dealerRole, // alias
   };
 };
 
@@ -154,6 +166,7 @@ export const useDealerRole = () => {
  */
 export const ForManager = ({ children, fallback = null }) => {
   const { isManager } = useDealerRole();
+  console.log('👔 ForManager check:', isManager);
   return isManager ? children : fallback;
 };
 
@@ -164,6 +177,7 @@ ForManager.propTypes = {
 
 export const ForStaff = ({ children, fallback = null }) => {
   const { isStaff } = useDealerRole();
+  console.log('👷 ForStaff check:', isStaff);
   return isStaff ? children : fallback;
 };
 
@@ -173,8 +187,9 @@ ForStaff.propTypes = {
 };
 
 export const ForStaffAndManager = ({ children }) => {
-  const currentUser = AuthService.getCurrentUser();
-  const isDealer = currentUser?.role?.includes('dealer');
+  const { user } = useAuth();
+  const isDealer = user?.role === 'DealerStaff' || user?.role === 'DealerManager';
+  console.log('🤝 ForStaffAndManager check:', isDealer);
   return isDealer ? children : null;
 };
 

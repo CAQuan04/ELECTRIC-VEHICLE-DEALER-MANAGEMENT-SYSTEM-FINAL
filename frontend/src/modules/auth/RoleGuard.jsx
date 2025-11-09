@@ -7,18 +7,40 @@ import { useAuth } from '../../context/AuthContext'; // Đảm bảo đường d
 const RoleGuard = ({ allowedRoles, children }) => {
   const { user, loading } = useAuth();
 
+  console.log('🛡️ RoleGuard check:', { user, loading, allowedRoles });
+
   if (loading) {
-    return <div>Loading session...</div>; // Hoặc một component loading
+    console.log('⏳ RoleGuard: Đang loading...');
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#0f172a',
+        color: '#fff'
+      }}>
+        <div>Loading session...</div>
+      </div>
+    );
   }
 
   if (!user) {
+    console.log('❌ RoleGuard: Không có user, redirect to /landing');
     return <Navigate to="/landing" replace />;
   }
   
   // Kiểm tra xem vai trò của user có nằm trong danh sách được phép không
   const hasAccess = allowedRoles.includes(user.role);
+  console.log('🔐 RoleGuard: hasAccess =', hasAccess, 'user.role =', user.role);
 
-  return hasAccess ? (children ? children : <Outlet />) : <Navigate to="/access-denied" replace />;
+  if (!hasAccess) {
+    console.log('🚫 RoleGuard: Không có quyền truy cập, redirect to /access-denied');
+    return <Navigate to="/access-denied" replace />;
+  }
+
+  console.log('✅ RoleGuard: Cho phép truy cập');
+  return children ? children : <Outlet />;
 };
 
 // ===================================================================================
@@ -67,6 +89,7 @@ export const AccessDenied = () => (
 
 // Tạm thời giữ nguyên DealerShopGuard
 export const DealerShopGuard = ({ children }) => {
+    console.log('🏪 DealerShopGuard: Cho phép truy cập');
     return children;
 }
 

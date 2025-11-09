@@ -1,12 +1,11 @@
 // File: src/features/admin/pages/VehicleCatalogue.jsx
 import React, { useMemo, useState, useEffect, useCallback } from "react";
-// File: src/features/admin/pages/VehicleCatalogue.jsx
-import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { Plus, Filter } from "lucide-react";
 import VehicleCard from "../components/catalog/VehicleCard";
 import ConfigModal from "../components/modals/ConfigModal";
 import VehicleModal from "../components/modals/VehicleModal";
 import { notifications } from '@utils/notifications';
+import { useAuth } from "../../../context/AuthContext";
 
 // --- CÁC THÀNH PHẦN TÍCH HỢP ---
 import apiClient from "../../../utils/api/client"; // Đảm bảo đường dẫn đúng
@@ -124,23 +123,6 @@ const VehicleCatalogue = () => {
     } catch (error) {
       console.error("Lỗi khi lưu cấu hình:", error);
     }
-  const handleSaveConfig = async (configData) => {
-    if (!activeVehicle) return;
-    try {
-      // ===================================================================================
-      // === PHẦN SỬA ĐỔI: SỬ DỤNG ĐÚNG ROUTE MỚI CHO UPDATE CONFIG ===
-      if (configData.configId) { // Sửa cấu hình
-        // Ghi chú: URL bây giờ cần cả vehicleId và configId.
-        await apiClient.put(`/admin/vehicles/${activeVehicle.vehicleId}/configs/${configData.configId}`, configData);
-      } else { // Thêm cấu hình mới
-        await apiClient.post(`/admin/vehicles/${activeVehicle.vehicleId}/configs`, configData);
-      }
-      // ===================================================================================
-      setOpenConfigModal(false);
-      await fetchVehicles();
-    } catch (error) {
-      console.error("Lỗi khi lưu cấu hình:", error);
-    }
   };
 
   const handleToggleConfigStatus = async (vehicleId, config) => {
@@ -167,23 +149,15 @@ const VehicleCatalogue = () => {
     }
   };
 
-  const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
-
   // === GIAO DIỆN ===
   const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
 
-  // === GIAO DIỆN ===
-   return (
+  return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
           Quản lý danh mục xe
         </h1>
-        {canManage && (
-          <button onClick={handleAddVehicle} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:brightness-110">
-            <Plus className="w-4 h-4" /> Thêm xe
-          </button>
-        )}
         {canManage && (
           <button onClick={handleAddVehicle} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:brightness-110">
             <Plus className="w-4 h-4" /> Thêm xe
@@ -198,45 +172,20 @@ const VehicleCatalogue = () => {
         <select value={filter.brand} onChange={(e) => setFilter({ ...filter, brand: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
           <option value="">Tất cả hãng</option>
           {brands.map((b) => (<option key={b} value={b}>{b}</option>))}
-          {brands.map((b) => (<option key={b} value={b}>{b}</option>))}
         </select>
-        <select value={filter.status} onChange={(e) => setFilter({ ...filter, status: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
+        
         <select value={filter.status} onChange={(e) => setFilter({ ...filter, status: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
           <option value="">Tất cả trạng thái</option>
           <option value="Active">Hoạt động</option>
           <option value="Inactive">Ngừng</option>
         </select>
-        <select value={filter.color} onChange={(e) => setFilter({ ...filter, color: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
+        
         <select value={filter.color} onChange={(e) => setFilter({ ...filter, color: e.target.value })} className="bg-transparent text-slate-200 px-3 py-2 rounded-xl border border-slate-700 focus:ring-2 focus:ring-cyan-500">
           <option value="">Tất cả màu</option>
-          {colors.map((c) => c && (<option key={c} value={c}>{c}</option>))}
           {colors.map((c) => c && (<option key={c} value={c}>{c}</option>))}
         </select>
       </div>
 
-      {loading ? (
-        <div className="text-center py-10">Đang tải dữ liệu...</div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredVehicles.map((v) => (
-            <VehicleCard
-              key={v.vehicleId}
-              vehicle={v}
-              canManage={canManage}
-              onEdit={() => handleEditVehicle(v)}
-              onDelete={() => handleDeleteVehicle(v.vehicleId)}
-              onAddConfig={() => handleOpenAddConfig(v)}
-              onEditConfig={(cfg) => handleOpenEditConfig(v, cfg)}
-              onToggleConfigStatus={(cfg) => handleToggleConfigStatus(v.vehicleId, cfg)}
-              onDeleteConfig={(cfgId) => handleDeleteConfig(v.vehicleId, cfgId)}
-              onReactivate={() => handleReactivateVehicle(v)}
-            />
-          ))}
-        </div>
-      )}
-
-      {openConfigModal && <ConfigModal config={activeConfig} onClose={() => setOpenConfigModal(false)} onSave={handleSaveConfig} />}
-      {openVehicleModal && <VehicleModal vehicle={activeVehicle} onClose={() => setOpenVehicleModal(false)} onSave={handleSaveVehicle} />}
       {loading ? (
         <div className="text-center py-10">Đang tải dữ liệu...</div>
       ) : (
@@ -264,5 +213,4 @@ const VehicleCatalogue = () => {
   );
 };
 
-export default VehicleCatalogue;
 export default VehicleCatalogue;

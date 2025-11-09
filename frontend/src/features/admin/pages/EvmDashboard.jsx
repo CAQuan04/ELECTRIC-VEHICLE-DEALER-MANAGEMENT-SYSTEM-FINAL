@@ -162,6 +162,8 @@ const EvmDashboard = () => {
   };
 
   /* ========== Giao diện dashboard (giữ nguyên tất cả) ========== */
+  console.log('🎨 EvmDashboard render - activeSection:', activeSection);
+  
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-6">
       {/* NAV PILLS */}

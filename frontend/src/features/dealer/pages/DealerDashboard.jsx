@@ -46,6 +46,8 @@ const NAV_SECTIONS = [
 // --- MAIN COMPONENT ---
 
 const DealerDashboard = () => {
+  console.log('🏢 DealerDashboard component render');
+  
   const navigate = useNavigate();
   const { startLoading, stopLoading } = usePageLoading();
   const [dashboardData, setDashboardData] = useState(null);
@@ -81,7 +83,12 @@ const DealerDashboard = () => {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  if (!dashboardData) return null; // Global loading handles the visual feedback
+  console.log('📊 Dashboard data:', dashboardData);
+  
+  if (!dashboardData) {
+    console.log('⏳ Waiting for dashboard data...');
+    return null; // Global loading handles the visual feedback
+  }
 
   const { dealer, inventory } = dashboardData;
 

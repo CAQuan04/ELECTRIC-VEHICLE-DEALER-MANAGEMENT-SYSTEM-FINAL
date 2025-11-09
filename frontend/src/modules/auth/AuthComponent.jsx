@@ -9,13 +9,16 @@ import apiClient from '../../utils/api/client';
 import './AuthComponent.css';
 
 const AuthComponent = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  
+  console.log('🎨 AuthComponent render - user:', user, 'loading:', loading);
   
   const toggleLogin = () => setIsLoginOpen(!isLoginOpen);
 
   // Nếu đã đăng nhập, chỉ hiển thị thông tin user và nút logout
   if (user) {
+    console.log('✅ User đã đăng nhập, hiển thị user menu');
     return (
       <div className="user-menu">
         <button className="user-btn" onClick={logout} title={`Đăng xuất (${user.role})`}>
@@ -26,6 +29,7 @@ const AuthComponent = () => {
   }
 
   // Nếu chưa đăng nhập, hiển thị nút Login và Modal khi được mở
+  console.log('ℹ️ User chưa đăng nhập, hiển thị login button');
   return (
     <>
       <button className="login-btn" onClick={toggleLogin}>Login</button>
@@ -49,6 +53,12 @@ const LoginModal = ({ onClose }) => {
         e.preventDefault();
         setLoginError('');
         setIsLoading(true);
+        
+        console.log('🔐 Đang đăng nhập với:', {
+            username: loginForm.username.trim(),
+            password: '***'
+        });
+        
         try {
             // Gọi API Backend thật
             const response = await apiClient.post('/Auth/login', {
@@ -56,24 +66,34 @@ const LoginModal = ({ onClose }) => {
                 password: loginForm.password,
             });
 
+            console.log('✅ API response:', response);
+
             // Nếu thành công, gọi hàm login từ context để lưu trạng thái
             login(response);
 
             // Chuyển hướng người dùng dựa trên vai trò
             const role = response.role;
+            console.log('🚀 Chuyển hướng dựa trên role:', role);
+            
             if (role === 'Admin' || role === 'EVMStaff') {
+                console.log('➡️ Navigate to /evm-dashboard');
                 navigate('/evm-dashboard');
             } else if (role === 'DealerManager' || role === 'DealerStaff') {
+                console.log('➡️ Navigate to /dealer-dashboard');
                 navigate('/dealer-dashboard');
             } else {
+                console.log('➡️ Navigate to /customer-dashboard');
                 navigate('/customer-dashboard');
             }
             
             onClose(); // Đóng modal
         } catch (err) {
+            console.error('❌ Lỗi đăng nhập:', err);
             // Xử lý lỗi trả về từ API
             if (err.response && err.response.data && err.response.data.message) {
                 setLoginError(err.response.data.message);
+            } else if (err.message) {
+                setLoginError(err.message);
             } else {
                 setLoginError('Không thể kết nối đến máy chủ. Vui lòng thử lại.');
             }

@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useRef, useEffect } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AuthService, USER_ROLES } from "../../utils/auth";
+import { useAuth } from "../../context/AuthContext";
 import { useSidebar } from "../../contexts/SidebarContext";
 import { useNotifications } from "../../hooks/useNotifications";
 import Logo from "../../components/common/Logo";
@@ -90,9 +91,11 @@ const icons = {
 
 /* ==== Sidebar (Icon-only modern style with expand/collapse) ==== */
 const Sidebar = ({ isOpen = false, onClose }) => {
-  const currentUser = AuthService.getCurrentUser();
-  const userRole = currentUser?.role;
+  const { user, logout } = useAuth();
+  const userRole = user?.role;
   const navigate = useNavigate();
+  
+  console.log('🎯 Sidebar render - user:', user, 'role:', userRole);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -109,8 +112,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   };
 
   const handleLogout = () => {
-    AuthService.logout();
-    navigate('/landing');
+    logout(); // Dùng logout từ useAuth
   };
 
   // Đóng menu khi click bên ngoài
@@ -156,8 +158,8 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       return [
         { label: 'Thêm Đại Lý', icon: RiGroupLine, path: '/admin/dealers/new' },
         { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
-        { label: 'Tạo Người Dùng', icon: FiUsers, path: '/admin/users/new' },
-        { label: 'Nhập Kho Tổng', icon: FiTruck, path: '/admin/inventory/import' },
+        // { label: 'Tạo Người Dùng', icon: FiUsers, path: '/admin/users/new' }, // TODO: Create UserManagement page
+        // { label: 'Nhập Kho Tổng', icon: FiTruck, path: '/admin/inventory/import' }, // TODO: Create Inventory Management page
         { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
       ];
     }
@@ -203,13 +205,13 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           { path: "/reports", icon: FiBarChart2, label: "Reports" },
           { path: "/admin/dealers", icon: RiGroupLine, label: "Đại Lý" },
           { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
-          { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" },
-          { path: "/admin/users", icon: FiUsers, label: "Người Dùng" },
+          { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" }, // TODO: Create Inventory Management page
+          { path: "/admin/users", icon: FiUsers, label: "Người Dùng" }, // TODO: Create UserManagement page
           { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
       
-      // Default cho guest hoặc role không xác định
+      // Default cho guest hoặc role không xác định 
       return [{ path: "/landing", icon: FiHome, label: "Trang Chủ" }];
     })();
 
@@ -234,10 +236,13 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   };
 
   // Don't render sidebar if no user
-  if (!currentUser) {
+  if (!user) {
+    console.log('❌ Sidebar: Không có user, không render');
     return null;
   }
 
+  console.log('✅ Sidebar: Có user, đang render sidebar');
+  
   return (
     <>
       {/* Mobile Menu Toggle Button */}
@@ -258,7 +263,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         className={[
           "fixed left-0 top-0 h-full bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl z-40 border-r border-slate-700/50",
           "transition-all duration-300 ease-in-out",
-          isExpanded ? "w-[250px]" : "w-20", // 250px khi mở rộng
+          isExpanded ? "w-[250px]" : "w-22", // 250px khi mở rộng
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
           "lg:translate-x-0"
         ].join(" ")}
@@ -266,13 +271,13 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         <div className="flex flex-col h-full justify-between py-6">
           {/* Logo & Title */}
           <div className={`flex items-center px-4 mb-8 ${isExpanded ? 'justify-start gap-3' : 'justify-center'} transition-all duration-300`}>
-            <Logo size={40} />
+            <Logo size={50} />
             {isExpanded && (
               <div className="overflow-hidden">
-                <div className="font-extrabold text-xl leading-6 bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent whitespace-nowrap">
+                <div className="font-extrabold text-2xl leading-6 bg-gradient-to-r from-sky-400 to-indigo-500 bg-clip-text text-transparent whitespace-nowrap">
                   EV Management
                 </div>
-                <div className="text-xs text-slate-400 whitespace-nowrap mt-0.5">
+                <div className="text-sm text-slate-400 whitespace-nowrap mt-0.5">
                   Admin Console
                 </div>
               </div>
@@ -358,20 +363,20 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           {/* Bottom Actions */}
           <div className="space-y-3 px-2">
             {/* User Info with Dropdown */}
-            {currentUser?.username && (
+            {user?.username && (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   className={`w-full flex items-center group hover:bg-slate-800/50 rounded-xl p-2 transition-all duration-200 ${isExpanded ? 'gap-3' : 'justify-center'}`}
                 >
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/30 flex-shrink-0 ring-2 ring-indigo-400/30">
-                    {currentUser.username.charAt(0).toUpperCase()}
+                    {user.username.charAt(0).toUpperCase()}
                   </div>
                   
                   {isExpanded && (
                     <div className="overflow-hidden flex-1 text-left">
                       <div className="text-[15px] font-semibold text-white whitespace-nowrap truncate">
-                        {currentUser.username}
+                        {user.username}
                       </div>
                       <div className="text-xs text-slate-400 whitespace-nowrap">
                         {userRole}
@@ -382,7 +387,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                   {/* Tooltip khi collapsed */}
                   {!isExpanded && (
                     <span className="absolute left-full ml-3 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-xl z-50">
-                      {currentUser.username}
+                      {user.username}
                       <br />
                       <span className="text-xs text-slate-300">{userRole}</span>
                       <span className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-slate-800"></span>
@@ -533,7 +538,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               <div className="relative flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-white/30">
-                    {currentUser.username.charAt(0).toUpperCase()}
+                    {user.username.charAt(0).toUpperCase()}
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-white">
@@ -564,13 +569,13 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                     Thông Tin Cá Nhân
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {currentUser.name && (
+                    {user.name && (
                       <div className="md:col-span-2">
                         <label className="block text-sm font-medium text-slate-400 mb-2">
                           Họ và tên
                         </label>
                         <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white font-medium">
-                          {currentUser.name}
+                          {user.name}
                         </div>
                       </div>
                     )}
@@ -579,26 +584,26 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                         Tên đăng nhập
                       </label>
                       <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white">
-                        {currentUser.username}
+                        {user.username}
                       </div>
                     </div>
-                    {currentUser.email && (
+                    {user.email && (
                       <div>
                         <label className="block text-sm font-medium text-slate-400 mb-2">
                           Email
                         </label>
                         <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white">
-                          {currentUser.email}
+                          {user.email}
                         </div>
                       </div>
                     )}
-                    {currentUser.phone && (
+                    {user.phone && (
                       <div>
                         <label className="block text-sm font-medium text-slate-400 mb-2">
                           Số điện thoại
                         </label>
                         <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3 text-white">
-                          {currentUser.phone}
+                          {user.phone}
                         </div>
                       </div>
                     )}
@@ -624,44 +629,44 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 </div>
 
                 {/* Thông tin Đại lý - chỉ hiện với DEALER */}
-                {(userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) && (currentUser.dealerId || currentUser.shopName || currentUser.dealerShopId) && (
+                {(userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) && (user.dealerId || user.shopName || user.dealerShopId) && (
                   <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/30">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <RiGroupLine size={20} className="text-indigo-400" />
                       Thông Tin Đại Lý
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {currentUser.shopName && (
+                      {user.shopName && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-indigo-300 mb-2">
                             Tên cửa hàng
                           </label>
                           <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white font-semibold">
-                            🏪 {currentUser.shopName}
+                            🏪 {user.shopName}
                           </div>
                         </div>
                       )}
-                      {currentUser.dealerId && (
+                      {user.dealerId && (
                         <div>
                           <label className="block text-sm font-medium text-indigo-300 mb-2">
                             Mã Đại Lý
                           </label>
                           <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
-                            #{currentUser.dealerId}
+                            #{user.dealerId}
                           </div>
                         </div>
                       )}
-                      {currentUser.dealerShopId && (
+                      {user.dealerShopId && (
                         <div>
                           <label className="block text-sm font-medium text-indigo-300 mb-2">
                             Mã Cửa Hàng
                           </label>
                           <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
-                            #{currentUser.dealerShopId}
+                            #{user.dealerShopId}
                           </div>
                         </div>
                       )}
-                      {currentUser.address && (
+                      {user.address && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-indigo-300 mb-2">
                             Địa chỉ cửa hàng
