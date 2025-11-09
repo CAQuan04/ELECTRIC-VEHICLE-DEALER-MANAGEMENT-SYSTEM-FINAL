@@ -135,70 +135,82 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
   // Create menu items theo role
   const createMenuItems = useMemo(() => {
-    switch (userRole) {
-      case USER_ROLES.DEALER:
-        return [
-          { label: 'Tạo Đơn Hàng', icon: FiShoppingCart, path: '/dealer/orders/new' },
-          { label: 'Thêm Khách Hàng', icon: FiUsers, path: '/dealer/customers/new' },
-          { label: 'Đặt Lịch Test Drive', icon: FiCalendar, path: '/dealer/test-drives/new' },
-          { label: 'Nhập Kho', icon: FiPackage, path: '/dealer/inventory/import' }
-        ];
-      
-      case USER_ROLES.CUSTOMER:
-        return [
-          { label: 'Đặt Lịch Test Drive', icon: FiCalendar, path: '/test-drive/book' },
-          { label: 'Tạo Đơn Hàng', icon: FiShoppingCart, path: '/orders/new' }
-        ];
-      
-      case USER_ROLES.EVM_ADMIN:
-        return [
-          { label: 'Thêm Đại Lý', icon: RiGroupLine, path: '/admin/dealers/new' },
-          { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
-          { label: 'Tạo Người Dùng', icon: FiUsers, path: '/admin/users/new' },
-          { label: 'Nhập Kho Tổng', icon: FiTruck, path: '/admin/inventory/import' },
-          { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
-        ];
-      
-      default:
-        return [];
+    // Xử lý cả role từ backend (DealerManager, DealerStaff) và role cũ (dealer)
+    if (userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) {
+      return [
+        { label: 'Tạo Đơn Hàng', icon: FiShoppingCart, path: '/dealer/orders/create' },
+        { label: 'Thêm Khách Hàng', icon: FiUsers, path: '/dealer/customers/new' },
+        { label: 'Đặt Lịch Test Drive', icon: FiCalendar, path: '/dealer/test-drives/new' },
+        { label: 'Yêu Cầu Nhập Kho', icon: FiPackage, path: '/dealer/inventory/request' }
+      ];
     }
+    
+    if (userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') {
+      return [
+        { label: 'Đặt Lịch Test Drive', icon: FiCalendar, path: '/test-drive/book' },
+        { label: 'Tạo Đơn Hàng', icon: FiShoppingCart, path: '/orders/new' }
+      ];
+    }
+    
+    if (userRole === 'Admin' || userRole === 'EVMStaff' || userRole === USER_ROLES.EVM_ADMIN || userRole === USER_ROLES.STAFF) {
+      return [
+        { label: 'Thêm Đại Lý', icon: RiGroupLine, path: '/admin/dealers/new' },
+        { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
+        { label: 'Tạo Người Dùng', icon: FiUsers, path: '/admin/users/new' },
+        { label: 'Nhập Kho Tổng', icon: FiTruck, path: '/admin/inventory/import' },
+        { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
+      ];
+    }
+    
+    return [];
   }, [userRole]);
 
   const menuItems = useMemo(() => {
     // Base menu items không có notifications
     const baseMenuItems = (() => {
-      switch (userRole) {
-        case USER_ROLES.DEALER:
-          return [
-            { path: '/dealer-dashboard', icon: RiDashboardLine, label: 'Dashboard' },
-            { path: '/dealer/vehicles', icon: RiCarLine, label: 'Catalog Xe' },
-            { path: '/dealer/inventory', icon: FiPackage, label: 'Quản Lý Kho' },
-            { path: '/dealer/customers', icon: FiUsers, label: 'Khách Hàng' },
-            { path: '/dealer/orders', icon: FiShoppingCart, label: 'Đơn Hàng' },
-            { path: '/landing', icon: FiHome, label: 'Trang Chủ' }
-          ];
-
-        case USER_ROLES.CUSTOMER:
-          return [
-            { path: '/customer-dashboard', icon: RiDashboardLine, label: 'Dashboard' },
-            { path: '/vehicles', icon: RiCarLine, label: 'Khám Phá Xe' },
-            { path: '/shop', icon: FiShoppingCart, label: 'Cửa Hàng' },
-            { path: '/landing', icon: FiHome, label: 'Trang Chủ' }
-          ];
-
-        case USER_ROLES.EVM_ADMIN:
-          return [
-            { path: "/evm-dashboard", icon: RiDashboardLine, label: "EVM Dashboard" },
-            { path: "/reports", icon: FiBarChart2, label: "Reports" },
-            { path: "/admin/dealers", icon: RiGroupLine, label: "Đại Lý" },
-            { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
-            { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" },
-            { path: "/admin/users", icon: FiUsers, label: "Người Dùng" },
-            { path: "/landing", icon: FiHome, label: "Trang Chủ" },
-          ];
-        default:
-          return [{ path: "/landing", icon: FiHome, label: "Trang Chủ" }];
+      // Xử lý Dealer roles (DealerManager và DealerStaff)
+      if (userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) {
+        return [
+          { path: '/dealer-dashboard', icon: RiDashboardLine, label: 'Dashboard' },
+          { path: '/dealer/vehicles', icon: RiCarLine, label: 'Catalog Xe' },
+          { path: '/dealer/inventory', icon: FiPackage, label: 'Quản Lý Kho' },
+          { path: '/dealer/customers', icon: FiUsers, label: 'Khách Hàng' },
+          { path: '/dealer/test-drives', icon: FiCalendar, label: 'Test Drive' },
+          { path: '/dealer/orders', icon: FiShoppingCart, label: 'Đơn Hàng' },
+          { path: '/dealer/quotations', icon: FiFileText, label: 'Báo Giá' },
+          { path: '/dealer/payments', icon: FiDollarSign, label: 'Thanh Toán' },
+          { path: '/dealer/reports/sales-performance', icon: FiBarChart2, label: 'Báo Cáo' },
+          { path: '/dealer/promotions', icon: FiFileText, label: 'Khuyến Mãi' },
+          { path: '/dealer/staff', icon: FiUsers, label: 'Nhân Viên' },
+          { path: '/landing', icon: FiHome, label: 'Trang Chủ' }
+        ];
       }
+
+      // Xử lý Customer role
+      if (userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') {
+        return [
+          { path: '/customer-dashboard', icon: RiDashboardLine, label: 'Dashboard' },
+          { path: '/vehicles', icon: RiCarLine, label: 'Khám Phá Xe' },
+          { path: '/shop', icon: FiShoppingCart, label: 'Cửa Hàng' },
+          { path: '/landing', icon: FiHome, label: 'Trang Chủ' }
+        ];
+      }
+
+      // Xử lý Admin và Staff roles
+      if (userRole === 'Admin' || userRole === 'EVMStaff' || userRole === USER_ROLES.EVM_ADMIN || userRole === USER_ROLES.STAFF) {
+        return [
+          { path: "/evm-dashboard", icon: RiDashboardLine, label: "EVM Dashboard" },
+          { path: "/reports", icon: FiBarChart2, label: "Reports" },
+          { path: "/admin/dealers", icon: RiGroupLine, label: "Đại Lý" },
+          { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
+          { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" },
+          { path: "/admin/users", icon: FiUsers, label: "Người Dùng" },
+          { path: "/landing", icon: FiHome, label: "Trang Chủ" },
+        ];
+      }
+      
+      // Default cho guest hoặc role không xác định
+      return [{ path: "/landing", icon: FiHome, label: "Trang Chủ" }];
     })();
 
     // Thêm notifications count từ API vào mỗi menu item
@@ -596,7 +608,12 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                       </label>
                       <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-                          {userRole === USER_ROLES.DEALER ? 'Đại Lý' :
+                          {userRole === 'DealerManager' ? 'Quản Lý Đại Lý' :
+                           userRole === 'DealerStaff' ? 'Nhân Viên Đại Lý' :
+                           userRole === 'Admin' ? 'Quản Trị Viên' :
+                           userRole === 'EVMStaff' ? 'Nhân Viên EVM' :
+                           userRole === 'Customer' ? 'Khách Hàng' :
+                           userRole === USER_ROLES.DEALER ? 'Đại Lý' :
                            userRole === USER_ROLES.CUSTOMER ? 'Khách Hàng' :
                            userRole === USER_ROLES.EVM_ADMIN ? 'Quản Trị Viên' :
                            userRole === USER_ROLES.STAFF ? 'Nhân Viên' : userRole}
@@ -607,7 +624,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 </div>
 
                 {/* Thông tin Đại lý - chỉ hiện với DEALER */}
-                {userRole === USER_ROLES.DEALER && (currentUser.dealerId || currentUser.shopName || currentUser.dealerShopId) && (
+                {(userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) && (currentUser.dealerId || currentUser.shopName || currentUser.dealerShopId) && (
                   <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/30">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <RiGroupLine size={20} className="text-indigo-400" />
@@ -659,7 +676,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 )}
 
                 {/* Thông tin Khách hàng - chỉ hiện với CUSTOMER */}
-                {userRole === USER_ROLES.CUSTOMER && currentUser.customerId && (
+                {(userRole === 'Customer' || userRole === USER_ROLES.CUSTOMER) && currentUser.customerId && (
                   <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <FiUsers size={20} className="text-purple-400" />
@@ -701,7 +718,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 )}
 
                 {/* Thông tin Nhân viên - chỉ hiện với STAFF */}
-                {userRole === USER_ROLES.STAFF && currentUser.staffId && (
+                {(userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) && currentUser.staffId && (
                   <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-500/30">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <FiUsers size={20} className="text-cyan-400" />
