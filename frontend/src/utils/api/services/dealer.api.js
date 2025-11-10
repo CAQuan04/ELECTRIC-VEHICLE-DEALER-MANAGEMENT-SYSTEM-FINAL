@@ -656,6 +656,86 @@ class DealerAPI {
     }
   }
 
+  // ==================== DEALER CONTRACT MANAGEMENT ====================
+
+  /**
+   * Get dealer contracts
+   * GET /manage/dealers/{dealerId}/contracts
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>} Contract list
+   */
+  async getDealerContracts(dealerId) {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/contracts`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy hợp đồng' };
+    }
+  }
+
+  /**
+   * Create dealer contract
+   * POST /manage/dealers/{dealerId}/contracts
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} contractData - Contract data {startDate, endDate, terms, status}
+   * @returns {Promise<Object>} Created contract
+   */
+  async createDealerContract(dealerId, contractData) {
+    try {
+      const response = await apiClient.post(`/manage/dealers/${dealerId}/contracts`, contractData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo hợp đồng' };
+    }
+  }
+
+  /**
+   * Get dealer targets
+   * GET /manage/dealers/{dealerId}/targets
+   * @param {string|number} dealerId - Dealer ID
+   * @returns {Promise<Object>} Target list
+   */
+  async getDealerTargets(dealerId) {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/targets`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy mục tiêu' };
+    }
+  }
+
+  /**
+   * Set dealer target
+   * POST /manage/dealers/{dealerId}/targets
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} targetData - Target data {periodStart, periodEnd, salesTarget}
+   * @returns {Promise<Object>} Created target
+   */
+  async setDealerTarget(dealerId, targetData) {
+    try {
+      const response = await apiClient.post(`/manage/dealers/${dealerId}/targets`, targetData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi đặt mục tiêu' };
+    }
+  }
+
+  /**
+   * Get dealer performance
+   * GET /manage/dealers/{dealerId}/performance?startDate=...&endDate=...
+   * @param {string|number} dealerId - Dealer ID
+   * @param {Object} dateRange - Date range filter {startDate, endDate}
+   * @returns {Promise<Object>} Performance data
+   */
+  async getDealerPerformance(dealerId, dateRange = {}) {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/performance`, { params: dateRange });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy hiệu suất' };
+    }
+  }
+
   // ==================== ORDER MANAGEMENT ====================
 
   /**

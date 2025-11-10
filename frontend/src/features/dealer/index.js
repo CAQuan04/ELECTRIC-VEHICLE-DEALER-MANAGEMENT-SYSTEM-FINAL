@@ -39,6 +39,7 @@ export { default as QuotationList } from './pages/Sales/QuotationList';
 export { default as CreateQuotation } from './pages/Sales/CreateQuotation';
 export { default as OrderList } from './pages/Sales/OrderList';
 export { default as CreateOrder } from './pages/Sales/CreateOrder';
+export { default as OrderDetail } from './pages/Sales/OrderDetail';
 export { default as PaymentList } from './pages/Sales/PaymentList';
 export { default as PaymentForm } from './pages/Sales/PaymentForm';
 

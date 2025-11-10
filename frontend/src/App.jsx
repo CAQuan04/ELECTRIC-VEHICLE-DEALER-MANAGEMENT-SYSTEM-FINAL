@@ -70,6 +70,7 @@ import {
   CreateQuotation,
   OrderList,
   CreateOrder,
+  OrderDetail,
   PaymentList,
   PaymentForm,
   // Purchase
@@ -366,6 +367,7 @@ const App = () => {
               <Route path="/dealer/quotations/create" element={<DealerGuard><DealerShopGuard><AppLayout><CreateQuotation /></AppLayout></DealerShopGuard></DealerGuard>} />
               <Route path="/dealer/orders" element={<DealerGuard><DealerShopGuard><AppLayout><OrderList /></AppLayout></DealerShopGuard></DealerGuard>} />
               <Route path="/dealer/orders/create" element={<DealerGuard><DealerShopGuard><AppLayout><CreateOrder /></AppLayout></DealerShopGuard></DealerGuard>} />
+              <Route path="/dealer/orders/:id" element={<DealerGuard><DealerShopGuard><AppLayout><OrderDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
               <Route path="/dealer/payments" element={<DealerGuard><DealerShopGuard><AppLayout><PaymentList /></AppLayout></DealerShopGuard></DealerGuard>} />
               <Route path="/dealer/payments/new" element={<DealerGuard><DealerShopGuard><AppLayout><PaymentForm /></AppLayout></DealerShopGuard></DealerGuard>} />
               

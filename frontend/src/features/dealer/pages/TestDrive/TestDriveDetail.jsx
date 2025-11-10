@@ -21,10 +21,49 @@ const TestDriveDetail = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
+  
+  // State cho thời gian thực tế (quản lý ở frontend)
+  const [actualStartTime, setActualStartTime] = useState(null);
+  const [actualEndTime, setActualEndTime] = useState(null);
+  const [durationMinutes, setDurationMinutes] = useState(null);
 
   useEffect(() => {
     loadTestDriveDetail();
+    // Load thời gian từ localStorage nếu có
+    loadTimingDataFromStorage();
   }, [id]);
+
+  // Load thời gian đã lưu từ localStorage
+  const loadTimingDataFromStorage = () => {
+    const storageKey = `testdrive_timing_${id}`;
+    const savedData = localStorage.getItem(storageKey);
+    if (savedData) {
+      try {
+        const { actualStartTime, actualEndTime, durationMinutes } = JSON.parse(savedData);
+        setActualStartTime(actualStartTime ? new Date(actualStartTime) : null);
+        setActualEndTime(actualEndTime ? new Date(actualEndTime) : null);
+        setDurationMinutes(durationMinutes);
+      } catch (error) {
+        console.error('Error loading timing data:', error);
+      }
+    }
+  };
+
+  // Lưu thời gian vào localStorage
+  const saveTimingDataToStorage = (startTime, endTime, duration) => {
+    const storageKey = `testdrive_timing_${id}`;
+    localStorage.setItem(storageKey, JSON.stringify({
+      actualStartTime: startTime,
+      actualEndTime: endTime,
+      durationMinutes: duration
+    }));
+  };
+
+  // Xóa dữ liệu timing khỏi localStorage
+  const clearTimingDataFromStorage = () => {
+    const storageKey = `testdrive_timing_${id}`;
+    localStorage.removeItem(storageKey);
+  };
 
   const loadTestDriveDetail = async () => {
     setIsLoading(true);
@@ -63,6 +102,69 @@ const TestDriveDetail = () => {
         } catch (error) {
           console.error('Error updating status:', error);
           notifications.error('Lỗi', 'Có lỗi xảy ra khi cập nhật trạng thái');
+        }
+      }
+    );
+  };
+
+  const handleStartTestDrive = async () => {
+    notifications.confirm(
+      'Xác nhận bắt đầu',
+      'Xác nhận bắt đầu lái thử và giao xe cho khách hàng?',
+      async () => {
+        const startTime = new Date();
+        setActualStartTime(startTime);
+        saveTimingDataToStorage(startTime.toISOString(), null, null);
+        notifications.success('Thành công', 'Đã xác nhận bắt đầu lái thử!');
+      }
+    );
+  };
+
+  const handleReturnTestDrive = async () => {
+    if (!actualStartTime) {
+      notifications.error('Lỗi', 'Chưa có thời gian bắt đầu. Vui lòng bắt đầu lái thử trước.');
+      return;
+    }
+
+    notifications.confirm(
+      'Xác nhận trả xe',
+      'Xác nhận khách hàng đã trả xe?',
+      async () => {
+        try {
+          const endTime = new Date();
+          const duration = Math.round((endTime - actualStartTime) / 60000); // Tính phút
+          
+          setActualEndTime(endTime);
+          setDurationMinutes(duration);
+          saveTimingDataToStorage(actualStartTime.toISOString(), endTime.toISOString(), duration);
+
+          // Tạo feedback với thông tin thời gian
+          const timingInfo = `
+═══════════════════════════════════════
+📊 THÔNG TIN THỜI GIAN LÁI THỬ
+═══════════════════════════════════════
+🚗 Bắt đầu: ${actualStartTime.toLocaleString('vi-VN')}
+🏁 Kết thúc: ${endTime.toLocaleString('vi-VN')}
+⏱️ Thời lượng: ${duration} phút${duration >= 60 ? ` (${Math.floor(duration / 60)} giờ ${duration % 60} phút)` : ''}
+═══════════════════════════════════════
+
+${feedback ? `📝 Phản hồi:\n${feedback}` : ''}
+          `.trim();
+
+          // Cập nhật status thành completed với feedback chứa thông tin thời gian
+          const result = await dealerAPI.updateTestDriveStatus(id, 'completed', timingInfo);
+          
+          if (result.success) {
+            notifications.success('Thành công', `Đã xác nhận trả xe thành công!\nThời gian sử dụng: ${duration} phút`);
+            await loadTestDriveDetail();
+            // Xóa dữ liệu timing sau khi hoàn thành
+            clearTimingDataFromStorage();
+          } else {
+            notifications.error('Lỗi', result.message);
+          }
+        } catch (error) {
+          console.error('Error returning test drive:', error);
+          notifications.error('Lỗi', 'Có lỗi xảy ra khi xác nhận trả xe');
         }
       }
     );
@@ -251,7 +353,7 @@ const TestDriveDetail = () => {
               })}
             />
             <InfoRow
-              label="Thời lượng"
+              label="Thời lượng dự kiến"
               value={`${testDrive.duration || 60} phút`}
             />
             {testDrive.dealerName && (
@@ -267,6 +369,55 @@ const TestDriveDetail = () => {
               />
             )}
           </InfoSection>
+
+          {/* Thời gian thực tế */}
+          {(actualStartTime || actualEndTime) && (
+            <InfoSection 
+              title="Thời gian thực tế" 
+              icon="⏱️"
+              className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-700"
+            >
+              {actualStartTime && (
+                <InfoRow
+                  label="🚗 Thời gian bắt đầu (giao xe)"
+                  value={actualStartTime.toLocaleString('vi-VN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })}
+                />
+              )}
+              {actualEndTime && (
+                <InfoRow
+                  label="🏁 Thời gian kết thúc (trả xe)"
+                  value={actualEndTime.toLocaleString('vi-VN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                  })}
+                />
+              )}
+              {durationMinutes && (
+                <InfoRow
+                  label="⌛ Thời gian sử dụng thực tế"
+                  value={
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      {durationMinutes} phút
+                      {durationMinutes >= 60 && 
+                        ` (${Math.floor(durationMinutes / 60)} giờ ${durationMinutes % 60} phút)`
+                      }
+                    </span>
+                  }
+                />
+              )}
+            </InfoSection>
+          )}
 
           {testDrive.notes && (
             <InfoSection 
@@ -316,7 +467,7 @@ const TestDriveDetail = () => {
           <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-500/20 dark:to-blue-600/10 border-2 border-blue-300 dark:border-blue-500">
             <h3 className="text-xl font-bold mb-4 text-gray-900 dark:text-white flex items-center gap-2">
               <Calendar className="w-6 h-6" />
-              Trạng thái
+              Trạng thái & Timeline
             </h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-lg">
@@ -326,10 +477,34 @@ const TestDriveDetail = () => {
                 </Badge>
               </div>
               {testDrive.createdAt && (
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  <span className="font-medium">Ngày đăng ký:</span>
+                <div className="text-sm text-gray-600 dark:text-gray-400 p-2 bg-white dark:bg-gray-800 rounded-lg">
+                  <span className="font-medium">📝 Ngày đăng ký:</span>
                   <br />
                   {new Date(testDrive.createdAt).toLocaleString('vi-VN')}
+                </div>
+              )}
+              {actualStartTime && (
+                <div className="text-sm text-emerald-600 dark:text-emerald-400 p-2 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                  <span className="font-medium">🚗 Bắt đầu:</span>
+                  <br />
+                  {actualStartTime.toLocaleString('vi-VN')}
+                </div>
+              )}
+              {actualEndTime && (
+                <div className="text-sm text-blue-600 dark:text-blue-400 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <span className="font-medium">🏁 Trả xe:</span>
+                  <br />
+                  {actualEndTime.toLocaleString('vi-VN')}
+                </div>
+              )}
+              {durationMinutes && (
+                <div className="text-sm font-bold text-purple-600 dark:text-purple-400 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-center">
+                  ⌛ {durationMinutes} phút
+                  {durationMinutes >= 60 && 
+                    <div className="text-xs mt-1">
+                      ({Math.floor(durationMinutes / 60)}h {durationMinutes % 60}m)
+                    </div>
+                  }
                 </div>
               )}
             </div>
@@ -359,14 +534,14 @@ const TestDriveDetail = () => {
                 </>
               )}
               
-              {testDrive.status === 'confirmed' && (
+              {testDrive.status === 'confirmed' && !actualStartTime && (
                 <>
                   <Button
                     variant="primary"
                     className="w-full"
-                    onClick={() => handleStatusUpdate('completed')}
+                    onClick={handleStartTestDrive}
                   >
-                    ✓ Đánh dấu hoàn thành
+                    🚗 Bắt đầu lái thử (Giao xe)
                   </Button>
                   <Button
                     variant="warning"
@@ -375,6 +550,21 @@ const TestDriveDetail = () => {
                   >
                     ✗ Hủy lịch
                   </Button>
+                </>
+              )}
+
+              {testDrive.status === 'confirmed' && actualStartTime && !actualEndTime && (
+                <>
+                  <Button
+                    variant="primary"
+                    className="w-full"
+                    onClick={handleReturnTestDrive}
+                  >
+                    🏁 Xác nhận trả xe
+                  </Button>
+                  <div className="text-sm text-gray-600 dark:text-gray-400 text-center p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    ⏱️ Đang trong quá trình lái thử...
+                  </div>
                 </>
               )}
 

@@ -10,7 +10,7 @@ export const useNotification = () => {
   const [notifications, setNotifications] = useState([]);
   const [confirms, setConfirms] = useState([]);
 
-  const showNotification = useCallback((type, title, message, duration = 6000) => {
+  const showNotification = useCallback((type, title, message, duration = 2000) => {
     const id = Date.now() + Math.random();
     const notification = {
       id,
