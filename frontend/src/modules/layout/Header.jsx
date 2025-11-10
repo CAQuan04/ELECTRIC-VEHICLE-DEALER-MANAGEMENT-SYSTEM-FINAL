@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import AuthComponent from '@modules/auth/AuthComponent';
-import { AuthService, USER_ROLES } from '@utils';
+import { USER_ROLES } from '@utils';
+import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/common/Logo';
 import './Header.css';
 
@@ -10,7 +11,7 @@ const Header = () => {
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
-  const currentUser = AuthService.getCurrentUser();
+  const { user: currentUser, logout } = useAuth();
   const userRole = currentUser?.role;
 
   const getMenuItems = () => {
@@ -118,11 +119,8 @@ const Header = () => {
 
   const handleLogout = () => {
     console.log('Logging out...'); // Debug log
-    AuthService.logout();
+    logout(); // Dùng logout từ useAuth
     setIsUserMenuOpen(false);
-    console.log('Current user after logout:', AuthService.getCurrentUser()); // Debug log
-    // Force complete page reload to clear all state
-    window.location.replace('/');
   };
 
   const isActivePage = (path) => {

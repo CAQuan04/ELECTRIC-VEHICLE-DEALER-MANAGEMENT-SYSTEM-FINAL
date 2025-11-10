@@ -1,21 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePageLoading } from '@modules/loading'; // Giả sử path đúng
-import { dealerAPI } from '@/utils/api/services/dealer.api.js'; // Sửa path
+import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { Package, CheckCircle, Tag, Archive } from 'lucide-react';
 
 // Import UI components
-import  Button  from '@/features/dealer/components/ui/Button.jsx';
-import  Badge from '@/features/dealer/components/ui/Badge.jsx';
-import  StatCard  from '@/features/dealer/components/ui/StatCard.jsx';
-import  Card  from '@/features/dealer/components/ui/Card.jsx';
-import  Table  from '@/features/dealer/components/ui/Table.jsx'; // Giả sử bạn có
-import { DetailHeader } from '@/features/dealer/components/ui/AdvancedComponents.jsx';
-import  SearchBar  from '@/features/dealer/components/ui/SearchBar.jsx';
-import  EmptyState  from '@/features/dealer/components/ui/EmptyState.jsx';
+import Button from '@/features/dealer/components/ui/Button.jsx';
+import Badge from '@/features/dealer/components/ui/Badge.jsx';
+import StatCard from '@/features/dealer/components/ui/StatCard.jsx';
+import Card from '@/features/dealer/components/ui/Card.jsx';
+import Table from '@/features/dealer/components/ui/Table.jsx';
+import { PageHeader } from '../../components';
+import SearchBar from '@/features/dealer/components/ui/SearchBar.jsx';
+import EmptyState from '@/features/dealer/components/ui/EmptyState.jsx';
 
-// (Giả sử PageContainer là 1 div đơn giản)
-const PageContainer = ({ children }) => <div className="container mx-auto p-4 md:p-8">{children}</div>;
+// Import PageContainer từ dealer layout
+import PageContainer from '../../components/layout/PageContainer';
 
 const DealerInventory = () => {
   const navigate = useNavigate();
@@ -86,9 +86,10 @@ const DealerInventory = () => {
 
   return (
     <PageContainer>
-      <DetailHeader
+      <PageHeader
         title="Kho xe"
         subtitle="Quản lý tồn kho và đặt hàng mới"
+        icon={<Package className="w-16 h-16" />}
         actions={
           <Button variant="gradient" onClick={handleRequestStock}>
             + Yêu cầu nhập xe
@@ -97,7 +98,7 @@ const DealerInventory = () => {
       />
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className=" mb-8 grid grid-cols-1 md:grid-cols-3 gap-6 ">
         <StatCard
           icon={<Package className="w-6 h-6" />}
           title="Tổng xe trong kho"
