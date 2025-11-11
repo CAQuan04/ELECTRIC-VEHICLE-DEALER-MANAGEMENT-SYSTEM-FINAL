@@ -75,9 +75,12 @@ const LoginModal = ({ onClose }) => {
             const role = response.role;
             console.log('🚀 Chuyển hướng dựa trên role:', role);
             
-            if (role === 'Admin' || role === 'EVMStaff') {
+            if (role === 'Admin') {
                 console.log('➡️ Navigate to /evm-dashboard');
                 navigate('/evm-dashboard');
+            } else if (role === 'EVMStaff') {
+                console.log('➡️ Navigate to /staff-dashboard');
+                navigate('/staff-dashboard');
             } else if (role === 'DealerManager' || role === 'DealerStaff') {
                 console.log('➡️ Navigate to /dealer-dashboard');
                 navigate('/dealer-dashboard');

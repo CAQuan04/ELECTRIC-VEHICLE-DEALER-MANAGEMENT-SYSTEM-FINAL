@@ -61,16 +61,25 @@ export const CustomerGuard = ({ children }) => (
   </RoleGuard>
 );
 
-// Ghi chú: Guard này cho phép cả "Admin" và "EVMStaff".
-// Đây là Guard chính cho các chức năng quản lý của hãng.
+// Ghi chú: Guard này CHỈ dành cho Admin.
+// Admin sẽ vào /evm-dashboard
 export const AdminGuard = ({ children }) => (
-  <RoleGuard allowedRoles={['Admin', 'EVMStaff']}>
+  <RoleGuard allowedRoles={['Admin']}>
     {children}
   </RoleGuard>
 );
 
-// Ghi chú: Guard này chỉ dành riêng cho EVMStaff (nếu có chức năng nào đó chỉ staff mới làm được).
+// Ghi chú: Guard này CHỈ dành cho EVMStaff.
+// EVMStaff sẽ vào /staff-dashboard
 export const StaffGuard = ({ children }) => (
+  <RoleGuard allowedRoles={['EVMStaff']}>
+    {children}
+  </RoleGuard>
+);
+
+// Ghi chú: Guard này cho phép CẢ Admin và EVMStaff.
+// Dùng cho các chức năng chung giữa Admin và Staff
+export const AdminStaffGuard = ({ children }) => (
   <RoleGuard allowedRoles={['Admin', 'EVMStaff']}>
     {children}
   </RoleGuard>

@@ -5,7 +5,8 @@ export {
     AdminGuard,
     DealerGuard,
     CustomerGuard,
-    StaffGuard,  // Add this line
+    StaffGuard,
+    AdminStaffGuard,  // Add new guard for shared functionality
     DealerShopGuard,
     AccessDenied
 } from './RoleGuard';

@@ -156,7 +156,8 @@ export const AuthProvider = ({ children }) => {
 
   const getDefaultDashboard = () => {
     const role = user?.role;
-    if (role === 'Admin' || role === 'EVMStaff') return '/evm-dashboard';
+    if (role === 'Admin') return '/evm-dashboard';
+    if (role === 'EVMStaff') return '/staff-dashboard';
     if (role === 'DealerManager' || role === 'DealerStaff') return '/dealer-dashboard';
     if (role === 'Customer') return '/customer-dashboard';
     return '/landing';

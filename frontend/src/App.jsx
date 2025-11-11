@@ -20,6 +20,7 @@ import {
     DealerGuard, 
     CustomerGuard, 
     StaffGuard,
+    AdminStaffGuard,
     DealerShopGuard 
 } from "@modules/auth";
 
@@ -295,7 +296,7 @@ const App = () => {
                 </AdminGuard>
               } />
 
-              {/* Staff Routes (Admin & EVMStaff) */}
+              {/* Staff Routes (EVMStaff only) */}
               <Route path="/staff-dashboard" element={
                 <StaffGuard>
                   <AppLayout>
@@ -304,20 +305,21 @@ const App = () => {
                 </StaffGuard>
               } />
               
+              {/* Shared Routes (Admin & EVMStaff) */}
               <Route path="/reports" element={
-                <StaffGuard>
+                <AdminStaffGuard>
                   <AppLayout>
                     <ReportDashboard />
                   </AppLayout>
-                </StaffGuard>
+                </AdminStaffGuard>
               } />
               
               <Route path="/admin/catalog" element={
-                <StaffGuard>
+                <AdminStaffGuard>
                   <AppLayout>
                     <VehicleCatalogue />
                   </AppLayout>
-                </StaffGuard>
+                </AdminStaffGuard>
               } />
 
               {/* Dealer Dashboard */}

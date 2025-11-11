@@ -154,12 +154,21 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       ];
     }
     
-    if (userRole === 'Admin' || userRole === 'EVMStaff' || userRole === USER_ROLES.EVM_ADMIN || userRole === USER_ROLES.STAFF) {
+    // Admin - có quyền quản lý đại lý
+    if (userRole === 'Admin' || userRole === USER_ROLES.EVM_ADMIN) {
       return [
         { label: 'Thêm Đại Lý', icon: RiGroupLine, path: '/admin/dealers/new' },
         { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
         // { label: 'Tạo Người Dùng', icon: FiUsers, path: '/admin/users/new' }, // TODO: Create UserManagement page
         // { label: 'Nhập Kho Tổng', icon: FiTruck, path: '/admin/inventory/import' }, // TODO: Create Inventory Management page
+        { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
+      ];
+    }
+    
+    // EVMStaff - không có quyền quản lý đại lý
+    if (userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) {
+      return [
+        { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
         { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
       ];
     }
@@ -198,8 +207,8 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         ];
       }
 
-      // Xử lý Admin và Staff roles
-      if (userRole === 'Admin' || userRole === 'EVMStaff' || userRole === USER_ROLES.EVM_ADMIN || userRole === USER_ROLES.STAFF) {
+      // Xử lý Admin role - chỉ Admin
+      if (userRole === 'Admin' || userRole === USER_ROLES.EVM_ADMIN) {
         return [
           { path: "/evm-dashboard", icon: RiDashboardLine, label: "EVM Dashboard" },
           { path: "/reports", icon: FiBarChart2, label: "Reports" },
@@ -207,6 +216,16 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
           { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" }, // TODO: Create Inventory Management page
           { path: "/admin/users", icon: FiUsers, label: "Người Dùng" }, // TODO: Create UserManagement page
+          { path: "/landing", icon: FiHome, label: "Trang Chủ" },
+        ];
+      }
+
+      // Xử lý EVMStaff role - chỉ Staff
+      if (userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) {
+        return [
+          { path: "/staff-dashboard", icon: RiDashboardLine, label: "Staff Dashboard" },
+          { path: "/reports", icon: FiBarChart2, label: "Reports" },
+          { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
           { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
@@ -672,7 +691,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                             Địa chỉ cửa hàng
                           </label>
                           <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white">
-                            📍 {currentUser.address}
+                            📍 {user.address}
                           </div>
                         </div>
                       )}
@@ -681,7 +700,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 )}
 
                 {/* Thông tin Khách hàng - chỉ hiện với CUSTOMER */}
-                {(userRole === 'Customer' || userRole === USER_ROLES.CUSTOMER) && currentUser.customerId && (
+                {(userRole === 'Customer' || userRole === USER_ROLES.CUSTOMER) && user.customerId && (
                   <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <FiUsers size={20} className="text-purple-400" />
@@ -693,28 +712,28 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                           Mã Khách Hàng
                         </label>
                         <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-purple-300 font-mono font-semibold">
-                          #{currentUser.customerId}
+                          #{user.customerId}
                         </div>
                       </div>
-                      {currentUser.membershipTier && (
+                      {user.membershipTier && (
                         <div>
                           <label className="block text-sm font-medium text-purple-300 mb-2">
                             Hạng thành viên
                           </label>
                           <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3">
                             <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                              ⭐ {currentUser.membershipTier}
+                              ⭐ {user.membershipTier}
                             </span>
                           </div>
                         </div>
                       )}
-                      {currentUser.address && (
+                      {user.address && (
                         <div className="md:col-span-2">
                           <label className="block text-sm font-medium text-purple-300 mb-2">
                             Địa chỉ
                           </label>
                           <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white">
-                            📍 {currentUser.address}
+                            📍 {user.address}
                           </div>
                         </div>
                       )}
@@ -723,7 +742,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 )}
 
                 {/* Thông tin Nhân viên - chỉ hiện với STAFF */}
-                {(userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) && currentUser.staffId && (
+                {(userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) && user.staffId && (
                   <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-500/30">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <FiUsers size={20} className="text-cyan-400" />
@@ -735,26 +754,26 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                           Mã Nhân Viên
                         </label>
                         <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-cyan-300 font-mono font-semibold">
-                          #{currentUser.staffId}
+                          #{user.staffId}
                         </div>
                       </div>
-                      {currentUser.department && (
+                      {user.department && (
                         <div>
                           <label className="block text-sm font-medium text-cyan-300 mb-2">
                             Phòng ban
                           </label>
                           <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
-                            🏢 {currentUser.department}
+                            🏢 {user.department}
                           </div>
                         </div>
                       )}
-                      {currentUser.position && (
+                      {user.position && (
                         <div>
                           <label className="block text-sm font-medium text-cyan-300 mb-2">
                             Chức vụ
                           </label>
                           <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
-                            👔 {currentUser.position}
+                            👔 {user.position}
                           </div>
                         </div>
                       )}
@@ -763,14 +782,14 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 )}
 
                 {/* Quyền hạn */}
-                {currentUser.permissions && currentUser.permissions.length > 0 && (
+                {user.permissions && user.permissions.length > 0 && (
                   <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
                     <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                       <FiSettings size={20} className="text-indigo-400" />
                       Quyền Hạn
                     </h3>
                     <div className="flex flex-wrap gap-2">
-                      {currentUser.permissions.map((permission, index) => (
+                      {user.permissions.map((permission, index) => (
                         <span
                           key={index}
                           className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 border border-slate-600/50"
