@@ -210,10 +210,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       // Xử lý Admin role - chỉ Admin
       if (userRole === 'Admin' || userRole === USER_ROLES.EVM_ADMIN) {
         return [
-          { path: "/evm-dashboard", icon: RiDashboardLine, label: "EVM Dashboard" },
-          { path: "/reports", icon: FiBarChart2, label: "Reports" },
-          { path: "/admin/dealers", icon: RiGroupLine, label: "Đại Lý" },
-          { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
+          { path: "/evm-dashboard", icon: RiDashboardLine, label: "Admin Dashboard" },
+          { path: "/admin/reports", icon: FiBarChart2, label: "Báo Cáo Doanh Thu" },
+          { path: "/admin/dealers", icon: RiGroupLine, label: "Quản lý Đại Lý" },
+          { path: "/admin/catalog", icon: RiCarLine, label: "Quản lý danh mục xe" },
           { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" }, // TODO: Create Inventory Management page
           { path: "/admin/users", icon: FiUsers, label: "Người Dùng" }, // TODO: Create UserManagement page
           { path: "/landing", icon: FiHome, label: "Trang Chủ" },

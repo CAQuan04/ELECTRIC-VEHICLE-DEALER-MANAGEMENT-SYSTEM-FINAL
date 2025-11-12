@@ -99,6 +99,8 @@ import {
 // Feature imports - Admin
 import { EvmDashboard, ReportDashboard, VehicleCatalogue, DealerList } from "./features/admin";
 import DealerManagement from './features/admin/pages/DealerManagement';
+import SalesReport from './features/admin/pages/SalesReport';
+import UserManagement from './features/admin/pages/UserManagement';
 
 // Feature imports - Staff
 import { StaffDashboard } from "./features/staff";
@@ -291,10 +293,19 @@ const App = () => {
               <Route path="/admin/dealers" element={
                 <AdminGuard>
                   <AppLayout>
-                    <DealerList />
+                    <DealerManagement />
                   </AppLayout>
                 </AdminGuard>
               } />
+
+              <Route path="/admin/users" element={
+                <AdminGuard>
+                  <AppLayout>
+                    <UserManagement />
+                  </AppLayout>
+                </AdminGuard>
+              } />
+              
 
               {/* Staff Routes (EVMStaff only) */}
               <Route path="/staff-dashboard" element={
@@ -306,10 +317,10 @@ const App = () => {
               } />
               
               {/* Shared Routes (Admin & EVMStaff) */}
-              <Route path="/reports" element={
+              <Route path="/admin/reports" element={
                 <AdminStaffGuard>
                   <AppLayout>
-                    <ReportDashboard />
+                    <SalesReport />
                   </AppLayout>
                 </AdminStaffGuard>
               } />

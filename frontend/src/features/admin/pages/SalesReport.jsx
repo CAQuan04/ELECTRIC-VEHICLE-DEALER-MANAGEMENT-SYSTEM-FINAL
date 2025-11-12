@@ -95,9 +95,9 @@ const SalesReport = () => {
   // ========== UI ==========
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-sky-400">
+      <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
         Báo cáo doanh số theo khu vực / đại lý
-      </h2>
+      </h1>
 
       {/* Bộ lọc */}
       <div className="flex flex-wrap gap-2 items-center">
