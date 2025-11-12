@@ -148,7 +148,7 @@ const UserManagement = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Quản lý người dùng</h1>
+        <h1 className="text-2xl font-base">Quản lý người dùng</h1>
         <button
           className="rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 font-semibold shadow-lg hover:brightness-105"
           onClick={openCreate}
@@ -189,7 +189,7 @@ const UserManagement = () => {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-        <table className="min-w-full border-collapse text-sm md:text-base">
+        <table className="min-w-full border-collapse text-base md:text-base">
           <thead className="bg-slate-800/60 text-sky-300">
             <tr>
               <th className="p-3 text-left">ID</th>

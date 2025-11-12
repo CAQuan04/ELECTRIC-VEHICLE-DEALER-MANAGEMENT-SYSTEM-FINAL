@@ -14,14 +14,14 @@ import { Sidebar, Navbar, Header } from "@modules/layout";
 import { VehicleList } from "@modules/common";
 
 // Auth Guards
-import { 
-    AccessDenied, 
-    AdminGuard, 
-    DealerGuard, 
-    CustomerGuard, 
-    StaffGuard,
-    AdminStaffGuard,
-    DealerShopGuard 
+import {
+  AccessDenied,
+  AdminGuard,
+  DealerGuard,
+  CustomerGuard,
+  StaffGuard,
+  AdminStaffGuard,
+  DealerShopGuard,
 } from "@modules/auth";
 
 // Utils
@@ -97,13 +97,24 @@ import {
 } from "./features/dealer";
 
 // Feature imports - Admin
-import { EvmDashboard, ReportDashboard, VehicleCatalogue, DealerList } from "./features/admin";
-import DealerManagement from './features/admin/pages/DealerManagement';
-import SalesReport from './features/admin/pages/SalesReport';
-import UserManagement from './features/admin/pages/UserManagement';
+import {
+  EvmDashboard,
+  ReportDashboard,
+  VehicleCatalogue,
+  DealerList,
+} from "./features/admin";
+import DealerManagement from "./features/admin/pages/DealerManagement";
+import SalesReport from "./features/admin/pages/SalesReport";
+import UserManagement from "./features/admin/pages/UserManagement";
+import DealerContractManagement from "./features/admin/pages/DealerContractManagement";
 
 // Feature imports - Staff
 import { StaffDashboard } from "./features/staff";
+import CatalogueViewer from "./features/staff/pages/CatalogueViewer";
+import InventoryManagement from "./features/staff/pages/InventoryManagement";
+import PricingManagement from "./features/staff/pages/PricingManagement";
+import InventoryTurnoverReport from "./features/staff/pages/InventoryTurnoverReport";
+import ForecastReport from './features/shared/pages/ForecastReport';
 
 // Feature imports - Public
 import {
@@ -201,13 +212,13 @@ const AppLayout = ({ children }) => {
   const { user } = useAuth(); // Sử dụng context mới
   const { isExpanded } = useSidebar(); // Lấy state từ context
 
-  console.log('📐 AppLayout render - user:', user);
+  console.log("📐 AppLayout render - user:", user);
 
   // Check if user is logged in to determine if we should show dashboard layout or public layout
   // Backend roles: 'Admin', 'EVMStaff', 'DealerManager', 'DealerStaff', 'Customer'
   if (user) {
     // For dashboard pages - show sidebar + navbar layout
-    console.log('✅ AppLayout: Hiển thị layout với sidebar');
+    console.log("✅ AppLayout: Hiển thị layout với sidebar");
     return (
       <div style={{ minHeight: "100vh" }}>
         <Sidebar />
@@ -222,7 +233,7 @@ const AppLayout = ({ children }) => {
         </div>
         <style>{`
           .main-content-with-sidebar {
-            padding-left: ${isExpanded ? '254px' : '60px'} !important;
+            padding-left: ${isExpanded ? "254px" : "60px"} !important;
             margin-left: 0 !important;
             min-height: 100vh;
             width: 100vw !important;
@@ -242,9 +253,9 @@ const AppLayout = ({ children }) => {
       </div>
     );
   }
-  
+
   // Nếu không có user, chỉ render children không có sidebar
-  console.log('ℹ️ AppLayout: Không có user, render children only');
+  console.log("ℹ️ AppLayout: Không có user, render children only");
   return <>{children}</>;
 };
 
@@ -272,159 +283,730 @@ const App = () => {
             <Routes>
               {/* Redirect root to landing */}
               <Route path="/" element={<LandingWithLoading />} />
-              
+
               {/* Public Routes with PublicLayout */}
-              <Route path="/landing" element={<PublicLayout><LandingWithLoading /></PublicLayout>} />
+              <Route
+                path="/landing"
+                element={
+                  <PublicLayout>
+                    <LandingWithLoading />
+                  </PublicLayout>
+                }
+              />
               <Route path="/access-denied" element={<AccessDenied />} />
-              
+
               {/* API Test Route */}
               <Route path="/api-test" element={<APITestPage />} />
 
               {/* Protected Routes with AppLayout */}
               {/* Admin Routes */}
-              <Route path="/evm-dashboard" element={
-                <AdminGuard>
-                  <AppLayout>
-                    <EvmDashboardWithLoading isLoading={false} isDataLoading={false} />
-                  </AppLayout>
-                </AdminGuard>
-              } />
-              
-              <Route path="/admin/dealers" element={
-                <AdminGuard>
-                  <AppLayout>
-                    <DealerManagement />
-                  </AppLayout>
-                </AdminGuard>
-              } />
+              <Route
+                path="/evm-dashboard"
+                element={
+                  <AdminGuard>
+                    <AppLayout>
+                      <EvmDashboardWithLoading
+                        isLoading={false}
+                        isDataLoading={false}
+                      />
+                    </AppLayout>
+                  </AdminGuard>
+                }
+              />
 
-              <Route path="/admin/users" element={
-                <AdminGuard>
-                  <AppLayout>
-                    <UserManagement />
-                  </AppLayout>
-                </AdminGuard>
-              } />
-              
+              <Route
+                path="/admin/dealers"
+                element={
+                  <AdminGuard>
+                    <AppLayout>
+                      <DealerManagement />
+                    </AppLayout>
+                  </AdminGuard>
+                }
+              />
+
+              <Route
+                path="/admin/users"
+                element={
+                  <AdminGuard>
+                    <AppLayout>
+                      <UserManagement />
+                    </AppLayout>
+                  </AdminGuard>
+                }
+              />
+
+              <Route
+                path="/admin/contracts-kpi"
+                element={
+                  <AdminGuard>
+                    <AppLayout>
+                      <DealerContractManagement />
+                    </AppLayout>
+                  </AdminGuard>
+                }
+              />
+
+              <Route
+                path="/admin/ai-forecast"
+                element={
+                  <AdminGuard>
+                    <AppLayout>
+                      <ForecastReport />
+                    </AppLayout>
+                  </AdminGuard>
+                }
+              />
 
               {/* Staff Routes (EVMStaff only) */}
-              <Route path="/staff-dashboard" element={
-                <StaffGuard>
-                  <AppLayout>
-                    <StaffDashboardWithLoading isLoading={false} isDataLoading={false} />
-                  </AppLayout>
-                </StaffGuard>
-              } />
-              
+              <Route
+                path="/staff-dashboard"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      <StaffDashboardWithLoading
+                        isLoading={false}
+                        isDataLoading={false}
+                      />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+
+              <Route
+                path="/staff/catalog"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      <CatalogueViewer />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+              <Route
+                path="/staff/inventory"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      <InventoryManagement />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+
+              <Route
+                path="/staff/pricing"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      <PricingManagement />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+
+              <Route
+                path="/staff/reports"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      {/* (Path này khớp với "Báo cáo tồn kho" trong Sidebar) */}
+                      <InventoryTurnoverReport />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+
+              <Route
+                path="/staff/ai-forecast"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      {/* (Tái sử dụng component ForecastReport của Admin) */}
+                      <ForecastReport />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+
               {/* Shared Routes (Admin & EVMStaff) */}
-              <Route path="/admin/reports" element={
-                <AdminStaffGuard>
-                  <AppLayout>
-                    <SalesReport />
-                  </AppLayout>
-                </AdminStaffGuard>
-              } />
-              
-              <Route path="/admin/catalog" element={
-                <AdminStaffGuard>
-                  <AppLayout>
-                    <VehicleCatalogue />
-                  </AppLayout>
-                </AdminStaffGuard>
-              } />
+              <Route
+                path="/admin/reports"
+                element={
+                  <AdminStaffGuard>
+                    <AppLayout>
+                      <SalesReport />
+                    </AppLayout>
+                  </AdminStaffGuard>
+                }
+              />
+
+              <Route
+                path="/admin/catalog"
+                element={
+                  <AdminStaffGuard>
+                    <AppLayout>
+                      <VehicleCatalogue />
+                    </AppLayout>
+                  </AdminStaffGuard>
+                }
+              />
 
               {/* Dealer Dashboard */}
-              <Route path="/dealer-dashboard" element={
-                <DealerGuard>
-                  <DealerShopGuard>
-                    <AppLayout>
-                      <DealerDashboardWithLoading isLoading={false} isDataLoading={false} />
-                    </AppLayout>
-                  </DealerShopGuard>
-                </DealerGuard>
-              } />
+              <Route
+                path="/dealer-dashboard"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerDashboardWithLoading
+                          isLoading={false}
+                          isDataLoading={false}
+                        />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
 
               {/* Customer Dashboard */}
-              <Route path="/customer-dashboard" element={
-                <CustomerGuard>
-                  <AppLayout>
-                    <CustomerDashboardWithLoading isLoading={false} isDataLoading={false} />
-                  </AppLayout>
-                </CustomerGuard>
-              } />
+              <Route
+                path="/customer-dashboard"
+                element={
+                  <CustomerGuard>
+                    <AppLayout>
+                      <CustomerDashboardWithLoading
+                        isLoading={false}
+                        isDataLoading={false}
+                      />
+                    </AppLayout>
+                  </CustomerGuard>
+                }
+              />
 
               {/* Dealer Routes - Vehicles */}
-              <Route path="/dealer/vehicles" element={<DealerGuard><DealerShopGuard><AppLayout><DealerVehicleList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/vehicles/:vehicleId" element={<DealerGuard><DealerShopGuard><AppLayout><VehicleDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/vehicles/compare" element={<DealerGuard><DealerShopGuard><AppLayout><CompareVehicles /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/vehicles"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerVehicleList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/vehicles/:vehicleId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <VehicleDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/vehicles/compare"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CompareVehicles />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Inventory */}
-              <Route path="/dealer/inventory" element={<DealerGuard><DealerShopGuard><AppLayout><DealerInventory /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/inventory/:stockId" element={<DealerGuard><DealerShopGuard><AppLayout><StockDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/inventory/request" element={<DealerGuard><DealerShopGuard><AppLayout><RequestStock /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/inventory"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerInventory />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/inventory/:stockId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <StockDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/inventory/request"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <RequestStock />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Customers */}
-              <Route path="/dealer/customers" element={<DealerGuard><DealerShopGuard><AppLayout><DealerCustomerList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/customers/new" element={<DealerGuard><DealerShopGuard><AppLayout><CustomerForm /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/customers/:customerId" element={<DealerGuard><DealerShopGuard><AppLayout><CustomerDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/customers/:customerId/edit" element={<DealerGuard><DealerShopGuard><AppLayout><CustomerForm /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/customers"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerCustomerList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/customers/new"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CustomerForm />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/customers/:customerId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CustomerDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/customers/:customerId/edit"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CustomerForm />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Test Drive */}
-              <Route path="/dealer/test-drives" element={<DealerGuard><DealerShopGuard><AppLayout><TestDriveList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/test-drives/new" element={<DealerGuard><DealerShopGuard><AppLayout><TestDriveForm /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/test-drives/calendar" element={<DealerGuard><DealerShopGuard><AppLayout><TestDriveCalendar /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/test-drives/:id" element={<DealerGuard><DealerShopGuard><AppLayout><TestDriveDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/test-drives"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <TestDriveList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/test-drives/new"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <TestDriveForm />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/test-drives/calendar"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <TestDriveCalendar />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/test-drives/:id"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <TestDriveDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Sales */}
-              <Route path="/dealer/quotations" element={<DealerGuard><DealerShopGuard><AppLayout><QuotationList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/quotations/create" element={<DealerGuard><DealerShopGuard><AppLayout><CreateQuotation /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/orders" element={<DealerGuard><DealerShopGuard><AppLayout><OrderList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/orders/create" element={<DealerGuard><DealerShopGuard><AppLayout><CreateOrder /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/orders/:id" element={<DealerGuard><DealerShopGuard><AppLayout><OrderDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/payments" element={<DealerGuard><DealerShopGuard><AppLayout><PaymentList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/payments/new" element={<DealerGuard><DealerShopGuard><AppLayout><PaymentForm /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/quotations"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <QuotationList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/quotations/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreateQuotation />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/orders"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <OrderList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/orders/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreateOrder />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/orders/:id"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <OrderDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/payments"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <PaymentList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/payments/new"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <PaymentForm />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Purchase */}
-              <Route path="/dealer/purchase-requests" element={<DealerGuard><DealerShopGuard><AppLayout><PurchaseRequestList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/purchase-requests/create" element={<DealerGuard><DealerShopGuard><AppLayout><CreatePurchaseRequest /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/purchase-requests"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <PurchaseRequestList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/purchase-requests/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreatePurchaseRequest />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Reports */}
-              <Route path="/dealer/reports/sales-performance" element={<DealerGuard><DealerShopGuard><AppLayout><SalesPerformanceReport /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/reports/customer-debt" element={<DealerGuard><DealerShopGuard><AppLayout><CustomerDebtReport /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/reports/supplier-debt" element={<DealerGuard><DealerShopGuard><AppLayout><SupplierDebtReport /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/reports/sales-performance"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <SalesPerformanceReport />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/reports/customer-debt"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CustomerDebtReport />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/reports/supplier-debt"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <SupplierDebtReport />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Promotions */}
-              <Route path="/dealer/promotions" element={<DealerGuard><DealerShopGuard><AppLayout><PromotionList /></AppLayout></DealerShopGuard></DealerGuard>} />
-              <Route path="/dealer/promotions/:promoId" element={<DealerGuard><DealerShopGuard><AppLayout><PromotionDetail /></AppLayout></DealerShopGuard></DealerGuard>} />
-              
+              <Route
+                path="/dealer/promotions"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <PromotionList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/promotions/:promoId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <PromotionDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Staff Management */}
-              <Route path="/dealer/staff" element={<DealerGuard><AppLayout><StaffList /></AppLayout></DealerGuard>} />
-              <Route path="/dealer/staff/new" element={<DealerGuard><AppLayout><StaffForm /></AppLayout></DealerGuard>} />
-              <Route path="/dealer/staff/:staffId/edit" element={<DealerGuard><AppLayout><StaffForm /></AppLayout></DealerGuard>} />
-              
+              <Route
+                path="/dealer/staff"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <StaffList />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/staff/new"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <StaffForm />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/staff/:staffId/edit"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <StaffForm />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+
               {/* Dealer Routes - Feedback */}
-              <Route path="/dealer/feedback" element={<DealerGuard><AppLayout><FeedbackList /></AppLayout></DealerGuard>} />
-              <Route path="/dealer/feedback/create" element={<DealerGuard><AppLayout><FeedbackForm /></AppLayout></DealerGuard>} />
-              <Route path="/dealer/feedback/edit/:feedbackId" element={<DealerGuard><AppLayout><FeedbackForm /></AppLayout></DealerGuard>} />
-              <Route path="/dealer/feedback/:feedbackId" element={<DealerGuard><AppLayout><FeedbackDetail /></AppLayout></DealerGuard>} />
-              
+              <Route
+                path="/dealer/feedback"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <FeedbackList />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/feedback/create"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <FeedbackForm />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/feedback/edit/:feedbackId"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <FeedbackForm />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/feedback/:feedbackId"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <FeedbackDetail />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+
               {/* Public Pages */}
-              <Route path="/vehicles" element={<PublicLayout><VehiclesWithLoading isLoading={false} /></PublicLayout>} />
-              <Route path="/vehicles/model-s" element={<PublicLayout><ModelSWithLoading isLoading={false} /></PublicLayout>} />
-              <Route path="/vehicles/model-3" element={<PublicLayout><Model3WithLoading isLoading={false} /></PublicLayout>} />
-              <Route path="/charging" element={<PublicLayout><Charging /></PublicLayout>} />
-              <Route path="/shop" element={<PublicLayout><Shop /></PublicLayout>} />
-              <Route path="/information" element={<PublicLayout><Information /></PublicLayout>} />
-              <Route path="/discover" element={<PublicLayout><Discover /></PublicLayout>} />
-              <Route path="/loading-demo" element={<PublicLayout><LoadingDemo /></PublicLayout>} />
-              
+              <Route
+                path="/vehicles"
+                element={
+                  <PublicLayout>
+                    <VehiclesWithLoading isLoading={false} />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/vehicles/model-s"
+                element={
+                  <PublicLayout>
+                    <ModelSWithLoading isLoading={false} />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/vehicles/model-3"
+                element={
+                  <PublicLayout>
+                    <Model3WithLoading isLoading={false} />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/charging"
+                element={
+                  <PublicLayout>
+                    <Charging />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/shop"
+                element={
+                  <PublicLayout>
+                    <Shop />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/information"
+                element={
+                  <PublicLayout>
+                    <Information />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/discover"
+                element={
+                  <PublicLayout>
+                    <Discover />
+                  </PublicLayout>
+                }
+              />
+              <Route
+                path="/loading-demo"
+                element={
+                  <PublicLayout>
+                    <LoadingDemo />
+                  </PublicLayout>
+                }
+              />
+
               {/* Auth Pages */}
               <Route path="/register" element={<RegisterForm />} />
               <Route path="/register/success" element={<RegisterSuccess />} />
-              
+
               {/* Legacy routes */}
-              <Route path="/dealer" element={<DealerGuard><AppLayout><DealerDashboardWithLoading isLoading={false} isDataLoading={false} /></AppLayout></DealerGuard>} />
-              <Route path="/evm" element={<AdminGuard><AppLayout><EvmDashboardWithLoading isLoading={false} isDataLoading={false} /></AppLayout></AdminGuard>} />
+              <Route
+                path="/dealer"
+                element={
+                  <DealerGuard>
+                    <AppLayout>
+                      <DealerDashboardWithLoading
+                        isLoading={false}
+                        isDataLoading={false}
+                      />
+                    </AppLayout>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/evm"
+                element={
+                  <AdminGuard>
+                    <AppLayout>
+                      <EvmDashboardWithLoading
+                        isLoading={false}
+                        isDataLoading={false}
+                      />
+                    </AppLayout>
+                  </AdminGuard>
+                }
+              />
             </Routes>
             <ThemeToggle />
             <NotificationContainer />

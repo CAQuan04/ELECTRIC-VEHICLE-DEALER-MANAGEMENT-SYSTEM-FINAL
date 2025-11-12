@@ -358,7 +358,7 @@ const DealerContractManagement = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-sky-400">Hợp đồng & KPI đại lý (PRO)</h2>
+      <h1 className="text-2xl font-bold text-sky-400">Hợp đồng & KPI đại lý</h1>
 
       {/* Tabs */}
       <div className="flex gap-2">
@@ -440,7 +440,7 @@ const DealerContractManagement = () => {
       {/* Panels */}
       {tab === "contracts" && (
         <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-          <table className="min-w-full border-collapse text-sm">
+          <table className="min-w-full border-collapse text-base">
             <thead className="bg-slate-800/60 text-sky-300">
               <tr>
                 <th className="p-3 text-left">Mã HĐ</th>

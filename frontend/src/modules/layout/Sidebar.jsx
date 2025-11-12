@@ -5,8 +5,35 @@ import { useAuth } from "../../context/AuthContext";
 import { useSidebar } from "../../contexts/SidebarContext";
 import { useNotifications } from "../../hooks/useNotifications";
 import Logo from "../../components/common/Logo";
-import { FiUsers, FiMenu, FiX, FiPlus, FiShoppingCart, FiBarChart2, FiHome, FiTruck, FiPackage, FiChevronLeft, FiChevronRight, FiSettings, FiLogOut, FiFileText, FiCalendar, FiDollarSign } from "react-icons/fi";
-import { RiGroupLine, RiMoonLine, RiSunLine, RiCarLine, RiDashboardLine } from "react-icons/ri";
+import {
+  FiUsers,
+  FiMenu,
+  FiX,
+  FiPlus,
+  FiShoppingCart,
+  FiBarChart2,
+  FiHome,
+  FiTruck,
+  FiPackage,
+  FiChevronLeft,
+  FiChevronRight,
+  FiSettings,
+  FiLogOut,
+  FiFileText,
+  FiCalendar,
+  FiDollarSign,
+} from "react-icons/fi";
+import {
+  RiGroupLine,
+  RiMoonLine,
+  RiSunLine,
+  RiCarLine,
+  RiDashboardLine,
+  RiFileTextLine,
+  RiBrainLine,
+  RiPriceTag3Line,
+  RiFileChartLine,
+} from "react-icons/ri";
 
 /* ==== SVG Icons (size up: w-6 h-6) ==== */
 const icons = {
@@ -94,15 +121,19 @@ const Sidebar = ({ isOpen = false, onClose }) => {
   const { user, logout } = useAuth();
   const userRole = user?.role;
   const navigate = useNavigate();
-  
-  console.log('🎯 Sidebar render - user:', user, 'role:', userRole);
+
+  console.log("🎯 Sidebar render - user:", user, "role:", userRole);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showCreateMenu, setShowCreateMenu] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const { isExpanded, toggleSidebar } = useSidebar(); // Sử dụng context
-  const { notifications, loading: notificationsLoading, markAsRead } = useNotifications(); // Lấy notifications thực tế
+  const {
+    notifications,
+    loading: notificationsLoading,
+    markAsRead,
+  } = useNotifications(); // Lấy notifications thực tế
   const userMenuRef = useRef(null);
   const createMenuRef = useRef(null);
 
@@ -121,58 +152,85 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
       }
-      if (createMenuRef.current && !createMenuRef.current.contains(event.target)) {
+      if (
+        createMenuRef.current &&
+        !createMenuRef.current.contains(event.target)
+      ) {
         setShowCreateMenu(false);
       }
     };
 
     if (showUserMenu || showCreateMenu) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [showUserMenu, showCreateMenu]);
 
   // Create menu items theo role
   const createMenuItems = useMemo(() => {
     // Xử lý cả role từ backend (DealerManager, DealerStaff) và role cũ (dealer)
-    if (userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) {
+    if (
+      userRole === "DealerManager" ||
+      userRole === "DealerStaff" ||
+      userRole === USER_ROLES.DEALER
+    ) {
       return [
-        { label: 'Tạo Đơn Hàng', icon: FiShoppingCart, path: '/dealer/orders/create' },
-        { label: 'Thêm Khách Hàng', icon: FiUsers, path: '/dealer/customers/new' },
-        { label: 'Đặt Lịch Test Drive', icon: FiCalendar, path: '/dealer/test-drives/new' },
-        { label: 'Yêu Cầu Nhập Kho', icon: FiPackage, path: '/dealer/inventory/request' }
+        {
+          label: "Tạo Đơn Hàng",
+          icon: FiShoppingCart,
+          path: "/dealer/orders/create",
+        },
+        {
+          label: "Thêm Khách Hàng",
+          icon: FiUsers,
+          path: "/dealer/customers/new",
+        },
+        {
+          label: "Đặt Lịch Test Drive",
+          icon: FiCalendar,
+          path: "/dealer/test-drives/new",
+        },
+        {
+          label: "Yêu Cầu Nhập Kho",
+          icon: FiPackage,
+          path: "/dealer/inventory/request",
+        },
       ];
     }
-    
-    if (userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') {
+
+    if (userRole === USER_ROLES.CUSTOMER || userRole === "Customer") {
       return [
-        { label: 'Đặt Lịch Test Drive', icon: FiCalendar, path: '/test-drive/book' },
-        { label: 'Tạo Đơn Hàng', icon: FiShoppingCart, path: '/orders/new' }
+        {
+          label: "Đặt Lịch Test Drive",
+          icon: FiCalendar,
+          path: "/test-drive/book",
+        },
+        { label: "Tạo Đơn Hàng", icon: FiShoppingCart, path: "/orders/new" },
       ];
     }
-    
+
     // Admin - có quyền quản lý đại lý
-    if (userRole === 'Admin' || userRole === USER_ROLES.EVM_ADMIN) {
+    if (userRole === "Admin" || userRole === USER_ROLES.EVM_ADMIN) {
       return [
-        { label: 'Thêm Đại Lý', icon: RiGroupLine, path: '/admin/dealers/new' },
-        { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
+        { label: "Thêm Đại Lý", icon: RiGroupLine, path: "/admin/dealers/new" },
+        { label: "Thêm Xe Mới", icon: RiCarLine, path: "/admin/catalog/new" },
         // { label: 'Tạo Người Dùng', icon: FiUsers, path: '/admin/users/new' }, // TODO: Create UserManagement page
         // { label: 'Nhập Kho Tổng', icon: FiTruck, path: '/admin/inventory/import' }, // TODO: Create Inventory Management page
-        { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
+        { label: "Tạo Báo Cáo", icon: FiFileText, path: "/reports/new" },
       ];
     }
-    
+
     // EVMStaff - không có quyền quản lý đại lý
-    if (userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) {
+    if (userRole === "EVMStaff" || userRole === USER_ROLES.STAFF) {
       return [
-        { label: 'Thêm Xe Mới', icon: RiCarLine, path: '/admin/catalog/new' },
-        { label: 'Tạo Báo Cáo', icon: FiFileText, path: '/reports/new' }
+        { label: "Thêm Xe Mới", icon: RiCarLine, path: "/admin/catalog/new" },
+        { label: "Tạo Báo Cáo", icon: FiFileText, path: "/reports/new" },
       ];
     }
-    
+
     return [];
   }, [userRole]);
 
@@ -180,64 +238,139 @@ const Sidebar = ({ isOpen = false, onClose }) => {
     // Base menu items không có notifications
     const baseMenuItems = (() => {
       // Xử lý Dealer roles (DealerManager và DealerStaff)
-      if (userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) {
+      if (
+        userRole === "DealerManager" ||
+        userRole === "DealerStaff" ||
+        userRole === USER_ROLES.DEALER
+      ) {
         return [
-          { path: '/dealer-dashboard', icon: RiDashboardLine, label: 'Dashboard' },
-          { path: '/dealer/vehicles', icon: RiCarLine, label: 'Catalog Xe' },
-          { path: '/dealer/inventory', icon: FiPackage, label: 'Quản Lý Kho' },
-          { path: '/dealer/customers', icon: FiUsers, label: 'Khách Hàng' },
-          { path: '/dealer/test-drives', icon: FiCalendar, label: 'Test Drive' },
-          { path: '/dealer/orders', icon: FiShoppingCart, label: 'Đơn Hàng' },
-          { path: '/dealer/quotations', icon: FiFileText, label: 'Báo Giá' },
-          { path: '/dealer/payments', icon: FiDollarSign, label: 'Thanh Toán' },
-          { path: '/dealer/reports/sales-performance', icon: FiBarChart2, label: 'Báo Cáo' },
-          { path: '/dealer/promotions', icon: FiFileText, label: 'Khuyến Mãi' },
-          { path: '/dealer/staff', icon: FiUsers, label: 'Nhân Viên' },
-          { path: '/landing', icon: FiHome, label: 'Trang Chủ' }
+          {
+            path: "/dealer-dashboard",
+            icon: RiDashboardLine,
+            label: "Dashboard",
+          },
+          { path: "/dealer/vehicles", icon: RiCarLine, label: "Catalog Xe" },
+          { path: "/dealer/inventory", icon: FiPackage, label: "Quản Lý Kho" },
+          { path: "/dealer/customers", icon: FiUsers, label: "Khách Hàng" },
+          {
+            path: "/dealer/test-drives",
+            icon: FiCalendar,
+            label: "Test Drive",
+          },
+          { path: "/dealer/orders", icon: FiShoppingCart, label: "Đơn Hàng" },
+          { path: "/dealer/quotations", icon: FiFileText, label: "Báo Giá" },
+          { path: "/dealer/payments", icon: FiDollarSign, label: "Thanh Toán" },
+          {
+            path: "/dealer/reports/sales-performance",
+            icon: FiBarChart2,
+            label: "Báo Cáo",
+          },
+          { path: "/dealer/promotions", icon: FiFileText, label: "Khuyến Mãi" },
+          { path: "/dealer/staff", icon: FiUsers, label: "Nhân Viên" },
+          { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
 
       // Xử lý Customer role
-      if (userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') {
+      if (userRole === USER_ROLES.CUSTOMER || userRole === "Customer") {
         return [
-          { path: '/customer-dashboard', icon: RiDashboardLine, label: 'Dashboard' },
-          { path: '/vehicles', icon: RiCarLine, label: 'Khám Phá Xe' },
-          { path: '/shop', icon: FiShoppingCart, label: 'Cửa Hàng' },
-          { path: '/landing', icon: FiHome, label: 'Trang Chủ' }
+          {
+            path: "/customer-dashboard",
+            icon: RiDashboardLine,
+            label: "Dashboard",
+          },
+          { path: "/vehicles", icon: RiCarLine, label: "Khám Phá Xe" },
+          { path: "/shop", icon: FiShoppingCart, label: "Cửa Hàng" },
+          { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
 
       // Xử lý Admin role - chỉ Admin
-      if (userRole === 'Admin' || userRole === USER_ROLES.EVM_ADMIN) {
+      if (userRole === "Admin" || userRole === USER_ROLES.EVM_ADMIN) {
         return [
-          { path: "/evm-dashboard", icon: RiDashboardLine, label: "Admin Dashboard" },
-          { path: "/admin/reports", icon: FiBarChart2, label: "Báo Cáo Doanh Thu" },
-          { path: "/admin/dealers", icon: RiGroupLine, label: "Quản lý Đại Lý" },
-          { path: "/admin/catalog", icon: RiCarLine, label: "Quản lý danh mục xe" },
-          { path: "/admin/inventory", icon: FiTruck, label: "Tổng Kho" }, // TODO: Create Inventory Management page
-          { path: "/admin/users", icon: FiUsers, label: "Người Dùng" }, // TODO: Create UserManagement page
+
+          {
+            path: "/evm-dashboard",
+            icon: RiDashboardLine,
+            label: "Admin Dashboard",
+          },
+
+          { path: "/admin/users", icon: FiUsers, label: "Người Dùng" },
+
+          {
+            path: "/admin/dealers",
+            icon: RiGroupLine,
+            label: "Quản lý Đại Lý",
+          },
+
+          {
+            path: "/admin/catalog",
+            icon: RiCarLine,
+            label: "Quản lý danh mục xe",
+          },
+
+          {
+            path: "/admin/contracts-kpi",
+            icon: RiFileTextLine,
+            label: "Hợp đồng & KPI Đại lý",
+          },
+
+          {
+            path: "/admin/reports",
+            icon: FiBarChart2,
+            label: "Báo Cáo Doanh Thu",
+          },
+
+          {
+            path: "/admin/ai-forecast",
+            icon: RiBrainLine,
+            label: "AI Dự báo Nhu cầu",
+          },
           { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
 
       // Xử lý EVMStaff role - chỉ Staff
-      if (userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) {
+      if (userRole === "EVMStaff" || userRole === USER_ROLES.STAFF) {
         return [
-          { path: "/staff-dashboard", icon: RiDashboardLine, label: "Staff Dashboard" },
-          { path: "/reports", icon: FiBarChart2, label: "Reports" },
-          { path: "/admin/catalog", icon: RiCarLine, label: "Catalog Xe" },
+          {
+            path: "/staff-dashboard",
+            icon: RiDashboardLine,
+            label: "Staff Dashboard",
+          },
+          { path: "/staff/catalog", icon: RiCarLine, label: "Danh mục xe" },
+          { 
+    path: "/staff/inventory", 
+    icon: FiPackage, 
+    label: "Tồn kho & Điều phối" 
+  },
+  { 
+    path: "/staff/pricing", 
+    icon: RiPriceTag3Line, 
+    label: "Giá sỉ & Khuyến mãi" 
+  },
+  { 
+    path: "/staff/reports", 
+    icon: RiFileChartLine, 
+    label: "Báo cáo tồn kho" 
+  },
+  { 
+    path: "/staff/ai-forecast", 
+    icon: RiBrainLine, 
+    label: "Dự báo nhu cầu (AI)" 
+  },
           { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
-      
-      // Default cho guest hoặc role không xác định 
+
+      // Default cho guest hoặc role không xác định
       return [{ path: "/landing", icon: FiHome, label: "Trang Chủ" }];
     })();
 
     // Thêm notifications count từ API vào mỗi menu item
-    return baseMenuItems.map(item => ({
+    return baseMenuItems.map((item) => ({
       ...item,
-      notifications: notifications[item.path] || 0
+      notifications: notifications[item.path] || 0,
     }));
   }, [userRole, notifications]);
 
@@ -256,12 +389,12 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
   // Don't render sidebar if no user
   if (!user) {
-    console.log('❌ Sidebar: Không có user, không render');
+    console.log("❌ Sidebar: Không có user, không render");
     return null;
   }
 
-  console.log('✅ Sidebar: Có user, đang render sidebar');
-  
+  console.log("✅ Sidebar: Có user, đang render sidebar");
+
   return (
     <>
       {/* Mobile Menu Toggle Button */}
@@ -284,12 +417,16 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           "transition-all duration-300 ease-in-out",
           isExpanded ? "w-[250px]" : "w-22", // 250px khi mở rộng
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full",
-          "lg:translate-x-0"
+          "lg:translate-x-0",
         ].join(" ")}
       >
         <div className="flex flex-col h-full justify-between py-6">
           {/* Logo & Title */}
-          <div className={`flex items-center px-4 mb-8 ${isExpanded ? 'justify-start gap-3' : 'justify-center'} transition-all duration-300`}>
+          <div
+            className={`flex items-center px-4 mb-8 ${
+              isExpanded ? "justify-start gap-3" : "justify-center"
+            } transition-all duration-300`}
+          >
             <Logo size={50} />
             {isExpanded && (
               <div className="overflow-hidden">
@@ -310,9 +447,15 @@ const Sidebar = ({ isOpen = false, onClose }) => {
             aria-label={isExpanded ? "Thu gọn sidebar" : "Mở rộng sidebar"}
           >
             {isExpanded ? (
-              <FiChevronLeft size={16} className="text-indigo-400 group-hover:text-indigo-300" />
+              <FiChevronLeft
+                size={16}
+                className="text-indigo-400 group-hover:text-indigo-300"
+              />
             ) : (
-              <FiChevronRight size={16} className="text-indigo-400 group-hover:text-indigo-300" />
+              <FiChevronRight
+                size={16}
+                className="text-indigo-400 group-hover:text-indigo-300"
+              />
             )}
           </button>
 
@@ -331,7 +474,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                       isExpanded ? "gap-6 pl-6" : "justify-center",
                       isActive
                         ? "bg-gradient-to-r from-indigo-600 to-indigo-500 shadow-lg shadow-indigo-500/30"
-                        : "hover:bg-slate-800/50"
+                        : "hover:bg-slate-800/50",
                     ].join(" ")
                   }
                   aria-label={item.label}
@@ -353,18 +496,20 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                           </span>
                         )}
                       </div>
-                      
+
                       {/* Label - hiển thị khi expanded */}
                       {isExpanded && (
-                        <span className={`text-[15px] font-semibold whitespace-nowrap ${
-                          isActive
-                            ? "text-white"
-                            : "text-slate-300 group-hover:text-white"
-                        }`}>
+                        <span
+                          className={`text-[15px] font-semibold whitespace-nowrap ${
+                            isActive
+                              ? "text-white"
+                              : "text-slate-300 group-hover:text-white"
+                          }`}
+                        >
                           {item.label}
                         </span>
                       )}
-                      
+
                       {/* Tooltip - chỉ hiển thị khi collapsed */}
                       {!isExpanded && (
                         <span className="absolute left-full ml-3 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-xl">
@@ -386,12 +531,14 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={() => setShowUserMenu(!showUserMenu)}
-                  className={`w-full flex items-center group hover:bg-slate-800/50 rounded-xl p-2 transition-all duration-200 ${isExpanded ? 'gap-3' : 'justify-center'}`}
+                  className={`w-full flex items-center group hover:bg-slate-800/50 rounded-xl p-2 transition-all duration-200 ${
+                    isExpanded ? "gap-3" : "justify-center"
+                  }`}
                 >
                   <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-indigo-500/30 flex-shrink-0 ring-2 ring-indigo-400/30">
                     {user.username.charAt(0).toUpperCase()}
                   </div>
-                  
+
                   {isExpanded && (
                     <div className="overflow-hidden flex-1 text-left">
                       <div className="text-[15px] font-semibold text-white whitespace-nowrap truncate">
@@ -402,7 +549,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                       </div>
                     </div>
                   )}
-                  
+
                   {/* Tooltip khi collapsed */}
                   {!isExpanded && (
                     <span className="absolute left-full ml-3 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-xl z-50">
@@ -416,7 +563,13 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
                 {/* Dropdown Menu */}
                 {showUserMenu && (
-                  <div className={`absolute ${isExpanded ? 'bottom-full left-0 right-0' : 'bottom-0 left-full ml-3'} mb-2 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 min-w-[200px]`}>
+                  <div
+                    className={`absolute ${
+                      isExpanded
+                        ? "bottom-full left-0 right-0"
+                        : "bottom-0 left-full ml-3"
+                    } mb-2 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 min-w-[200px]`}
+                  >
                     <div className="py-2">
                       {/* Config Account */}
                       <button
@@ -426,7 +579,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                         }}
                         className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-700/50 transition-colors text-left group"
                       >
-                        <FiSettings size={18} className="text-slate-400 group-hover:text-indigo-400" />
+                        <FiSettings
+                          size={18}
+                          className="text-slate-400 group-hover:text-indigo-400"
+                        />
                         <span className="text-sm font-medium text-slate-300 group-hover:text-white">
                           Cấu hình tài khoản
                         </span>
@@ -443,7 +599,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                         }}
                         className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-red-500/10 transition-colors text-left group"
                       >
-                        <FiLogOut size={18} className="text-slate-400 group-hover:text-red-400" />
+                        <FiLogOut
+                          size={18}
+                          className="text-slate-400 group-hover:text-red-400"
+                        />
                         <span className="text-sm font-medium text-slate-300 group-hover:text-red-400">
                           Đăng xuất
                         </span>
@@ -458,27 +617,33 @@ const Sidebar = ({ isOpen = false, onClose }) => {
             <button
               onClick={toggleDarkMode}
               className={`w-full p-3 flex items-center hover:bg-slate-800/50 rounded-xl group relative transition-all duration-200 ${
-                isExpanded ? 'gap-3 justify-start' : 'justify-center'
+                isExpanded ? "gap-3 justify-start" : "justify-center"
               }`}
               aria-label="Toggle Dark Mode"
             >
               <div className="flex-shrink-0">
                 {isDarkMode ? (
-                  <RiSunLine size={24} className="text-slate-400 group-hover:text-amber-400" />
+                  <RiSunLine
+                    size={24}
+                    className="text-slate-400 group-hover:text-amber-400"
+                  />
                 ) : (
-                  <RiMoonLine size={24} className="text-slate-400 group-hover:text-indigo-400" />
+                  <RiMoonLine
+                    size={24}
+                    className="text-slate-400 group-hover:text-indigo-400"
+                  />
                 )}
               </div>
-              
+
               {isExpanded && (
                 <span className="text-[15px] font-semibold text-slate-300 group-hover:text-white whitespace-nowrap">
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                  {isDarkMode ? "Light Mode" : "Dark Mode"}
                 </span>
               )}
-              
+
               {!isExpanded && (
                 <span className="absolute left-full ml-3 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-xl">
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                  {isDarkMode ? "Light Mode" : "Dark Mode"}
                   <span className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-slate-800"></span>
                 </span>
               )}
@@ -489,18 +654,20 @@ const Sidebar = ({ isOpen = false, onClose }) => {
               <button
                 onClick={() => setShowCreateMenu(!showCreateMenu)}
                 className={`flex items-center bg-gradient-to-r from-indigo-300 to-purple-500 hover:from-indigo-500 hover:to-indigo-400 text-white rounded-full shadow-lg shadow-indigo-500/30 hover:shadow-indigo-500/50 transition-all duration-200 group relative transform hover:scale-105 ${
-                  isExpanded ? 'w-full p-3 gap-3 justify-center' : 'w-12 h-12 mx-auto justify-center'
+                  isExpanded
+                    ? "w-full p-3 gap-3 justify-center"
+                    : "w-12 h-12 mx-auto justify-center"
                 }`}
                 aria-label="Create New"
               >
                 <FiPlus size={24} className="flex-shrink-0" />
-                
+
                 {isExpanded && (
                   <span className="text-[15px] font-bold whitespace-nowrap">
                     Create New
                   </span>
                 )}
-                
+
                 {!isExpanded && (
                   <span className="absolute left-full ml-3 px-3 py-2 bg-slate-800 border border-slate-700 text-white text-sm rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 whitespace-nowrap shadow-xl z-50">
                     Create New
@@ -511,7 +678,13 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
               {/* Dropdown Create Menu */}
               {showCreateMenu && createMenuItems.length > 0 && (
-                <div className={`absolute ${isExpanded ? 'bottom-full left-0 right-0' : 'bottom-0 left-full ml-3'} mb-2 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 min-w-[220px]`}>
+                <div
+                  className={`absolute ${
+                    isExpanded
+                      ? "bottom-full left-0 right-0"
+                      : "bottom-0 left-full ml-3"
+                  } mb-2 bg-slate-800 border border-slate-700 rounded-xl shadow-xl overflow-hidden z-50 min-w-[220px]`}
+                >
                   <div className="py-2">
                     {createMenuItems.map((item, index) => (
                       <div key={index}>
@@ -522,7 +695,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                           }}
                           className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-slate-700/50 transition-colors text-left group"
                         >
-                          <item.icon size={18} className="text-slate-400 group-hover:text-indigo-400 flex-shrink-0" />
+                          <item.icon
+                            size={18}
+                            className="text-slate-400 group-hover:text-indigo-400 flex-shrink-0"
+                          />
                           <span className="text-sm font-medium text-slate-300 group-hover:text-white">
                             {item.label}
                           </span>
@@ -544,11 +720,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       {showProfileModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-fadeIn">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowProfileModal(false)}
           />
-          
+
           {/* Modal Content */}
           <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl shadow-2xl border border-slate-700/50 w-full max-w-2xl max-h-[90vh] overflow-hidden animate-slideUp">
             {/* Header */}
@@ -573,7 +749,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                   className="p-2 rounded-full hover:bg-white/20 transition-colors group"
                   aria-label="Đóng"
                 >
-                  <FiX size={24} className="text-white group-hover:rotate-90 transition-transform duration-300" />
+                  <FiX
+                    size={24}
+                    className="text-white group-hover:rotate-90 transition-transform duration-300"
+                  />
                 </button>
               </div>
             </div>
@@ -632,15 +811,25 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                       </label>
                       <div className="bg-slate-900/50 border border-slate-700 rounded-lg px-4 py-3">
                         <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-indigo-500 to-purple-500 text-white">
-                          {userRole === 'DealerManager' ? 'Quản Lý Đại Lý' :
-                           userRole === 'DealerStaff' ? 'Nhân Viên Đại Lý' :
-                           userRole === 'Admin' ? 'Quản Trị Viên' :
-                           userRole === 'EVMStaff' ? 'Nhân Viên EVM' :
-                           userRole === 'Customer' ? 'Khách Hàng' :
-                           userRole === USER_ROLES.DEALER ? 'Đại Lý' :
-                           userRole === USER_ROLES.CUSTOMER ? 'Khách Hàng' :
-                           userRole === USER_ROLES.EVM_ADMIN ? 'Quản Trị Viên' :
-                           userRole === USER_ROLES.STAFF ? 'Nhân Viên' : userRole}
+                          {userRole === "DealerManager"
+                            ? "Quản Lý Đại Lý"
+                            : userRole === "DealerStaff"
+                            ? "Nhân Viên Đại Lý"
+                            : userRole === "Admin"
+                            ? "Quản Trị Viên"
+                            : userRole === "EVMStaff"
+                            ? "Nhân Viên EVM"
+                            : userRole === "Customer"
+                            ? "Khách Hàng"
+                            : userRole === USER_ROLES.DEALER
+                            ? "Đại Lý"
+                            : userRole === USER_ROLES.CUSTOMER
+                            ? "Khách Hàng"
+                            : userRole === USER_ROLES.EVM_ADMIN
+                            ? "Quản Trị Viên"
+                            : userRole === USER_ROLES.STAFF
+                            ? "Nhân Viên"
+                            : userRole}
                         </span>
                       </div>
                     </div>
@@ -648,138 +837,144 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 </div>
 
                 {/* Thông tin Đại lý - chỉ hiện với DEALER */}
-                {(userRole === 'DealerManager' || userRole === 'DealerStaff' || userRole === USER_ROLES.DEALER) && (user.dealerId || user.shopName || user.dealerShopId) && (
-                  <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/30">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <RiGroupLine size={20} className="text-indigo-400" />
-                      Thông Tin Đại Lý
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {user.shopName && (
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-indigo-300 mb-2">
-                            Tên cửa hàng
-                          </label>
-                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white font-semibold">
-                            🏪 {user.shopName}
+                {(userRole === "DealerManager" ||
+                  userRole === "DealerStaff" ||
+                  userRole === USER_ROLES.DEALER) &&
+                  (user.dealerId || user.shopName || user.dealerShopId) && (
+                    <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 rounded-xl p-6 border border-indigo-500/30">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <RiGroupLine size={20} className="text-indigo-400" />
+                        Thông Tin Đại Lý
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {user.shopName && (
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-indigo-300 mb-2">
+                              Tên cửa hàng
+                            </label>
+                            <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white font-semibold">
+                              🏪 {user.shopName}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {user.dealerId && (
-                        <div>
-                          <label className="block text-sm font-medium text-indigo-300 mb-2">
-                            Mã Đại Lý
-                          </label>
-                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
-                            #{user.dealerId}
+                        )}
+                        {user.dealerId && (
+                          <div>
+                            <label className="block text-sm font-medium text-indigo-300 mb-2">
+                              Mã Đại Lý
+                            </label>
+                            <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
+                              #{user.dealerId}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {user.dealerShopId && (
-                        <div>
-                          <label className="block text-sm font-medium text-indigo-300 mb-2">
-                            Mã Cửa Hàng
-                          </label>
-                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
-                            #{user.dealerShopId}
+                        )}
+                        {user.dealerShopId && (
+                          <div>
+                            <label className="block text-sm font-medium text-indigo-300 mb-2">
+                              Mã Cửa Hàng
+                            </label>
+                            <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-indigo-300 font-mono font-semibold">
+                              #{user.dealerShopId}
+                            </div>
                           </div>
-                        </div>
-                      )}
-                      {user.address && (
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-indigo-300 mb-2">
-                            Địa chỉ cửa hàng
-                          </label>
-                          <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white">
-                            📍 {user.address}
+                        )}
+                        {user.address && (
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-indigo-300 mb-2">
+                              Địa chỉ cửa hàng
+                            </label>
+                            <div className="bg-slate-900/50 border border-indigo-500/30 rounded-lg px-4 py-3 text-white">
+                              📍 {user.address}
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Thông tin Khách hàng - chỉ hiện với CUSTOMER */}
-                {(userRole === 'Customer' || userRole === USER_ROLES.CUSTOMER) && user.customerId && (
-                  <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <FiUsers size={20} className="text-purple-400" />
-                      Thông Tin Khách Hàng
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-purple-300 mb-2">
-                          Mã Khách Hàng
-                        </label>
-                        <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-purple-300 font-mono font-semibold">
-                          #{user.customerId}
-                        </div>
-                      </div>
-                      {user.membershipTier && (
+                {(userRole === "Customer" ||
+                  userRole === USER_ROLES.CUSTOMER) &&
+                  user.customerId && (
+                    <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl p-6 border border-purple-500/30">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <FiUsers size={20} className="text-purple-400" />
+                        Thông Tin Khách Hàng
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium text-purple-300 mb-2">
-                            Hạng thành viên
+                            Mã Khách Hàng
                           </label>
-                          <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3">
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-                              ⭐ {user.membershipTier}
-                            </span>
+                          <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-purple-300 font-mono font-semibold">
+                            #{user.customerId}
                           </div>
                         </div>
-                      )}
-                      {user.address && (
-                        <div className="md:col-span-2">
-                          <label className="block text-sm font-medium text-purple-300 mb-2">
-                            Địa chỉ
-                          </label>
-                          <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white">
-                            📍 {user.address}
+                        {user.membershipTier && (
+                          <div>
+                            <label className="block text-sm font-medium text-purple-300 mb-2">
+                              Hạng thành viên
+                            </label>
+                            <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3">
+                              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                                ⭐ {user.membershipTier}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
+                        {user.address && (
+                          <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-purple-300 mb-2">
+                              Địa chỉ
+                            </label>
+                            <div className="bg-slate-900/50 border border-purple-500/30 rounded-lg px-4 py-3 text-white">
+                              📍 {user.address}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Thông tin Nhân viên - chỉ hiện với STAFF */}
-                {(userRole === 'EVMStaff' || userRole === USER_ROLES.STAFF) && user.staffId && (
-                  <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-500/30">
-                    <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                      <FiUsers size={20} className="text-cyan-400" />
-                      Thông Tin Nhân Viên
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-cyan-300 mb-2">
-                          Mã Nhân Viên
-                        </label>
-                        <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-cyan-300 font-mono font-semibold">
-                          #{user.staffId}
+                {(userRole === "EVMStaff" || userRole === USER_ROLES.STAFF) &&
+                  user.staffId && (
+                    <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 rounded-xl p-6 border border-cyan-500/30">
+                      <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                        <FiUsers size={20} className="text-cyan-400" />
+                        Thông Tin Nhân Viên
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-cyan-300 mb-2">
+                            Mã Nhân Viên
+                          </label>
+                          <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-cyan-300 font-mono font-semibold">
+                            #{user.staffId}
+                          </div>
                         </div>
+                        {user.department && (
+                          <div>
+                            <label className="block text-sm font-medium text-cyan-300 mb-2">
+                              Phòng ban
+                            </label>
+                            <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
+                              🏢 {user.department}
+                            </div>
+                          </div>
+                        )}
+                        {user.position && (
+                          <div>
+                            <label className="block text-sm font-medium text-cyan-300 mb-2">
+                              Chức vụ
+                            </label>
+                            <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
+                              👔 {user.position}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      {user.department && (
-                        <div>
-                          <label className="block text-sm font-medium text-cyan-300 mb-2">
-                            Phòng ban
-                          </label>
-                          <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
-                            🏢 {user.department}
-                          </div>
-                        </div>
-                      )}
-                      {user.position && (
-                        <div>
-                          <label className="block text-sm font-medium text-cyan-300 mb-2">
-                            Chức vụ
-                          </label>
-                          <div className="bg-slate-900/50 border border-cyan-500/30 rounded-lg px-4 py-3 text-white">
-                            👔 {user.position}
-                          </div>
-                        </div>
-                      )}
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {/* Quyền hạn */}
                 {user.permissions && user.permissions.length > 0 && (
@@ -794,7 +989,10 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                           key={index}
                           className="inline-flex items-center px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-700/50 text-slate-300 border border-slate-600/50"
                         >
-                          ✓ {permission.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                          ✓{" "}
+                          {permission
+                            .replace(/_/g, " ")
+                            .replace(/\b\w/g, (l) => l.toUpperCase())}
                         </span>
                       ))}
                     </div>
@@ -810,21 +1008,30 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center">
                       <div className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
-                        {Object.values(notifications).reduce((a, b) => a + b, 0)}
+                        {Object.values(notifications).reduce(
+                          (a, b) => a + b,
+                          0
+                        )}
                       </div>
-                      <div className="text-sm text-slate-400 mt-1">Thông báo</div>
+                      <div className="text-sm text-slate-400 mt-1">
+                        Thông báo
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
                         {menuItems.length}
                       </div>
-                      <div className="text-sm text-slate-400 mt-1">Tính năng</div>
+                      <div className="text-sm text-slate-400 mt-1">
+                        Tính năng
+                      </div>
                     </div>
                     <div className="text-center">
                       <div className="text-3xl font-bold bg-gradient-to-r from-pink-400 to-red-400 bg-clip-text text-transparent">
                         {createMenuItems.length}
                       </div>
-                      <div className="text-sm text-slate-400 mt-1">Hành động</div>
+                      <div className="text-sm text-slate-400 mt-1">
+                        Hành động
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -843,7 +1050,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                 onClick={() => {
                   setShowProfileModal(false);
                   // TODO: Navigate to edit profile page
-                  navigate('/profile/edit');
+                  navigate("/profile/edit");
                 }}
                 className="px-6 py-2.5 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-medium transition-all shadow-lg shadow-indigo-500/30"
               >

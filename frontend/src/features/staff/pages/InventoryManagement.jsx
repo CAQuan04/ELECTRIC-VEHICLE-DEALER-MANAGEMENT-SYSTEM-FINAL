@@ -209,7 +209,7 @@ const InventoryManagement = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-sm md:text-base">
+            <table className="min-w-full border-collapse text-base md:text-base">
               <thead className="bg-slate-800/60 text-emerald-300">
                 <tr>
                   <th className="p-3 text-left">ID</th>
@@ -268,7 +268,7 @@ const InventoryManagement = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-sm md:text-base">
+            <table className="min-w-full border-collapse text-base md:text-base">
               <thead className="bg-slate-800/60 text-sky-300">
                 <tr>
                   <th className="p-3 text-left">ID</th>

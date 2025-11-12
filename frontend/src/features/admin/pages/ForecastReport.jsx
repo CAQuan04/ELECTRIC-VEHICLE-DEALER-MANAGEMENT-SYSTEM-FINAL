@@ -9,7 +9,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { runDemandForecast, getForecast } from "../../../services/forecastService";
+import { runDemandForecast, getForecast } from "../../staff/pages/service/forecastService";
 
 // 🌈 Bảng màu riêng cho từng đại lý
 const DEALER_COLORS = {
@@ -78,9 +78,9 @@ const ForecastReport = () => {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold text-indigo-400">
-        🤖 Dự báo nhu cầu sản xuất & phân phối (Multi-Dealer)
-      </h2>
+      <h1 className="text-2xl font-bold text-indigo-400">
+        Dự báo nhu cầu sản xuất & phân phối 
+      </h1>
       <p className="text-slate-400">
         So sánh dữ liệu tiêu thụ thực tế và dự báo AI cho từng đại lý.
       </p>
@@ -98,7 +98,7 @@ const ForecastReport = () => {
 
       {/* Bảng kết quả */}
       <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-        <table className="min-w-full border-collapse text-sm">
+        <table className="min-w-full border-collapse text-base">
           <thead className="bg-slate-800/60 text-indigo-300">
             <tr>
               <th className="p-3 text-left">Đại lý</th>

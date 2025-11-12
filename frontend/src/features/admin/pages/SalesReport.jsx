@@ -268,7 +268,7 @@ const SalesReport = () => {
 
       {/* Bảng chi tiết */}
       <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-        <table className="min-w-full border-collapse text-sm">
+        <table className="min-w-full border-collapse text-base">
           <thead className="bg-slate-800/60 text-sky-300">
             <tr>
               <th className="p-3 text-left">Đại lý</th>
