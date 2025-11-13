@@ -123,6 +123,7 @@ import InventoryManagement from "./features/staff/pages/InventoryManagement";
 import PricingManagement from "./features/staff/pages/PricingManagement";
 import InventoryTurnoverReport from "./features/staff/pages/InventoryTurnoverReport";
 import ForecastReport from './features/shared/pages/ForecastReport';
+import SaleReport from "./features/staff/pages/SaleReport";
 
 // Feature imports - Public
 import {
@@ -408,6 +409,17 @@ const App = () => {
                   <StaffGuard>
                     <AppLayout>
                       <PricingManagement />
+                    </AppLayout>
+                  </StaffGuard>
+                }
+              />
+
+                            <Route
+                path="/staff/sales-reports"
+                element={
+                  <StaffGuard>
+                    <AppLayout>
+                      <SaleReport />
                     </AppLayout>
                   </StaffGuard>
                 }

@@ -205,7 +205,7 @@ const SalesReport = () => {
           : [value, name]
       }
     />
-    <Legend wrapperStyle={{ color: "#cbd5e1", fontSize: 13 }} />
+    <Legend wrapperStyle={{ color: "#cbd5e1", fontSize: 12 }} />
 
     {/* Cột doanh thu */}
     <Bar

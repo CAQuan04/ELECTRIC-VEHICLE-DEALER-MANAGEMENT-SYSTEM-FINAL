@@ -356,6 +356,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
     label: "Giá sỉ & Khuyến mãi" 
   },
   { 
+    path: "/staff/sales-reports", 
+    icon: RiFileChartLine, 
+    label: "Báo cáo doanh số" 
+  },
+  { 
     path: "/staff/reports", 
     icon: RiFileChartLine, 
     label: "Báo cáo tồn kho" 

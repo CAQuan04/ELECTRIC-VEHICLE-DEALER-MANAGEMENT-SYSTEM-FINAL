@@ -9,7 +9,7 @@ import PricingManagement from "./PricingManagement";
 import ReportsSection from "../components/ReportsSection";
 import InventoryTurnoverReport from "./InventoryTurnoverReport";
 import CatalogueViewer from "../pages/CatalogueViewer";
-import SalesReport from "../pages/SalesReport";
+import SalesReport from "./SaleReport";
 import ForecastReport from "../../shared/pages/ForecastReport";
 
 /* =======================
