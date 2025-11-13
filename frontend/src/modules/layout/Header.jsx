@@ -206,7 +206,7 @@ const Header = () => {
                       }
                     }}>
                       <span className="menu-icon">👤</span>
-                      <span>Thông tin tài khoản</span>
+                      <span>Dashboard</span>
                     </button>
                     
                     {userRole === USER_ROLES.CUSTOMER && (

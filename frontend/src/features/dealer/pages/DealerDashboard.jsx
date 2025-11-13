@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { AuthService } from '@utils';
 import { dealerAPI } from '@utils/api/services';
 import { usePageLoading } from '@modules/loading';
@@ -32,9 +32,6 @@ import {
 // Import components
 import HeroStats from './DealerDashboard/components/HeroStats';
 
-// Import mock data
-import { mockDashboardData } from './DealerDashboard/mockData';
-
 const NAV_SECTIONS = [
   { id: 'overview', icon: BarChart3, label: 'Tổng quan' },
   { id: 'inventory', icon: Car, label: 'Kho xe' },
@@ -49,35 +46,110 @@ const DealerDashboard = () => {
   console.log('🏢 DealerDashboard component render');
   
   const navigate = useNavigate();
+  const { dealerId } = useParams(); // Lấy dealerId từ URL
   const { startLoading, stopLoading } = usePageLoading();
   const [dashboardData, setDashboardData] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
   const currentUser = AuthService.getCurrentUser();
   const { dealerRole, isManager, isStaff } = useDealerRole();
 
+  // Log dealerId from URL
+  console.log('📍 DealerId from URL:', dealerId);
+  console.log('👤 Current User dealerId:', currentUser?.dealerId);
+
   const loadDashboardData = useCallback(async () => {
     try {
       startLoading('Đang tải dữ liệu đại lý...');
       
-      // Fetch real data from API
-      const result = await dealerAPI.getDashboard();
+      // Lấy dealerId từ URL hoặc currentUser
+      const currentDealerId = dealerId || currentUser?.dealerId;
       
-      if (result.success) {
-        setDashboardData(result.data);
+      // Fetch dealer info và dashboard stats song song
+      const [dealerInfoResult, dashboardResult] = await Promise.all([
+        currentDealerId 
+          ? dealerAPI.getDealerById(currentDealerId) 
+          : dealerAPI.getDealerProfile(), // Fallback: lấy profile của user hiện tại
+        dealerAPI.getDashboard()
+      ]);
+      
+      console.log('📊 Dealer Info Result:', dealerInfoResult);
+      console.log('📊 Dashboard Result:', dashboardResult);
+      
+      // Tạo dealer data từ kết quả API hoặc từ currentUser/dashboard
+      let dealerData;
+      if (dealerInfoResult.success && dealerInfoResult.data) {
+        dealerData = dealerInfoResult.data;
+        console.log('✅ Using dealer data from getDealerById API');
+      } else if (dashboardResult.success && dashboardResult.data?.dealer) {
+        // Nếu có dealer info từ dashboard API
+        dealerData = dashboardResult.data.dealer;
+        console.log('✅ Using dealer data from Dashboard API');
       } else {
-        notifications.error('Lỗi tải dữ liệu', result.message || 'Không thể tải dữ liệu dashboard');
-        // Fallback to mock data
-        setDashboardData(mockDashboardData(currentUser));
+        // Fallback: tạo từ currentUser
+        dealerData = {
+          dealerId: currentDealerId,
+          name: `Đại lý #${currentDealerId}`,
+          dealerName: `Đại lý #${currentDealerId}`,
+          address: 'Chưa có thông tin',
+          phone: 'Chưa có thông tin',
+          email: 'Chưa có thông tin',
+          totalVehicles: 0,
+          totalOrders: 0,
+          totalUsers: 0
+        };
+        console.warn('⚠️ Using fallback dealer data');
+      }
+      
+      console.log('🏢 Final Dealer Data:', dealerData);
+      console.log('🏷️ Dealer Name:', dealerData?.dealerName || dealerData?.name);
+      
+      // Tạo dashboard data - luôn có dữ liệu cơ bản
+      const data = {
+        dealer: dealerData,
+        performance: dashboardResult.success ? dashboardResult.data?.performance : {
+          monthlySales: 0,
+          quarterTarget: 0,
+          customerSatisfaction: 0,
+          deliveryTime: 0
+        },
+        recentOrders: dashboardResult.success ? dashboardResult.data?.recentOrders || [] : [],
+        inventory: dashboardResult.success ? dashboardResult.data?.inventory || [] : []
+      };
+      
+      setDashboardData(data);
+      
+      // Chỉ hiện thông báo lỗi, không block UI
+      if (!dashboardResult.success) {
+        console.warn('⚠️ Dashboard API failed:', dashboardResult.message);
       }
     } catch (err) {
-      console.error('Dealer Dashboard error:', err);
-      notifications.error('Lỗi hệ thống', 'Lỗi khi tải dữ liệu dashboard');
-      // Set fallback data
-      setDashboardData(mockDashboardData(currentUser));
+      console.error('❌ Dealer Dashboard error:', err);
+      
+      // Vẫn tạo dữ liệu cơ bản để hiển thị
+      const fallbackData = {
+        dealer: {
+          dealerId: dealerId || currentUser?.dealerId,
+          name: currentUser?.name ? `Đại lý của ${currentUser.name}` : 'Đại lý',
+          dealerName: currentUser?.name ? `Đại lý của ${currentUser.name}` : 'Đại lý',
+          address: 'Chưa có thông tin',
+          phone: 'Chưa có thông tin',
+          email: 'Chưa có thông tin'
+        },
+        performance: {
+          monthlySales: 0,
+          quarterTarget: 0,
+          customerSatisfaction: 0,
+          deliveryTime: 0
+        },
+        recentOrders: [],
+        inventory: []
+      };
+      
+      setDashboardData(fallbackData);
     } finally {
       stopLoading();
     }
-  }, [startLoading, stopLoading, currentUser]);
+  }, [startLoading, stopLoading, currentUser, dealerId]);
 
   useEffect(() => {
     loadDashboardData();
@@ -142,47 +214,103 @@ const DealerDashboard = () => {
         
         {/* Content */}
         <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-4">
+          <div className="flex items-center gap-4 mb-6">
             <div className="p-4 bg-white/30 dark:bg-emerald-500/20 rounded-2xl backdrop-blur-sm border border-white/50 dark:border-emerald-400/30 shadow-lg">
               <span className="text-4xl md:text-5xl">🏢</span>
             </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl">
-                Dealer Dashboard
+            <div className="flex-1">
+              {/* Tên đại lý nổi bật */}
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl mb-1">
+                {dealer?.name || dealer?.dealerName || 'Dealer Dashboard'}
               </h1>
+              {dealer?.address && (
+                <p className="text-sm md:text-base text-white/90 font-medium mb-1 flex items-center gap-2">
+                  <span>📍</span>
+                  <span>{dealer.address}</span>
+                </p>
+              )}
+              <p className="text-xs md:text-sm text-white/70 font-medium">
+                Mã đại lý: {dealer?.dealerId || dealerId || currentUser?.dealerId || 'N/A'}
+              </p>
               <div className="h-1 w-32 dark:bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 bg-gradient-to-r from-white to-cyan-200 rounded-full mt-2 shadow-lg"></div>
             </div>
           </div>
           
-          <p className="text-base md:text-lg lg:text-xl text-white/95 mb-4 font-medium drop-shadow-md">
-            Chào mừng <span className="font-bold text-yellow-200 dark:text-emerald-300 px-2 py-1 bg-white/20 dark:bg-emerald-500/20 rounded-lg backdrop-blur-sm">{currentUser?.name || 'Quản lý'}</span>
-            {dealerRole && (
-              <span className={`ml-3 px-3 py-1.5 text-sm font-bold rounded-full border shadow-lg ${
-                isManager 
-                  ? 'bg-red-500/30 text-red-100 border-red-300/50' 
-                  : 'bg-blue-500/30 text-blue-100 border-blue-300/50'
-              }`}>
-                {isManager ? '👔 Quản lý' : '🧑‍💼 Nhân viên'}
-              </span>
-            )}
-          </p>
-          
-          {/* Shop Information */}
-          {currentUser?.dealerShopId && (
-            <div className="flex items-center gap-3 mb-8">
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-white/10 rounded-xl backdrop-blur-md border border-white/60 dark:border-emerald-400/40 shadow-lg">
-                <span className="text-2xl">🏪</span>
-                <div className="flex flex-col">
-                  <span className="text-sm text-white/80 font-medium">Cửa hàng</span>
-                  <span className="text-white font-bold">{currentUser?.shopName || currentUser?.dealerShopId}</span>
+          {/* Thông tin người dùng và vai trò */}
+          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-white/40 dark:border-emerald-400/30 shadow-lg">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">👤</span>
+                <div>
+                  <p className="text-xs text-white/70 font-medium">Người dùng</p>
+                  <p className="text-lg font-bold text-white">{currentUser?.name || 'Chưa xác định'}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 px-4 py-2 bg-white/30 dark:bg-white/10 rounded-xl backdrop-blur-md border border-white/60 dark:border-emerald-400/40 shadow-lg">
-                <span className="text-xl">🆔</span>
-                <div className="flex flex-col">
-                  <span className="text-sm text-white/80 font-medium">Mã cửa hàng</span>
-                  <span className="text-white font-bold font-mono">{currentUser?.dealerShopId}</span>
+              
+              <div className="h-8 w-px bg-white/30"></div>
+              
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{isManager ? '👔' : '🧑‍💼'}</span>
+                <div>
+                  <p className="text-xs text-white/70 font-medium">Vai trò</p>
+                  <p className="text-lg font-bold text-white">
+                    {isManager ? 'Quản lý Đại lý' : isStaff ? 'Nhân viên Đại lý' : currentUser?.role || 'Chưa xác định'}
+                  </p>
                 </div>
+              </div>
+              
+              {currentUser?.email && (
+                <>
+                  <div className="h-8 w-px bg-white/30"></div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-2xl">📧</span>
+                    <div>
+                      <p className="text-xs text-white/70 font-medium">Email</p>
+                      <p className="text-sm font-semibold text-white">{currentUser.email}</p>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+          
+          {/* Thông tin Đại lý (nếu có) */}
+          {dealer && (dealer.address || dealer.phone || dealer.email) && (
+            <div className="bg-white/15 dark:bg-white/5 backdrop-blur-md rounded-2xl p-4 mb-8 border border-white/30 dark:border-emerald-400/20 shadow-lg">
+              <div className="flex items-center gap-3 flex-wrap">
+                {dealer.address && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📍</span>
+                    <div>
+                      <p className="text-xs text-white/70 font-medium">Địa chỉ</p>
+                      <p className="text-sm font-semibold text-white">{dealer.address}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {dealer.phone && dealer.address && <div className="h-8 w-px bg-white/30"></div>}
+                
+                {dealer.phone && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📞</span>
+                    <div>
+                      <p className="text-xs text-white/70 font-medium">Điện thoại</p>
+                      <p className="text-sm font-semibold text-white">{dealer.phone}</p>
+                    </div>
+                  </div>
+                )}
+                
+                {dealer.email && (dealer.address || dealer.phone) && <div className="h-8 w-px bg-white/30"></div>}
+                
+                {dealer.email && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">✉️</span>
+                    <div>
+                      <p className="text-xs text-white/70 font-medium">Email liên hệ</p>
+                      <p className="text-sm font-semibold text-white">{dealer.email}</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

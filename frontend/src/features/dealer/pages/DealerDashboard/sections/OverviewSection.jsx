@@ -15,25 +15,25 @@ import RecentOrdersList from '../components/RecentOrdersList';
 import BentoMenu from '../../../components/BentoMenu';
 
 const OverviewSection = ({ dashboardData, navigate }) => {
-  const { dealer, performance } = dashboardData;
+  const { dealer = {}, performance = {} } = dashboardData || {};
 
   // Basic stats - visible to all
   const basicStatsConfig = [
-    { icon: Car, title: 'Xe có sẵn', value: dealer.vehicles, change: '+5 xe trong tuần' },
-    { icon: ClipboardList, title: 'Đơn hàng', value: dealer.orders, change: '+18% so với tháng trước' },
+    { icon: Car, title: 'Xe có sẵn', value: dealer?.totalVehicles || dealer?.vehicles || 0, change: '+5 xe trong tuần' },
+    { icon: ClipboardList, title: 'Đơn hàng', value: dealer?.totalOrders || dealer?.orders || 0, change: '+18% so với tháng trước' },
   ];
 
   // Manager-only stats - sensitive business data
   const managerStatsConfig = [
-    { icon: Users, title: 'Khách hàng', value: dealer.customers, change: '+12 khách mới' },
-    { icon: TrendingUp, title: 'Doanh thu', value: `${dealer.revenue} tỷ`, change: '+25% so với tháng trước' }
+    { icon: Users, title: 'Khách hàng', value: dealer?.totalCustomers || dealer?.customers || 0, change: '+12 khách mới' },
+    { icon: TrendingUp, title: 'Doanh thu', value: `${dealer?.revenue || 0} tỷ`, change: '+25% so với tháng trước' }
   ];
 
   const performanceMetrics = [
-    { label: 'Bán hàng tháng này', value: performance.monthlySales },
-    { label: 'Mục tiêu quý', value: `${performance.quarterTarget}%` },
-    { label: 'Hài lòng khách hàng', value: `${performance.customerSatisfaction}/5` },
-    { label: 'Thời gian giao xe', value: `${performance.deliveryTime} ngày` }
+    { label: 'Bán hàng tháng này', value: performance?.monthlySales || 0 },
+    { label: 'Mục tiêu quý', value: `${performance?.quarterTarget || 0}%` },
+    { label: 'Hài lòng khách hàng', value: `${performance?.customerSatisfaction || 0}/5` },
+    { label: 'Thời gian giao xe', value: `${performance?.deliveryTime || 0} ngày` }
   ];
 
   return (

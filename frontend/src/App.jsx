@@ -452,7 +452,24 @@ const App = () => {
                 }
               />
 
-              {/* Dealer Dashboard */}
+              {/* Dealer Dashboard - với dealerId trong URL */}
+              <Route
+                path="/:dealerId/dealer-dashboard"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerDashboardWithLoading
+                          isLoading={false}
+                          isDataLoading={false}
+                        />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              
+              {/* Fallback route cho dealer-dashboard không có dealerId */}
               <Route
                 path="/dealer-dashboard"
                 element={

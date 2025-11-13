@@ -603,9 +603,12 @@ class DealerAPI {
    */
   async getDealerById(dealerId) {
     try {
-            const response = await apiClient.get(`/Dealers/${dealerId}`);
-      return { success: true, data: response.data };
+      const response = await apiClient.get(`/Dealers/${dealerId}`);
+      // Backend trả về direct object, không có wrapper
+      const dealerData = response.data || response;
+      return { success: true, data: dealerData };
     } catch (error) {
+      console.error('❌ getDealerById error:', error);
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin đại lý' };
     }
   }

@@ -171,32 +171,35 @@ const Sidebar = ({ isOpen = false, onClose }) => {
 
   // Create menu items theo role
   const createMenuItems = useMemo(() => {
+    const dealerId = user?.dealerId;
+    
     // Xử lý cả role từ backend (DealerManager, DealerStaff) và role cũ (dealer)
     if (
       userRole === "DealerManager" ||
       userRole === "DealerStaff" ||
       userRole === USER_ROLES.DEALER
     ) {
+      const basePath = dealerId ? `/${dealerId}/dealer` : '/dealer';
       return [
         {
           label: "Tạo Đơn Hàng",
           icon: FiShoppingCart,
-          path: "/dealer/orders/create",
+          path: `${basePath}/orders/create`,
         },
         {
           label: "Thêm Khách Hàng",
           icon: FiUsers,
-          path: "/dealer/customers/new",
+          path: `${basePath}/customers/new`,
         },
         {
           label: "Đặt Lịch Test Drive",
           icon: FiCalendar,
-          path: "/dealer/test-drives/new",
+          path: `${basePath}/test-drives/new`,
         },
         {
           label: "Yêu Cầu Nhập Kho",
           icon: FiPackage,
-          path: "/dealer/inventory/request",
+          path: `${basePath}/inventory/request`,
         },
       ];
     }
@@ -232,9 +235,11 @@ const Sidebar = ({ isOpen = false, onClose }) => {
     }
 
     return [];
-  }, [userRole]);
+  }, [userRole, user?.dealerId]);
 
   const menuItems = useMemo(() => {
+    const dealerId = user?.dealerId;
+    
     // Base menu items không có notifications
     const baseMenuItems = (() => {
       // Xử lý Dealer roles (DealerManager và DealerStaff)
@@ -243,30 +248,31 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         userRole === "DealerStaff" ||
         userRole === USER_ROLES.DEALER
       ) {
+        const basePath = dealerId ? `/${dealerId}/dealer` : '/dealer';
         return [
           {
-            path: "/dealer-dashboard",
+            path: `${dealerId ? `/${dealerId}` : ''}/dealer-dashboard`,
             icon: RiDashboardLine,
             label: "Dashboard",
           },
-          { path: "/dealer/vehicles", icon: RiCarLine, label: "Catalog Xe" },
-          { path: "/dealer/inventory", icon: FiPackage, label: "Quản Lý Kho" },
-          { path: "/dealer/customers", icon: FiUsers, label: "Khách Hàng" },
+          { path: `${basePath}/vehicles`, icon: RiCarLine, label: "Catalog Xe" },
+          { path: `${basePath}/inventory`, icon: FiPackage, label: "Quản Lý Kho" },
+          { path: `${basePath}/customers`, icon: FiUsers, label: "Khách Hàng" },
           {
-            path: "/dealer/test-drives",
+            path: `${basePath}/test-drives`,
             icon: FiCalendar,
             label: "Test Drive",
           },
-          { path: "/dealer/orders", icon: FiShoppingCart, label: "Đơn Hàng" },
-          { path: "/dealer/quotations", icon: FiFileText, label: "Báo Giá" },
-          { path: "/dealer/payments", icon: FiDollarSign, label: "Thanh Toán" },
+          { path: `${basePath}/orders`, icon: FiShoppingCart, label: "Đơn Hàng" },
+          { path: `${basePath}/quotations`, icon: FiFileText, label: "Báo Giá" },
+          { path: `${basePath}/payments`, icon: FiDollarSign, label: "Thanh Toán" },
           {
-            path: "/dealer/reports/sales-performance",
+            path: `${basePath}/reports/sales-performance`,
             icon: FiBarChart2,
             label: "Báo Cáo",
           },
-          { path: "/dealer/promotions", icon: FiFileText, label: "Khuyến Mãi" },
-          { path: "/dealer/staff", icon: FiUsers, label: "Nhân Viên" },
+          { path: `${basePath}/promotions`, icon: FiFileText, label: "Khuyến Mãi" },
+          { path: `${basePath}/staff`, icon: FiUsers, label: "Nhân Viên" },
           { path: "/landing", icon: FiHome, label: "Trang Chủ" },
         ];
       }
@@ -372,7 +378,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
       ...item,
       notifications: notifications[item.path] || 0,
     }));
-  }, [userRole, notifications]);
+  }, [userRole, notifications, user?.dealerId]);
 
   const handleItemClick = () => {
     onClose && onClose();

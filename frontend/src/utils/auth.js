@@ -1,4 +1,6 @@
 // Role-based access control utilities
+import { jwtDecode } from 'jwt-decode'; // ✨ Import at top
+
 export const USER_ROLES = {
   DEALER: 'dealer',
   CUSTOMER: 'customer', 
@@ -17,29 +19,72 @@ export const DASHBOARD_ROUTES = {
 
 // Mock user data - Replace with real authentication
 let currentUser = null; // No default user - require login
+let cachedToken = null; // Cache token để tránh decode nhiều lần
 
 export const AuthService = {
   getCurrentUser: () => {
-    // Check localStorage first
-    const savedUser = localStorage.getItem('user');
-    if (savedUser && !currentUser) {
-      try {
-        currentUser = JSON.parse(savedUser);
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('user');
-        currentUser = null;
-      }
+    const token = localStorage.getItem('jwtToken');
+    
+    // Nếu có cache và token không đổi, trả về cache
+    if (currentUser && cachedToken === token) {
+      return currentUser;
     }
-    return currentUser;
+    
+    // Reset nếu không có token
+    if (!token) {
+      currentUser = null;
+      cachedToken = null;
+      return null;
+    }
+    
+    // Parse token nếu chưa có cache hoặc token đổi
+    try {
+      const decodedToken = jwtDecode(token);
+      
+      // Check if token is still valid
+      if (decodedToken.exp * 1000 > Date.now()) {
+        const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+        const username = decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] || 
+                        decodedToken.sub || 
+                        decodedToken.name || 
+                        'User';
+        const userId = decodedToken.userId;
+        const dealerShopId = decodedToken.dealerShopId;
+        const dealerId = decodedToken.dealerId;
+        
+        currentUser = {
+          username,
+          role,
+          userId,
+          dealerShopId,
+          dealerId,
+          name: username
+        };
+        cachedToken = token; // Cache token
+        return currentUser;
+      } else {
+        // Token hết hạn
+        localStorage.removeItem('jwtToken');
+        currentUser = null;
+        cachedToken = null;
+        return null;
+      }
+    } catch (error) {
+      console.error('Error decoding JWT token:', error);
+      currentUser = null;
+      cachedToken = null;
+      return null;
+    }
   },
   
   setCurrentUser: (user) => {
     currentUser = user;
+    cachedToken = localStorage.getItem('jwtToken'); // Update cache
     if (user) {
       localStorage.setItem('user', JSON.stringify(user));
     } else {
       localStorage.removeItem('user');
+      cachedToken = null; // Clear cache khi logout
     }
   },
   

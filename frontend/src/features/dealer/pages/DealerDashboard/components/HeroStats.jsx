@@ -1,11 +1,11 @@
 import React from 'react';
 
 const HeroStats = ({ dashboardData }) => {
-  const { dealer, performance } = dashboardData;
+  const { dealer = {}, performance = {} } = dashboardData || {};
   const stats = [
-    { value: dealer.vehicles, label: 'Xe có sẵn' },
-    { value: dealer.orders, label: 'Đơn hàng tháng này' },
-    { value: `${performance.quarterTarget}%`, label: 'Hoàn thành mục tiêu' }
+    { value: dealer?.totalVehicles || dealer?.vehicles || 0, label: 'Xe có sẵn' },
+    { value: dealer?.totalOrders || dealer?.orders || 0, label: 'Đơn hàng tháng này' },
+    { value: `${performance?.quarterTarget || 0}%`, label: 'Hoàn thành mục tiêu' }
   ];
 
   return (
