@@ -66,7 +66,8 @@ builder.Services.AddScoped<IPricingRepository, PricingRepository>();
 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 builder.Services.AddScoped<IDemandForecastRepository, DemandForecastRepository>();
 // Thêm bất kỳ repository nào khác bạn có ở đây...
-
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IDealerRepository, DealerRepository>();
 
 // Ghi chú: Đăng ký Unit of Work, quản lý tất cả Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
@@ -94,9 +95,15 @@ builder.Services.AddScoped<IDistributionSuggestionRepository, DistributionSugges
 builder.Logging.AddConsole();
 // Ghi chú: Đăng ký AutoMapper, tự động tìm tất cả các Profile trong project API.
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IDealerRepository, DealerRepository>();
+
 builder.Services.AddScoped<ISupplyPlanningService, SupplyPlanningService>();
 // Ghi chú: Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication).
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters

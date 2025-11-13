@@ -121,11 +121,6 @@ public class DealerRepository : IDealerRepository
     public async Task<IEnumerable<Dealer>> GetAllBasicAsync()
     {
         // Ghi chú: Chỉ lấy dữ liệu từ bảng Dealers, không Join với bất kỳ bảng nào khác.
-        return await _context.Dealers
-            // Ghi chú: Dùng AsNoTracking() để báo cho EF biết chúng ta chỉ đọc, không sửa,
-            // giúp tăng tốc độ và giảm bộ nhớ sử dụng.
-            .AsNoTracking()
-            .OrderBy(d => d.Name)
-            .ToListAsync();
+        return await _context.Dealers.AsNoTracking().OrderBy(d => d.Name).ToListAsync();
     }
 }

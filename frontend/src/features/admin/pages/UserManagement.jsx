@@ -1,152 +1,108 @@
-// File: src/features/admin/pages/UserManagement.jsx
-import React, { useState, useMemo } from "react";
-
-/* ========== Mock data ========== */
-const initialUsers = [
-  {
-    id: "U001",
-    name: "Nguyễn Minh Anh",
-    username: "minhanh",
-    password: "123456",
-    email: "minh.anh@example.com",
-    role: "Admin",
-    dealer: "DL001",
-    active: true,
-    createdAt: "2025-09-01",
-    updatedAt: "2025-10-10",
-  },
-  {
-    id: "U002",
-    name: "Trần Bảo",
-    username: "tranbao",
-    password: "abc123",
-    email: "tran.bao@example.com",
-    role: "Dealer Manager",
-    dealer: "DL002",
-    active: true,
-    createdAt: "2025-09-10",
-    updatedAt: "2025-10-15",
-  },
-  {
-    id: "U003",
-    name: "Lê Kiên",
-    username: "lekien",
-    password: "kien789",
-    email: "le.kien@example.com",
-    role: "EVM Staff",
-    dealer: "DL005",
-    active: false,
-    createdAt: "2025-10-02",
-    updatedAt: "2025-10-20",
-  },
-  {
-    id: "U004",
-    name: "Phạm Trí",
-    username: "phamtri",
-    password: "tri123",
-    email: "pham.tri@example.com",
-    role: "Dealer Staff",
-    dealer: "DL008",
-    active: true,
-    createdAt: "2025-10-10",
-    updatedAt: "2025-10-23",
-  },
-];
-
-const emptyForm = {
-  id: "",
-  name: "",
-  username: "",
-  password: "",
-  email: "",
-  role: "Staff",
-  dealer: "",
-  active: true,
-  createdAt: "",
-  updatedAt: "",
-};
+import React, { useState, useMemo, useEffect, useCallback } from "react";
+import AdminService from "../../../utils/api/services/admin.service";
+import UserModal from "../components/modals/UserModal";
 
 const UserManagement = () => {
-  const [users, setUsers] = useState(initialUsers);
+  // --- STATE MANAGEMENT ---
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [keyword, setKeyword] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
+  
   const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState(emptyForm);
-  const [isEdit, setIsEdit] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
 
+  // --- API CALLS ---
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await AdminService.getAllUsers();
+      setUsers(response.data);
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách người dùng:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  // --- LOGIC XỬ LÝ SỰ KIỆN ---
+  const openCreate = () => {
+    setEditingUser(null);
+    setShowModal(true);
+  };
+
+  const openEdit = (user) => {
+    setEditingUser(user);
+    setShowModal(true);
+  };
+
+  const handleSaveUser = async (formData) => {
+    try {
+      if (editingUser) { // --- CHẾ ĐỘ SỬA ---
+        const updateData = {
+          roleId: parseInt(formData.roleId),
+          dealerId: formData.dealerId ? parseInt(formData.dealerId) : null,
+          fullName: formData.fullName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          dateOfBirth: formData.dateOfBirth || null, 
+        };
+        await AdminService.updateUser(editingUser.userId, updateData);
+      } else { // --- CHẾ ĐỘ TẠO MỚI ---
+        // Ghi chú: Đối tượng createData chứa đầy đủ các trường mà API yêu cầu.
+        const createData = {
+          username: formData.username,
+          password: formData.password,
+          fullName: formData.fullName,
+          email: formData.email,
+          phoneNumber: formData.phoneNumber,
+          dateOfBirth: formData.dateOfBirth || null,
+          roleId: parseInt(formData.roleId),
+          dealerId: formData.dealerId ? parseInt(formData.dealerId) : null,
+        };
+        await AdminService.createUser(createData);
+      }
+      setShowModal(false);
+      fetchUsers();
+    } catch (error) {
+      console.error("Lỗi khi lưu người dùng:", error);
+      const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi không xác định.";
+      alert(`Lỗi: ${errorMessage} (Vui lòng kiểm tra lại thông tin, Username hoặc Email có thể đã tồn tại).`);
+    }
+  };
+
+  const toggleActive = async (user) => {
+    const newStatus = user.status === 'Active' ? 'Inactive' : 'Active';
+    if (window.confirm(`Bạn có chắc muốn chuyển trạng thái của người dùng "${user.username}" thành "${newStatus}"?`)) {
+      try {
+        await AdminService.changeUserStatus(user.userId, { status: newStatus });
+        fetchUsers(); 
+      } catch (error) {
+        console.error("Lỗi khi thay đổi trạng thái người dùng:", error);
+        alert("Đã xảy ra lỗi khi thay đổi trạng thái.");
+      }
+    }
+  };
+
+  // --- FILTER LOGIC ---
   const filteredUsers = useMemo(() => {
+    if (!users) return [];
     return users.filter((u) => {
       const k = keyword.trim().toLowerCase();
-      const byKey =
-        !k ||
-        [u.name, u.email, u.id].some((v) =>
-          String(v).toLowerCase().includes(k)
-        );
-      const byRole = roleFilter === "ALL" || u.role === roleFilter;
-      const byStatus =
-        statusFilter === "ALL" ||
-        (statusFilter === "ACTIVE" ? u.active : !u.active);
+      const byKey = !k || [u.username, u.fullName, u.email, `U${String(u.userId).padStart(3, "0")}`].some(v => v?.toLowerCase().includes(k));
+      const byRole = roleFilter === "ALL" || u.roleName === roleFilter;
+      const byStatus = statusFilter === "ALL" || (statusFilter === "ACTIVE" ? u.status === 'Active' : u.status === 'Inactive');
       return byKey && byRole && byStatus;
     });
   }, [users, keyword, roleFilter, statusFilter]);
 
-  const genId = () => {
-    const num =
-      Math.max(0, ...users.map((u) => Number(u.id.replace("U", "")))) + 1;
-    return `U${String(num).padStart(3, "0")}`;
-  };
-  const isValidEmail = (v) => /^\S+@\S+\.\S+$/.test(v);
-
-  const openCreate = () => {
-    setIsEdit(false);
-    setForm({ ...emptyForm, id: genId() });
-    setShowModal(true);
-  };
-  const openEdit = (u) => {
-    setIsEdit(true);
-    setForm({ ...u });
-    setShowModal(true);
-  };
-
-  const saveUser = (e) => {
-    e.preventDefault();
-    if (!form.name.trim()) return alert("Vui lòng nhập họ tên.");
-    if (!form.username.trim()) return alert("Vui lòng nhập username.");
-    if (!form.password.trim()) return alert("Vui lòng nhập mật khẩu.");
-    if (!isValidEmail(form.email)) return alert("Email không hợp lệ.");
-
-    const now = new Date().toISOString().slice(0, 10);
-
-    if (isEdit) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === form.id ? { ...u, ...form, updatedAt: now } : u
-        )
-      );
-    } else {
-      setUsers((prev) => [
-        ...prev,
-        { ...form, createdAt: now, updatedAt: now },
-      ]);
-    }
-    setShowModal(false);
-    setForm(emptyForm);
-  };
-
-  const toggleActive = (id) =>
-    setUsers((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, active: !u.active } : u))
-    );
-  const askDelete = (u) => setConfirmDelete(u);
-  const doDelete = () => {
-    setUsers((prev) => prev.filter((u) => u.id !== confirmDelete.id));
-    setConfirmDelete(null);
-  };
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-4 text-white">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-base">Quản lý người dùng</h1>
         <button
@@ -189,288 +145,67 @@ const UserManagement = () => {
 
       {/* Table */}
       <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-        <table className="min-w-full border-collapse text-base md:text-base">
+        <table className="min-w-full border-collapse text-sm md:text-base">
           <thead className="bg-slate-800/60 text-sky-300">
             <tr>
               <th className="p-3 text-left">ID</th>
               <th className="p-3 text-left">Họ và tên</th>
               <th className="p-3 text-left">Username</th>
-              <th className="p-3 text-left">Mật khẩu</th>
-              <th className="p-3 text-left">Gmail</th>
+              <th className="p-3 text-left">Email</th>
               <th className="p-3 text-left">Vai trò</th>
               <th className="p-3 text-left">Đại lý</th>
-              <th className="p-3 text-left">Ngày tạo</th>
-              <th className="p-3 text-left">Ngày cập nhật</th>
               <th className="p-3 text-left">Trạng thái</th>
               <th className="p-3 text-center">Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {filteredUsers.map((u) => (
-              <tr
-                key={u.id}
-                className="border-t border-slate-800 hover:bg-slate-800/30"
-              >
-                <td className="p-3">{u.id}</td>
-                <td className="p-3 font-medium">{u.name}</td>
-                <td className="p-3">{u.username}</td>
-                <td className="p-3">{u.password}</td>
-                <td className="p-3">{u.email}</td>
-                <td className="p-3">{u.role}</td>
-                <td className="p-3">{u.dealer}</td>
-                <td className="p-3">{u.createdAt}</td>
-                <td className="p-3">{u.updatedAt}</td>
-                <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      u.active
-                        ? "bg-emerald-500/20 text-emerald-300"
-                        : "bg-rose-500/20 text-rose-300"
-                    }`}
-                  >
-                    {u.active ? "Hoạt động" : "Ngưng"}
-                  </span>
-                </td>
-                <td className="p-3 text-center space-x-2">
-                  <button
-                    className="px-2 py-1 rounded-lg bg-sky-600/40 hover:bg-sky-600 text-white"
-                    onClick={() => openEdit(u)}
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    className="px-2 py-1 rounded-lg bg-rose-600/40 hover:bg-rose-600 text-white"
-                    onClick={() => askDelete(u)}
-                  >
-                    Xóa
-                  </button>
-                  <button
-                    className={`px-2 py-1 rounded-lg ${
-                      u.active
-                        ? "bg-slate-700 hover:bg-slate-600"
-                        : "bg-emerald-600/40 hover:bg-emerald-600"
-                    }`}
-                    onClick={() => toggleActive(u.id)}
-                  >
-                    {u.active ? "Tắt" : "Bật"}
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {loading ? (
+              <tr><td colSpan="8" className="p-4 text-center">Đang tải dữ liệu người dùng...</td></tr>
+            ) : (
+              filteredUsers.map((u) => (
+                <tr key={u.userId} className="border-t border-slate-800 hover:bg-slate-800/30">
+                  <td className="p-3">{`U${String(u.userId).padStart(3, "0")}`}</td>
+                  <td className="p-3 font-medium">{u.fullName}</td>
+                  <td className="p-3">{u.username}</td>
+                  <td className="p-3">{u.email}</td>
+                  <td className="p-3">{u.roleName}</td>
+                  <td className="p-3">{u.dealerName || 'N/A'}</td>
+                  <td className="p-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.status === 'Active' ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"}`}>
+                      {u.status === 'Active' ? "Hoạt động" : "Ngưng"}
+                    </span>
+                  </td>
+                  <td className="p-3 text-center space-x-2">
+                    <button
+                      className="px-2 py-1 rounded-lg bg-sky-600/40 hover:bg-sky-600 text-white"
+                      onClick={() => openEdit(u)}
+                    >
+                      Sửa
+                    </button>
+                    <button
+                      className={`px-2 py-1 rounded-lg ${u.status === 'Active' ? "bg-slate-700 hover:bg-slate-600" : "bg-emerald-600/40 hover:bg-emerald-600"}`}
+                      onClick={() => toggleActive(u)}
+                    >
+                      {u.status === 'Active' ? "Tắt" : "Bật"}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+            {!loading && filteredUsers.length === 0 && (
+                <tr><td colSpan="8" className="p-4 text-center text-slate-500">Không tìm thấy người dùng nào.</td></tr>
+            )}
           </tbody>
         </table>
       </div>
 
-      {/* Modal thêm/sửa */}
+      {/* Modal */}
       {showModal && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 backdrop-blur-sm p-4"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/80 shadow-[0_30px_120px_rgba(2,6,23,.8)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-              <h3 className="text-xl font-bold">
-                {isEdit ? "Cập nhật người dùng" : "Thêm người dùng"}
-              </h3>
-              <button
-                className="w-8 h-8 grid place-items-center rounded-lg border border-slate-700 hover:border-sky-500/50 hover:bg-sky-500/10"
-                onClick={() => setShowModal(false)}
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={saveUser} className="px-5 py-4 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-base text-slate-300">ID</label>
-                  <input
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.id}
-                    disabled
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">
-                    Họ và tên
-                  </label>
-                  <input
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.name}
-                    onChange={(e) =>
-                      setForm({ ...form, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">
-                    Username
-                  </label>
-                  <input
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.username}
-                    onChange={(e) =>
-                      setForm({ ...form, username: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">
-                    Mật khẩu
-                  </label>
-                  <input
-                    type="password"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.password}
-                    onChange={(e) =>
-                      setForm({ ...form, password: e.target.value })
-                    }
-                    required={!isEdit}
-                    placeholder={isEdit ? "Giữ nguyên nếu không đổi" : ""}
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">Email</label>
-                  <input
-                    type="email"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.email}
-                    onChange={(e) =>
-                      setForm({ ...form, email: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">
-                    Vai trò
-                  </label>
-                  <select
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.role}
-                    onChange={(e) =>
-                      setForm({ ...form, role: e.target.value })
-                    }
-                  >
-                    <option>Admin</option>
-                    <option>EVM Staff</option>
-                    <option>Dealer Manager</option>
-                    <option>Dealer Staff</option>
-                    <option>Staff</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">Đại lý</label>
-                  <input
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                    value={form.dealer}
-                    onChange={(e) =>
-                      setForm({ ...form, dealer: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">
-                    Trạng thái
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      className="h-4 w-4 accent-sky-500"
-                      checked={form.active}
-                      onChange={() =>
-                        setForm({ ...form, active: !form.falsed })
-                      }
-                    />
-                    <span>Active</span>
-                  </label>
-                </div>
-
-                <div>
-                  <label className="text-base text-slate-300">
-                    Ngày tạo
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-slate-200"
-                    value={form.createdAt || ""}
-                    onChange={(e) =>
-                      setForm({ ...form, createdAt: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <label className="text-base text-slate-300">
-                    Cập nhật gần nhất
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5 text-slate-200"
-                    value={form.updatedAt || ""}
-                    onChange={(e) =>
-                      setForm({ ...form, updatedAt: e.target.value })
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-xl border border-slate-700 hover:border-sky-500/50 hover:bg-sky-500/10"
-                  onClick={() => setShowModal(false)}
-                >
-                  Huỷ
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white font-semibold shadow-lg hover:brightness-105"
-                >
-                  {isEdit ? "Lưu thay đổi" : "Tạo người dùng"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete confirm */}
-      {confirmDelete && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 backdrop-blur-sm p-4"
-          onClick={() => setConfirmDelete(null)}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 shadow-[0_30px_120px_rgba(2,6,23,.8)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-5 py-4 border-b border-slate-800">
-              <h3 className="text-xl font-bold">Xoá người dùng</h3>
-            </div>
-            <div className="px-5 py-4 text-slate-200">
-              Bạn có chắc muốn xoá <b>{confirmDelete.name}</b> (
-              {confirmDelete.email})?
-            </div>
-            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-800">
-              <button
-                className="px-4 py-2 rounded-xl border border-slate-700 hover:border-sky-500/50 hover:bg-sky-500/10"
-                onClick={() => setConfirmDelete(null)}
-              >
-                Huỷ
-              </button>
-              <button
-                className="px-4 py-2 rounded-xl border border-rose-600/40 text-rose-200 hover:bg-rose-600/15"
-                onClick={doDelete}
-              >
-                Xoá
-              </button>
-            </div>
-          </div>
-        </div>
+        <UserModal 
+          user={editingUser} 
+          onClose={() => setShowModal(false)}
+          onSave={handleSaveUser}
+        />
       )}
     </div>
   );
