@@ -59,20 +59,26 @@ import {
   // Customers
   CustomerList as DealerCustomerList,
   CustomerForm,
+  CustomerForm as CreateCustomer,
   CustomerDetail,
   // Test Drive
   TestDriveList,
+  TestDriveList as DealerTestDriveList,
   TestDriveForm,
+  TestDriveForm as CreateTestDrive,
   TestDriveCalendar,
   TestDriveDetail,
   TestDriveCalendarDetail,
   // Sales
   QuotationList,
+  QuotationList as DealerQuotationList,
   CreateQuotation,
   OrderList,
+  OrderList as DealerOrderList,
   CreateOrder,
   OrderDetail,
   PaymentList,
+  PaymentList as DealerPaymentList,
   PaymentForm,
   // Purchase
   PurchaseRequestList,
@@ -83,9 +89,11 @@ import {
   SupplierDebtReport,
   // Promotion
   PromotionList,
+  PromotionList as DealerPromotionList,
   PromotionDetail,
   // Staff
   StaffList,
+  StaffList as DealerStaffManagement,
   StaffForm,
   // Feedback
   FeedbackList,
@@ -463,6 +471,206 @@ const App = () => {
                           isLoading={false}
                           isDataLoading={false}
                         />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Vehicles */}
+              <Route
+                path="/:dealerId/dealer/vehicles"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerVehicleList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/vehicles/:vehicleId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <VehicleDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/vehicles/compare"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CompareVehicles />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Inventory */}
+              <Route
+                path="/:dealerId/dealer/inventory"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerInventory />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Customers */}
+              <Route
+                path="/:dealerId/dealer/customers"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerCustomerList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/customers/new"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreateCustomer />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Test Drives */}
+              <Route
+                path="/:dealerId/dealer/test-drives"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerTestDriveList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/test-drives/new"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreateTestDrive />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Orders */}
+              <Route
+                path="/:dealerId/dealer/orders"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerOrderList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/orders/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreateOrder />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Quotations */}
+              <Route
+                path="/:dealerId/dealer/quotations"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerQuotationList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Payments */}
+              <Route
+                path="/:dealerId/dealer/payments"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerPaymentList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Reports */}
+              <Route
+                path="/:dealerId/dealer/reports/sales-performance"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <SalesPerformanceReport />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Promotions */}
+              <Route
+                path="/:dealerId/dealer/promotions"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerPromotionList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+              {/* Dealer Routes with dealerId - Staff */}
+              <Route
+                path="/:dealerId/dealer/staff"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DealerStaffManagement />
                       </AppLayout>
                     </DealerShopGuard>
                   </DealerGuard>
