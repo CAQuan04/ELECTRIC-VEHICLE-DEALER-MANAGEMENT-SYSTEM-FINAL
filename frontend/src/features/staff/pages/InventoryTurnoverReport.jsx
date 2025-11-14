@@ -21,9 +21,9 @@ const InventoryTurnoverReport = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-slate-100 flex items-center gap-2">
-            ⚙️ Báo cáo tồn kho & tốc độ tiêu thụ
-          </h2>
+          <h1 className="text-3xl font-extrabold text-slate-100 flex items-center gap-2 py-2">
+            Báo cáo tồn kho & tốc độ tiêu thụ
+          </h1>
           <p className="text-slate-400 mt-1">
             Theo dõi hiệu suất tồn kho và tốc độ tiêu thụ của từng sản phẩm
           </p>

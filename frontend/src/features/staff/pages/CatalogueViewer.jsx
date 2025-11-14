@@ -100,8 +100,8 @@ const CatalogueViewer = () => {
   return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
-          Catalogue Sản Phẩm
+        <h1 className="text-lg font-semibold leading-normal py-2 text-sky-400">
+          Danh mục xe
         </h1>
       </div>
 

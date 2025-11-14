@@ -117,7 +117,7 @@ const DealerManagement = () => {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">Quản lý Đại lý</h1>
+        <h1 className="text-lg font-semibold leading-normal py-2">Quản lý Đại lý</h1>
         <button
           className="rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 font-semibold shadow-lg hover:brightness-105"
           onClick={openCreate}

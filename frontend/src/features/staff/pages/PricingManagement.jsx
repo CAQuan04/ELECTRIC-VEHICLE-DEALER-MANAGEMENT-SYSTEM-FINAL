@@ -149,6 +149,12 @@ const PricingManagement = () => {
   /* ========== UI ========== */
   return (
     <div className="space-y-6">
+      {/* === TIÊU ĐỀ TRANG === */}
+      <h1 className="text-3xl font-bold text-white py-4">
+        Quản lý giá & khuyến mãi
+      </h1>
+      {/* === KẾT THÚC TIÊU ĐỀ TRANG === */}
+
       {/* Tabs */}
       <div className="flex flex-wrap gap-2">
         {[

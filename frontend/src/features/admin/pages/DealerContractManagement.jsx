@@ -358,7 +358,7 @@ const DealerContractManagement = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-sky-400">Hợp đồng & KPI đại lý</h1>
+      <h1 className="text-lg font-semibold leading-normal py-2 text-sky-400">Hợp đồng & KPI đại lý</h1>
 
       {/* Tabs */}
       <div className="flex gap-2">

@@ -119,7 +119,7 @@ const UserManagement = () => {
   return (
     <div className="space-y-4 p-4 text-white">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-base">Quản lý người dùng</h1>
+        <h1 className="text-lg font-semibold leading-normal py-2">Quản lý người dùng</h1>
         <button
           className="rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 font-semibold shadow-lg hover:brightness-105"
           onClick={openCreate}

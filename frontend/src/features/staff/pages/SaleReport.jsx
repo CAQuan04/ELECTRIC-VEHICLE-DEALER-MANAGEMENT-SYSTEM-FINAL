@@ -37,7 +37,7 @@ const SalesReport = () => {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-emerald-400">
+      <h1 className="text-2xl font-bold text-emerald-400 py-3">
         Báo cáo doanh số theo khu vực / đại lý (EVM Staff)
       </h1>
 
