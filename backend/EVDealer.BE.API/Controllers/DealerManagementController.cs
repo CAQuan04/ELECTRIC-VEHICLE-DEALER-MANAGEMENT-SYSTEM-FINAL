@@ -52,5 +52,12 @@ namespace EVDealer.BE.API.Controllers
             var performanceReport = await _dealerService.TrackPerformanceAsync(dealerId, startDate, endDate);
             return Ok(performanceReport);
         }
+
+        [HttpGet("{dealerId}/debts")]
+        public async Task<IActionResult> GetDebtsForDealer(int dealerId)
+        {
+            var debts = await _dealerService.GetDebtsAsync(dealerId);
+            return Ok(debts);
+        }
     }
 }

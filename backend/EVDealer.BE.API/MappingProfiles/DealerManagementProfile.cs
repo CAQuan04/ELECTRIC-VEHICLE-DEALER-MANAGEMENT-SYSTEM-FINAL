@@ -23,6 +23,8 @@ namespace EVDealer.BE.API.MappingProfiles
 
             // === Quy tắc 4: Mapping từ SetTargetDto sang DealerTarget ===
             CreateMap<SetTargetDto, DealerTarget>();
+
+            CreateMap<Debt, DebtDto>();
         }
     }
 }
