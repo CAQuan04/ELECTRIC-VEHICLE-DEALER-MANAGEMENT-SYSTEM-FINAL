@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EVDealer.BE.DAL.Models;
 
@@ -19,6 +20,9 @@ public partial class Distribution
     public DateOnly? ScheduledDate { get; set; }
 
     public string Status { get; set; } = null!;
+
+    [ForeignKey("ToDealerId")]
+    public DateOnly? ActualDate { get; set; }
 
     public virtual Dealer ToDealer { get; set; } = null!;
 

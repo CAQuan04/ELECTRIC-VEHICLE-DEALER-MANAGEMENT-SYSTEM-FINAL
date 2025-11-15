@@ -1,4 +1,6 @@
-﻿namespace EVDealer.BE.DAL.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EVDealer.BE.DAL.Models;
 
 public partial class Inventory
 {
@@ -17,6 +19,10 @@ public partial class Inventory
     public virtual VehicleConfig Config { get; set; } = null!;
 
     public virtual Vehicle Vehicle { get; set; } = null!;
+    public DateTime UpdatedAt { get; set; }
+
+    [ForeignKey("LocationId")]
+    public virtual Dealer Location { get; set; }
 }
 
 #region Seed Query

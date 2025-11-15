@@ -69,5 +69,21 @@ namespace EVDealer.BE.API.Controllers
             // 4. Nếu thành công.
             return Ok(new { message = "Xác nhận nhận hàng thành công. Tồn kho đã được cập nhật." });
         }
+
+        // --- Các endpoint GET để Frontend gọi ---
+
+        [HttpGet("summary")] // GET /api/inventory/summary
+        public async Task<IActionResult> GetInventorySummary()
+        {
+            var summary = await _inventoryService.GetInventorySummaryAsync();
+            return Ok(summary);
+        }
+
+        [HttpGet("distributions/summary")] // GET /api/inventory/distributions/summary
+        public async Task<IActionResult> GetDistributionSummary()
+        {
+            var summary = await _inventoryService.GetDistributionSummaryAsync();
+            return Ok(summary);
+        }
     }
 }

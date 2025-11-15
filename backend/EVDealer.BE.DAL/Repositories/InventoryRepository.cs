@@ -56,5 +56,26 @@ namespace EVDealer.BE.DAL.Repositories
         {
             return await _context.SaveChangesAsync() > 0;
         }
+        public async Task<IEnumerable<Inventory>> GetAllSummaryAsync()
+        {
+            return await _context.Inventories
+                .AsNoTracking() // Tăng hiệu năng vì chỉ đọc
+                .Include(i => i.Vehicle)
+                .Include(i => i.Config)
+                .Include(i => i.Location)  // Join sang Dealer
+                .OrderByDescending(i => i.UpdatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Distribution>> GetAllDistributionsSummaryAsync()
+        {
+            return await _context.Distributions
+                .AsNoTracking()
+                .Include(d => d.Vehicle)
+                .Include(d => d.Config)
+                .Include(d => d.ToDealer)     // Join sang Dealer
+                .OrderByDescending(d => d.ScheduledDate)
+                .ToListAsync();
+        }
     }
 }
