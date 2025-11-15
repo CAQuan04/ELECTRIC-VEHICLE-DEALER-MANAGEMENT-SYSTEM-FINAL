@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 // Ghi chú: Import apiClient để thực hiện các lời gọi API.
-import apiClient from "../../../utils/api/apiClient"; // Đảm bảo đường dẫn đúng
+    import apiClient from "../../../utils/api/apiClient"; 
 
 // --- Helper utils (Hàm tiện ích để định dạng số tiền) ---
 const formatMoney = (n) => typeof n === "number" ? n.toLocaleString("vi-VN") + ' VNĐ' : n;
@@ -130,7 +130,6 @@ const DealerContractManagement = () => {
   const selectedDealerName = dealers.find(d => d.dealerId === parseInt(selectedDealerId))?.name || '';
   
   return (
-
     <div className="space-y-6 p-4 text-white">
       <h1 className="text-2xl font-bold text-sky-400">Hợp đồng & KPI đại lý</h1>
       
@@ -145,32 +144,6 @@ const DealerContractManagement = () => {
             <option key={d.dealerId} value={d.dealerId}>{d.name}</option>
           ))}
         </select>
-    <div className="space-y-6">
-      <h1 className="text-lg font-semibold leading-normal py-2 text-sky-400">Hợp đồng & KPI đại lý</h1>
-
-      {/* Tabs */}
-      <div className="flex gap-2">
-        {[
-          { key: "contracts", label: "Hợp đồng" },
-          { key: "targets", label: "Chỉ tiêu doanh số" },
-          { key: "debts", label: "Công nợ" },
-        ].map((t) => (
-          <button
-            key={t.key}
-            onClick={() => {
-              setTab(t.key);
-              setSearch("");
-              setFilterStatus("ALL");
-              setSortBy("");
-            }}
-            className={`px-4 py-2 rounded-xl font-semibold ${
-              tab === t.key ? "bg-sky-600 text-white" : "bg-slate-900/40 border border-slate-800 hover:bg-sky-500/10"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-
       </div>
 
       {selectedDealerId ? (
@@ -225,7 +198,7 @@ const DealerContractManagement = () => {
                     <tbody>
                     {contracts.map((c) => (
                         <tr key={c.contractId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                        <td className="p-3 font-medium">{(c.contractId)}</td>
+                        <td className="p-3 font-medium">{`C${String(c.contractId).padStart(3, "0")}`}</td>
                         <td className="p-3">{c.startDate}</td>
                         <td className="p-3">{c.endDate}</td>
                         <td className="p-3 truncate max-w-[40ch]" title={c.terms}>{c.terms}</td>
@@ -253,7 +226,7 @@ const DealerContractManagement = () => {
                     <tbody>
                     {targets.map((t) => (
                         <tr key={t.targetId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                        <td className="p-3 font-medium">{(t.targetId)}</td>
+                        <td className="p-3 font-medium">{`T${String(t.targetId).padStart(3, "0")}`}</td>
                         <td className="p-3">{t.periodStart}</td>
                         <td className="p-3">{t.periodEnd}</td>
                         <td className="p-3 font-bold text-yellow-400">{formatMoney(t.salesTarget)}</td>
@@ -280,7 +253,7 @@ const DealerContractManagement = () => {
                     <tbody>
                     {debts.map((d) => (
                         <tr key={d.debtId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                        <td className="p-3 font-medium">{(d.debtId)}</td>
+                        <td className="p-3 font-medium">{`D${String(d.debtId).padStart(3, "0")}`}</td>
                         <td className="p-3 font-bold">{formatMoney(d.amountDue)}</td>
                         <td className="p-3">{d.dueDate}</td>
                         <td className="p-3">

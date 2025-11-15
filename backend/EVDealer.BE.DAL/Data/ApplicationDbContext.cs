@@ -59,6 +59,9 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<DistributionSuggestion> DistributionSuggestions { get; set; }
 
+    public virtual DbSet<Region> Regions { get; set; }
+
+
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");

@@ -23,12 +23,14 @@ namespace EVDealer.BE.API.Controllers
             _forecastService = forecastService;
         }
 
-        [HttpGet("sales-by-dealer")]
-        public async Task<IActionResult> GetSalesReportByDealer([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        // GET: /api/analytics/sales-report?StartDate=...&GroupBy=...
+        [HttpGet("sales-report")]
+        public async Task<IActionResult> GetSalesReport([FromQuery] SalesReportQueryDto query)
         {
             try
             {
-                var report = await _analyticsService.GenerateSalesReportByDealerAsync(startDate, endDate);
+                // Ghi chú: Gọi đến phương thức đã được đổi tên và cập nhật.
+                var report = await _analyticsService.GenerateSalesReportAsync(query);
                 return Ok(report);
             }
             catch (ArgumentException ex)
@@ -37,12 +39,13 @@ namespace EVDealer.BE.API.Controllers
             }
         }
 
+        // GET: /api/analytics/inventory-turnover?StartDate=...
         [HttpGet("inventory-turnover")]
-        public async Task<IActionResult> GetInventoryTurnoverReport([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        public async Task<IActionResult> GetInventoryTurnoverReport([FromQuery] SalesReportQueryDto query)
         {
             try
             {
-                var report = await _analyticsService.GenerateInventoryTurnoverReportAsync(startDate, endDate);
+                var report = await _analyticsService.GenerateInventoryTurnoverReportAsync(query);
                 return Ok(report);
             }
             catch (Exception ex)

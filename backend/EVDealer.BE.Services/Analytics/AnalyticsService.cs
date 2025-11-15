@@ -24,72 +24,51 @@ namespace EVDealer.BE.Services.Analytics
         }
 
         // --- Báo cáo Doanh số ---
-        public async Task<SalesReportResponseDto> GenerateSalesReportByDealerAsync(DateOnly startDate, DateOnly endDate)
+        public async Task<SalesReportResponseDto> GenerateSalesReportAsync(SalesReportQueryDto query)
         {
-            if (startDate > endDate)
+            if (query.StartDate > query.EndDate)
             {
                 throw new ArgumentException("Ngày bắt đầu không được sau ngày kết thúc.");
             }
 
-            // Ghi chú: Gọi phương thức GetSalesDataByDealerAsync thông qua Unit of Work.
-            var reportData = await _unitOfWork.Analytics.GetSalesDataByDealerAsync(startDate, endDate);
+            // Ghi chú: Truyền tất cả các tham số từ DTO xuống Repository.
+            var reportData = await _unitOfWork.Analytics.GetSalesDataAsync(query.StartDate, query.EndDate, query.GroupBy, query.DealerId, query.VehicleId);
 
             return new SalesReportResponseDto
             {
                 ReportData = reportData,
-                ReportTitle = $"Báo cáo doanh số theo Đại lý từ {startDate:yyyy-MM-dd} đến {endDate:yyyy-MM-dd}"
+                ReportTitle = $"Báo cáo doanh số từ {query.StartDate:yyyy-MM-dd} đến {query.EndDate:yyyy-MM-dd}"
             };
         }
 
-        // --- Báo cáo Tồn kho & Tốc độ tiêu thụ ---
-        public async Task<IEnumerable<InventoryTurnoverReportItemDto>> GenerateInventoryTurnoverReportAsync(DateOnly startDate, DateOnly endDate)
+        // --- Báo cáo Tồn kho ---
+        public async Task<IEnumerable<InventoryTurnoverReportItemDto>> GenerateInventoryTurnoverReportAsync(SalesReportQueryDto query)
         {
-            // ===================================================================================
-            // === PHẦN SỬA LỖI: SỬ DỤNG CÁC PHƯƠNG THỨC REPOSITORY MỚI ===
+            // Ghi chú: Truyền đầy đủ các tham số lọc từ DTO 'query' xuống các hàm Repository.
+            var salesData = await _unitOfWork.Analytics.GetTotalSalesByDealerAndVehicleAsync(query.StartDate, query.EndDate, query.DealerId, query.VehicleId);
+            var receiptData = await _unitOfWork.Analytics.GetTotalReceiptsByDealerAndVehicleAsync(query.StartDate, query.EndDate, query.DealerId, query.VehicleId);
+            var inventoryData = await _unitOfWork.Analytics.GetCurrentInventoryByDealerAndVehicleAsync(query.DealerId, query.VehicleId);
 
-            // Ghi chú: Gọi các phương thức mới trả về Dictionary chi tiết theo cặp (Dealer, Vehicle).
-            var salesDataTask = _unitOfWork.Analytics.GetTotalSalesByDealerAndVehicleAsync(startDate, endDate);
-            var receiptDataTask = _unitOfWork.Analytics.GetTotalReceiptsByDealerAndVehicleAsync(startDate, endDate);
-            var inventoryDataTask = _unitOfWork.Analytics.GetCurrentInventoryByDealerAndVehicleAsync();
-            var allDealersTask = _context.Dealers.AsNoTracking().ToListAsync();
-
-            await Task.WhenAll(salesDataTask, receiptDataTask, inventoryDataTask, allDealersTask);
-
-            var salesByVehicle = salesDataTask.Result;
-            var receiptsByVehicle = receiptDataTask.Result;
-            var inventoryByVehicle = inventoryDataTask.Result;
-            var allDealers = allDealersTask.Result;
+            var dealersQuery = _context.Dealers.AsNoTracking();
+            if (query.DealerId.HasValue)
+            {
+                dealersQuery = dealersQuery.Where(d => d.DealerId == query.DealerId.Value);
+            }
+            var dealersToReport = await dealersQuery.ToListAsync();
 
             var report = new List<InventoryTurnoverReportItemDto>();
 
-            // Ghi chú: Logic tính toán được sửa lại để tổng hợp dữ liệu từ cấp độ chi tiết (Vehicle)
-            // lên cấp độ tổng hợp (Dealer).
-            foreach (var dealer in allDealers)
+            foreach (var dealer in dealersToReport)
             {
-                // Tính tổng lượng bán của ĐẠI LÝ này bằng cách lọc và tính tổng từ dictionary chi tiết.
-                var quantitySold = salesByVehicle
-                    .Where(kvp => kvp.Key.DealerId == dealer.DealerId)
-                    .Sum(kvp => kvp.Value);
+                var quantitySold = salesData.Where(kvp => kvp.Key.DealerId == dealer.DealerId).Sum(kvp => kvp.Value);
+                var quantityReceived = receiptData.Where(kvp => kvp.Key.DealerId == dealer.DealerId).Sum(kvp => kvp.Value);
+                var closingStock = inventoryData.Where(kvp => kvp.Key.DealerId == dealer.DealerId).Sum(kvp => kvp.Value);
 
-                // Tính tổng lượng nhập.
-                var quantityReceived = receiptsByVehicle
-                    .Where(kvp => kvp.Key.DealerId == dealer.DealerId)
-                    .Sum(kvp => kvp.Value);
-
-                // Tính tổng tồn kho cuối kỳ.
-                var closingStock = inventoryByVehicle
-                    .Where(kvp => kvp.Key.DealerId == dealer.DealerId)
-                    .Sum(kvp => kvp.Value);
-
-                // Chỉ thêm vào báo cáo nếu đại lý có hoạt động.
                 if (quantitySold > 0 || quantityReceived > 0 || closingStock > 0)
                 {
-                    // Công thức tính tồn đầu kỳ vẫn không đổi.
                     var openingStock = closingStock - quantityReceived + quantitySold;
                     var denominator = openingStock + quantityReceived;
-                    var sellThroughRate = (denominator > 0)
-                        ? Math.Round((decimal)quantitySold / denominator * 100, 2)
-                        : 0;
+                    var sellThroughRate = (denominator > 0) ? Math.Round((decimal)quantitySold / denominator * 100, 2) : 0;
 
                     report.Add(new InventoryTurnoverReportItemDto
                     {
@@ -103,7 +82,6 @@ namespace EVDealer.BE.Services.Analytics
                 }
             }
             return report;
-            // ===================================================================================
         }
     }
 }

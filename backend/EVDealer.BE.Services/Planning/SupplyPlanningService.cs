@@ -43,7 +43,7 @@ namespace EVDealer.BE.Services.Planning
             }
 
             _logger.LogInformation("Đang thu thập dữ liệu tồn kho hiện tại của các đại lý...");
-            var currentInventories = await _unitOfWork.Analytics.GetCurrentInventoryByDealerAndVehicleAsync();
+            var currentInventories = await _unitOfWork.Analytics.GetCurrentInventoryByDealerAndVehicleAsync(dealerId: null, vehicleId: null);
 
             _logger.LogInformation("Đang thu thập danh sách đại lý cơ bản...");
             var allDealers = await _unitOfWork.Dealers.GetAllBasicAsync();

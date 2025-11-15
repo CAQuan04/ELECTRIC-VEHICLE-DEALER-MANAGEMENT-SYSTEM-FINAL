@@ -13,6 +13,10 @@ public partial class Dealer
 
     public string? Phone { get; set; }
 
+    public int? RegionId { get; set; }
+
+    public virtual Region? Region { get; set; }
+
     public int SafetyStockLevel { get; set; }
 
     public virtual ICollection<DemandForecast> DemandForecasts { get; set; } = new List<DemandForecast>();

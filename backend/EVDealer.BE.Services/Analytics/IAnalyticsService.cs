@@ -8,8 +8,7 @@ namespace EVDealer.BE.Services.Analytics
     // Ghi chú: "Hợp đồng" cho dịch vụ phân tích (Phiên bản GỐC).
     public interface IAnalyticsService
     {
-        Task<SalesReportResponseDto> GenerateSalesReportByDealerAsync(DateOnly startDate, DateOnly endDate);
-
-        Task<IEnumerable<InventoryTurnoverReportItemDto>> GenerateInventoryTurnoverReportAsync(DateOnly startDate, DateOnly endDate);
+        Task<SalesReportResponseDto> GenerateSalesReportAsync(SalesReportQueryDto query);
+        Task<IEnumerable<InventoryTurnoverReportItemDto>> GenerateInventoryTurnoverReportAsync(SalesReportQueryDto query);
     }
 }

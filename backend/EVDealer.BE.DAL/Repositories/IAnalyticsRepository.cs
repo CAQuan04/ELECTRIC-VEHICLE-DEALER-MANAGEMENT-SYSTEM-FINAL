@@ -10,7 +10,7 @@ namespace EVDealer.BE.DAL.Repositories
     public interface IAnalyticsRepository
     {
         // === Hợp đồng cho Báo cáo Doanh số ===
-        Task<IEnumerable<SalesReportItemDto>> GetSalesDataByDealerAsync(DateOnly startDate, DateOnly endDate);
+        Task<IEnumerable<SalesReportItemDto>> GetSalesDataAsync(DateOnly startDate, DateOnly endDate, string groupBy, int? dealerId, int? vehicleId);
 
         // === Hợp đồng cho Huấn luyện AI ===
         Task<IEnumerable<OrderItem>> GetHistoricalSalesDataAsync(DateOnly untilDate);
@@ -18,19 +18,12 @@ namespace EVDealer.BE.DAL.Repositories
         // === Hợp đồng cho Module Hoạch định (Planning) ===
 
         // Ghi chú: Hợp nhất và nâng cấp. Lấy tổng lượng bán theo cặp (DealerId, VehicleId).
-        Task<Dictionary<(int DealerId, int VehicleId), int>> GetTotalSalesByDealerAndVehicleAsync(DateOnly startDate, DateOnly endDate);
+        Task<Dictionary<(int DealerId, int VehicleId), int>> GetTotalSalesByDealerAndVehicleAsync(DateOnly startDate, DateOnly endDate, int? dealerId, int? vehicleId);
+        Task<Dictionary<(int DealerId, int VehicleId), int>> GetTotalReceiptsByDealerAndVehicleAsync(DateOnly startDate, DateOnly endDate, int? dealerId, int? vehicleId);
+        Task<Dictionary<(int DealerId, int VehicleId), int>> GetCurrentInventoryByDealerAndVehicleAsync(int? dealerId, int? vehicleId);
 
-        // Ghi chú: Hợp nhất và nâng cấp. Lấy tổng lượng nhập theo cặp (DealerId, VehicleId).
-        Task<Dictionary<(int DealerId, int VehicleId), int>> GetTotalReceiptsByDealerAndVehicleAsync(DateOnly startDate, DateOnly endDate);
-
-        // Ghi chú: Nâng cấp để lấy tồn kho chi tiết theo từng cặp (DealerId, VehicleId).
-        // Đây là thay đổi quan trọng nhất để logic hoạch định chạy đúng.
-        Task<Dictionary<(int DealerId, int VehicleId), int>> GetCurrentInventoryByDealerAndVehicleAsync();
-
-        // Ghi chú: Lấy tổng nhu cầu dự báo theo từng Vehicle.
+        // --- Hợp đồng cho Báo cáo Sản xuất ---
         Task<Dictionary<int, int>> GetTotalDemandForecastByVehicleAsync(DateOnly periodStart);
-
-        // Ghi chú: Lấy tổng tồn kho theo từng Vehicle tại một loại kho nhất định.
         Task<Dictionary<int, int>> GetTotalInventoryByVehicleAsync(string locationType);
     }
 }
