@@ -18,11 +18,11 @@ namespace EVDealer.BE.API.Validators
 
             // === QUY TẮC 2: BẢO VỆ HỆ THỐNG (NGHIỆP VỤ QUAN TRỌNG) ===
             // Ghi chú: Định nghĩa một quy tắc áp dụng cho toàn bộ đối tượng (query).
-            RuleFor(query => query)
-                // Ghi chú: Must() cho phép chúng ta viết một logic kiểm tra tùy chỉnh phức tạp.
-                .Must(query => query.EndDate.DayNumber - query.StartDate.DayNumber <= 366)
-                // Ghi chú: Thông báo lỗi này rất quan trọng, nó cho người dùng biết giới hạn của hệ thống.
-                .WithMessage("Khoảng thời gian báo cáo không được vượt quá 1 năm (366 ngày).");
+            //RuleFor(query => query)
+            //    // Ghi chú: Must() cho phép chúng ta viết một logic kiểm tra tùy chỉnh phức tạp.
+            //    .Must(query => query.EndDate.DayNumber - query.StartDate.DayNumber <= 366)
+            //    // Ghi chú: Thông báo lỗi này rất quan trọng, nó cho người dùng biết giới hạn của hệ thống.
+            //    .WithMessage("Khoảng thời gian báo cáo không được vượt quá 1 năm (366 ngày).");
         }
     }
 }
