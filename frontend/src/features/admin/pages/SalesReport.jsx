@@ -95,7 +95,7 @@ const SalesReport = () => {
   // ========== UI ==========
   return (
     <div className="space-y-6">
-      <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+      <h1 className="text-lg font-semibold leading-normal py-2 text-sky-400">
         Báo cáo doanh số theo khu vực / đại lý
       </h1>
 
@@ -205,7 +205,7 @@ const SalesReport = () => {
           : [value, name]
       }
     />
-    <Legend wrapperStyle={{ color: "#cbd5e1", fontSize: 13 }} />
+    <Legend wrapperStyle={{ color: "#cbd5e1", fontSize: 12 }} />
 
     {/* Cột doanh thu */}
     <Bar

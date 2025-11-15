@@ -78,7 +78,7 @@ const ForecastReport = () => {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold text-indigo-400">
+      <h1 className="text-lg font-semibold leading-normal py-2">
         Dự báo nhu cầu sản xuất & phân phối 
       </h1>
       <p className="text-slate-400">

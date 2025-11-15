@@ -43,8 +43,9 @@ export const AuthProvider = ({ children }) => {
                           'User';
           const userId = decodedToken.userId || decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
           const dealerShopId = decodedToken.dealerShopId;
+          const dealerId = decodedToken.dealerId; // ✨ Thêm dealerId từ token
           
-          console.log('📋 Parsed claims:', { role, username, userId, dealerShopId });
+          console.log('📋 Parsed claims:', { role, username, userId, dealerShopId, dealerId });
           
           if (role) {
               const userData = { 
@@ -52,6 +53,7 @@ export const AuthProvider = ({ children }) => {
                 role,
                 userId,
                 dealerShopId,
+                dealerId, // ✨ Thêm dealerId vào userData
                 name: username
               };
               console.log('👤 Khôi phục user:', userData);
@@ -101,12 +103,14 @@ export const AuthProvider = ({ children }) => {
                         'User';
         const userId = decodedToken.userId || decodedToken['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'];
         const dealerShopId = decodedToken.dealerShopId;
+        const dealerId = decodedToken.dealerId; // ✨ Thêm dealerId từ token
         
         const userData = { 
           username, 
           role,
           userId,
           dealerShopId,
+          dealerId, // ✨ Thêm dealerId vào userData
           name: username
         };
         
@@ -156,9 +160,13 @@ export const AuthProvider = ({ children }) => {
 
   const getDefaultDashboard = () => {
     const role = user?.role;
+    const dealerId = user?.dealerId;
+    
     if (role === 'Admin') return '/evm-dashboard';
     if (role === 'EVMStaff') return '/staff-dashboard';
-    if (role === 'DealerManager' || role === 'DealerStaff') return '/dealer-dashboard';
+    if ((role === 'DealerManager' || role === 'DealerStaff') && dealerId) {
+      return `/${dealerId}/dealer-dashboard`;
+    }
     if (role === 'Customer') return '/customer-dashboard';
     return '/landing';
   };

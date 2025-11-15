@@ -155,7 +155,7 @@ const VehicleCatalogue = () => {
   return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-4xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">
+        <h1 className="text-lg font-semibold leading-normal pb-2 text-sky-400">
           Quản lý danh mục xe
         </h1>
         {canManage && (

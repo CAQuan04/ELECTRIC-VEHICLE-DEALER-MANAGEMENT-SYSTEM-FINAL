@@ -37,9 +37,9 @@ const SalesReport = () => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-emerald-400">
+      <h1 className="text-2xl font-bold text-emerald-400 py-3">
         Báo cáo doanh số theo khu vực / đại lý (EVM Staff)
-      </h2>
+      </h1>
 
       {/* Bộ lọc */}
       <div className="flex flex-wrap gap-2 items-center">
@@ -186,7 +186,7 @@ const SalesReport = () => {
 
       {/* Bảng chi tiết */}
       <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
-        <table className="min-w-full border-collapse text-sm">
+        <table className="min-w-full border-collapse text-base">
           <thead className="bg-slate-800/60 text-emerald-300">
             <tr>
               <th className="p-3 text-left">Đại lý</th>

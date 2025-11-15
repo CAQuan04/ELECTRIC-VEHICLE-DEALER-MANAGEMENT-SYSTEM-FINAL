@@ -48,11 +48,32 @@ const RoleGuard = ({ allowedRoles, children }) => {
 
 // Ghi chú: Guard này cho phép những người dùng có vai trò là "DealerManager" hoặc "DealerStaff"
 // vì cả hai đều thuộc nhóm "dealer" theo yêu cầu của bạn.
-export const DealerGuard = ({ children }) => (
-  <RoleGuard allowedRoles={['DealerManager', 'DealerStaff']}>
-    {children}
-  </RoleGuard>
-);
+// Ngoài ra, kiểm tra dealerId trong URL khớp với dealerId của user
+export const DealerGuard = ({ children }) => {
+  const { user } = useAuth();
+  const location = window.location;
+  
+  // Extract dealerId from URL path (e.g., /123/dealer-dashboard)
+  const pathParts = location.pathname.split('/');
+  const urlDealerId = pathParts[1]; // Get first segment after /
+  
+  console.log('🔒 DealerGuard: URL dealerId =', urlDealerId, ', User dealerId =', user?.dealerId);
+  
+  // If URL contains dealerId, validate it matches user's dealerId
+  if (urlDealerId && !isNaN(urlDealerId)) {
+    const userDealerIdStr = user?.dealerId?.toString();
+    if (urlDealerId !== userDealerIdStr) {
+      console.log('❌ DealerGuard: DealerId mismatch! Redirecting...');
+      return <Navigate to="/access-denied" replace />;
+    }
+  }
+  
+  return (
+    <RoleGuard allowedRoles={['DealerManager', 'DealerStaff']}>
+      {children}
+    </RoleGuard>
+  );
+};
 
 // Ghi chú: Guard này chỉ dành cho Customer (nếu có).
 export const CustomerGuard = ({ children }) => (

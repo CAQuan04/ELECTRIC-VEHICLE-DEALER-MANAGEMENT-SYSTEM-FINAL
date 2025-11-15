@@ -6,6 +6,7 @@ import { handleGoogleAccessTokenLogin, redirectUserBasedOnRole } from '../../uti
 import { handleFacebookLoginSuccess, handleFacebookLoginError, redirectUserBasedOnRole as redirectUserBasedOnRoleFB } from '../../utils/facebookAuth';
 import { AuthNotifications } from '../../utils/notifications';
 import apiClient from '../../utils/api/client';
+import { jwtDecode } from 'jwt-decode'; // ✨ Import jwtDecode
 import './AuthComponent.css';
 
 const AuthComponent = () => {
@@ -68,12 +69,17 @@ const LoginModal = ({ onClose }) => {
 
             console.log('✅ API response:', response);
 
-            // Nếu thành công, gọi hàm login từ context để lưu trạng thái
+            // Nếu thành công, gọi hàm login từ context để lưu trạng thái và parse token
             login(response);
 
-            // Chuyển hướng người dùng dựa trên vai trò
-            const role = response.role;
-            console.log('🚀 Chuyển hướng dựa trên role:', role);
+            // Parse token để lấy dealerId
+            const { token } = response;
+            const decodedToken = jwtDecode(token); // ✨ Sử dụng import
+            
+            const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            const dealerId = decodedToken.dealerId; // ✨ Lấy dealerId từ token
+            
+            console.log('🚀 Chuyển hướng dựa trên role:', role, 'dealerId:', dealerId);
             
             if (role === 'Admin') {
                 console.log('➡️ Navigate to /evm-dashboard');
@@ -82,8 +88,13 @@ const LoginModal = ({ onClose }) => {
                 console.log('➡️ Navigate to /staff-dashboard');
                 navigate('/staff-dashboard');
             } else if (role === 'DealerManager' || role === 'DealerStaff') {
-                console.log('➡️ Navigate to /dealer-dashboard');
-                navigate('/dealer-dashboard');
+                if (dealerId) {
+                    console.log(`➡️ Navigate to /${dealerId}/dealer-dashboard`);
+                    navigate(`/${dealerId}/dealer-dashboard`);
+                } else {
+                    console.log('⚠️ No dealerId found, navigate to /dealer-dashboard');
+                    navigate('/dealer-dashboard');
+                }
             } else {
                 console.log('➡️ Navigate to /customer-dashboard');
                 navigate('/customer-dashboard');

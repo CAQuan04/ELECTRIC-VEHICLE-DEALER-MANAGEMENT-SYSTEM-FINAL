@@ -18,7 +18,9 @@ const UserManagement = () => {
     setLoading(true);
     try {
       const response = await AdminService.getAllUsers();
-      setUsers(response.data);
+      // Sắp xếp mảng data nhận về theo userId tăng dần
+      const sortedData = response.data.sort((a, b) => a.userId - b.userId);
+      setUsers(sortedData); // Sử dụng dữ liệu đã sắp xếp
     } catch (error) {
       console.error("Lỗi khi tải danh sách người dùng:", error);
     } finally {
@@ -54,7 +56,6 @@ const UserManagement = () => {
         };
         await AdminService.updateUser(editingUser.userId, updateData);
       } else { // --- CHẾ ĐỘ TẠO MỚI ---
-        // Ghi chú: Đối tượng createData chứa đầy đủ các trường mà API yêu cầu.
         const createData = {
           username: formData.username,
           password: formData.password,
@@ -68,7 +69,7 @@ const UserManagement = () => {
         await AdminService.createUser(createData);
       }
       setShowModal(false);
-      fetchUsers();
+      fetchUsers(); // Tải lại danh sách (đã được sắp xếp)
     } catch (error) {
       console.error("Lỗi khi lưu người dùng:", error);
       const errorMessage = error.response?.data?.message || "Đã xảy ra lỗi không xác định.";
@@ -77,11 +78,14 @@ const UserManagement = () => {
   };
 
   const toggleActive = async (user) => {
-    const newStatus = user.status === 'Active' ? 'Inactive' : 'Active';
-    if (window.confirm(`Bạn có chắc muốn chuyển trạng thái của người dùng "${user.username}" thành "${newStatus}"?`)) {
+    // Sử dụng 'active'/'inactive' (chữ thường)
+    const newStatus = user.status === 'active' ? 'inactive' : 'active';
+    const friendlyNewStatus = newStatus === 'active' ? 'Hoạt động' : 'Ngưng hoạt động';
+
+    if (window.confirm(`Bạn có chắc muốn chuyển trạng thái của người dùng "${user.username}" thành "${friendlyNewStatus}"?`)) {
       try {
         await AdminService.changeUserStatus(user.userId, { status: newStatus });
-        fetchUsers(); 
+        fetchUsers(); // Tải lại danh sách (đã được sắp xếp)
       } catch (error) {
         console.error("Lỗi khi thay đổi trạng thái người dùng:", error);
         alert("Đã xảy ra lỗi khi thay đổi trạng thái.");
@@ -94,9 +98,20 @@ const UserManagement = () => {
     if (!users) return [];
     return users.filter((u) => {
       const k = keyword.trim().toLowerCase();
-      const byKey = !k || [u.username, u.fullName, u.email, `U${String(u.userId).padStart(3, "0")}`].some(v => v?.toLowerCase().includes(k));
+      
+      // Tìm kiếm theo ID gốc (String) và SĐT
+      const byKey = !k || [
+        u.username, 
+        u.fullName, 
+        u.email, 
+        u.phoneNumber,
+        String(u.userId) // Tìm ID gốc
+      ].some(v => v?.toLowerCase().includes(k));
+      
       const byRole = roleFilter === "ALL" || u.roleName === roleFilter;
-      const byStatus = statusFilter === "ALL" || (statusFilter === "ACTIVE" ? u.status === 'Active' : u.status === 'Inactive');
+      // Lọc theo trạng thái chữ thường
+      const byStatus = statusFilter === "ALL" || (statusFilter === "ACTIVE" ? u.status === 'active' : u.status === 'inactive');
+      
       return byKey && byRole && byStatus;
     });
   }, [users, keyword, roleFilter, statusFilter]);
@@ -104,7 +119,7 @@ const UserManagement = () => {
   return (
     <div className="space-y-4 p-4 text-white">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-base">Quản lý người dùng</h1>
+        <h1 className="text-lg font-semibold leading-normal py-2">Quản lý người dùng</h1>
         <button
           className="rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 font-semibold shadow-lg hover:brightness-105"
           onClick={openCreate}
@@ -117,7 +132,7 @@ const UserManagement = () => {
       <div className="flex flex-wrap gap-2 mb-2">
         <input
           className="min-w-[220px] flex-1 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-          placeholder="Tìm theo tên, email, ID…"
+          placeholder="Tìm theo tên, email, SĐT, ID…"
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
@@ -152,6 +167,8 @@ const UserManagement = () => {
               <th className="p-3 text-left">Họ và tên</th>
               <th className="p-3 text-left">Username</th>
               <th className="p-3 text-left">Email</th>
+              <th className="p-3 text-left">SĐT</th>
+              <th className="p-3 text-left">Ngày sinh</th>
               <th className="p-3 text-left">Vai trò</th>
               <th className="p-3 text-left">Đại lý</th>
               <th className="p-3 text-left">Trạng thái</th>
@@ -160,21 +177,30 @@ const UserManagement = () => {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="8" className="p-4 text-center">Đang tải dữ liệu người dùng...</td></tr>
+              <tr><td colSpan="10" className="p-4 text-center">Đang tải dữ liệu người dùng...</td></tr>
             ) : (
               filteredUsers.map((u) => (
                 <tr key={u.userId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                  <td className="p-3">{`U${String(u.userId).padStart(3, "0")}`}</td>
+                  
+                  {/* Hiển thị ID gốc */}
+                  <td className="p-3">{u.userId}</td>
+                  
                   <td className="p-3 font-medium">{u.fullName}</td>
                   <td className="p-3">{u.username}</td>
                   <td className="p-3">{u.email}</td>
+                  <td className="p-3">{u.phoneNumber || 'N/A'}</td>
+                  <td className="p-3">{u.dateOfBirth || 'N/A'}</td>
                   <td className="p-3">{u.roleName}</td>
                   <td className="p-3">{u.dealerName || 'N/A'}</td>
+                  
+                  {/* Hiển thị trạng thái (chữ thường) */}
                   <td className="p-3">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.status === 'Active' ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"}`}>
-                      {u.status === 'Active' ? "Hoạt động" : "Ngưng"}
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.status === 'active' ? "bg-emerald-500/20 text-emerald-300" : "bg-rose-500/20 text-rose-300"}`}>
+                      {u.status === 'active' ? "Hoạt động" : "Ngưng"}
                     </span>
                   </td>
+                  
+                  {/* Nút hành động (chữ thường) */}
                   <td className="p-3 text-center space-x-2">
                     <button
                       className="px-2 py-1 rounded-lg bg-sky-600/40 hover:bg-sky-600 text-white"
@@ -183,17 +209,17 @@ const UserManagement = () => {
                       Sửa
                     </button>
                     <button
-                      className={`px-2 py-1 rounded-lg ${u.status === 'Active' ? "bg-slate-700 hover:bg-slate-600" : "bg-emerald-600/40 hover:bg-emerald-600"}`}
+                      className={`px-2 py-1 rounded-lg ${u.status === 'active' ? "bg-slate-700 hover:bg-slate-600" : "bg-emerald-600/40 hover:bg-emerald-600"}`}
                       onClick={() => toggleActive(u)}
                     >
-                      {u.status === 'Active' ? "Tắt" : "Bật"}
+                      {u.status === 'active' ? "Tắt" : "Bật"}
                     </button>
                   </td>
                 </tr>
               ))
             )}
             {!loading && filteredUsers.length === 0 && (
-                <tr><td colSpan="8" className="p-4 text-center text-slate-500">Không tìm thấy người dùng nào.</td></tr>
+                <tr><td colSpan="10" className="p-4 text-center text-slate-500">Không tìm thấy người dùng nào.</td></tr>
             )}
           </tbody>
         </table>

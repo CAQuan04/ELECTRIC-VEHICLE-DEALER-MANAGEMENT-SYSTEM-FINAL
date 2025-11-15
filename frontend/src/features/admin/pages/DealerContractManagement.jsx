@@ -130,6 +130,7 @@ const DealerContractManagement = () => {
   const selectedDealerName = dealers.find(d => d.dealerId === parseInt(selectedDealerId))?.name || '';
   
   return (
+
     <div className="space-y-6 p-4 text-white">
       <h1 className="text-2xl font-bold text-sky-400">Hợp đồng & KPI đại lý</h1>
       
@@ -144,6 +145,32 @@ const DealerContractManagement = () => {
             <option key={d.dealerId} value={d.dealerId}>{d.name}</option>
           ))}
         </select>
+    <div className="space-y-6">
+      <h1 className="text-lg font-semibold leading-normal py-2 text-sky-400">Hợp đồng & KPI đại lý</h1>
+
+      {/* Tabs */}
+      <div className="flex gap-2">
+        {[
+          { key: "contracts", label: "Hợp đồng" },
+          { key: "targets", label: "Chỉ tiêu doanh số" },
+          { key: "debts", label: "Công nợ" },
+        ].map((t) => (
+          <button
+            key={t.key}
+            onClick={() => {
+              setTab(t.key);
+              setSearch("");
+              setFilterStatus("ALL");
+              setSortBy("");
+            }}
+            className={`px-4 py-2 rounded-xl font-semibold ${
+              tab === t.key ? "bg-sky-600 text-white" : "bg-slate-900/40 border border-slate-800 hover:bg-sky-500/10"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+
       </div>
 
       {selectedDealerId ? (
