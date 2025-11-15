@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -9,113 +9,108 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { runDemandForecast, getForecast } from "../services/forecastService";
+import apiClient from '../../../utils/api/apiClient'; // Đảm bảo đường dẫn này đúng
+import { useAuth } from '../../../context/AuthContext'; // Import useAuth để lấy vai trò người dùng
 
-// 🌈 Màu riêng cho từng đại lý
+// 🌈 Màu cho biểu đồ
 const DEALER_COLORS = {
-  DL001: "#06b6d4", // Hà Nội
-  DL002: "#a78bfa", // TP.HCM
-  DL003: "#34d399", // Đà Nẵng
+  "Đại lý A - Hà Nội": "#06b6d4",
+  "Đại lý B - TPHCM": "#a78bfa",
+  "Đại lý Sài Gòn": "#34d399",
+  "VinFast Thang Long": "#f97316",
+  "VinFast Sài Gòn": "#ec4899",
 };
 
-// ⚡️ Dữ liệu bán hàng lịch sử (SalesOrder)
-const salesHistory = [
-  { dealer_id: "DL001", period: "2025-Q1", quantity: 120 },
-  { dealer_id: "DL001", period: "2025-Q2", quantity: 140 },
-  { dealer_id: "DL001", period: "2025-Q3", quantity: 160 },
-  { dealer_id: "DL002", period: "2025-Q1", quantity: 80 },
-  { dealer_id: "DL002", period: "2025-Q2", quantity: 90 },
-  { dealer_id: "DL002", period: "2025-Q3", quantity: 100 },
-  { dealer_id: "DL003", period: "2025-Q1", quantity: 60 },
-  { dealer_id: "DL003", period: "2025-Q2", quantity: 75 },
-  { dealer_id: "DL003", period: "2025-Q3", quantity: 120 },
-];
-
-const ForecastReport = ({ role = "Staff" }) => {
+const ForecastReport = () => {
+  // --- STATE MANAGEMENT ---
   const [forecasts, setForecasts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [isJobRunning, setIsJobRunning] = useState(false);
+  const { user } = useAuth(); // Lấy thông tin user hiện tại
 
-  const canRunAI = role === "Admin"; // ✅ chỉ Admin được chạy dự báo
+  // Ghi chú: Xác định quyền dựa trên vai trò của người dùng lấy từ AuthContext.
+  const canRunAI = user?.role === "Admin"; 
 
-  // 🧠 Chạy mô hình AI dự báo
-  const handleRunForecast = () => {
-    if (!canRunAI)
-      return alert("❌ Chỉ Admin mới có quyền chạy mô hình dự báo AI.");
+  // --- API CALLS ---
+  const fetchForecasts = useCallback(async () => {
     setLoading(true);
-    setTimeout(() => {
-      runDemandForecast(); // 🧠 chạy mô hình
-      const updated = getForecast(); // 🆕 lấy dữ liệu mới nhất
-      setForecasts([...updated]); // cập nhật state
+    try {
+      const response = await apiClient.get('/api/Analytics/demand-forecasts');
+      setForecasts(response.data);
+    } catch (error) {
+      console.error("Lỗi khi tải dữ liệu dự báo:", error);
+      setForecasts([]); // Đặt lại thành mảng rỗng nếu có lỗi
+    } finally {
       setLoading(false);
-    }, 800);
-  };
-
-  // 🔁 Làm mới dữ liệu mock
-  const handleRefresh = () => {
-    const updated = getForecast();
-    setForecasts([...updated]);
-  };
-
-  // 🧩 Lấy dữ liệu ban đầu (cho Staff/hoặc lần đầu vào)
-  useEffect(() => {
-    const data = getForecast();
-    setForecasts(data);
+    }
   }, []);
 
-  // ⚙️ Chuẩn bị dữ liệu biểu đồ
-  const chartData = useMemo(() => {
-    const allPeriods = [
-      ...new Set([
-        ...salesHistory.map((s) => s.period),
-        ...forecasts.map((f) => f.forecast_period_start),
-      ]),
-    ].sort();
+  const handleRunForecast = async () => {
+    if (!canRunAI) return;
+    setIsJobRunning(true);
+    try {
+      // Gửi yêu cầu chạy job và nhận lại jobId
+      const response = await apiClient.post('/api/Analytics/run-demand-forecast');
+      console.log("Đã gửi yêu cầu chạy Job AI, Job ID:", response.data.jobId);
+      // Có thể thêm logic kiểm tra trạng thái job sau một khoảng thời gian
+      alert("Yêu cầu đã được gửi. Dữ liệu sẽ được cập nhật sau vài phút. Vui lòng nhấn 'Làm mới' để xem kết quả.");
+    } catch (error) {
+      console.error("Lỗi khi kích hoạt Job AI:", error);
+      alert("Kích hoạt Job AI thất bại.");
+    } finally {
+      setIsJobRunning(false);
+    }
+  };
 
-    return allPeriods.map((period) => {
-      const row = { period };
-      for (const dealer of Object.keys(DEALER_COLORS)) {
-        const sale = salesHistory.find(
-          (s) => s.dealer_id === dealer && s.period === period
-        );
-        const forecast = forecasts.find(
-          (f) => f.dealer_id === dealer && f.forecast_period_start === period
-        );
-        row[`${dealer}_actual`] = sale ? sale.quantity : null;
-        row[`${dealer}_forecast`] = forecast ? forecast.predicted_quantity : null;
-      }
-      return row;
-    });
-  }, [forecasts]);
+  // Lấy dữ liệu lần đầu khi trang được tải
+  useEffect(() => {
+    fetchForecasts();
+  }, [fetchForecasts]);
+
+  // --- DATA PREPARATION FOR CHART ---
+  // Ghi chú: Phần này rất phức tạp và phụ thuộc vào dữ liệu lịch sử.
+  // Hiện tại, chúng ta sẽ tạm thời ẩn biểu đồ và chỉ tập trung vào bảng.
+  // Để biểu đồ hoạt động, bạn cần một API khác để lấy dữ liệu bán hàng lịch sử đã được tổng hợp.
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-2xl font-bold text-indigo-400">
-        🤖 Dự báo nhu cầu sản xuất & phân phối
-      </h2>
-      <p className="text-slate-400">
-        AI phân tích dữ liệu bán hàng lịch sử để dự báo số lượng cần sản xuất cho
-        kỳ tiếp theo.
-      </p>
+    <div className="space-y-8 p-4 text-white">
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-indigo-400">
+            🤖 Dự báo nhu cầu sản xuất & phân phối
+          </h2>
+          <p className="text-slate-400 mt-1">
+            AI phân tích dữ liệu bán hàng lịch sử để dự báo số lượng cần sản xuất cho kỳ tiếp theo.
+          </p>
+        </div>
+        
+        {/* Ghi chú: Thêm thông tin về lịch chạy tự động */}
+        <div className="text-right text-xs text-slate-500 bg-slate-800/50 p-2 rounded-lg">
+          <p>🤖 Lần chạy tự động tiếp theo:</p>
+          <p className="font-semibold text-amber-400">Chủ Nhật hàng tuần (18:00)</p>
+        </div>
+      </div>
 
-      {/* 🎛️ Bộ điều khiển */}
+      {/* Bộ điều khiển */}
       <div className="flex flex-wrap gap-3 items-center">
         <button
           onClick={handleRunForecast}
-          disabled={!canRunAI || loading}
+          disabled={!canRunAI || isJobRunning}
           className={`px-4 py-2 rounded-xl font-semibold shadow transition ${
             canRunAI
-              ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:opacity-90"
+              ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white hover:opacity-90 disabled:opacity-50 disabled:cursor-wait"
               : "bg-slate-800 text-slate-500 cursor-not-allowed"
           }`}
         >
-          {loading ? "🔄 Đang chạy mô hình AI..." : "🚀 Chạy dự báo AI"}
+          {isJobRunning ? "🔄 Đang chạy mô hình AI..." : "🚀 Chạy dự báo (Thủ công)"}
         </button>
 
         <button
-          onClick={handleRefresh}
+          onClick={fetchForecasts}
           className="px-3 py-2 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-sm"
+          disabled={loading}
         >
-          🔁 Làm mới dữ liệu
+          {loading ? "Đang tải..." : "🔁 Làm mới dữ liệu"}
         </button>
 
         {!canRunAI && (
@@ -124,43 +119,46 @@ const ForecastReport = ({ role = "Staff" }) => {
           </span>
         )}
       </div>
+      
+      {/* Ghi chú: Thêm một dòng giải thích về kết quả đang xem */}
+      {forecasts.length > 0 && (
+        <p className="text-sm text-slate-400 italic">
+          Bảng bên dưới hiển thị kết quả từ lần chạy AI gần nhất vào lúc: <span className="font-semibold text-cyan-400">{new Date(forecasts[0].createdAt).toLocaleString('vi-VN')}</span>
+        </p>
+      )}
 
-      {/* 🧾 Bảng dự báo */}
+      {/* Bảng dự báo */}
       <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-900/40 shadow-xl">
         <table className="min-w-full border-collapse text-base">
           <thead className="bg-slate-800/60 text-indigo-300">
             <tr>
               <th className="p-3 text-left">Đại lý</th>
-              <th className="p-3 text-left">Mã xe</th>
+              <th className="p-3 text-left">Tên xe</th>
               <th className="p-3 text-left">Kỳ dự báo</th>
               <th className="p-3 text-left">Số lượng dự báo</th>
               <th className="p-3 text-left">Thời gian tạo</th>
             </tr>
           </thead>
           <tbody>
-            {forecasts.length > 0 ? (
+            {loading ? (
+                <tr><td colSpan="5" className="p-6 text-center">Đang tải dữ liệu dự báo...</td></tr>
+            ) : forecasts.length > 0 ? (
               forecasts.map((f) => (
-                <tr
-                  key={f.forecast_id}
-                  className="border-t border-slate-800 hover:bg-slate-800/30"
-                >
-                  <td className="p-3">{f.dealer_id}</td>
-                  <td className="p-3">{f.vehicle_id}</td>
-                  <td className="p-3">{f.forecast_period_start}</td>
+                <tr key={f.forecastId} className="border-t border-slate-800 hover:bg-slate-800/30">
+                  <td className="p-3 font-medium">{f.dealerName}</td>
+                  <td className="p-3">{f.vehicleName}</td>
+                  <td className="p-3">{f.forecastPeriodStart}</td>
                   <td className="p-3 font-semibold text-indigo-300">
-                    {f.predicted_quantity}
+                    {f.predictedQuantity}
                   </td>
                   <td className="p-3 text-slate-400">
-                    {new Date(f.created_at).toLocaleString()}
+                    {new Date(f.createdAt).toLocaleString('vi-VN')}
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td
-                  colSpan="5"
-                  className="p-6 text-center text-slate-400 italic"
-                >
+                <td colSpan="5" className="p-6 text-center text-slate-400 italic">
                   Chưa có dữ liệu dự báo. Nhấn “Chạy dự báo AI” để bắt đầu.
                 </td>
               </tr>
@@ -169,55 +167,15 @@ const ForecastReport = ({ role = "Staff" }) => {
         </table>
       </div>
 
-      {/* 📊 Biểu đồ đa đại lý */}
+      {/* Biểu đồ (Tạm thời ẩn đi) */}
+      {/* 
       <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl">
         <h3 className="text-lg font-semibold text-indigo-300 mb-3">
           Xu hướng tiêu thụ & Dự báo AI (đa đại lý)
         </h3>
-
-        <ResponsiveContainer width="100%" height={400}>
-          <LineChart
-            data={chartData}
-            margin={{ top: 20, right: 40, left: 0, bottom: 10 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-            <XAxis dataKey="period" stroke="#94a3b8" />
-            <YAxis stroke="#94a3b8" />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#0f172a",
-                border: "1px solid #334155",
-                borderRadius: "8px",
-                color: "#e2e8f0",
-              }}
-            />
-            <Legend wrapperStyle={{ color: "#cbd5e1", cursor: "pointer" }} />
-
-            {/* Vẽ từng đại lý */}
-            {Object.keys(DEALER_COLORS).map((dealer) => (
-              <React.Fragment key={dealer}>
-                <Line
-                  type="monotone"
-                  dataKey={`${dealer}_actual`}
-                  stroke={DEALER_COLORS[dealer]}
-                  strokeWidth={3}
-                  dot={{ r: 4 }}
-                  name={`${dealer} - Thực tế`}
-                />
-                <Line
-                  type="monotone"
-                  dataKey={`${dealer}_forecast`}
-                  stroke={DEALER_COLORS[dealer]}
-                  strokeWidth={3}
-                  strokeDasharray="5 5"
-                  dot={{ r: 5 }}
-                  name={`${dealer} - Dự báo AI`}
-                />
-              </React.Fragment>
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        // Logic biểu đồ cần API dữ liệu lịch sử...
       </div>
+      */}
     </div>
   );
 };

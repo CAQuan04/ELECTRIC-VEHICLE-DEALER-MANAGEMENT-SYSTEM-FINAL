@@ -33,6 +33,11 @@ namespace EVDealer.BE.Services.Auth
             {
                 return new LoginResponseDto { IsSuccess = false, Message = "Tài khoản hoặc mật khẩu không đúng." };
             }
+            if (user.Status != "active")
+            {
+                // Nếu tài khoản không ở trạng thái "active", từ chối đăng nhập.
+                return new LoginResponseDto { IsSuccess = false, Message = "Tài khoản của bạn đã bị vô hiệu hóa." };
+            }
 
             // Bước 3: Tạo một "Tấm Thẻ Bài" (JWT Token) hoàn chỉnh chứa đủ quyền hạn.
             var token = GenerateJwtToken(user);

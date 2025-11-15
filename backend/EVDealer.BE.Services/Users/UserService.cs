@@ -70,6 +70,13 @@ namespace EVDealer.BE.Services.Users
             var userToUpdate = await _userRepository.GetByIdAsync(userId);
             if (userToUpdate == null) return false;
 
+            if (userToUpdate.Username.Equals("admin", System.StringComparison.OrdinalIgnoreCase))
+            {
+                // Nếu là tài khoản admin, ném ra một lỗi nghiệp vụ rõ ràng.
+                // Controller sẽ bắt lỗi này và trả về 400 Bad Request.
+                throw new InvalidOperationException("Không thể thay đổi trạng thái của tài khoản Admin gốc.");
+            }
+
             userToUpdate.Status = statusUpdateDto.Status;
             userToUpdate.UpdatedAt = DateTime.UtcNow;
 
