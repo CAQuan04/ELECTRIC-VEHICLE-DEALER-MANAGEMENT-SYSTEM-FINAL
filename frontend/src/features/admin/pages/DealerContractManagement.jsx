@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 // Ghi chú: Import apiClient để thực hiện các lời gọi API.
-    import apiClient from "../../../utils/api/apiClient"; 
+import apiClient from "../../../utils/api/apiClient";
 
 // --- Helper utils (Hàm tiện ích để định dạng số tiền) ---
 const formatMoney = (n) => typeof n === "number" ? n.toLocaleString("vi-VN") + ' VNĐ' : n;
@@ -25,6 +25,22 @@ const DealerContractManagement = () => {
   const [showTargetModal, setShowTargetModal] = useState(false);
   const [targetForm, setTargetForm] = useState(null); // State cho form chỉ tiêu
 
+  // --- DERIVED/SORTED STATE (THÊM MỚI) ---
+  // Sắp xếp danh sách hợp đồng theo ID
+  const sortedContracts = useMemo(() => {
+    return [...contracts].sort((a, b) => a.contractId - b.contractId);
+  }, [contracts]);
+
+  // Sắp xếp danh sách chỉ tiêu theo ID
+  const sortedTargets = useMemo(() => {
+    return [...targets].sort((a, b) => a.targetId - b.targetId);
+  }, [targets]);
+
+  // Sắp xếp danh sách công nợ theo ID
+  const sortedDebts = useMemo(() => {
+    return [...debts].sort((a, b) => a.debtId - b.debtId);
+  }, [debts]);
+  
   // --- API CALLS ---
 
   // Ghi chú: useEffect này chạy 1 lần duy nhất để tải danh sách đại lý cho dropdown.
@@ -131,7 +147,7 @@ const DealerContractManagement = () => {
   
   return (
     <div className="space-y-6 p-4 text-white">
-      <h1 className="text-2xl font-bold text-sky-400">Hợp đồng & KPI đại lý</h1>
+      <h1 className="text-2xl font-bold text-sky-400 py-2">Hợp đồng & KPI đại lý</h1>
       
       <div className="flex items-center gap-3 bg-slate-900/40 border border-slate-800 p-3 rounded-xl">
         <label className="font-semibold whitespace-nowrap">Xem thông tin của Đại lý:</label>
@@ -196,16 +212,17 @@ const DealerContractManagement = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {contracts.map((c) => (
+                    {/* CẬP NHẬT: Dùng sortedContracts và hiển thị contractId */}
+                    {sortedContracts.map((c) => (
                         <tr key={c.contractId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                        <td className="p-3 font-medium">{`C${String(c.contractId).padStart(3, "0")}`}</td>
+                        <td className="p-3 font-medium">{c.contractId}</td>
                         <td className="p-3">{c.startDate}</td>
                         <td className="p-3">{c.endDate}</td>
                         <td className="p-3 truncate max-w-[40ch]" title={c.terms}>{c.terms}</td>
                         <td className="p-3"><span className="px-2 py-1 rounded-full text-xs font-semibold bg-slate-700/40">{c.status}</span></td>
                         </tr>
                     ))}
-                    {contracts.length === 0 && ( <tr><td colSpan="5" className="p-6 text-center text-slate-400">Đại lý này chưa có hợp đồng nào.</td></tr> )}
+                    {sortedContracts.length === 0 && ( <tr><td colSpan="5" className="p-6 text-center text-slate-400">Đại lý này chưa có hợp đồng nào.</td></tr> )}
                     </tbody>
                 </table>
                 </div>
@@ -224,16 +241,17 @@ const DealerContractManagement = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {targets.map((t) => (
+                    {/* CẬP NHẬT: Dùng sortedTargets và hiển thị targetId */}
+                    {sortedTargets.map((t) => (
                         <tr key={t.targetId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                        <td className="p-3 font-medium">{`T${String(t.targetId).padStart(3, "0")}`}</td>
+                        <td className="p-3 font-medium">{t.targetId}</td>
                         <td className="p-3">{t.periodStart}</td>
                         <td className="p-3">{t.periodEnd}</td>
                         <td className="p-3 font-bold text-yellow-400">{formatMoney(t.salesTarget)}</td>
                         <td className="p-3 font-bold text-emerald-400">{formatMoney(t.actualSales)}</td>
                         </tr>
                     ))}
-                     {targets.length === 0 && ( <tr><td colSpan="5" className="p-6 text-center text-slate-400">Đại lý này chưa có chỉ tiêu nào.</td></tr> )}
+                     {sortedTargets.length === 0 && ( <tr><td colSpan="5" className="p-6 text-center text-slate-400">Đại lý này chưa có chỉ tiêu nào.</td></tr> )}
                     </tbody>
                 </table>
                 </div>
@@ -251,9 +269,10 @@ const DealerContractManagement = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {debts.map((d) => (
+                    {/* CẬP NHẬT: Dùng sortedDebts và hiển thị debtId */}
+                    {sortedDebts.map((d) => (
                         <tr key={d.debtId} className="border-t border-slate-800 hover:bg-slate-800/30">
-                        <td className="p-3 font-medium">{`D${String(d.debtId).padStart(3, "0")}`}</td>
+                        <td className="p-3 font-medium">{d.debtId}</td>
                         <td className="p-3 font-bold">{formatMoney(d.amountDue)}</td>
                         <td className="p-3">{d.dueDate}</td>
                         <td className="p-3">
@@ -261,7 +280,7 @@ const DealerContractManagement = () => {
                         </td>
                         </tr>
                     ))}
-                    {debts.length === 0 && ( <tr><td colSpan="4" className="p-6 text-center text-slate-400">Đại lý này không có công nợ nào.</td></tr> )}
+                    {sortedDebts.length === 0 && ( <tr><td colSpan="4" className="p-6 text-center text-slate-400">Đại lý này không có công nợ nào.</td></tr> )}
                     </tbody>
                 </table>
                 </div>

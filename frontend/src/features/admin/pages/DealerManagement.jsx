@@ -2,54 +2,59 @@ import React, { useState, useMemo } from "react";
 
 const initialDealers = [
   {
-    id: "DL001",
+    id: 1, // Đã đổi thành số
     name: "VinFast Thăng Long",
     address: "Số 1 Trần Duy Hưng, Cầu Giấy, Hà Nội",
     phone: "0912345678",
     safetyStockLevel: 10,
     active: true,
+    region: "Miền Bắc",
   },
   {
-    id: "DL002",
+    id: 2,
     name: "VinFast Sài Gòn",
     address: "Landmark 81, Quận Bình Thạnh, TP. Hồ Chí Minh",
     phone: "0987654321",
     safetyStockLevel: 5,
     active: true,
+    region: "Miền Nam",
   },
   {
-    id: "DL003",
+    id: 3,
     name: "Đại lý Sài Gòn",
     address: "456 Nguyễn Huệ, TP.HCM",
     phone: "0987654321",
     safetyStockLevel: 5,
     active: true,
+    region: "Miền Nam",
   },
   {
-    id: "DL004",
+    id: 4,
     name: "Đại lý A - Hà Nội",
     address: "55 Tràng Tiền, Hà Nội",
     phone: "02411112222",
     safetyStockLevel: 5,
     active: true,
+    region: "Miền Bắc",
   },
   {
-    id: "DL005",
+    id: 5,
     name: "Đại lý B - TPHCM",
     address: "22 Nguyễn Huệ, Quận 1, TP.HCM",
     phone: "02833334444",
     safetyStockLevel: 5,
     active: true,
+    region: "Miền Nam",
   },
 ];
 
 const emptyDealer = {
   id: "",
-  username: "",
-  password: "",
+  name: "",
   address: "",
-  email: "",
-  role: "Dealer Staff",
+  phone: "",
+  safetyStockLevel: 5,
+  region: "Miền Bắc",
   active: true,
 };
 
@@ -61,18 +66,21 @@ const DealerManagement = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(null);
 
+  // Logic lọc và SẮP XẾP
   const filteredDealers = useMemo(() => {
-    return dealers.filter((d) =>
-      [d.username, d.address, d.id, d.email].some((v) =>
+    const result = dealers.filter((d) =>
+      [d.name, d.address, d.id, d.phone, d.region].some((v) =>
         String(v).toLowerCase().includes(keyword.toLowerCase())
       )
     );
+    // Sắp xếp ID từ thấp đến cao
+    return result.sort((a, b) => a.id - b.id);
   }, [dealers, keyword]);
 
+  // Logic tạo ID mới đơn giản (Max ID + 1)
   const genId = () => {
-    const next =
-      Math.max(0, ...dealers.map((d) => Number(d.id.replace("DL", "")))) + 1;
-    return `DL${String(next).padStart(3, "0")}`;
+    if (dealers.length === 0) return 1;
+    return Math.max(...dealers.map((d) => d.id)) + 1;
   };
 
   const openCreate = () => {
@@ -80,6 +88,7 @@ const DealerManagement = () => {
     setIsEdit(false);
     setShowModal(true);
   };
+
   const openEdit = (d) => {
     setForm(d);
     setIsEdit(true);
@@ -88,10 +97,9 @@ const DealerManagement = () => {
 
   const saveDealer = (e) => {
     e.preventDefault();
-    if (!form.username.trim()) return alert("Username không được để trống.");
-    if (!form.password.trim()) return alert("Password bắt buộc.");
+    if (!form.name.trim()) return alert("Tên đại lý không được để trống.");
     if (!form.address.trim()) return alert("Địa chỉ không được để trống.");
-    if (!form.email.trim()) return alert("Email bắt buộc.");
+    if (!form.phone.trim()) return alert("Điện thoại bắt buộc.");
 
     if (isEdit) {
       setDealers((prev) =>
@@ -128,7 +136,7 @@ const DealerManagement = () => {
 
       <input
         className="min-w-[240px] mb-4 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-        placeholder="Tìm kiếm theo tên, địa chỉ hoặc email..."
+        placeholder="Tìm kiếm theo tên, địa chỉ, SĐT, khu vực..."
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
       />
@@ -140,6 +148,7 @@ const DealerManagement = () => {
               <th className="p-3 text-left">ID</th>
               <th className="p-3 text-left">Tên đại lý</th>
               <th className="p-3 text-left">Địa chỉ</th>
+              <th className="p-3 text-left">Khu vực</th>
               <th className="p-3 text-left">Điện thoại</th>
               <th className="p-3 text-left">Mức tồn an toàn</th>
               <th className="p-3 text-left">Trạng thái</th>
@@ -155,6 +164,7 @@ const DealerManagement = () => {
                 <td className="p-3">{d.id}</td>
                 <td className="p-3 font-medium">{d.name}</td>
                 <td className="p-3">{d.address}</td>
+                <td className="p-3">{d.region}</td>
                 <td className="p-3">{d.phone}</td>
                 <td className="p-3 text-center">{d.safetyStockLevel}</td>
                 <td className="p-3">
@@ -229,24 +239,11 @@ const DealerManagement = () => {
                 />
               </div>
               <div>
-                <label className="text-base text-slate-300">Username</label>
+                <label className="text-base text-slate-300">Tên đại lý</label>
                 <input
                   className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                  value={form.username}
-                  onChange={(e) =>
-                    setForm({ ...form, username: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-base text-slate-300">Password</label>
-                <input
-                  type="password"
-                  className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                  value={form.password}
-                  onChange={(e) =>
-                    setForm({ ...form, password: e.target.value })
-                  }
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
               </div>
               <div>
@@ -254,31 +251,40 @@ const DealerManagement = () => {
                 <input
                   className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
                   value={form.address}
-                  onChange={(e) =>
-                    setForm({ ...form, address: e.target.value })
-                  }
+                  onChange={(e) => setForm({ ...form, address: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-base text-slate-300">Email</label>
+                <label className="text-base text-slate-300">Điện thoại</label>
                 <input
-                  type="email"
+                  type="text"
                   className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
               </div>
               <div>
-                <label className="text-base text-slate-300">Vai trò</label>
+                <label className="text-base text-slate-300">Khu vực</label>
                 <select
                   className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                  value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  value={form.region}
+                  onChange={(e) => setForm({ ...form, region: e.target.value })}
                 >
-                  <option>Dealer Staff</option>
-                  <option>Dealer Manager</option>
-                  <option>EVM Staff</option>
+                  <option>Miền Bắc</option>
+                  <option>Miền Trung</option>
+                  <option>Miền Nam</option>
                 </select>
+              </div>
+              <div>
+                <label className="text-base text-slate-300">Mức tồn an toàn</label>
+                <input
+                  type="number"
+                  className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
+                  value={form.safetyStockLevel}
+                  onChange={(e) =>
+                    setForm({ ...form, safetyStockLevel: Number(e.target.value) })
+                  }
+                />
               </div>
 
               <div className="flex justify-end gap-2 pt-2 border-t border-slate-800">
@@ -315,7 +321,7 @@ const DealerManagement = () => {
               <h3 className="text-xl font-bold">Xoá Đại lý</h3>
             </div>
             <div className="px-5 py-4 text-slate-200">
-              Bạn có chắc muốn xoá <b>{confirmDelete.username}</b> không?
+              Bạn có chắc muốn xoá <b>{confirmDelete.name}</b> không?
             </div>
             <div className="flex justify-end gap-2 px-5 py-4 border-t border-slate-800">
               <button
