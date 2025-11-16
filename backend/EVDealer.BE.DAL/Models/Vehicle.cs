@@ -15,7 +15,7 @@ public partial class Vehicle
     public int? Year { get; set; }
 
 
-
+    public virtual ICollection<WholesalePrice> WholesalePrices { get; set; } = new List<WholesalePrice>();
     public decimal? BasePrice { get; set; }
 
     public virtual ICollection<DemandForecast> DemandForecasts { get; set; } = new List<DemandForecast>();

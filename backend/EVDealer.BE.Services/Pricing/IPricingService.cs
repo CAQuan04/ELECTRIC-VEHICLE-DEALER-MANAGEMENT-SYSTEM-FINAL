@@ -17,5 +17,8 @@ namespace EVDealer.BE.Services.Pricing
         Task<PromotionPolicy> CreatePromotionPolicyAsync(CreatePromotionPolicyDto dto);
         // Hợp đồng: Phải có chức năng lấy giá áp dụng cho đại lý.
         Task<WholesalePrice?> GetPriceForDealerAsync(int vehicleId, int dealerId);
+
+        Task<IEnumerable<WholesalePriceSummaryDto>> GetWholesalePricesSummaryAsync();
+        Task<IEnumerable<PromotionPolicySummaryDto>> GetPromotionPoliciesSummaryAsync();
     }
 }

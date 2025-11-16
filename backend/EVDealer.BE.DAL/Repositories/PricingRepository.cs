@@ -62,7 +62,24 @@ namespace EVDealer.BE.DAL.Repositories
             // Trả về giá chung nếu có, hoặc null nếu không có giá nào.
             return generalPrice;
         }
+        public async Task<IEnumerable<WholesalePrice>> GetAllWholesalePricesSummaryAsync()
+        {
+            return await _context.WholesalePrices
+                .AsNoTracking()
+                .Include(p => p.Product) // JOIN sang bảng Vehicle (giả sử navigation property là 'Product')
+                .Include(p => p.Dealer)  // JOIN sang bảng Dealer
+                .OrderByDescending(p => p.ValidFrom)
+                .ToListAsync();
+        }
 
+        public async Task<IEnumerable<PromotionPolicy>> GetAllPromotionPoliciesSummaryAsync()
+        {
+            return await _context.PromotionPolicies
+                .AsNoTracking()
+                .Include(p => p.Dealer) // JOIN sang bảng Dealer
+                .OrderByDescending(p => p.StartDate)
+                .ToListAsync();
+        }
         // Triển khai: Lưu các thay đổi vào CSDL.
         // Ghi chú: Không có thay đổi ở đây.
         public async Task<bool> SaveChangesAsync() => await _context.SaveChangesAsync() > 0;

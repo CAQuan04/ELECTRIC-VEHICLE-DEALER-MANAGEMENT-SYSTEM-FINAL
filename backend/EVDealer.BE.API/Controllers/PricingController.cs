@@ -45,5 +45,20 @@ namespace EVDealer.BE.API.Controllers
             }
             return Ok(price);
         }
+        [HttpGet("wholesale-prices-summary")]
+        public async Task<IActionResult> GetWholesalePricesSummary()
+        {
+            var result = await _pricingService.GetWholesalePricesSummaryAsync();
+            return Ok(result);
+        }
+
+        // GET: /api/pricing/promotion-policies-summary
+        [HttpGet("promotion-policies-summary")]
+        public async Task<IActionResult> GetPromotionPoliciesSummary()
+        {
+            var result = await _pricingService.GetPromotionPoliciesSummaryAsync();
+            return Ok(result);
+        }
+
     }
 }
