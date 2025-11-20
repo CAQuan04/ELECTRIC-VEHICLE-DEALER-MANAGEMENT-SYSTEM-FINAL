@@ -1,87 +1,94 @@
 /**
  * Admin API Service
- * Handles all admin-related API calls
+ * Handles all admin-related API calls by connecting to the real backend
  */
-import { CompleteMockAPI } from '../database';
+import apiClient from '../apiClient'; // Ghi chú: Import apiClient mà chúng ta vừa tạo
 
 export class AdminService {
-  // User Management
+  
+  // === User Management (Đã tích hợp API thật) ===
+
   static async getAllUsers(filters = {}) {
-    return await CompleteMockAPI.getAllUsers(filters);
+    // Ghi chú: Sử dụng apiClient để gọi GET /api/Users
+    // Chúng ta sẽ xử lý filters sau nếu cần, tạm thời lấy tất cả.
+    return await apiClient.get('/api/Users');
   }
   
   static async getUserById(userId) {
-    return await CompleteMockAPI.getUserById(userId);
+    return await apiClient.get(`/api/Users/${userId}`);
   }
   
   static async createUser(userData) {
-    return await CompleteMockAPI.createUser(userData);
+    // Ghi chú: Gửi dữ liệu userData (khớp với UserCreateDto) đến API
+    return await apiClient.post('/api/Users', userData);
   }
   
   static async updateUser(userId, updateData) {
-    return await CompleteMockAPI.updateUser(userId, updateData);
+    // Ghi chú: updateData phải khớp với UserUpdateDto
+    return await apiClient.put(`/api/Users/${userId}`, updateData);
   }
   
-  static async deleteUser(userId) {
-    return await CompleteMockAPI.deleteUser(userId);
+  // Ghi chú: API của bạn dùng PATCH cho việc thay đổi trạng thái, không phải DELETE
+  static async changeUserStatus(userId, statusData) {
+    // statusData sẽ là object dạng { status: 'Active' } hoặc { status: 'Inactive' }
+    return await apiClient.patch(`/api/Users/${userId}/status`, statusData);
+  }
+
+  // === CÁC API PHỤ TRỢ CẦN THIẾT CHO FORM ===
+
+  static async getAllRoles() {
+    // Ghi chú: API này chưa có trong Controller của bạn, cần phải tạo
+    return await apiClient.get('/api/Roles');
+  }
+
+  static async getAllDealersBasic() {
+    // Ghi chú: API này cũng cần được tạo để lấy danh sách đại lý gọn nhẹ
+    return await apiClient.get('/api/Dealers/basic'); // Ví dụ một endpoint mới
   }
   
-  static async bulkCreateUsers(usersData) {
-    return await CompleteMockAPI.bulkCreateUsers(usersData);
-  }
+  // === Các chức năng khác (giữ lại cấu trúc, sẽ tích hợp sau) ===
   
   // Analytics
   static async getDashboardAnalytics(userId) {
-    return await CompleteMockAPI.getDashboardAnalytics('admin', userId);
+    // TODO: Sẽ tích hợp API phân tích ở đây
+    // return await apiClient.get(`/api/analytics/dashboard`);
+    return { success: true, data: {} }; // Trả về dữ liệu giả tạm thời
   }
   
   // Reports
   static async exportData(dataType, filters = {}) {
-    return await CompleteMockAPI.exportData(dataType, filters);
+    // TODO: Sẽ tích hợp API xuất dữ liệu ở đây
+    return { success: true, data: [] };
   }
   
   // System Management
   static async getSystemStats() {
-    const [usersResult, ordersResult, vehiclesResult] = await Promise.all([
-      CompleteMockAPI.getAllUsers(),
-      CompleteMockAPI.getAllOrders(),
-      CompleteMockAPI.getAllVehicles()
-    ]);
-    
-    return {
-      success: true,
-      data: {
-        totalUsers: usersResult.data?.users?.length || 0,
-        totalOrders: ordersResult.data?.length || 0,
-        totalVehicleModels: vehiclesResult.data?.length || 0,
-        activeUsers: usersResult.data?.users?.filter(u => u.isActive)?.length || 0,
-        completedOrders: ordersResult.data?.filter(o => o.status === 'delivered')?.length || 0,
-        revenue: ordersResult.data?.reduce((sum, order) => sum + order.totalAmount, 0) || 0
-      }
-    };
+    // TODO: Tích hợp API lấy thống kê hệ thống
+    return { success: true, data: {} };
   }
   
-  // Dealer Management
-  static async getAllDealers() {
-    const usersResult = await CompleteMockAPI.getAllUsers({ role: 'dealer' });
-    return usersResult;
-  }
-  
-  // Vehicle Management
+  // Vehicle Management (sẽ dùng trong chức năng quản lý xe)
   static async getAllVehicles(filters = {}) {
-    return await CompleteMockAPI.getAllVehicles(filters);
+    return await apiClient.get('/admin/vehicles', { params: filters });
   }
+  // === PHẦN BỔ SUNG: CÁC HÀM CUNG CẤP DỮ LIỆU CHO DROPDOWN ===
   
-  static async createVehicle(vehicleData) {
-    return await CompleteMockAPI.createVehicle(vehicleData);
+  static async getAllRoles() {
+    // Ghi chú: Gọi đến API GET /api/Roles mà chúng ta đã tạo ở Backend.
+    return await apiClient.get('/api/Roles');
   }
-  
-  static async updateVehicle(vehicleId, updateData) {
-    return await CompleteMockAPI.updateVehicle(vehicleId, updateData);
+ static async getAllRoles() {
+    // Ghi chú: Gọi đến API GET /api/Roles mà chúng ta vừa tạo ở Backend.
+    return await apiClient.get('/api/Roles');
   }
-  
-  static async deleteVehicle(vehicleId) {
-    return await CompleteMockAPI.deleteVehicle(vehicleId);
+
+  static async getAllDealersBasic() {
+    // Ghi chú: Gọi đến API GET /api/Dealers/basic để lấy danh sách đại lý gọn nhẹ.
+    return await apiClient.get('/api/Dealers/basic');
+  }
+  static async getAllDealersBasic() {
+    // Ghi chú: Gọi đến API GET /api/Dealers/basic để lấy danh sách đại lý gọn nhẹ.
+    return await apiClient.get('/api/Dealers/basic');
   }
 }
 

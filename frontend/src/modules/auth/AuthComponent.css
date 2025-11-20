@@ -348,7 +348,7 @@
   height: 100vh !important;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
-  z-index: 999999 !important;
+  z-index: 9999 !important;
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
@@ -371,6 +371,7 @@
   right: auto !important;
   top: auto !important;
   bottom: auto !important;
+  z-index: 10000 !important;
 }
 
 @keyframes authSlide {
@@ -437,8 +438,9 @@
   color: #333;
   text-align: center;
   padding: 40px;
-  z-index: 1;
+  z-index: 10 !important;
   transition: 0.4s ease-in-out 0.5s, visibility 0s 1s;
+  pointer-events: auto;
 }
 
 .auth-container.active .form-box {
@@ -456,6 +458,7 @@
 .input-box {
   position: relative;
   margin: 30px 0;
+  z-index: 20;
 }
 
 .input-box input {
@@ -470,6 +473,9 @@
   font-weight: 500;
   font-family: "Poppins", sans-serif;
   transition: all 0.3s ease;
+  pointer-events: auto;
+  position: relative;
+  z-index: 21;
 }
 
 .input-box input:focus {
@@ -602,6 +608,8 @@
   position: absolute;
   width: 100%;
   height: 100%;
+  z-index: 2 !important;
+  pointer-events: none;
 }
 
 .toggle-box::before {
@@ -614,7 +622,7 @@
   background-size: 400% 400%;
   animation: gradientMove 6s ease-in-out infinite;
   border-radius: 150px;
-  z-index: 2;
+  z-index: 1 !important;
   transition: 1.5s ease-in-out;
 }
 
@@ -631,8 +639,9 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  z-index: 2;
+  z-index: 3 !important;
   transition: 0.4s ease-in-out;
+  pointer-events: auto;
 }
 
 .toggle-panel h1 {
@@ -699,7 +708,7 @@
   color: #666;
   font-size: 28px;
   cursor: pointer;
-  z-index: 10;
+  z-index: 10001 !important;
   transition: color 0.3s ease;
 }
 
@@ -1115,9 +1124,35 @@
 }
 
 .test-list {
-  margin-top: 8px;
-  line-height: 1.6;
+  margin-top: 10px;
+  line-height: 1.8;
   color: #555;
+}
+
+.test-list .account-group {
+  margin-bottom: 12px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 4px;
+  border-left: 3px solid #4A90E2;
+}
+
+.test-list .account-group:last-child {
+  margin-bottom: 0;
+}
+
+.test-list .account-group strong {
+  display: block;
+  color: #333;
+  margin-bottom: 4px;
+  font-size: 13px;
+}
+
+.test-list .account-group div {
+  font-size: 11px;
+  color: #666;
+  padding-left: 8px;
+  line-height: 1.6;
 }
 
 /* Toggle Container Updates */

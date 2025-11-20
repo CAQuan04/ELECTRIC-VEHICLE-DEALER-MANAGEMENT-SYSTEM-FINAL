@@ -3,7 +3,6 @@
 // --- Import các namespace cần thiết ---
 using EVDealer.BE.API.Helpers;
 using EVDealer.BE.API.Validators;
-using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Admin;
@@ -14,8 +13,6 @@ using EVDealer.BE.Services.Customers;
 using EVDealer.BE.Services.DealerManagement;
 using EVDealer.BE.Services.Dealers;
 using EVDealer.BE.Services.Deliveries;
-
-// Ghi chú: Đổi tên namespace 'IInventory' thành 'Inventory' cho nhất quán nếu bạn đã đổi.
 using EVDealer.BE.Services.IInventory;
 using EVDealer.BE.Services.Orders;
 using EVDealer.BE.Services.Planning;
@@ -81,7 +78,6 @@ builder.Services.AddScoped<IDealerRepository, DealerRepository>();
 builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
 builder.Services.AddScoped<IDistributionRepository, DistributionRepository>();
-
 // Ghi chú: Đăng ký Unit of Work, quản lý tất cả Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // ===================================================================================
@@ -108,6 +104,9 @@ builder.Services.AddScoped<IDistributionService, DistributionService>();
 // Đăng ký Service AI
 builder.Services.AddScoped<IDemandForecastService, DemandForecastService>();
 builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+
+// Ghi chú: Đăng ký AutoMapper ở đây.
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Logging.ClearProviders();
 builder.Services.AddScoped<IDistributionSuggestionRepository, DistributionSuggestionRepository>();

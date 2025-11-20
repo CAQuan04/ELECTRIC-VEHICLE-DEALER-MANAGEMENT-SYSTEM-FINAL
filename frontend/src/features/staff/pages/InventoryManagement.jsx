@@ -1,461 +1,329 @@
-// InventoryManagement.jsx — Quản lý tồn kho & điều phối xe (EVM Staff)
-import React, { useState, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import apiClient from "../../../utils/api/apiClient";
+import { useAuth } from "../../../context/AuthContext";
 
 const InventoryManagement = () => {
-  const [activeTab, setActiveTab] = useState("inventory");
+    const [activeTab, setActiveTab] = useState("inventory");
+    const { user } = useAuth();
 
-  /* ========== MOCK DATA ========== */
-  const [inventories, setInventories] = useState([
-    {
-      inventory_id: "INV001",
-      product_id: "P001",
-      location_type: "Tổng kho",
-      location_id: "WH001",
-      quantity: 120,
-      updated_at: "2025-10-20",
-    },
-    {
-      inventory_id: "INV002",
-      product_id: "P002",
-      location_type: "Đại lý",
-      location_id: "DL001",
-      quantity: 20,
-      updated_at: "2025-10-23",
-    },
-  ]);
+    // --- STATE MANAGEMENT ---
+    const [inventories, setInventories] = useState([]);
+    const [distributions, setDistributions] = useState([]);
+    const [loading, setLoading] = useState(false);
+    
+    // State cho Modal
+    const [showModal, setShowModal] = useState(false);
+    const [form, setForm] = useState({});
+    const [isEdit, setIsEdit] = useState(false); // Sẽ dùng trong tương lai cho chức năng Sửa
+    
+    const [vehicles, setVehicles] = useState([]);
+    const [dealers, setDealers] = useState([]);
+    const [configs, setConfigs] = useState([]); // State mới để lưu config của xe được chọn
 
-  const [distributions, setDistributions] = useState([
-    {
-      dist_id: "DIST001",
-      from_location: "WH001",
-      to_dealer_id: "DL001",
-      product_id: "P001",
-      qty: 10,
-      scheduled_date: "2025-10-22",
-      actual_date: "2025-10-23",
-      status: "Hoàn tất",
-    },
-    {
-      dist_id: "DIST002",
-      from_location: "WH001",
-      to_dealer_id: "DL002",
-      product_id: "P002",
-      qty: 5,
-      scheduled_date: "2025-10-25",
-      actual_date: "",
-      status: "Đang chờ",
-    },
-  ]);
+    // --- QUYỀN HẠN ---
+    const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
+    const isDealerManager = user?.role === 'DealerManager';
 
-  /* ========== FORM / MODAL STATE ========== */
-  const [showModal, setShowModal] = useState(false);
-  const [form, setForm] = useState({});
-  const [isEdit, setIsEdit] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(null);
+    // --- API CALLS ---
+    const fetchData = useCallback(async () => {
+        setLoading(true);
+        try {
+            // Cần các API GET mới để lấy dữ liệu đã được JOIN
+            const [invRes, distRes] = await Promise.all([
+                apiClient.get('/api/inventory/summary'), 
+                apiClient.get('/api/inventory/distributions/summary')
+            ]);
+            setInventories(invRes.data);
+            setDistributions(distRes.data);
+        } catch (error) {
+            console.error("Lỗi khi tải dữ liệu:", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
-  /* ========== GENERATORS ========== */
-  const genId = (prefix, list, key) => {
-    const num =
-      Math.max(0, ...list.map((i) => Number(i[key].replace(prefix, "")))) + 1;
-    return `${prefix}${String(num).padStart(3, "0")}`;
-  };
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
-  /* ========== INVENTORY CRUD ========== */
-  const openCreateInventory = () => {
-    setIsEdit(false);
-    setForm({
-      inventory_id: genId("INV", inventories, "inventory_id"),
-      product_id: "",
-      location_type: "Tổng kho",
-      location_id: "",
-      quantity: "",
-      updated_at: new Date().toISOString().slice(0, 10),
-    });
-    setShowModal(true);
-  };
+    const fetchDropdownData = async () => {
+        if (vehicles.length === 0 || dealers.length === 0) {
+            try {
+                const [vehRes, dealRes] = await Promise.all([
+                    apiClient.get('/api/admin/vehicles'),
+                    apiClient.get('/api/dealers/basic')
+                ]);
+                setVehicles(vehRes.data);
+                setDealers(dealRes.data);
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu dropdowns:", error);
+            }
+        }
+    };
+    
+    // Tải danh sách config khi người dùng chọn một xe trong modal
+    const handleVehicleChangeInModal = async (vehicleId) => {
+        setForm(prev => ({...prev, vehicleId, configId: ''})); // Reset configId
+        if (!vehicleId) {
+            setConfigs([]);
+            return;
+        }
+        try {
+            const res = await apiClient.get(`/api/vehicles/${vehicleId}/configs`);
+            setConfigs(res.data);
+        } catch (error) {
+            console.error("Lỗi khi tải config:", error);
+        }
+    };
 
-  const openEditInventory = (i) => {
-    setIsEdit(true);
-    setForm({ ...i });
-    setShowModal(true);
-  };
+    const handleFormChange = (e) => {
+        setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    };
 
-  const saveInventory = (e) => {
-    e.preventDefault();
-    if (!form.product_id || !form.location_id || !form.quantity)
-      return alert("Vui lòng nhập đầy đủ thông tin.");
-    const now = new Date().toISOString().slice(0, 10);
-    if (isEdit) {
-      setInventories((prev) =>
-        prev.map((x) =>
-          x.inventory_id === form.inventory_id
-            ? { ...form, updated_at: now }
-            : x
-        )
-      );
-    } else {
-      setInventories((prev) => [
-        { ...form, updated_at: now },
-        ...prev,
-      ]);
-    }
-    setShowModal(false);
-  };
+    // --- CRUD ---
+    const openCreateInventory = () => {
+        setIsEdit(false);
+        setForm({
+            vehicleId: '', configId: '',
+            locationType: "HQ", locationId: '1',
+            quantity: '',
+        });
+        fetchDropdownData();
+        setConfigs([]);
+        setShowModal(true);
+    };
 
-  const deleteInventory = () => {
-    setInventories((prev) =>
-      prev.filter((x) => x.inventory_id !== confirmDelete.inventory_id)
-    );
-    setConfirmDelete(null);
-  };
+    const saveInventory = async (e) => {
+        e.preventDefault();
+        try {
+            await apiClient.post('/api/inventory/stock', {
+                ...form,
+                quantity: parseInt(form.quantity)
+            });
+            setShowModal(false);
+            fetchData();
+        } catch (error) {
+            console.error("Lỗi khi lưu tồn kho:", error);
+            alert("Lưu tồn kho thất bại: " + (error.response?.data?.message || ''));
+        }
+    };
 
-  /* ========== DISTRIBUTION CRUD ========== */
-  const openCreateDistribution = () => {
-    setIsEdit(false);
-    setForm({
-      dist_id: genId("DIST", distributions, "dist_id"),
-      from_location: "WH001",
-      to_dealer_id: "",
-      product_id: "",
-      qty: "",
-      scheduled_date: new Date().toISOString().slice(0, 10),
-      actual_date: "",
-      status: "Đang chờ",
-    });
-    setShowModal(true);
-  };
+    const openCreateDistribution = () => {
+        setIsEdit(false);
+        setForm({
+            vehicleId: '', configId: '',
+            quantity: '',
+            fromLocation: 'Kho Tong Ha Noi',
+            toDealerId: '',
+            scheduledDate: new Date().toISOString().slice(0, 10),
+        });
+        fetchDropdownData();
+        setConfigs([]);
+        setShowModal(true);
+    };
 
-  const openEditDistribution = (d) => {
-    setIsEdit(true);
-    setForm({ ...d });
-    setShowModal(true);
-  };
+    const saveDistribution = async (e) => {
+        e.preventDefault();
+        try {
+            await apiClient.post('/api/inventory/distributions', {
+                ...form,
+                quantity: parseInt(form.quantity)
+            });
+            setShowModal(false);
+            fetchData();
+        } catch (error) {
+            console.error("Lỗi khi tạo phiếu điều phối:", error);
+            alert("Tạo phiếu thất bại.");
+        }
+    };
 
-  const saveDistribution = (e) => {
-    e.preventDefault();
-    if (!form.product_id || !form.to_dealer_id || !form.qty)
-      return alert("Vui lòng nhập đầy đủ thông tin điều phối.");
-    if (isEdit) {
-      setDistributions((prev) =>
-        prev.map((x) =>
-          x.dist_id === form.dist_id ? { ...form } : x
-        )
-      );
-    } else {
-      setDistributions((prev) => [{ ...form }, ...prev]);
-    }
-    setShowModal(false);
-  };
+    const confirmDelivery = async (distId) => {
+        if (window.confirm("Bạn có chắc muốn xác nhận đã nhận được lô hàng này?")) {
+            try {
+                await apiClient.post(`/api/inventory/distributions/${distId}/confirm`);
+                fetchData();
+            } catch (error) {
+                console.error("Lỗi khi xác nhận giao hàng:", error);
+                alert("Xác nhận thất bại: " + (error.response?.data?.message || ''));
+            }
+        }
+    };
+    
+    // --- STYLES ---
+    const btnBase = "px-3 py-1.5 rounded-xl font-semibold transition duration-150 text-sm";
+    const btnAdd = btnBase + " bg-gradient-to-r from-emerald-500 to-emerald-600 text-white hover:brightness-110";
+    const btnConfirm = btnBase + " bg-sky-600/30 hover:bg-sky-600 text-white";
 
-  const deleteDistribution = () => {
-    setDistributions((prev) =>
-      prev.filter((x) => x.dist_id !== confirmDelete.dist_id)
-    );
-    setConfirmDelete(null);
-  };
+    return (
+        <div className="space-y-6 p-4 text-white">
+            <h1 className="text-3xl font-bold text-slate-100 py-2">Quản lý tồn kho & điều phối xe</h1>
 
-  const confirmDelivery = (dist_id) => {
-    const now = new Date().toISOString().slice(0, 10);
-    setDistributions((prev) =>
-      prev.map((d) =>
-        d.dist_id === dist_id
-          ? { ...d, status: "Hoàn tất", actual_date: now }
-          : d
-      )
-    );
-  };
-
-  /* ========== UI RENDERING ========== */
-  return (
-    <div className="space-y-6">
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2">
-        {[
-          { key: "inventory", label: "Tồn kho tổng" },
-          { key: "distribution", label: "Điều phối xe" },
-        ].map((tab) => (
-          <button
-            key={tab.key}
-            onClick={() => setActiveTab(tab.key)}
-            className={`rounded-full border px-5 py-2.5 font-semibold transition ${
-              activeTab === tab.key
-                ? "bg-emerald-600 text-white border-emerald-600 shadow-[0_0_20px_rgba(16,185,129,.4)]"
-                : "bg-slate-900/50 border-slate-800 text-slate-300 hover:border-emerald-500/40 hover:bg-emerald-500/10"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
-      </div>
-
-      {/* INVENTORY */}
-      {activeTab === "inventory" && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-emerald-400">
-              Quản lý tồn kho tổng
-            </h2>
-            <button
-              onClick={openCreateInventory}
-              className="rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white px-4 py-2 shadow-lg hover:brightness-110"
-            >
-              + Thêm kho
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-sm md:text-base">
-              <thead className="bg-slate-800/60 text-emerald-300">
-                <tr>
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">Mã sản phẩm</th>
-                  <th className="p-3 text-left">Loại kho</th>
-                  <th className="p-3 text-left">Mã kho / đại lý</th>
-                  <th className="p-3 text-left">Số lượng</th>
-                  <th className="p-3 text-left">Cập nhật</th>
-                  <th className="p-3 text-center">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {inventories.map((i) => (
-                  <tr
-                    key={i.inventory_id}
-                    className="border-t border-slate-800 hover:bg-slate-800/40"
-                  >
-                    <td className="p-3">{i.inventory_id}</td>
-                    <td className="p-3">{i.product_id}</td>
-                    <td className="p-3">{i.location_type}</td>
-                    <td className="p-3">{i.location_id}</td>
-                    <td className="p-3">{i.quantity}</td>
-                    <td className="p-3">{i.updated_at}</td>
-                    <td className="p-3 text-center space-x-2">
-                      <button
-                        onClick={() => openEditInventory(i)}
-                        className="px-2 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-white"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(i)}
-                        className="px-2 py-1 rounded-lg bg-rose-600/30 hover:bg-rose-600 text-white"
-                      >
-                        Xoá
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* DISTRIBUTION */}
-      {activeTab === "distribution" && (
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-emerald-400">
-              Điều phối xe cho đại lý
-            </h2>
-            <button
-              onClick={openCreateDistribution}
-              className="rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 text-white px-4 py-2 shadow-lg hover:brightness-110"
-            >
-              + Tạo phiếu điều phối
-            </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-sm md:text-base">
-              <thead className="bg-slate-800/60 text-sky-300">
-                <tr>
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">Từ kho</th>
-                  <th className="p-3 text-left">Đến đại lý</th>
-                  <th className="p-3 text-left">Sản phẩm</th>
-                  <th className="p-3 text-left">Số lượng</th>
-                  <th className="p-3 text-left">Lịch giao</th>
-                  <th className="p-3 text-left">Thực tế</th>
-                  <th className="p-3 text-left">Trạng thái</th>
-                  <th className="p-3 text-center">Hành động</th>
-                </tr>
-              </thead>
-              <tbody>
-                {distributions.map((d) => (
-                  <tr
-                    key={d.dist_id}
-                    className="border-t border-slate-800 hover:bg-slate-800/40"
-                  >
-                    <td className="p-3">{d.dist_id}</td>
-                    <td className="p-3">{d.from_location}</td>
-                    <td className="p-3">{d.to_dealer_id}</td>
-                    <td className="p-3">{d.product_id}</td>
-                    <td className="p-3">{d.qty}</td>
-                    <td className="p-3">{d.scheduled_date}</td>
-                    <td className="p-3">{d.actual_date || "—"}</td>
-                    <td className="p-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          d.status === "Hoàn tất"
-                            ? "bg-emerald-500/20 text-emerald-300"
-                            : "bg-yellow-500/20 text-yellow-300"
-                        }`}
-                      >
-                        {d.status}
-                      </span>
-                    </td>
-                    <td className="p-3 text-center space-x-2">
-                      {d.status !== "Hoàn tất" && (
-                        <button
-                          onClick={() => confirmDelivery(d.dist_id)}
-                          className="px-2 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-white"
-                        >
-                          Xác nhận
-                        </button>
-                      )}
-                      <button
-                        onClick={() => openEditDistribution(d)}
-                        className="px-2 py-1 rounded-lg bg-sky-600/30 hover:bg-sky-600 text-white"
-                      >
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => setConfirmDelete(d)}
-                        className="px-2 py-1 rounded-lg bg-rose-600/30 hover:bg-rose-600 text-white"
-                      >
-                        Xoá
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* MODALS */}
-      {showModal && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 backdrop-blur-sm p-4"
-          onClick={() => setShowModal(false)}
-        >
-          <div
-            className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/80 shadow-[0_30px_100px_rgba(2,6,23,.9)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
-              <h3 className="text-xl font-bold text-emerald-400">
-                {activeTab === "inventory"
-                  ? isEdit
-                    ? "Cập nhật kho"
-                    : "Thêm kho mới"
-                  : isEdit
-                  ? "Sửa phiếu điều phối"
-                  : "Tạo phiếu điều phối"}
-              </h3>
-              <button
-                className="w-8 h-8 grid place-items-center rounded-lg border border-slate-700 hover:border-emerald-500/40 hover:bg-emerald-500/10"
-                onClick={() => setShowModal(false)}
-              >
-                ✕
-              </button>
+            {/* Tabs */}
+            <div className="flex flex-wrap gap-2">
+                <button
+                    onClick={() => setActiveTab("inventory")}
+                    className={`rounded-full border px-5 py-2.5 font-semibold transition ${activeTab === "inventory" ? "bg-emerald-600 text-white border-emerald-600 shadow-[0_0_20px_rgba(16,185,129,.4)]" : "bg-slate-900/50 border-slate-800 text-slate-300 hover:border-emerald-500/40 hover:bg-emerald-500/10"}`}>
+                    Tồn kho
+                </button>
+                <button
+                    onClick={() => setActiveTab("distribution")}
+                    className={`rounded-full border px-5 py-2.5 font-semibold transition ${activeTab === "distribution" ? "bg-emerald-600 text-white border-emerald-600 shadow-[0_0_20px_rgba(16,185,129,.4)]" : "bg-slate-900/50 border-slate-800 text-slate-300 hover:border-emerald-500/40 hover:bg-emerald-500/10"}`}>
+                    Điều phối xe
+                </button>
             </div>
 
-            <form
-              onSubmit={
-                activeTab === "inventory"
-                  ? saveInventory
-                  : saveDistribution
-              }
-              className="px-5 py-4 space-y-3"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {Object.keys(form)
-                  .filter((k) => !["status", "updated_at"].includes(k))
-                  .map((key) => (
-                    <div key={key} className="space-y-1">
-                      <label className="text-slate-300 capitalize">
-                        {key.replace(/_/g, " ")}
-                      </label>
-                      <input
-                        value={form[key]}
-                        onChange={(e) =>
-                          setForm({ ...form, [key]: e.target.value })
-                        }
-                        disabled={key.endsWith("_id")}
-                        className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-2.5"
-                      />
+            {/* INVENTORY TAB */}
+            {activeTab === "inventory" && (
+                <div className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-emerald-400">Danh sách Tồn kho</h2>
+                        {canManage && <button onClick={openCreateInventory} className={btnAdd}>+ Nhập/Xuất kho</button>}
                     </div>
-                  ))}
-              </div>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full border-collapse text-base">
+                            <thead className="bg-slate-800/60 text-emerald-300">
+                                <tr>
+                                    <th className="p-3 text-left">Mã Tồn</th>
+                                    <th className="p-3 text-left">Sản phẩm</th>
+                                    <th className="p-3 text-left">Loại kho</th>
+                                    <th className="p-3 text-left">Địa điểm</th>
+                                    <th className="p-3 text-left">Số lượng</th>
+                                    <th className="p-3 text-left">Cập nhật lúc</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (<tr><td colSpan="6" className="text-center p-4">Đang tải dữ liệu tồn kho...</td></tr>) :
+                                inventories.length > 0 ? (
+                                    inventories.map((i) => (
+                                        <tr key={i.inventoryId} className="border-t border-slate-800 hover:bg-slate-800/40">
+                                            <td className="p-3">{`I${String(i.inventoryId).padStart(3, "0")}`}</td>
+                                            <td className="p-3 font-medium">{i.vehicleName} ({i.configName})</td>
+                                            <td className="p-3">{i.locationType}</td>
+                                            <td className="p-3">{i.locationName}</td>
+                                            <td className="p-3 font-semibold">{i.quantity}</td>
+                                            <td className="p-3 text-slate-400">{new Date(i.updatedAt).toLocaleString('vi-VN')}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    // === CẢI TIẾN: THÔNG BÁO KHI KHÔNG CÓ DỮ LIỆU ===
+                                    <tr><td colSpan="6" className="text-center p-6 text-slate-500 italic">Không có dữ liệu tồn kho.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
-                <button
-                  type="button"
-                  className="px-4 py-2 rounded-xl border border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/10"
-                  onClick={() => setShowModal(false)}
-                >
-                  Huỷ
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold shadow-lg hover:brightness-110"
-                >
-                  {isEdit ? "Lưu thay đổi" : "Tạo mới"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+            {/* DISTRIBUTION TAB */}
+            {activeTab === "distribution" && (
+                 <div className="rounded-2xl border border-slate-800 bg-slate-900/50 shadow-xl p-6 space-y-4">
+                    <div className="flex items-center justify-between">
+                        <h2 className="text-xl font-bold text-sky-400">Danh sách Phiếu điều phối</h2>
+                        {canManage && <button onClick={openCreateDistribution} className={btnAdd}>+ Tạo phiếu</button>}
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full border-collapse text-base">
+                            <thead className="bg-slate-800/60 text-sky-300">
+                                <tr>
+                                    <th className="p-3 text-left">Mã Phiếu</th>
+                                    <th className="p-3 text-left">Sản phẩm</th>
+                                    <th className="p-3 text-left">Số lượng</th>
+                                    <th className="p-3 text-left">Từ</th>
+                                    <th className="p-3 text-left">Đến Đại lý</th>
+                                    <th className="p-3 text-left">Ngày dự kiến</th>
+                                    <th className="p-3 text-left">Trạng thái</th>
+                                    <th className="p-3 text-center">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {loading ? (<tr><td colSpan="8" className="text-center p-4">Đang tải dữ liệu điều phối...</td></tr>) :
+                                distributions.length > 0 ? (
+                                    distributions.map((d) => (
+                                        <tr key={d.distId} className="border-t border-slate-800 hover:bg-slate-800/40">
+                                            <td className="p-3">{`D${String(d.distId).padStart(3, "0")}`}</td>
+                                            <td className="p-3 font-medium">{d.vehicleName} ({d.configName})</td>
+                                            <td className="p-3">{d.quantity}</td>
+                                            <td className="p-3">{d.fromLocation}</td>
+                                            <td className="p-3">{d.toDealerName}</td>
+                                            <td className="p-3">{d.scheduledDate}</td>
+                                            <td className="p-3">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                                    d.status === "Completed" ? "bg-emerald-500/20 text-emerald-300" :
+                                                    d.status === "InTransit" ? "bg-sky-500/20 text-sky-300" :
+                                                    "bg-yellow-500/20 text-yellow-300"
+                                                }`}>{d.status}</span>
+                                            </td>
+                                            <td className="p-3 text-center">
+                                                {isDealerManager && d.toDealerId === user.dealerId && d.status === 'InTransit' && (
+                                                    <button onClick={() => confirmDelivery(d.distId)} className={btnConfirm}>Xác nhận</button>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    // === CẢI TIẾN: THÔNG BÁO KHI KHÔNG CÓ DỮ LIỆU ===
+                                    <tr><td colSpan="8" className="text-center p-6 text-slate-500 italic">Không có phiếu điều phối nào.</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
 
-      {/* DELETE CONFIRM */}
-      {confirmDelete && (
-        <div
-          className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 backdrop-blur-sm p-4"
-          onClick={() => setConfirmDelete(null)}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl border border-slate-800 bg-slate-900/80 shadow-[0_30px_100px_rgba(2,6,23,.9)]"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="px-5 py-4 border-b border-slate-800">
-              <h3 className="text-xl font-bold text-emerald-400">
-                Xác nhận xoá
-              </h3>
-            </div>
-            <div className="px-5 py-4 text-slate-200">
-              Bạn có chắc muốn xoá bản ghi{" "}
-              <b>
-                {confirmDelete.inventory_id ||
-                  confirmDelete.dist_id}
-              </b>
-              ?
-            </div>
-            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-800">
-              <button
-                className="px-4 py-2 rounded-xl border border-slate-700 hover:border-emerald-500/40 hover:bg-emerald-500/10"
-                onClick={() => setConfirmDelete(null)}
-              >
-                Huỷ
-              </button>
-              <button
-                className="px-4 py-2 rounded-xl border border-rose-600/40 text-rose-300 hover:bg-rose-600/15"
-                onClick={
-                  activeTab === "inventory"
-                    ? deleteInventory
-                    : deleteDistribution
-                }
-              >
-                Xoá
-              </button>
-            </div>
-          </div>
+            {/* MODAL FORM */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 grid place-items-center bg-slate-950/70 p-4" onClick={() => setShowModal(false)}>
+                    <div className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900/80" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-xl font-bold px-5 py-4 border-b border-slate-800 text-emerald-400">
+                           {activeTab === 'inventory' ? 'Nhập/Xuất kho Tổng' : 'Tạo Phiếu điều phối mới'}
+                        </h3>
+                        <form onSubmit={activeTab === 'inventory' ? saveInventory : saveDistribution} className="px-5 py-4 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label className="text-slate-300">Sản phẩm (Xe) *</label>
+                                    <select name="vehicleId" value={form.vehicleId} onChange={(e) => handleVehicleChangeInModal(e.target.value)} required className="w-full mt-1 rounded-xl bg-slate-900/60 p-2 border border-slate-700">
+                                        <option value="">-- Chọn xe --</option>
+                                        {vehicles.map(v => <option key={v.vehicleId} value={v.vehicleId}>{v.model}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-slate-300">Phiên bản (Cấu hình) *</label>
+                                    <select name="configId" value={form.configId} onChange={handleFormChange} required disabled={!form.vehicleId} className="w-full mt-1 rounded-xl bg-slate-900/60 p-2 border border-slate-700 disabled:opacity-50">
+                                        <option value="">-- Chọn phiên bản --</option>
+                                        {configs.map(c => <option key={c.configId} value={c.configId}>{c.color} - Pin {c.batteryKwh}kWh</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="text-slate-300">Số lượng *</label>
+                                    <input type="number" name="quantity" value={form.quantity} onChange={handleFormChange} required min={activeTab === 'distribution' ? 1 : undefined} className="w-full mt-1 rounded-xl bg-slate-900/60 p-2 border border-slate-700" />
+                                    {activeTab === 'inventory' && <p className="text-xs text-slate-500 mt-1">Nhập số âm để xuất kho.</p>}
+                                </div>
+                                {activeTab === 'distribution' && (
+                                    <>
+                                        <div>
+                                            <label className="text-slate-300">Đến Đại lý *</label>
+                                            <select name="toDealerId" value={form.toDealerId} onChange={handleFormChange} required className="w-full mt-1 rounded-xl bg-slate-900/60 p-2 border border-slate-700">
+                                                <option value="">-- Chọn đại lý --</option>
+                                                {dealers.map(d => <option key={d.dealerId} value={d.dealerId}>{d.name}</option>)}
+                                            </select>
+                                        </div>
+                                         <div>
+                                            <label className="text-slate-300">Ngày giao dự kiến *</label>
+                                            <input type="date" name="scheduledDate" value={form.scheduledDate} onChange={handleFormChange} required className="w-full mt-1 rounded-xl bg-slate-900/60 p-2 border border-slate-700" />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                            <div className="flex justify-end gap-2 pt-4 border-t border-slate-800">
+                                <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl border border-slate-700">Hủy</button>
+                                <button type="submit" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold">Lưu</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default InventoryManagement;

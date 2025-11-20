@@ -1,364 +1,358 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
+import { useAuth } from '../../context/AuthContext';
 import { handleGoogleAccessTokenLogin, redirectUserBasedOnRole } from '../../utils/googleAuth';
 import { handleFacebookLoginSuccess, handleFacebookLoginError, redirectUserBasedOnRole as redirectUserBasedOnRoleFB } from '../../utils/facebookAuth';
-import { AuthService } from '../../utils/auth';
 import { AuthNotifications } from '../../utils/notifications';
+import apiClient from '../../utils/api/client';
+import { jwtDecode } from 'jwt-decode'; // ✨ Import jwtDecode
 import './AuthComponent.css';
 
-const AuthComponent = ({ onUserChange }) => {
+const AuthComponent = () => {
+  const { user, logout, loading } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [isAdvancedRegister, setIsAdvancedRegister] = useState(false);
-  const [loginForm, setLoginForm] = useState({ username: '', password: '' });
-  const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '' });
-  const [currentUser, setCurrentUser] = useState(null);
+  
+  console.log('🎨 AuthComponent render - user:', user, 'loading:', loading);
+  
+  const toggleLogin = () => setIsLoginOpen(!isLoginOpen);
 
-  // Check if user is already logged in on component mount
-  useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser);
-        setCurrentUser(userData);
-        AuthService.setCurrentUser(userData); // Sync with AuthService
-        if (onUserChange) {
-          onUserChange(userData);
-        }
-      } catch (error) {
-        console.error('Error parsing saved user:', error);
-        localStorage.removeItem('user');
-        AuthService.setCurrentUser(null); // Clear AuthService
-      }
-    } else {
-      // No saved user, ensure AuthService is also clear
-      AuthService.setCurrentUser(null);
-    }
-  }, [onUserChange]);
+  // Nếu đã đăng nhập, chỉ hiển thị thông tin user và nút logout
+  if (user) {
+    console.log('✅ User đã đăng nhập, hiển thị user menu');
+    return (
+      <div className="user-menu">
+        <button className="user-btn" onClick={logout} title={`Đăng xuất (${user.role})`}>
+          <span className="user-name">{user.username}</span>
+        </button>
+      </div>
+    );
+  }
 
-  // Multi-step registration handlers
-  // Mock user accounts for testing
-  const mockUsers = [
-    { username: 'dealer01', password: 'dealer123', role: 'dealer', name: 'Dealer User', email: 'dealer@company.com' },
-    { username: 'admin01', password: 'admin123', role: 'evm_admin', name: 'EVM Admin', email: 'admin@evm.com' },
-    { username: 'customer01', password: 'customer123', role: 'customer', name: 'Customer User', email: 'customer@gmail.com' },
-    { username: 'dealer02', password: 'password', role: 'dealer', name: 'Dealer Manager', email: 'manager@dealer.com' },
-    { username: 'evm01', password: 'password', role: 'evm_admin', name: 'EVM Director', email: 'director@evm.com' },
-    { username: 'user01', password: 'password', role: 'customer', name: 'Regular User', email: 'user@example.com' },
-    { username: 'staff01', password: 'staff123', role: 'staff', name: 'Regular Staff', email: 'staff@example.com' }
-  ];
-
-  // Handle mock login
-  const handleMockLogin = (e) => {
-    e.preventDefault();
-    const user = mockUsers.find(u => u.username === loginForm.username && u.password === loginForm.password);
-    
-    if (user) {
-      const userData = {
-        id: user.username,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        provider: 'mock'
-      };
-      
-      localStorage.setItem('user', JSON.stringify(userData));
-      setCurrentUser(userData);
-      AuthService.setCurrentUser(userData); // Update AuthService
-      if (onUserChange) {
-        onUserChange(userData);
-      }
-      alert(`Chào mừng ${user.name}! Đăng nhập thành công với role: ${user.role}`);
-      toggleLogin();
-      
-      setTimeout(() => {
-        redirectUserBasedOnRole(user.role);
-      }, 1000);
-    } else {
-      alert('Tên đăng nhập hoặc mật khẩu không đúng!');
-    }
-  };
-
-  // Google OAuth hook
-  const login = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const result = await handleGoogleAccessTokenLogin(tokenResponse);
-        if (result.success) {
-          setCurrentUser(result.user);
-          AuthService.setCurrentUser(result.user); // Update AuthService
-          if (onUserChange) {
-            onUserChange(result.user);
-          }
-          AuthNotifications.googleLoginSuccess(result.user.name);
-          toggleLogin();
-          
-          setTimeout(() => {
-            redirectUserBasedOnRole(result.user.role);
-          }, 1500);
-        } else {
-          AuthNotifications.loginError(result.error);
-        }
-      } catch (error) {
-        console.error('Google login error:', error);
-        AuthNotifications.socialLoginError('Google', error.message);
-      }
-    },
-    onError: (error) => {
-      console.error('Google login error:', error);
-    }
-  });
-
-  const toggleLogin = () => {
-    setIsLoginOpen(!isLoginOpen);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('userData');
-    setCurrentUser(null);
-    AuthService.setCurrentUser(null); // Update AuthService
-    if (onUserChange) {
-      onUserChange(null);
-    }
-    AuthNotifications.logoutSuccess();
-    window.location.href = '/';
-  };
-
-  // Handle mock register
-  const handleMockRegister = (e) => {
-    e.preventDefault();
-    
-    if (isAdvancedRegister) {
-      // Redirect to existing multi-step registration
-      window.location.href = '/register';
-      return;
-    }
-
-    // Simple registration
-    const userData = {
-      id: registerForm.username,
-      name: registerForm.username,
-      email: registerForm.email,
-      role: 'customer',
-      provider: 'mock'
-    };
-    
-    localStorage.setItem('user', JSON.stringify(userData));
-    setCurrentUser(userData);
-    AuthService.setCurrentUser(userData); // Update AuthService
-    if (onUserChange) {
-      onUserChange(userData);
-    }
-    AuthNotifications.registerSuccess(registerForm.username);
-    toggleLogin();
-  };
-
+  // Nếu chưa đăng nhập, hiển thị nút Login và Modal khi được mở
+  console.log('ℹ️ User chưa đăng nhập, hiển thị login button');
   return (
     <>
-      {currentUser ? (
-        <div className="user-menu">
-          <button className="user-btn" onClick={handleLogout} title={`Đăng xuất (${currentUser.role})`}>
-            <span className="user-name">{currentUser.name}</span>
-          </button>
-        </div>
-      ) : (
-        <button className="login-btn" onClick={toggleLogin}>
-          Login
-        </button>
-      )}
+      <button className="login-btn" onClick={toggleLogin}>Login</button>
+      {isLoginOpen && <LoginModal onClose={toggleLogin} />}
+    </>
+  );
+};
 
-      {isLoginOpen && (
-        <div className="auth-overlay" onClick={toggleLogin}>
-          <div className={`auth-container ${isRegisterMode ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
+// Component Modal Đăng nhập
+const LoginModal = ({ onClose }) => {
+    const { login } = useAuth();
+    const navigate = useNavigate();
+    const [loginForm, setLoginForm] = useState({ username: '', password: '' });
+    const [registerForm, setRegisterForm] = useState({ username: '', email: '', password: '' });
+    const [isRegisterMode, setIsRegisterMode] = useState(false);
+    const [isAdvancedRegister, setIsAdvancedRegister] = useState(false);
+    const [loginError, setLoginError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoginError('');
+        setIsLoading(true);
+        
+        console.log('🔐 Đang đăng nhập với:', {
+            username: loginForm.username.trim(),
+            password: '***'
+        });
+        
+        try {
+            // Gọi API Backend thật
+            const response = await apiClient.post('/Auth/login', {
+                username: loginForm.username.trim(),
+                password: loginForm.password,
+            });
+
+            console.log('✅ API response:', response);
+
+            // Nếu thành công, gọi hàm login từ context để lưu trạng thái và parse token
+            login(response);
+
+            // Parse token để lấy dealerId
+            const { token } = response;
+            const decodedToken = jwtDecode(token); // ✨ Sử dụng import
             
-            {/* Login Form */}
-            <div className="form-box login">
-              <form action="#" onSubmit={handleMockLogin}>
-                <h1>Login</h1>
-                <div className="input-box">
-                  <input 
-                    type="text" 
-                    placeholder="Username" 
-                    required 
-                    value={loginForm.username}
-                    onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-                  />
-                  <i className="bx bxs-user"></i>
-                </div>
-                <div className="input-box">
-                  <input 
-                    type="password" 
-                    placeholder="Password" 
-                    required 
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-                  />
-                  <i className="bx bxs-lock-alt"></i>
-                </div>
-                <div className="forgot-link">
-                  <a href="#">Forgot Password?</a>
-                </div>
-                <button type="submit" className="auth-btn">Login</button>
-                
-                <div className="test-accounts">
-                  <details>
-                    <summary>📝 Test Accounts</summary>
-                    <div className="test-list">
-                      <strong>Dealer:</strong> dealer01 / dealer123<br/>
-                      <strong>EVM:</strong> admin01 / admin123<br/>
-                      <strong>Customer:</strong> customer01 / customer123<br/>
-                      <strong>Staff:</strong> staff01 / staff123<br/>
-                    </div>
-                  </details>
-                </div>
-                
-                <p>or login with social platforms</p>
-                <div className="social-icons">
-                  <a href="#" className="google-icon" onClick={(e) => {
-                    e.preventDefault();
-                    login();
-                  }}>
-                  </a>
-                  <a href="#" className="facebook-icon" onClick={async (e) => {
-                    e.preventDefault();
-                    try {
-                      const userData = await handleFacebookLoginSuccess();
-                      setCurrentUser(userData);
-                      if (onUserChange) {
-                        onUserChange(userData);
-                      }
-                      AuthNotifications.facebookLoginSuccess(userData.name);
-                      toggleLogin();
-                      
-                      setTimeout(() => {
-                        redirectUserBasedOnRoleFB(userData.role);
-                      }, 1500);
-                    } catch (error) {
-                      handleFacebookLoginError(error);
-                    }
-                  }}>
-                  </a>
-                </div>
-              </form>
-            </div>
+            const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+            const dealerId = decodedToken.dealerId; // ✨ Lấy dealerId từ token
+            
+            console.log('🚀 Chuyển hướng dựa trên role:', role, 'dealerId:', dealerId);
+            
+            if (role === 'Admin') {
+                console.log('➡️ Navigate to /evm-dashboard');
+                navigate('/evm-dashboard');
+            } else if (role === 'EVMStaff') {
+                console.log('➡️ Navigate to /staff-dashboard');
+                navigate('/staff-dashboard');
+            } else if (role === 'DealerManager' || role === 'DealerStaff') {
+                if (dealerId) {
+                    console.log(`➡️ Navigate to /${dealerId}/dealer-dashboard`);
+                    navigate(`/${dealerId}/dealer-dashboard`);
+                } else {
+                    console.log('⚠️ No dealerId found, navigate to /dealer-dashboard');
+                    navigate('/dealer-dashboard');
+                }
+            } else {
+                console.log('➡️ Navigate to /customer-dashboard');
+                navigate('/customer-dashboard');
+            }
+            
+            onClose(); // Đóng modal
+        } catch (err) {
+            console.error('❌ Lỗi đăng nhập:', err);
+            // Xử lý lỗi trả về từ API
+            if (err.response && err.response.data && err.response.data.message) {
+                setLoginError(err.response.data.message);
+            } else if (err.message) {
+                setLoginError(err.message);
+            } else {
+                setLoginError('Không thể kết nối đến máy chủ. Vui lòng thử lại.');
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
-            {/* Register Form */}
-            <div className="form-box register">
-              <form action="#" onSubmit={handleMockRegister}>
-                <h1>Registration</h1>
-                
-                {/* Registration Mode Toggle */}
-                <div className="register-mode-toggle">
-                  <label className="toggle-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={isAdvancedRegister}
-                      onChange={(e) => setIsAdvancedRegister(e.target.checked)}
-                    />
-                    <span className="toggle-slider"></span>
-                    <span className="toggle-label">
-                      {isAdvancedRegister ? 'Nâng cao' : 'Cơ bản'}
-                    </span>
-                  </label>
-                </div>
+    const handleMockRegister = (e) => {
+        e.preventDefault();
+        if (isAdvancedRegister) {
+            navigate('/register-advanced');
+        } else {
+            AuthNotifications.registerSuccess();
+            onClose();
+        }
+    };
 
-                <div className="input-box">
-                  <input 
-                    type="text" 
-                    placeholder="Username" 
-                    required 
-                    value={registerForm.username}
-                    onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
-                  />
-                  <i className="bx bxs-user"></i>
-                </div>
-                <div className="input-box">
-                  <input 
-                    type="email" 
-                    placeholder="Email" 
-                    required 
-                    value={registerForm.email}
-                    onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
-                  />
-                  <i className="bx bxs-envelope"></i>
-                </div>
-                <div className="input-box">
-                  <input 
-                    type="password" 
-                    placeholder="Password" 
-                    required 
-                    value={registerForm.password}
-                    onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
-                  />
-                  <i className="bx bxs-lock-alt"></i>
-                </div>
+    // Google Login
+    const googleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+            try {
+                const userData = await handleGoogleAccessTokenLogin(tokenResponse.access_token);
+                login(userData);
+                AuthNotifications.googleLoginSuccess(userData.username);
+                onClose();
                 
-                <button type="submit" className="auth-btn">
-                  {isAdvancedRegister ? 'Đến trang nâng cao' : 'Register'}
-                </button>
-                
-                {isAdvancedRegister && (
-                  <p className="advanced-note">
-                    🚀 Đăng ký với email & khảo sát
-                  </p>
-                )}
-                
-                <p>or register with social platforms</p>
-                <div className="social-icons">
-                  <a href="#" className="google-icon" onClick={(e) => {
-                    e.preventDefault();
-                    login();
-                  }}>
-                  </a>
-                  <a href="#" className="facebook-icon" onClick={async (e) => {
-                    e.preventDefault();
-                    try {
-                      const userData = await handleFacebookLoginSuccess();
-                      setCurrentUser(userData);
-                      if (onUserChange) {
-                        onUserChange(userData);
-                      }
-                      AuthNotifications.facebookLoginSuccess(userData.name);
-                      toggleLogin();
-                      
-                      setTimeout(() => {
-                        redirectUserBasedOnRoleFB(userData.role);
-                      }, 1500);
-                    } catch (error) {
-                      handleFacebookLoginError(error);
-                    }
-                  }}>
-                  </a>
-                </div>
-              </form>
-            </div>
+                setTimeout(() => {
+                    redirectUserBasedOnRole(userData.role);
+                }, 1500);
+            } catch (error) {
+                console.error('Google login error:', error);
+                setLoginError('Đăng nhập Google thất bại. Vui lòng thử lại.');
+            }
+        },
+        onError: (error) => {
+            console.error('Google login error:', error);
+            setLoginError('Đăng nhập Google thất bại. Vui lòng thử lại.');
+        }
+    });
 
-            {/* Toggle Box */}
-            <div className="toggle-box">
-              <div className="toggle-panel toggle-left">
-                <h1>Welcome Back!</h1>
-                <p>Don't have an account?</p>
-                <button className="auth-btn register-btn" onClick={() => setIsRegisterMode(true)}>
-                  Register
-                </button>
+  return (
+    <div className="auth-overlay" onClick={onClose}>
+      <div className={`auth-container ${isRegisterMode ? 'active' : ''}`} onClick={(e) => e.stopPropagation()}>
+        
+        {/* Login Form */}
+        <div className="form-box login">
+          <form action="#" onSubmit={handleLogin}>
+            <h1>Login</h1>
+            
+            {loginError && (
+              <div className="error-message" style={{
+                color: '#ff4444',
+                backgroundColor: '#ffeeee',
+                padding: '10px',
+                borderRadius: '5px',
+                marginBottom: '15px',
+                fontSize: '14px'
+              }}>
+                {loginError}
               </div>
+            )}
+            
+            <div className="input-box">
+              <input 
+                type="text" 
+                placeholder="Username" 
+                required 
+                value={loginForm.username}
+                onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                disabled={isLoading}
+              />
+              <i className="bx bxs-user"></i>
+            </div>
+            <div className="input-box">
+              <input 
+                type="password" 
+                placeholder="Password" 
+                required 
+                value={loginForm.password}
+                onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                disabled={isLoading}
+              />
+              <i className="bx bxs-lock-alt"></i>
+            </div>
+            <div className="forgot-link">
+              <a href="#">Forgot Password?</a>
+            </div>
+            <button type="submit" className="auth-btn" disabled={isLoading}>
+              {isLoading ? 'Đang đăng nhập...' : 'Login'}
+            </button>
+            
+            <div className="test-accounts">
+              <details>
+                <summary>📝 Test Accounts (Backend API)</summary>
+                <div className="test-list">
+                  <strong>🔧 Admin/EVM Staff:</strong>
+                  <div>admin / 12345</div>
+                  <div>TestEVMStaff / 123456</div>
+                  
+                  <strong>🏢 Dealer Manager & Staff:</strong>
+                  <div>TestDealerStaff / 12345</div>
+                  <div>TestDealerManager / 12346</div>
+                </div>
+              </details>
+            </div>
+            
+            <p>or login with social platforms</p>
+            <div className="social-icons">
+              <a href="#" className="google-icon" onClick={(e) => {
+                e.preventDefault();
+                googleLogin();
+              }}>
+              </a>
+              <a href="#" className="facebook-icon" onClick={async (e) => {
+                e.preventDefault();
+                try {
+                  const userData = await handleFacebookLoginSuccess();
+                  login(userData);
+                  AuthNotifications.facebookLoginSuccess(userData.username || userData.name);
+                  onClose();
+                  
+                  setTimeout(() => {
+                    redirectUserBasedOnRoleFB(userData.role);
+                  }, 1500);
+                } catch (error) {
+                  handleFacebookLoginError(error);
+                  setLoginError('Đăng nhập Facebook thất bại. Vui lòng thử lại.');
+                }
+              }}>
+              </a>
+            </div>
+          </form>
+        </div>
 
-              <div className="toggle-panel toggle-right">
-                <h1>Hello, Welcome!</h1>
-                <p>Already have an account?</p>
-                <button className="auth-btn login-btn" onClick={() => setIsRegisterMode(false)}>
-                  Login
-                </button>
-              </div>
+        {/* Register Form */}
+        <div className="form-box register">
+          <form action="#" onSubmit={handleMockRegister}>
+            <h1>Registration</h1>
+            
+            {/* Registration Mode Toggle */}
+            <div className="register-mode-toggle">
+              <label className="toggle-switch">
+                <input 
+                  type="checkbox" 
+                  checked={isAdvancedRegister}
+                  onChange={(e) => setIsAdvancedRegister(e.target.checked)}
+                />
+                <span className="toggle-slider"></span>
+                <span className="toggle-label">
+                  {isAdvancedRegister ? 'Nâng cao' : 'Cơ bản'}
+                </span>
+              </label>
             </div>
 
-            <button className="auth-close" onClick={toggleLogin}>×</button>
+            <div className="input-box">
+              <input 
+                type="text" 
+                placeholder="Username" 
+                required 
+                value={registerForm.username}
+                onChange={(e) => setRegisterForm({...registerForm, username: e.target.value})}
+              />
+              <i className="bx bxs-user"></i>
+            </div>
+            <div className="input-box">
+              <input 
+                type="email" 
+                placeholder="Email" 
+                required 
+                value={registerForm.email}
+                onChange={(e) => setRegisterForm({...registerForm, email: e.target.value})}
+              />
+              <i className="bx bxs-envelope"></i>
+            </div>
+            <div className="input-box">
+              <input 
+                type="password" 
+                placeholder="Password" 
+                required 
+                value={registerForm.password}
+                onChange={(e) => setRegisterForm({...registerForm, password: e.target.value})}
+              />
+              <i className="bx bxs-lock-alt"></i>
+            </div>
+            
+            <button type="submit" className="auth-btn">
+              {isAdvancedRegister ? 'Đến trang nâng cao' : 'Register'}
+            </button>
+            
+            {isAdvancedRegister && (
+              <p className="advanced-note">
+                🚀 Đăng ký với email & khảo sát
+              </p>
+            )}
+            
+            <p>or register with social platforms</p>
+            <div className="social-icons">
+              <a href="#" className="google-icon" onClick={(e) => {
+                e.preventDefault();
+                googleLogin();
+              }}>
+              </a>
+              <a href="#" className="facebook-icon" onClick={async (e) => {
+                e.preventDefault();
+                try {
+                  const userData = await handleFacebookLoginSuccess();
+                  login(userData);
+                  AuthNotifications.facebookLoginSuccess(userData.username || userData.name);
+                  onClose();
+                  
+                  setTimeout(() => {
+                    redirectUserBasedOnRoleFB(userData.role);
+                  }, 1500);
+                } catch (error) {
+                  handleFacebookLoginError(error);
+                }
+              }}>
+              </a>
+            </div>
+          </form>
+        </div>
+
+        {/* Toggle Box */}
+        <div className="toggle-box">
+          <div className="toggle-panel toggle-left">
+            <h1>Welcome Back!</h1>
+            <p>Don't have an account?</p>
+            <button className="auth-btn register-btn" onClick={() => setIsRegisterMode(true)}>
+              Register
+            </button>
+          </div>
+
+          <div className="toggle-panel toggle-right">
+            <h1>Hello, Welcome!</h1>
+            <p>Already have an account?</p>
+            <button className="auth-btn login-btn" onClick={() => setIsRegisterMode(false)}>
+              Login
+            </button>
           </div>
         </div>
-      )}
-    </>
+
+        <button className="auth-close" onClick={onClose}>×</button>
+      </div>
+    </div>
   );
 };
 

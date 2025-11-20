@@ -7,6 +7,9 @@ export { handleGoogleAccessTokenLogin, redirectUserBasedOnRole } from './googleA
 // Facebook Auth - Old SDK
 export { handleFacebookLoginSuccess, handleFacebookLoginError } from './facebookAuth';
 
+// API Services
+export { AuthAPI, UsersAPI, VehiclesAPI, DealersAPI, CustomersAPI } from '../services/api';
+
 // API - New Structure
 export { 
   apiClient,

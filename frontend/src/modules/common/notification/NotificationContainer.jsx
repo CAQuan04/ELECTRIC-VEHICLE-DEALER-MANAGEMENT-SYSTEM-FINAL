@@ -49,7 +49,7 @@ const NotificationContainer = () => {
     const newNotification = {
       id,
       type: 'info',
-      duration: 5000,
+      duration: 2000,
       ...notification
     };
     

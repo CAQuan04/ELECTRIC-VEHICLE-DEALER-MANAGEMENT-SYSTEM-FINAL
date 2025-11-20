@@ -1,67 +1,126 @@
+// File: src/modules/auth/RoleGuard.jsx
 import React from 'react';
-import { Navigate } from 'react-router-dom';
-import { AuthService } from '../../utils/auth';
+import { Navigate, Outlet } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext'; // Đảm bảo đường dẫn đúng
 
-const RoleGuard = ({ children, requiredRole, fallback = '/landing' }) => {
-  const currentUser = AuthService.getCurrentUser();
-  
-  // If no user is logged in, redirect to landing page
-  if (!currentUser) {
-    console.warn('No user logged in, redirecting to landing page');
+// Component Guard chung, kiểm tra vai trò người dùng
+const RoleGuard = ({ allowedRoles, children }) => {
+  const { user, loading } = useAuth();
+
+  console.log('🛡️ RoleGuard check:', { user, loading, allowedRoles });
+
+  if (loading) {
+    console.log('⏳ RoleGuard: Đang loading...');
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+        backgroundColor: '#0f172a',
+        color: '#fff'
+      }}>
+        <div>Loading session...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    console.log('❌ RoleGuard: Không có user, redirect to /landing');
     return <Navigate to="/landing" replace />;
   }
   
-  const hasAccess = AuthService.hasRole(requiredRole);
+  // Kiểm tra xem vai trò của user có nằm trong danh sách được phép không
+  const hasAccess = allowedRoles.includes(user.role);
+  console.log('🔐 RoleGuard: hasAccess =', hasAccess, 'user.role =', user.role);
 
   if (!hasAccess) {
-    console.warn(`Access denied. Required role: ${requiredRole}, User role: ${currentUser?.role}`);
-    return <Navigate to={fallback} replace />;
+    console.log('🚫 RoleGuard: Không có quyền truy cập, redirect to /access-denied');
+    return <Navigate to="/access-denied" replace />;
   }
 
-  return children;
+  console.log('✅ RoleGuard: Cho phép truy cập');
+  return children ? children : <Outlet />;
 };
 
-export const DealerGuard = ({ children }) => (
-  <RoleGuard requiredRole="dealer" fallback="/access-denied">
-    {children}
-  </RoleGuard>
-);
+// ===================================================================================
+// === CÁC GUARD CỤ THỂ - ĐÃ ĐƯỢC CẬP NHẬT THEO ÁNH XẠ MỚI ===
 
+// Ghi chú: Guard này cho phép những người dùng có vai trò là "DealerManager" hoặc "DealerStaff"
+// vì cả hai đều thuộc nhóm "dealer" theo yêu cầu của bạn.
+// Ngoài ra, kiểm tra dealerId trong URL khớp với dealerId của user
+export const DealerGuard = ({ children }) => {
+  const { user } = useAuth();
+  const location = window.location;
+  
+  // Extract dealerId from URL path (e.g., /123/dealer-dashboard)
+  const pathParts = location.pathname.split('/');
+  const urlDealerId = pathParts[1]; // Get first segment after /
+  
+  console.log('🔒 DealerGuard: URL dealerId =', urlDealerId, ', User dealerId =', user?.dealerId);
+  
+  // If URL contains dealerId, validate it matches user's dealerId
+  if (urlDealerId && !isNaN(urlDealerId)) {
+    const userDealerIdStr = user?.dealerId?.toString();
+    if (urlDealerId !== userDealerIdStr) {
+      console.log('❌ DealerGuard: DealerId mismatch! Redirecting...');
+      return <Navigate to="/access-denied" replace />;
+    }
+  }
+  
+  return (
+    <RoleGuard allowedRoles={['DealerManager', 'DealerStaff']}>
+      {children}
+    </RoleGuard>
+  );
+};
+
+// Ghi chú: Guard này chỉ dành cho Customer (nếu có).
 export const CustomerGuard = ({ children }) => (
-  <RoleGuard requiredRole="customer" fallback="/access-denied">
+  <RoleGuard allowedRoles={['Customer']}>
     {children}
   </RoleGuard>
 );
 
+// Ghi chú: Guard này CHỈ dành cho Admin.
+// Admin sẽ vào /evm-dashboard
 export const AdminGuard = ({ children }) => (
-  <RoleGuard requiredRole="evm_admin" fallback="/access-denied">
+  <RoleGuard allowedRoles={['Admin']}>
     {children}
   </RoleGuard>
 );
 
+// Ghi chú: Guard này CHỈ dành cho EVMStaff.
+// EVMStaff sẽ vào /staff-dashboard
 export const StaffGuard = ({ children }) => (
-  <RoleGuard requiredRole="staff" fallback="/access-denied">
+  <RoleGuard allowedRoles={['EVMStaff']}>
     {children}
   </RoleGuard>
 );
 
-// Access Denied page
+// Ghi chú: Guard này cho phép CẢ Admin và EVMStaff.
+// Dùng cho các chức năng chung giữa Admin và Staff
+export const AdminStaffGuard = ({ children }) => (
+  <RoleGuard allowedRoles={['Admin', 'EVMStaff']}>
+    {children}
+  </RoleGuard>
+);
+// ===================================================================================
+
+
+// --- TRANG TỪ CHỐI TRUY CẬP ---
 export const AccessDenied = () => (
-  <div className="dashboard-container">
-    <div className="error-message">
-      <h2>🚫 Truy cập bị từ chối</h2>
-      <p>Bạn không có quyền truy cập vào trang này.</p>
-      <p>Vui lòng đăng nhập với tài khoản phù hợp.</p>
-      <div style={{ marginTop: '20px' }}>
-        <button onClick={() => window.location.href = '/landing'}>
-          Về trang chủ
-        </button>
-        <button onClick={() => window.location.href = '/auth'} style={{ marginLeft: '10px' }}>
-          Đăng nhập
-        </button>
-      </div>
-    </div>
+  <div style={{ textAlign: 'center', marginTop: '50px' }}>
+    <h2>🚫 Truy cập bị từ chối</h2>
+    <p>Bạn không có quyền truy cập vào trang này.</p>
+    <button onClick={() => (window.location.href = '/landing')}>Về trang chủ</button>
   </div>
 );
+
+// Tạm thời giữ nguyên DealerShopGuard
+export const DealerShopGuard = ({ children }) => {
+    console.log('🏪 DealerShopGuard: Cho phép truy cập');
+    return children;
+}
 
 export default RoleGuard;

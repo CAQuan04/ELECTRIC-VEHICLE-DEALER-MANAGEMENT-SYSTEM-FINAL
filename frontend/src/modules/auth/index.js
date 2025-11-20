@@ -1,6 +1,15 @@
 // Auth Module - Barrel Export
 export { default as AuthComponent } from './AuthComponent';
-export { default as RoleGuard, CustomerGuard, DealerGuard, AdminGuard, StaffGuard, AccessDenied } from './RoleGuard';
+export { 
+    default as RoleGuard,
+    AdminGuard,
+    DealerGuard,
+    CustomerGuard,
+    StaffGuard,
+    AdminStaffGuard,  // Add new guard for shared functionality
+    DealerShopGuard,
+    AccessDenied
+} from './RoleGuard';
 export { default as MultiStepRegister } from './MultiStepRegister';
 export { default as MultiStepRegisterSimple } from './MultiStepRegisterSimple';
 export { default as RegisterForm } from './RegisterForm';

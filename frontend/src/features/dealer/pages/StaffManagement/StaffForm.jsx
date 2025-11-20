@@ -1,35 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@/utils/api/services/dealer.api';
+import { notifications } from '@utils/notifications';
+
+// Import Lucide icons
+import {
+  UserPlus,
+  Edit,
+  Save,
+  X,
+  Mail,
+  Phone,
+  User,
+  Lock,
+  Calendar,
+  Building,
+  Shield
+} from 'lucide-react';
+
+// Import components
+import {
+  PageContainer,
+  PageHeader,
+  Button,
+  FormGroup,
+  Label,
+  Input,
+  Select,
+  InfoSection,
+  ActionBar
+} from '../../components';
 
 const StaffForm = () => {
-  const { staffId } = useParams();
   const navigate = useNavigate();
+  const { staffId } = useParams();
   const { startLoading, stopLoading } = usePageLoading();
+  
   const isEditMode = !!staffId;
 
   const [formData, setFormData] = useState({
-    name: '',
-    role: '',
+    username: '',
+    password: '',
+    fullName: '',
     email: '',
-    phone: '',
-    address: '',
-    joinDate: '',
-    salary: '',
-    notes: ''
+    phoneNumber: '',
+    dateOfBirth: '',
+    roleId: 2, // Default to Sales
+    dealerId: null,
+    status: 'Active'
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Role options - convert to Select component format
+  const roles = [
+    { id: 1, name: 'Admin' },
+    { id: 2, name: 'Dealer Manager' },
+    { id: 3, name: 'Sales Executive' },
+    { id: 4, name: 'Technician' },
+    { id: 5, name: 'Customer Service' },
+    { id: 6, name: 'Finance' },
+    { id: 7, name: 'Support' }
+  ];
+
+  // Convert roles to options format for Select component
+  const roleOptions = roles.map(role => ({
+    value: role.id,
+    label: role.name
+  }));
+
+  // Status options for Select component
+  const statusOptions = [
+    { value: 'Active', label: 'Đang làm việc' },
+    { value: 'Inactive', label: 'Nghỉ việc' }
+  ];
+
+  useEffect(() => {
+    if (isEditMode) {
+      loadStaffData();
+    }
+  }, [staffId]);
+
+  const loadStaffData = async () => {
     try {
-      startLoading(isEditMode ? 'Đang cập nhật...' : 'Đang thêm nhân viên...');
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      startLoading('Đang tải thông tin nhân viên...');
       
-      alert(isEditMode ? 'Cập nhật nhân viên thành công!' : 'Thêm nhân viên thành công!');
-      navigate('/dealer/staff');
+      const result = await dealerAPI.getUserById(staffId);
+      
+      if (result.success && result.data) {
+        const userData = result.data;
+        setFormData({
+          username: userData.username || '',
+          password: '', // Don't load password
+          fullName: userData.fullName || '',
+          email: userData.email || '',
+          phoneNumber: userData.phoneNumber || '',
+          dateOfBirth: userData.dateOfBirth ? userData.dateOfBirth.split('T')[0] : '',
+          roleId: userData.roleId || 2,
+          dealerId: userData.dealerId || null,
+          status: userData.status || 'Active'
+        });
+      } else {
+        notifications.error('Lỗi', result.message || 'Không thể tải thông tin nhân viên');
+        navigate('/dealer/staff');
+      }
     } catch (error) {
-      console.error('Error saving staff:', error);
-      alert('Có lỗi xảy ra!');
+      console.error('Error loading staff data:', error);
+      notifications.error('Lỗi', 'Không thể tải thông tin nhân viên');
+      navigate('/dealer/staff');
     } finally {
       stopLoading();
     }
@@ -41,74 +121,308 @@ const StaffForm = () => {
       ...prev,
       [name]: value
     }));
+    
+    // Clear error when user types
+    if (errors[name]) {
+      setErrors(prev => ({
+        ...prev,
+        [name]: null
+      }));
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    // Username validation
+    if (!formData.username.trim()) {
+      newErrors.username = 'Tên đăng nhập không được để trống';
+    } else if (formData.username.length < 3) {
+      newErrors.username = 'Tên đăng nhập phải có ít nhất 3 ký tự';
+    }
+
+    // Password validation (only for create mode)
+    if (!isEditMode) {
+      if (!formData.password) {
+        newErrors.password = 'Mật khẩu không được để trống';
+      } else if (formData.password.length < 6) {
+        newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+      }
+    }
+
+    // Full name validation
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Họ tên không được để trống';
+    }
+
+    // Email validation
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email không được để trống';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    // Phone validation
+    if (!formData.phoneNumber.trim()) {
+      newErrors.phoneNumber = 'Số điện thoại không được để trống';
+    } else if (!/^0\d{9}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = 'Số điện thoại phải có 10 số và bắt đầu bằng 0';
+    }
+
+    // Date of birth validation
+    if (formData.dateOfBirth) {
+      const birthDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      if (age < 18 || age > 65) {
+        newErrors.dateOfBirth = 'Nhân viên phải từ 18 đến 65 tuổi';
+      }
+    }
+
+    // Role validation
+    if (!formData.roleId) {
+      newErrors.roleId = 'Vui lòng chọn chức vụ';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      notifications.warning('Validation', 'Vui lòng kiểm tra lại thông tin');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      startLoading(isEditMode ? 'Đang cập nhật nhân viên...' : 'Đang tạo nhân viên mới...');
+
+      // Prepare data
+      const submitData = {
+        username: formData.username,
+        fullName: formData.fullName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        dateOfBirth: formData.dateOfBirth || null,
+        roleId: parseInt(formData.roleId),
+        dealerId: formData.dealerId ? parseInt(formData.dealerId) : null
+      };
+
+      // Add password only for create mode
+      if (!isEditMode) {
+        submitData.password = formData.password;
+      }
+
+      let result;
+      if (isEditMode) {
+        result = await dealerAPI.updateUser(staffId, submitData);
+      } else {
+        result = await dealerAPI.createUser(submitData);
+      }
+
+      if (result.success) {
+        notifications.success(
+          'Thành công', 
+          isEditMode ? 'Cập nhật nhân viên thành công' : 'Tạo nhân viên mới thành công'
+        );
+        navigate('/dealer/staff');
+      } else {
+        notifications.error('Lỗi', result.message);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      notifications.error('Lỗi', 'Không thể lưu thông tin nhân viên');
+    } finally {
+      setIsSubmitting(false);
+      stopLoading();
+    }
+  };
+
+  const handleCancel = () => {
+    navigate('/dealer/staff');
   };
 
   return (
-    <div className="staff-form-page">
-      <button className="btn-back" onClick={() => navigate(-1)}>
-        ← Quay lại
-      </button>
+    <PageContainer>
+      <PageHeader
+        title={isEditMode ? '✏️ Chỉnh sửa nhân viên' : '➕ Thêm nhân viên mới'}
+        description={isEditMode ? 'Cập nhật thông tin nhân viên' : 'Tạo tài khoản nhân viên mới'}
+        onBack={() => navigate('/dealer/staff')}
+      />
 
-      <div className="page-header">
-        <h1>{isEditMode ? '✏️ Cập nhật nhân viên' : '➕ Thêm nhân viên mới'}</h1>
-      </div>
+      <form onSubmit={handleSubmit}>
+        {/* Account Information */}
+        <InfoSection title="🔐 Thông tin tài khoản" icon={<Shield size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+            <FormGroup error={errors.username}>
+              <Label required icon={<User size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                Tên đăng nhập
+              </Label>
+              <Input
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                disabled={isEditMode}
+                placeholder="Nhập tên đăng nhập"
+                error={!!errors.username}
+              />
+              {errors.username && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.username}</span>}
+            </FormGroup>
 
-      <form onSubmit={handleSubmit} className="staff-form">
-        <div className="form-row">
-          <div className="form-group">
-            <label>Họ và tên *</label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} required />
+            {!isEditMode && (
+              <FormGroup error={errors.password}>
+                <Label required icon={<Lock size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                  Mật khẩu
+                </Label>
+                <Input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                  error={!!errors.password}
+                />
+                {errors.password && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.password}</span>}
+              </FormGroup>
+            )}
+
+            <FormGroup error={errors.roleId}>
+              <Label required icon={<Shield size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                Chức vụ
+              </Label>
+              <Select
+                name="roleId"
+                value={formData.roleId}
+                onChange={handleChange}
+                options={roleOptions}
+                placeholder="-- Chọn chức vụ --"
+                error={!!errors.roleId}
+              />
+              {errors.roleId && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.roleId}</span>}
+            </FormGroup>
+
+            {isEditMode && (
+              <FormGroup>
+                <Label icon={<Shield size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                  Trạng thái
+                </Label>
+                <Select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleChange}
+                  options={statusOptions}
+                />
+              </FormGroup>
+            )}
           </div>
-          <div className="form-group">
-            <label>Chức vụ *</label>
-            <select name="role" value={formData.role} onChange={handleChange} required>
-              <option value="">-- Chọn chức vụ --</option>
-              <option value="sales_manager">Sales Manager</option>
-              <option value="sales_executive">Sales Executive</option>
-              <option value="customer_service">Customer Service</option>
-              <option value="technician">Technician</option>
-            </select>
-          </div>
-        </div>
+        </InfoSection>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Email *</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} required />
-          </div>
-          <div className="form-group">
-            <label>Số điện thoại *</label>
-            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} required />
-          </div>
-        </div>
+        {/* Personal Information */}
+        <InfoSection title="👤 Thông tin cá nhân" icon={<User size={20} />}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1.5rem' }}>
+            <FormGroup error={errors.fullName}>
+              <Label required icon={<User size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                Họ và tên
+              </Label>
+              <Input
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Nhập họ và tên đầy đủ"
+                error={!!errors.fullName}
+              />
+              {errors.fullName && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.fullName}</span>}
+            </FormGroup>
 
-        <div className="form-group">
-          <label>Địa chỉ</label>
-          <input type="text" name="address" value={formData.address} onChange={handleChange} />
-        </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <FormGroup error={errors.email}>
+                <Label required icon={<Mail size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                  Email
+                </Label>
+                <Input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  placeholder="example@dealer.com"
+                  error={!!errors.email}
+                />
+                {errors.email && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.email}</span>}
+              </FormGroup>
 
-        <div className="form-row">
-          <div className="form-group">
-            <label>Ngày vào làm *</label>
-            <input type="date" name="joinDate" value={formData.joinDate} onChange={handleChange} required />
+              <FormGroup error={errors.phoneNumber}>
+                <Label required icon={<Phone size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                  Số điện thoại
+                </Label>
+                <Input
+                  type="tel"
+                  name="phoneNumber"
+                  value={formData.phoneNumber}
+                  onChange={handleChange}
+                  placeholder="0901234567"
+                  error={!!errors.phoneNumber}
+                />
+                {errors.phoneNumber && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.phoneNumber}</span>}
+              </FormGroup>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+              <FormGroup error={errors.dateOfBirth}>
+                <Label icon={<Calendar size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                  Ngày sinh
+                </Label>
+                <Input
+                  type="date"
+                  name="dateOfBirth"
+                  value={formData.dateOfBirth}
+                  onChange={handleChange}
+                  max={new Date().toISOString().split('T')[0]}
+                  error={!!errors.dateOfBirth}
+                />
+                {errors.dateOfBirth && <span style={{ color: '#e53e3e', fontSize: '0.875rem' }}>{errors.dateOfBirth}</span>}
+              </FormGroup>
+
+              <FormGroup>
+                <Label icon={<Building size={16} />} style={{ paddingTop: '0.25rem', paddingBottom: '0.5rem' }}>
+                  Mã đại lý
+                </Label>
+                <Input
+                  type="number"
+                  name="dealerId"
+                  value={formData.dealerId || ''}
+                  onChange={handleChange}
+                  placeholder="Nhập mã đại lý (nếu có)"
+                />
+              </FormGroup>
+            </div>
           </div>
-          <div className="form-group">
-            <label>Lương (VNĐ)</label>
-            <input type="number" name="salary" value={formData.salary} onChange={handleChange} placeholder="15000000" />
-          </div>
-        </div>
+        </InfoSection>
 
-        <div className="form-group">
-          <label>Ghi chú</label>
-          <textarea name="notes" value={formData.notes} onChange={handleChange} rows="4" />
-        </div>
-
-        <div className="form-actions">
-          <button type="button" className="btn-secondary" onClick={() => navigate(-1)}>Hủy</button>
-          <button type="submit" className="btn-primary">{isEditMode ? 'Cập nhật' : 'Thêm mới'}</button>
-        </div>
+        {/* Form Actions */}
+        <ActionBar>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isSubmitting}
+            icon={<X size={18} />}
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitting}
+            icon={isSubmitting ? null : (isEditMode ? <Save size={18} /> : <UserPlus size={18} />)}
+          >
+            {isSubmitting ? '⏳ Đang xử lý...' : (isEditMode ? 'Cập nhật' : 'Tạo mới')}
+          </Button>
+        </ActionBar>
       </form>
-    </div>
+    </PageContainer>
   );
 };
 

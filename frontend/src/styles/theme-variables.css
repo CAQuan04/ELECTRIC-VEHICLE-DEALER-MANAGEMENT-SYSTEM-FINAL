@@ -1,0 +1,205 @@
+/* ========================================
+   THEME VARIABLES - Centralized Theme System
+   Đã cập nhật: Dark Mode dùng tông Blue/Indigo
+   ======================================== */
+
+:root {
+  /* Light Mode Colors */
+  --bg-page: rgb(249, 250, 251);
+  --bg-page-gradient: linear-gradient(to bottom right, rgb(255, 255, 255), rgb(249, 250, 251), rgb(239, 246, 255));
+  
+  --bg-card: rgb(255, 255, 255);
+  --bg-card-hover: rgb(236, 254, 255);
+  
+  --bg-input: rgb(255, 255, 255);
+  --bg-input-focus: rgb(255, 255, 255);
+  
+  --bg-table-header: linear-gradient(to right, rgb(236, 254, 255), rgb(239, 246, 255));
+  --hover-bg: rgb(236, 254, 255);
+  
+  --border-default: rgb(229, 231, 235);
+  --border-hover: rgb(6, 182, 212);
+  --border-focus: rgb(6, 182, 212);
+  
+  --text-primary: rgb(17, 24, 39);
+  --text-secondary: rgb(75, 85, 99);
+  --text-muted: rgb(107, 114, 128);
+  
+  --shadow-default: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 20px 25px -5px rgba(6, 182, 212, 0.3), 0 8px 10px -6px rgba(6, 182, 212, 0.3);
+  
+  --accent-primary: rgb(212, 6, 126);
+  --accent-secondary: rgb(37, 99, 235);
+  --accent-gradient: linear-gradient(to right, rgb(6, 182, 212), rgb(37, 99, 235));
+}
+
+html.dark {
+  /* Dark Mode Colors - ĐÃ THAY THẾ EMERALD BẰNG BLUE */
+  --bg-page: rgb(250, 240, 240);
+  --bg-page-gradient: linear-gradient(to bottom right, rgb(44, 45, 46), rgb(51, 52, 56), rgb(41, 25, 56));
+  
+  --bg-card: rgba(31, 41, 55, 0.4);
+  --bg-card-hover: rgba(31, 41, 55, 0.6);
+  
+  --bg-input: rgba(31, 41, 55, 0.5);
+  --bg-input-focus: rgb(31, 41, 55);
+  
+  --bg-table-header: rgba(17, 24, 39, 0.6);
+  --hover-bg: rgba(59, 130, 246, 0.1); /* Thay đổi từ Emerald -> Blue */
+  
+  --border-default: rgba(55, 65, 81, 0.5);
+  --border-hover: rgba(59, 130, 246, 0.5); /* Thay đổi từ Emerald -> Blue */
+  --border-focus: rgb(59, 130, 246); /* Thay đổi từ Emerald -> Blue */
+  
+  --text-primary: rgb(255, 255, 255);
+  --text-secondary: rgb(209, 213, 219);
+  --text-muted: rgb(156, 163, 175);
+  
+  --shadow-default: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  --shadow-hover: 0 25px 50px -12px rgba(59, 130, 246, 0.3); /* Thay đổi từ Emerald -> Blue */
+  
+  --accent-primary: rgb(59, 130, 246); /* Thay đổi từ Emerald -> Blue (Blue-500) */
+  --accent-secondary: rgb(30, 64, 175); /* Thay đổi từ Emerald -> Blue (Blue-800) */
+  --accent-gradient: linear-gradient(to right, rgb(59, 130, 246), rgb(30, 64, 175)); /* Thay đổi từ Emerald -> Blue */
+}
+
+/* ========================================
+   UTILITY CLASSES - Using CSS Variables
+   ======================================== */
+
+.theme-page {
+  background: var(--bg-page-gradient);
+  color: var(--text-primary);
+  transition: background 0.5s ease, color 0.3s ease;
+}
+
+.theme-card {
+  background: var(--bg-card);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-default);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.theme-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-hover);
+}
+
+.theme-input {
+  background: var(--bg-input);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+.theme-input:focus {
+  background: var(--bg-input-focus);
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.3);
+}
+
+.theme-input::placeholder {
+  color: var(--text-muted);
+}
+
+.theme-text-primary {
+  color: var(--text-primary) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-text-secondary {
+  color: var(--text-secondary) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-text-muted {
+  color: var(--text-muted) !important;
+  transition: color 0.3s ease;
+}
+
+.theme-border {
+  border-color: var(--border-default) !important;
+  transition: border-color 0.3s ease;
+}
+
+.theme-shadow {
+  box-shadow: var(--shadow-default);
+}
+
+.theme-accent-gradient {
+  background: var(--accent-gradient);
+}
+
+/* ========================================
+   MAIN LAYOUT - Override inline styles
+   ======================================== */
+
+/* ========================================
+   STATS & CARDS - Consistent styling
+   ======================================== */
+
+.stat-value {
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+.metric-value {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========================================
+   ANIMATIONS - Smooth transitions
+   ======================================== */
+
+/* REMOVED universal selector to prevent conflicts with Tailwind dark mode */
+/* Apply transitions only to theme-specific elements */
+.theme-card,
+.theme-input,
+.theme-page,
+[class*="theme-"] {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+html {
+  transition: background-color 0.5s ease;
+}
+
+body {
+  transition: background-color 0.5s ease;
+}
+
+/* ========================================
+   SCROLLBAR - Theme aware
+   ======================================== */
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  background: rgba(55, 65, 81, 0.8);
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}

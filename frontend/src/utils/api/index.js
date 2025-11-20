@@ -13,4 +13,4 @@ export { CompleteMockAPI } from './database';
 export * from './mock/data';
 
 // Services
-export { AdminService, DealerService, CustomerService } from './services';
+export { AdminService, DealerService, CustomerService, dealerAPI } from './services';

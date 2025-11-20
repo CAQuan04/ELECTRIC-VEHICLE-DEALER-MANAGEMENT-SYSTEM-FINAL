@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Logo from '../../components/common/Logo';
 import './Footer.css';
 
 const Footer = () => {
@@ -121,11 +122,7 @@ const Footer = () => {
           {/* Logo Section */}
           <div className="tesla-footer__brand">
             <Link to="/" className="tesla-footer__logo">
-              <img 
-                src="https://s3-us-west-2.amazonaws.com/s.cdpn.io/1780138/logoTesla.svg" 
-                alt="Tesla" 
-                className="tesla-logo-footer"
-              />
+              <Logo size={40} className="tesla-logo-footer" />
             </Link>
             <p className="tesla-footer__tagline">
               Accelerating the world's transition to sustainable energy
