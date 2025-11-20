@@ -18,5 +18,8 @@ namespace EVDealer.BE.Services.DealerManagement
         Task<IEnumerable<ContractDto>> GetContractsAsync(int dealerId);
         Task<IEnumerable<TargetDto>> GetTargetsAsync(int dealerId);
         Task<DealerPerformanceDto> TrackPerformanceAsync(int dealerId, DateOnly startDate, DateOnly endDate);
+
+        Task<IEnumerable<DebtDto>> GetDebtsAsync(int dealerId);
+
     }
 }

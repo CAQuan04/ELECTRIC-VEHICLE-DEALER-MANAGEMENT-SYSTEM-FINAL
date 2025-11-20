@@ -36,6 +36,7 @@ namespace EVDealer.BE.DAL.Repositories
             return await _context.Users
                 .Include(u => u.Role)
                 .Include(u => u.Dealer)
+                .OrderBy(u => u.FullName)
                 .ToListAsync();
         }
         public async Task AddAsync(User user)

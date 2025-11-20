@@ -20,6 +20,9 @@ namespace EVDealer.BE.DAL.Repositories
         // Đây là nghiệp vụ đọc quan trọng.
         Task<WholesalePrice?> GetApplicablePriceForDealerAsync(int vehicleId, int dealerId, DateOnly currentDate);
 
+        Task<IEnumerable<WholesalePrice>> GetAllWholesalePricesSummaryAsync();
+        Task<IEnumerable<PromotionPolicy>> GetAllPromotionPoliciesSummaryAsync();
+
         // Hợp đồng: Phải có chức năng lưu tất cả các thay đổi.
         Task<bool> SaveChangesAsync();
     }

@@ -14,4 +14,6 @@ public interface IDealerService
     Task<bool> DeleteAsync(int dealerId);
     Task<DealerDto?> GetByPhoneAsync(string phone);
     Task<DealerDto?> GetByNameAsync(string name);
+    Task<IEnumerable<object>> GetAllBasicAsync();
+
 }

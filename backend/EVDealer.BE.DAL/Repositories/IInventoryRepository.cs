@@ -21,6 +21,8 @@ namespace EVDealer.BE.DAL.Repositories
 
         // Hợp đồng: Phải có chức năng tìm một phiếu điều phối theo ID của nó.
         Task<Distribution> GetDistributionByIdAsync(int distributionId);
+        Task<IEnumerable<Inventory>> GetAllSummaryAsync();
+        Task<IEnumerable<Distribution>> GetAllDistributionsSummaryAsync();
 
         // Hợp đồng: Phải có chức năng lưu tất cả các thay đổi vào CSDL.
         Task<bool> SaveChangesAsync();

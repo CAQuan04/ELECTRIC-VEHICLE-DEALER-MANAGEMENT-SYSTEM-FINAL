@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using EVDealer.BE.DAL.Models;
+﻿using EVDealer.BE.DAL.Models;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace EVDealer.BE.DAL.Data;
 
@@ -18,6 +17,14 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Customer> Customers { get; set; }
 
+    public virtual DbSet<Contract> Contracts { get; set; }
+
+    public virtual DbSet<Delivery> Deliveries { get; set; }
+
+    public virtual DbSet<Promotion> Promotions { get; set; }
+
+    public virtual DbSet<OrderPromotion> OrderPromotions { get; set; }
+
     public virtual DbSet<Dealer> Dealers { get; set; }
 
     public virtual DbSet<DemandForecast> DemandForecasts { get; set; }
@@ -33,6 +40,8 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<PurchaseRequest> PurchaseRequests { get; set; }
 
     public virtual DbSet<Quotation> Quotations { get; set; }
+
+    public virtual DbSet<QuotationItem> QuotationItems { get; set; }
 
     public virtual DbSet<Role> Roles { get; set; }
 
@@ -61,6 +70,74 @@ public partial class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Contract>(entity =>
+        {
+            entity.ToTable("Contract");
+
+            entity.HasKey(e => e.ContractId);
+
+            entity.Property(e => e.ContractId).HasColumnName("contract_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.ContractDate).HasColumnName("contract_date");
+            entity.Property(e => e.Terms).HasColumnName("terms").HasColumnType("TEXT");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(50);
+
+            entity.HasOne(d => d.Order)
+                .WithOne(p => p.Contract)
+                .HasForeignKey<Contract>(d => d.OrderId)
+                .HasConstraintName("FK_Contract_SalesOrder");
+        });
+
+        modelBuilder.Entity<Delivery>(entity =>
+        {
+            entity.ToTable("Delivery");
+            entity.HasKey(e => e.DeliveryId);
+            entity.HasIndex(e => e.OrderId).IsUnique();
+
+            entity.Property(e => e.DeliveryId).HasColumnName("delivery_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(50);
+            entity.Property(e => e.ScheduledDate).HasColumnName("scheduled_date");
+            entity.Property(e => e.ActualDate).HasColumnName("actual_date");
+            entity.Property(e => e.TrackingNo).HasColumnName("tracking_no").HasMaxLength(100);
+            entity.Property(e => e.CarrierInfo).HasColumnName("carrier_info").HasMaxLength(200);
+
+            entity.HasOne(d => d.Order)
+                .WithOne(p => p.Delivery)
+                .HasForeignKey<Delivery>(d => d.OrderId)
+                .HasConstraintName("FK_Delivery_SalesOrder");
+        });
+
+        modelBuilder.Entity<Promotion>(entity =>
+        {
+            entity.ToTable("Promotion");
+            entity.HasKey(e => e.PromotionId);
+            entity.Property(e => e.PromotionId).HasColumnName("promo_id");
+            entity.Property(e => e.Name).HasColumnName("name").HasMaxLength(200);
+            entity.Property(e => e.Description).HasColumnName("description");
+            entity.Property(e => e.DiscountType).HasColumnName("discount_type").HasMaxLength(50);
+            entity.Property(e => e.DiscountValue).HasColumnName("discount_value").HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.StartDate).HasColumnName("start_date");
+            entity.Property(e => e.EndDate).HasColumnName("end_date");
+            entity.Property(e => e.Status).HasColumnName("status").HasMaxLength(20);
+        });
+
+        modelBuilder.Entity<OrderPromotion>(entity =>
+        {
+            entity.ToTable("OrderPromotion");
+            entity.HasKey(e => new { e.OrderId, e.PromotionId });
+
+            entity.HasOne(op => op.Order)
+                .WithMany(o => o.OrderPromotions)
+                .HasForeignKey(op => op.OrderId)
+                .HasConstraintName("FK_OrderPromotion_Order");
+
+            entity.HasOne(op => op.Promotion)
+                .WithMany(p => p.OrderPromotions)
+                .HasForeignKey(op => op.PromotionId)
+                .HasConstraintName("FK_OrderPromotion_Promotion");
+        });
+
         modelBuilder.Entity<Customer>(entity =>
         {
             entity.HasKey(e => e.CustomerId).HasName("PK__Customer__CD65CB851DFCF011");
@@ -255,13 +332,15 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.RequestId).HasColumnName("request_id");
             entity.Property(e => e.DealerId).HasColumnName("dealer_id");
+            entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+            entity.Property(e => e.ConfigId).HasColumnName("config_id");
             entity.Property(e => e.Quantity).HasColumnName("quantity");
             entity.Property(e => e.Status)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasDefaultValue("pending")
                 .HasColumnName("status");
-            entity.Property(e => e.VehicleId).HasColumnName("vehicle_id");
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at").HasDefaultValueSql("GETDATE()");
 
             entity.HasOne(d => d.Dealer).WithMany(p => p.PurchaseRequests)
                 .HasForeignKey(d => d.DealerId)
@@ -272,6 +351,38 @@ public partial class ApplicationDbContext : DbContext
                 .HasForeignKey(d => d.VehicleId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PurchaseRequest_Vehicle");
+
+            entity.HasOne(d => d.Config).WithMany(p => p.PurchaseRequests)
+                .HasForeignKey(d => d.ConfigId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PurchaseRequest_Config");
+        });
+
+        modelBuilder.Entity<QuotationItem>(entity =>
+        {
+            entity.ToTable("QuotationItem");
+
+            entity.HasKey(e => new { e.QuotationId, e.VehicleId, e.ConfigId });
+
+            entity.Property(e => e.UnitPrice).HasColumnType("decimal(18, 2)");
+
+            entity.HasOne(d => d.Quotation)
+                .WithMany(p => p.QuotationItems)
+                .HasForeignKey(d => d.QuotationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QuotationItem_Quotation");
+
+            entity.HasOne(d => d.Vehicle)
+                .WithMany(p => p.QuotationItems)
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QuotationItem_Vehicle");
+
+            entity.HasOne(d => d.Config)
+                .WithMany(p => p.QuotationItems)
+                .HasForeignKey(d => d.ConfigId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_QuotationItem_Config");
         });
 
         modelBuilder.Entity<Quotation>(entity =>
@@ -340,6 +451,9 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.TotalAmount)
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("total_amount");
+
+            entity.Property(e => e.ApprovalNote).HasColumnName("approval_note").HasColumnType("TEXT");
+            entity.Property(e => e.ApprovedAt).HasColumnName("approved_at");
 
             entity.HasOne(d => d.ApprovedByNavigation).WithMany(p => p.SalesOrders)
                 .HasForeignKey(d => d.ApprovedBy)

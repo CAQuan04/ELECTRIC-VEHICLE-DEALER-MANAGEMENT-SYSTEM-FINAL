@@ -1,4 +1,4 @@
-using EVDealer.BE.DAL.Data;
+﻿using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -115,5 +115,12 @@ public class DealerRepository : IDealerRepository
         }
 
         return dealersQuery;
+    }
+    // Ghi chú: Đây là phương thức được tối ưu hóa riêng cho các nghiệp vụ cần danh sách nhanh,
+    // như chức năng AI của bạn.
+    public async Task<IEnumerable<Dealer>> GetAllBasicAsync()
+    {
+        // Ghi chú: Chỉ lấy dữ liệu từ bảng Dealers, không Join với bất kỳ bảng nào khác.
+        return await _context.Dealers.AsNoTracking().OrderBy(d => d.Name).ToListAsync();
     }
 }

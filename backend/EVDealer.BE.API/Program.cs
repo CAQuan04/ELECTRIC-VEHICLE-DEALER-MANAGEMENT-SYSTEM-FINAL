@@ -1,83 +1,128 @@
-﻿
+﻿// Ghi chú: File khởi động, là "tổng đài" kết nối tất cả các dịch vụ của ứng dụng.
+
+// --- Import các namespace cần thiết ---
 using EVDealer.BE.API.Helpers;
+using EVDealer.BE.API.Validators;
+using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.Services.Admin;
+using EVDealer.BE.Services.AI;
+using EVDealer.BE.Services.Analytics;
 using EVDealer.BE.Services.Auth;
-  
 using EVDealer.BE.Services.Customers;
+using EVDealer.BE.Services.DealerManagement;
 using EVDealer.BE.Services.Dealers;
-using EVDealer.BE.Services.TestDrives;
+using EVDealer.BE.Services.Deliveries;
 
+// Ghi chú: Đổi tên namespace 'IInventory' thành 'Inventory' cho nhất quán nếu bạn đã đổi.
 using EVDealer.BE.Services.IInventory;
-
+using EVDealer.BE.Services.Orders;
+using EVDealer.BE.Services.Planning;
+using EVDealer.BE.Services.Pricing;
+using EVDealer.BE.Services.Procurement;
+using EVDealer.BE.Services.Promotions;
+using EVDealer.BE.Services.Quotations;
+using EVDealer.BE.Services.TestDrives;
 using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
+using FluentValidation.AspNetCore;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 using System.Text;
-using EVDealer.BE.Services.DealerManagement;
-using EVDealer.BE.API.Validators;
-using FluentValidation.AspNetCore;
-using System.Reflection;
-using EVDealer.BE.Services.Pricing;
-using System.Reflection;
-using EVDealer.BE.Services.Analytics;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
-// 1. Kết nối CSDL
+// === 1. CẤU HÌNH CÁC DỊCH VỤ (SERVICE CONFIGURATION) ===
+
+// Ghi chú: Kết nối với CSDL SQL Server sử dụng chuỗi kết nối từ appsettings.json.
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
-// 2. Đăng ký các "phòng ban" (Dependency Injection)
+// Ghi chú: Cấu hình CORS.
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
+
+// ===================================================================================
+// === PHẦN SỬA ĐỔI: ĐĂNG KÝ REPOSITORY VÀ UNIT OF WORK ===
+
+// Ghi chú: Đăng ký tất cả các Repository riêng lẻ.
+// Đây là bước quan trọng để giải quyết lỗi. Hệ thống DI cần biết cách tạo ra các
+// Repository này khi các Service yêu cầu chúng.
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-// Ghi chú: "Khai báo" cho hệ thống biết rằng mỗi khi có ai đó cần IUserService,
-// hãy tạo một đối tượng UserService để cung cấp.
-builder.Services.AddScoped<IUserService, UserService>();
-
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
-builder.Services.AddScoped<IVehicleService, VehicleService>();
-
-
 builder.Services.AddScoped<IDealerRepository, DealerRepository>();
-builder.Services.AddScoped<IDealerService, DealerService>();
-
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<ICustomerService, CustomerService>();
-
 builder.Services.AddScoped<ITestDriveRepository, TestDriveRepository>();
-builder.Services.AddScoped<ITestDriveService, TestDriveService>();
-
-builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
-builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
-
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
-builder.Services.AddScoped<IInventoryService, InventoryService>();
-
 builder.Services.AddScoped<IDealerManagementRepository, DealerManagementRepository>();
-builder.Services.AddScoped<IDealerManagementService, DealerManagementService>();
+builder.Services.AddScoped<IPricingRepository, PricingRepository>();
+builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
+builder.Services.AddScoped<IDemandForecastRepository, DemandForecastRepository>();
+builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
+// Thêm bất kỳ repository nào khác bạn có ở đây...
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IDealerRepository, DealerRepository>();
+builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
+builder.Services.AddScoped<IDistributionRepository, DistributionRepository>();
 
-// Ghi chú: Đăng ký AutoMapper ở đây.
-builder.Services.AddAutoMapper(typeof(Program));
+// Ghi chú: Đăng ký Unit of Work, quản lý tất cả Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+// ===================================================================================
 
-// Ghi chú: Dòng này sẽ tự động tìm tất cả các lớp kế thừa từ 'Profile'
-// trong Assembly hiện tại (tức là project API) và đăng ký chúng.
+
+// Ghi chú: Đăng ký các "phòng ban" nghiệp vụ (Services).
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IVehicleService, VehicleService>();
+builder.Services.AddScoped<IDealerService, DealerService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
+builder.Services.AddScoped<ITestDriveService, TestDriveService>();
+builder.Services.AddScoped<IVehicleAdminService, VehicleAdminService>();
+builder.Services.AddScoped<IInventoryService, InventoryService>();
+builder.Services.AddScoped<IDealerManagementService, DealerManagementService>();
+builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+builder.Services.AddScoped<IPurchaseRequestService, PurchaseRequestService>();
+builder.Services.AddScoped<IDistributionService, DistributionService>();
+// Đăng ký Service AI
+builder.Services.AddScoped<IDemandForecastService, DemandForecastService>();
+builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Logging.ClearProviders();
+builder.Services.AddScoped<IDistributionSuggestionRepository, DistributionSuggestionRepository>();
+builder.Logging.AddConsole();
+// Ghi chú: Đăng ký AutoMapper, tự động tìm tất cả các Profile trong project API.
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-builder.Services.AddScoped<IPricingRepository, PricingRepository>();
-builder.Services.AddScoped<IPricingService, PricingService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IDealerRepository, DealerRepository>();
 
-builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
-builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
-
-
-// 3. Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication)
+builder.Services.AddScoped<ISupplyPlanningService, SupplyPlanningService>();
+// Ghi chú: Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication).
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+
+
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -92,65 +137,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ===================================================================================
-// === PHẦN ĐÃ HOÀN CHỈNH: ĐỊNH NGHĨA CÁC CHÍNH SÁCH PHÂN QUYỀN (POLICY-BASED) ===
-// ===================================================================================
-// Ghi chú: Đây là nơi chúng ta "dạy" cho hệ thống biết các quy tắc phân quyền.
+// Ghi chú: Định nghĩa các chính sách phân quyền (Policy-Based Authorization).
 builder.Services.AddAuthorization(options =>
 {
-    // Ghi chú: Định nghĩa một chính sách tên là "CanViewDashboardStats".
-    // Yêu cầu: Người dùng phải có một claim với type là "permission" và value là "ViewDashboardStats".
-    options.AddPolicy("CanViewDashboardStats", policy =>
-        policy.RequireClaim("permission", "ViewDashboardStats"));
-
-    // Ghi chú: Định nghĩa chính sách cho việc quản lý người dùng.
-    options.AddPolicy("CanManageUsers", policy =>
-        policy.RequireClaim("permission", "ManageUsers"));
-
-    // Ghi chú: "Dạy" cho hệ thống biết Policy "CanManageDealerAccounts" có nghĩa là gì.
-    options.AddPolicy("CanManageDealerAccounts", policy =>
-        policy.RequireClaim("permission", "ManageDealerAccounts"));
-
-    // Ghi chú: Thêm chính sách mới 'CanManageVehicles' để bảo vệ Controller của bạn.
-    options.AddPolicy("CanManageVehicles", policy =>
-        policy.RequireClaim("permission", "ManageVehicles"));
-
+    options.AddPolicy("CanViewDashboardStats", policy => policy.RequireClaim("permission", "ViewDashboardStats"));
+    options.AddPolicy("CanManageUsers", policy => policy.RequireClaim("permission", "ManageUsers"));
+    options.AddPolicy("CanManageDealerAccounts", policy => policy.RequireClaim("permission", "ManageDealerAccounts"));
+    options.AddPolicy("CanManageVehicles", policy => policy.RequireClaim("permission", "ManageVehicles"));
     options.AddPolicy("ManageInventory", policy => policy.RequireClaim("permission", "ManageInventory"));
     options.AddPolicy("ManageDistributions", policy => policy.RequireClaim("permission", "ManageDistributions"));
     options.AddPolicy("ConfirmDistributions", policy => policy.RequireClaim("permission", "ConfirmDistributions"));
-
-    options.AddPolicy("ManageDealers", policy =>
-        policy.RequireClaim("permission", "ManageDealers"));
-
-    options.AddPolicy("ManagePricing", policy =>
-        policy.RequireClaim("permission", "ManagePricing"));
-
-    options.AddPolicy("CanViewAnalytics", policy =>
-       policy.RequireClaim("permission", "CanViewAnalytics"));
-
+    options.AddPolicy("ManageDealers", policy => policy.RequireClaim("permission", "ManageDealers"));
+    options.AddPolicy("ManagePricing", policy => policy.RequireClaim("permission", "ManagePricing"));
+    options.AddPolicy("CanViewAnalytics", policy => policy.RequireClaim("permission", "CanViewAnalytics"));
 });
 
+// Ghi chú: Đăng ký các Controller, cấu hình JSON và kích hoạt FluentValidation.
 builder.Services.AddControllers()
-.AddJsonOptions(options =>
- {
-     options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
- })
-.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>())
-.AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SetWholesalePriceDtoValidator>())
-.AddFluentValidation(fv =>
-{fv.RegisterValidatorsFromAssemblyContaining<SalesReportQueryDtoValidator>();
-});
+    .AddJsonOptions(options =>
+    {
+        // Thêm "người phiên dịch" để API hiểu được kiểu dữ liệu DateOnly.
+        options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
+    })
+    .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>());
 
 
 builder.Services.AddEndpointsApiExplorer();
-
-// Cấu hình Swagger để hiển thị nút Authorize (giữ nguyên, phần này bạn đã làm đúng)
 builder.Services.AddSwaggerGen(options =>
 {
+    // Cấu hình Swagger để hiển thị nút Authorize.
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Vui lòng nhập token",
+        Description = "Vui lòng nhập token (ví dụ: Bearer your_token)",
         Name = "Authorization",
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
         BearerFormat = "JWT",
@@ -161,44 +180,59 @@ builder.Services.AddSwaggerGen(options =>
         {
             new Microsoft.OpenApi.Models.OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference { Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme, Id = "Bearer" }
             },
             new string[]{}
         }
     });
 });
 
-// ===== ADD CORS SERVICE (SIMPLER VERSION) =====
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", builder =>
-    {
-        builder.AllowAnyOrigin()           // Allow all origins (development only!)
-               .AllowAnyMethod()           // Allow all HTTP methods
-               .AllowAnyHeader();           // Allow all headers
-    });
-});
+// Ghi chú: Cấu hình dịch vụ Hangfire để chạy các công việc trong nền (background jobs).
+builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddHangfireServer();
 
 
+// === 2. XÂY DỰNG ỨNG DỤNG (BUILD THE APP) ===
 var app = builder.Build();
 
+
+// === 3. CẤU HÌNH PIPELINE XỬ LÝ HTTP REQUEST (CONFIGURE THE PIPELINE) ===
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseCors("AllowAll");
-
 app.UseHttpsRedirection();
+app.UseCors("AllowAll");
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseHangfireDashboard();
 
-// Kích hoạt các "chốt bảo vệ" theo đúng thứ tự
-app.UseAuthentication(); // Chốt 1: Xác thực xem "thẻ bài" (Token) có hợp lệ không.
-app.UseAuthorization();  // Chốt 2: Kiểm tra xem người mang thẻ có đủ quyền vào khu vực này không.
+// Lên lịch cho công việc dự báo AI chạy vào lúc 18:00 (6 giờ tối) Chủ Nhật hàng tuần.
+RecurringJob.AddOrUpdate<IDemandForecastService>(
+    "weekly-demand-forecast",
+    service => service.RunDemandForecastProcessAsync(),
+    // Ghi chú: "0 18 * * SUN" là biểu thức Cron có nghĩa là:
+    // Phút 0, Giờ 18, mỗi Ngày, mỗi Tháng, vào ngày Chủ Nhật (Sunday).
+    "0 18 * * SUN",
+    new RecurringJobOptions
+    {
+        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")
+    }
+);
+
+// Lên lịch cho công việc tạo đề xuất chạy vào lúc 19:00 (7 giờ tối) Chủ Nhật hàng tuần.
+RecurringJob.AddOrUpdate<ISupplyPlanningService>(
+    "weekly-suggestion-generator",
+    service => service.GenerateDistributionSuggestionsAsync(),
+    // Ghi chú: Tương tự, "0 19 * * SUN" nghĩa là Phút 0, Giờ 19 vào ngày Chủ Nhật.
+    "0 19 * * SUN",
+    new RecurringJobOptions
+    {
+        TimeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time")
+    }
+);
 
 app.MapControllers();
 app.Run();

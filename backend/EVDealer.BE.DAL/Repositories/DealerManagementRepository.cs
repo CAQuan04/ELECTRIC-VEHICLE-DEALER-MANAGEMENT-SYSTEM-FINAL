@@ -50,5 +50,13 @@ namespace EVDealer.BE.DAL.Repositories
                     o.OrderDate <= endDate)
                 .SumAsync(o => o.TotalAmount);
         }
+
+        public async Task<IEnumerable<Debt>> GetDebtsByDealerIdAsync(int dealerId)
+        {
+            return await _context.Debts
+                .Where(d => d.DealerId == dealerId)
+                .OrderByDescending(d => d.DueDate)
+                .ToListAsync();
+        }
     }
 }

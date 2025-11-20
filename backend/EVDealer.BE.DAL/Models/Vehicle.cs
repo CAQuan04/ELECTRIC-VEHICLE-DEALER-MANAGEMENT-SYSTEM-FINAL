@@ -30,6 +30,10 @@ public partial class Vehicle
 
     public virtual ICollection<VehicleConfig> VehicleConfigs { get; set; } = new List<VehicleConfig>();
 
+    public virtual ICollection<WholesalePrice> WholesalePrices { get; set; } = new List<WholesalePrice>();
+
+    public virtual ICollection<QuotationItem> QuotationItems { get; set; } = new List<QuotationItem>();
+
     [Required]
     [Column(TypeName = "varchar(20)")] // <-- Thử thêm attribute này để rõ ràng hơn
     public string Status { get; set; }

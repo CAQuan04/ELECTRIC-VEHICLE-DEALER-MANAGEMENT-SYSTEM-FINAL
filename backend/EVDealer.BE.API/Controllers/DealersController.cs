@@ -39,7 +39,15 @@ public class DealersController : ControllerBase
             return BadRequest(ex.Message);
         }
     }
-
+    // === PHẦN BỔ SUNG QUAN TRỌNG CHO DROPDOWN ===
+    [HttpGet("basic")]
+    public async Task<IActionResult> GetAllBasicDealers()
+    {
+        // Ghi chú: Controller gọi phương thức tương ứng từ Service.
+        // Nó không cần biết làm thế nào để lấy được dữ liệu.
+        var dealers = await _dealerService.GetAllBasicAsync();
+        return Ok(dealers);
+    }
     /// <summary>
     /// Cập nhật dealer
     /// Auth: EVM/Admin

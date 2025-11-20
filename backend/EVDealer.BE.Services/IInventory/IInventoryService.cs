@@ -20,5 +20,8 @@ namespace EVDealer.BE.Services.IInventory
         // Hợp đồng: Phải có chức năng xác nhận nhận hàng, đây là nghiệp vụ cốt lõi.
         // Cần dealerId để xác thực đúng người nhận.
         Task<bool> ConfirmDistributionReceiptAsync(int distributionId, int dealerId);
+
+        Task<IEnumerable<InventoryySummaryDto>> GetInventorySummaryAsync();
+        Task<IEnumerable<DistributionSummaryDto>> GetDistributionSummaryAsync();
     }
 }

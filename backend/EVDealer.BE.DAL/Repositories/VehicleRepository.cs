@@ -92,4 +92,16 @@ public class VehicleRepository : IVehicleRepository
 
         return vehiclesQuery;
     }
+    public async Task<IEnumerable<Vehicle>> GetAllAsync()
+    {
+        return await _context.Vehicles.AsNoTracking().ToListAsync();
+    }
+
+
+    // === PHẦN BỔ SUNG: TRIỂN KHAI PHƯƠNG THỨC MỚI, TỐI ƯU HƠN ===
+    // Ghi chú: Phương thức này chỉ lấy dữ liệu từ bảng Vehicle, không JOIN, rất nhanh.
+    public async Task<IEnumerable<Vehicle>> GetAllBasicAsync()
+    {
+        return await _context.Vehicles.AsNoTracking().ToListAsync();
+    }
 }

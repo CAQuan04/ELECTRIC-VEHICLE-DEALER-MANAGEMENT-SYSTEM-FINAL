@@ -15,7 +15,7 @@ namespace EVDealer.BE.DAL.Models
         public int PriceId { get; set; }
 
         [Column("product_id")]
-        public int ProductId { get; set; } // Trong trường hợp này là VehicleId
+        public int ProductId { get; set; } // Trong trường hợp này là VehicleId 
 
         // Ghi chú: dealer_id có thể NULL, cho biết đây là giá sỉ áp dụng chung.
         // Dấu ? cho biết thuộc tính này là nullable.
@@ -34,7 +34,7 @@ namespace EVDealer.BE.DAL.Models
         // === Navigation Properties ===
         // Ghi chú: Các thuộc tính này giúp EF Core hiểu mối quan hệ giữa các bảng.
         [ForeignKey("ProductId")]
-        public virtual Vehicle Vehicle { get; set; }
+        public virtual Vehicle Product { get; set; }
 
         [ForeignKey("DealerId")]
         public virtual Dealer? Dealer { get; set; }

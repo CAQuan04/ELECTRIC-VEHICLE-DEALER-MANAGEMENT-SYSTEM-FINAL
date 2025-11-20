@@ -7,6 +7,7 @@ public class VehicleListDto
     public string Brand { get; set; } = string.Empty;
     public int? Year { get; set; }
     public decimal? BasePrice { get; set; }
+    public string? ImageUrl { get; set; }
     public List<VehicleConfigDto> Configs { get; set; } = new();
     public InventorySummaryDto InventorySummary { get; set; } = new();
     public string Status { get; set; }

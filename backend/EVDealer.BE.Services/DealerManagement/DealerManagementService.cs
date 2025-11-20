@@ -78,5 +78,11 @@ namespace EVDealer.BE.Services.DealerManagement
                 Message = "Báo cáo hiệu suất."
             };
         }
+        public async Task<IEnumerable<DebtDto>> GetDebtsAsync(int dealerId)
+        {
+            var debtsFromDb = await _dealerRepo.GetDebtsByDealerIdAsync(dealerId);
+            // Ghi chú: Sử dụng AutoMapper để chuyển đổi List<Debt> thành List<DebtDto>.
+            return _mapper.Map<IEnumerable<DebtDto>>(debtsFromDb);
+        }
     }
 }

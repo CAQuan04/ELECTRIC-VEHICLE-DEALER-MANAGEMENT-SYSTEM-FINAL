@@ -91,5 +91,39 @@ namespace EVDealer.BE.Services.IInventory
             // Nếu bước này thất bại, tất cả thay đổi (trừ, cộng, cập nhật status) sẽ được rollback.
             return await _inventoryRepo.SaveChangesAsync();
         }
+
+        public async Task<IEnumerable<InventoryySummaryDto>> GetInventorySummaryAsync()
+        {
+            var inventories = await _inventoryRepo.GetAllSummaryAsync();
+            return inventories.Select(i => new InventoryySummaryDto
+            {
+                InventoryId = i.InventoryId,
+                VehicleName = i.Vehicle?.Model ?? "N/A",
+                ConfigName = i.Config?.Color ?? "N/A", // Giả sử lấy Color làm tên Config
+                LocationType = i.LocationType,
+                // Dòng code bạn đã hỏi
+                LocationName = i.LocationType == "HQ" ? "Kho Tổng" : i.Location?.Name ?? "N/A",
+                Quantity = i.Quantity,
+                UpdatedAt = i.UpdatedAt
+            });
+        }
+
+        public async Task<IEnumerable<DistributionSummaryDto>> GetDistributionSummaryAsync()
+        {
+            var distributions = await _inventoryRepo.GetAllDistributionsSummaryAsync();
+            return distributions.Select(d => new DistributionSummaryDto
+            {
+                DistId = d.DistId,
+                VehicleName = d.Vehicle?.Model ?? "N/A",
+                ConfigName = d.Config?.Color ?? "N/A",
+                Quantity = d.Quantity,
+                FromLocation = d.FromLocation,
+                ToDealerId = d.ToDealerId,
+                ToDealerName = d.ToDealer?.Name ?? "N/A",
+                ScheduledDate = (DateOnly)d.ScheduledDate,
+                ActualDate = d.ActualDate,
+                Status = d.Status
+            });
+        }
     }
 }

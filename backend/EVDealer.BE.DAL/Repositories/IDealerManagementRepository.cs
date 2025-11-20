@@ -21,5 +21,8 @@ namespace EVDealer.BE.DAL.Repositories
         Task<IEnumerable<DealerTarget>> GetTargetsByDealerIdAsync(int dealerId);
         Task<DealerTarget?> GetTargetForPeriodAsync(int dealerId, DateOnly startDate, DateOnly endDate);
         Task<decimal> CalculateActualSalesAsync(int dealerId, DateOnly startDate, DateOnly endDate);
+
+        Task<IEnumerable<Debt>> GetDebtsByDealerIdAsync(int dealerId);
+
     }
 }

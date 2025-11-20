@@ -92,8 +92,16 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("varchar(20)")
                         .HasColumnName("phone");
 
+                    b.Property<int?>("RegionId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SafetyStockLevel")
+                        .HasColumnType("int");
+
                     b.HasKey("DealerId")
                         .HasName("PK__Dealer__019990C0196E5CEB");
+
+                    b.HasIndex("RegionId");
 
                     b.ToTable("Dealer", (string)null);
                 });
@@ -258,6 +266,9 @@ namespace EVDealer.BE.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DistId"));
 
+                    b.Property<DateOnly?>("ActualDate")
+                        .HasColumnType("date");
+
                     b.Property<int>("ConfigId")
                         .HasColumnType("int");
 
@@ -303,6 +314,49 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("Distribution", (string)null);
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DistributionSuggestion", b =>
+                {
+                    b.Property<int>("SuggestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SuggestionId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CurrentInventory")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ForecastedDemand")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SafetyStock")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("SuggestedQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SuggestionId");
+
+                    b.HasIndex("DealerId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("DistributionSuggestions");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Inventory", b =>
                 {
                     b.Property<int>("InventoryId")
@@ -331,6 +385,9 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("int")
                         .HasColumnName("quantity");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("VehicleId")
                         .HasColumnType("int")
                         .HasColumnName("vehicle_id");
@@ -339,6 +396,8 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasName("PK__Inventor__B59ACC49D4996A94");
 
                     b.HasIndex("ConfigId");
+
+                    b.HasIndex("LocationId");
 
                     b.HasIndex("VehicleId");
 
@@ -569,6 +628,24 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Quotation", (string)null);
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Region", b =>
+                {
+                    b.Property<int>("RegionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RegionId"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("RegionId");
+
+                    b.ToTable("Regions");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Role", b =>
@@ -821,6 +898,9 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("brand");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(MAX)");
+
                     b.Property<string>("Model")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -925,6 +1005,15 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("WholesalePrices");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Dealer", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Region", "Region")
+                        .WithMany("Dealers")
+                        .HasForeignKey("RegionId");
+
+                    b.Navigation("Region");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerContract", b =>
                 {
                     b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
@@ -1003,6 +1092,25 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DistributionSuggestion", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Dealer");
+
+                    b.Navigation("Vehicle");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Inventory", b =>
                 {
                     b.HasOne("EVDealer.BE.DAL.Models.VehicleConfig", "Config")
@@ -1011,6 +1119,12 @@ namespace EVDealer.BE.DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Inventory_Config");
 
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
                         .WithMany("Inventories")
                         .HasForeignKey("VehicleId")
@@ -1018,6 +1132,8 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasConstraintName("FK_Inventory_Vehicle");
 
                     b.Navigation("Config");
+
+                    b.Navigation("Location");
 
                     b.Navigation("Vehicle");
                 });
@@ -1224,7 +1340,7 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasForeignKey("DealerId");
 
                     b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
-                        .WithMany()
+                        .WithMany("WholesalePrices")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1268,6 +1384,11 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("SalesOrder");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Region", b =>
+                {
+                    b.Navigation("Dealers");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Role", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -1304,6 +1425,8 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("TestDrives");
 
                     b.Navigation("VehicleConfigs");
+
+                    b.Navigation("WholesalePrices");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.VehicleConfig", b =>

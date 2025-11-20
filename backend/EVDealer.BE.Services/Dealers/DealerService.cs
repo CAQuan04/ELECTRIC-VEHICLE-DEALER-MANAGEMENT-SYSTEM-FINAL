@@ -1,4 +1,4 @@
-using EVDealer.BE.Common.DTOs;
+﻿using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.DAL.Models;
 using EVDealer.BE.DAL.Repositories;
 using EVDealer.BE.DAL.Utils;
@@ -13,7 +13,15 @@ public class DealerService : IDealerService
     {
         _dealerRepository = dealerRepository;
     }
+    public async Task<IEnumerable<object>> GetAllBasicAsync()
+    {
+        // Bước 1: Gọi xuống Repository để lấy dữ liệu.
+        var dealers = await _dealerRepository.GetAllBasicAsync();
 
+        // Bước 2: Dùng LINQ Select để định dạng lại dữ liệu, chỉ trả về ID và Name.
+        // Điều này giúp giữ cho Controller "trong sáng", không cần biết đến logic này.
+        return dealers.Select(d => new { d.DealerId, d.Name });
+    }
     public async Task<DealerDto> CreateAsync(DealerCreateDto createDto)
     {
         if (!string.IsNullOrEmpty(createDto.Phone))

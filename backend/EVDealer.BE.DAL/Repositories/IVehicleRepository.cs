@@ -10,6 +10,14 @@ public interface IVehicleRepository
     Task<IEnumerable<Vehicle>> GetVehiclesForComparisonAsync(IEnumerable<int> vehicleIds);
     Task<IEnumerable<VehicleConfig>> GetAvailableConfigsAsync(int vehicleId);
     Task<IEnumerable<Inventory>> GetInventoriesByVehicleAsync(int vehicleId);
+
+    // Ghi chú: Giữ nguyên phương thức cũ.
+    Task<IEnumerable<Vehicle>> GetAllAsync();
+
+    // ===================================================================================
+    // === PHẦN BỔ SUNG: THÊM HỢP ĐỒNG CHO PHƯƠNG THỨC LẤY DỮ LIỆU CƠ BẢN ===
+    Task<IEnumerable<Vehicle>> GetAllBasicAsync();
+    // ===================================================================================
 }
 
 #region Query DTO
