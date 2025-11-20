@@ -35,7 +35,7 @@ const ForecastReport = () => {
   const fetchForecasts = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/api/Analytics/demand-forecasts');
+      const response = await apiClient.get('/Analytics/demand-forecasts');
       setForecasts(response.data);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu dự báo:", error);
@@ -50,7 +50,7 @@ const ForecastReport = () => {
     setIsJobRunning(true);
     try {
       // Gửi yêu cầu chạy job và nhận lại jobId
-      const response = await apiClient.post('/api/Analytics/run-demand-forecast');
+      const response = await apiClient.post('/Analytics/run-demand-forecast');
       console.log("Đã gửi yêu cầu chạy Job AI, Job ID:", response.data.jobId);
       // Có thể thêm logic kiểm tra trạng thái job sau một khoảng thời gian
       alert("Yêu cầu đã được gửi. Dữ liệu sẽ được cập nhật sau vài phút. Vui lòng nhấn 'Làm mới' để xem kết quả.");

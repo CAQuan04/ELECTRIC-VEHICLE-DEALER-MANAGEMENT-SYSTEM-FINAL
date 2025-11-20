@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { AuthService } from '@utils';
 import { 
   PageContainer, 
   PageHeader, 
@@ -49,23 +50,40 @@ const TestDriveCalendar = () => {
   const loadAppointments = async () => {
     setIsLoading(true);
     try {
+      const currentUser = AuthService.getCurrentUser();
+      const dealerId = currentUser?.dealerId;
+      
+      if (!dealerId) {
+        console.error('❌ No dealerId found');
+        setAppointments([]);
+        setIsLoading(false);
+        return;
+      }
+      
       const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
       const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
       
-      const result = await dealerAPI.getTestDriveCalendar(
-        startDate.toISOString().split('T')[0],
-        endDate.toISOString().split('T')[0]
-      );
+      console.log('🔍 Loading test drives for calendar:', { dealerId, startDate, endDate });
+      
+      const result = await dealerAPI.getTestDrives(dealerId, {
+        FromDate: startDate.toISOString().split('T')[0],
+        ToDate: endDate.toISOString().split('T')[0],
+        Page: 1,
+        Size: 1000
+      });
+      
+      console.log('✅ Calendar test drives result:', result);
       
       if (result.success && result.data) {
-        const appointmentList = Array.isArray(result.data) ? result.data : result.data.data || [];
+        const appointmentList = Array.isArray(result.data) ? result.data : [];
+        console.log('📅 Calendar appointments:', appointmentList);
         setAppointments(appointmentList);
       } else {
-        console.error('Failed to load calendar:', result.message);
+        console.error('❌ Failed to load calendar:', result.message);
         setAppointments([]);
       }
     } catch (error) {
-      console.error('Error loading calendar:', error);
+      console.error('❌ Error loading calendar:', error);
       setAppointments([]);
     } finally {
       setIsLoading(false);

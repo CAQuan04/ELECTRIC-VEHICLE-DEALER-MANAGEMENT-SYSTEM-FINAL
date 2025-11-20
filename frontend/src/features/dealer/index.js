@@ -21,7 +21,8 @@ export { default as CompareVehicles } from './pages/Vehicles/CompareVehicles';
 // Inventory Management
 export { default as DealerInventory } from './pages/Inventory/DealerInventory';
 export { default as StockDetail } from './pages/Inventory/StockDetail';
-export { default as RequestStock } from './pages/Inventory/RequestStock';
+export { default as DistributionList } from './pages/Inventory/DistributionList';
+export { default as DistributionRequestDetail } from './pages/Inventory/DistributionRequestDetail';
 
 // Customer Management
 export { default as CustomerList } from './pages/Customers/CustomerList';

@@ -37,7 +37,7 @@ const SalesReport = () => {
         EndDate: filters.endDate,
         GroupBy: filters.groupBy,
       };
-      const response = await apiClient.get('/api/Analytics/sales-report', { params });
+      const response = await apiClient.get('/Analytics/sales-report', { params });
       
       const data = response.data.reportData || [];
       setReportData(data);

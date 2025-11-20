@@ -62,5 +62,75 @@ namespace EVDealer.BE.API.Controllers
 
             return Ok(quotation);
         }
+
+        /// <summary>
+        /// Lấy danh sách báo giá của dealer
+        /// Auth: DealerStaff, DealerManager
+        /// </summary>
+        [HttpGet("dealer/{dealerId}")]
+        [Authorize(Roles = "DealerStaff,DealerManager,Admin")]
+        public async Task<IActionResult> GetDealerQuotations(int dealerId, [FromQuery] string? status = null, [FromQuery] string? search = null)
+        {
+            try
+            {
+                var quotations = await _quotationService.GetDealerQuotationsAsync(dealerId, status, search);
+                return Ok(new { success = true, data = quotations });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật báo giá
+        /// Auth: DealerStaff
+        /// </summary>
+        [HttpPut("{id}")]
+        [Authorize(Roles = "DealerStaff,Admin")]
+        public async Task<IActionResult> UpdateQuotation(int id, [FromBody] QuotationUpdateDto updateDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                var quotation = await _quotationService.UpdateAsync(id, updateDto);
+                return Ok(new { success = true, data = quotation });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gửi báo giá tới khách hàng
+        /// Auth: DealerStaff
+        /// </summary>
+        [HttpPost("{id}/send")]
+        [Authorize(Roles = "DealerStaff,Admin")]
+        public async Task<IActionResult> SendQuotation(int id)
+        {
+            try
+            {
+                await _quotationService.SendQuotationAsync(id);
+                return Ok(new { success = true, message = "Quotation sent successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        private int GetUserIdFromClaims()
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+            {
+                throw new UnauthorizedAccessException("Invalid user identifier");
+            }
+            return userId;
+        }
     }
 }

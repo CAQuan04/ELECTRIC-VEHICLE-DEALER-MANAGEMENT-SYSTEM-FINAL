@@ -9,41 +9,41 @@ export class AdminService {
   // === User Management (Đã tích hợp API thật) ===
 
   static async getAllUsers(filters = {}) {
-    // Ghi chú: Sử dụng apiClient để gọi GET /api/Users
+    // Ghi chú: Sử dụng apiClient để gọi GET /Users (baseURL đã có /api)
     // Chúng ta sẽ xử lý filters sau nếu cần, tạm thời lấy tất cả.
-    return await apiClient.get('/api/Users');
+    return await apiClient.get('/Users');
   }
   
   static async getUserById(userId) {
-    return await apiClient.get(`/api/Users/${userId}`);
+    return await apiClient.get(`/Users/${userId}`);
   }
   
   static async createUser(userData) {
     // Ghi chú: Gửi dữ liệu userData (khớp với UserCreateDto) đến API
-    return await apiClient.post('/api/Users', userData);
+    return await apiClient.post('/Users', userData);
   }
   
   static async updateUser(userId, updateData) {
     // Ghi chú: updateData phải khớp với UserUpdateDto
-    return await apiClient.put(`/api/Users/${userId}`, updateData);
+    return await apiClient.put(`/Users/${userId}`, updateData);
   }
   
   // Ghi chú: API của bạn dùng PATCH cho việc thay đổi trạng thái, không phải DELETE
   static async changeUserStatus(userId, statusData) {
     // statusData sẽ là object dạng { status: 'Active' } hoặc { status: 'Inactive' }
-    return await apiClient.patch(`/api/Users/${userId}/status`, statusData);
+    return await apiClient.patch(`/Users/${userId}/status`, statusData);
   }
 
   // === CÁC API PHỤ TRỢ CẦN THIẾT CHO FORM ===
 
   static async getAllRoles() {
     // Ghi chú: API này chưa có trong Controller của bạn, cần phải tạo
-    return await apiClient.get('/api/Roles');
+    return await apiClient.get('/Roles');
   }
 
   static async getAllDealersBasic() {
     // Ghi chú: API này cũng cần được tạo để lấy danh sách đại lý gọn nhẹ
-    return await apiClient.get('/api/Dealers/basic'); // Ví dụ một endpoint mới
+    return await apiClient.get('/Dealers/basic'); // Ví dụ một endpoint mới
   }
   
   // === Các chức năng khác (giữ lại cấu trúc, sẽ tích hợp sau) ===
@@ -74,21 +74,21 @@ export class AdminService {
   // === PHẦN BỔ SUNG: CÁC HÀM CUNG CẤP DỮ LIỆU CHO DROPDOWN ===
   
   static async getAllRoles() {
-    // Ghi chú: Gọi đến API GET /api/Roles mà chúng ta đã tạo ở Backend.
-    return await apiClient.get('/api/Roles');
+    // Ghi chú: Gọi đến API GET /Roles mà chúng ta đã tạo ở Backend.
+    return await apiClient.get('/Roles');
   }
  static async getAllRoles() {
-    // Ghi chú: Gọi đến API GET /api/Roles mà chúng ta vừa tạo ở Backend.
-    return await apiClient.get('/api/Roles');
+    // Ghi chú: Gọi đến API GET /Roles mà chúng ta vừa tạo ở Backend.
+    return await apiClient.get('/Roles');
   }
 
   static async getAllDealersBasic() {
-    // Ghi chú: Gọi đến API GET /api/Dealers/basic để lấy danh sách đại lý gọn nhẹ.
-    return await apiClient.get('/api/Dealers/basic');
+    // Ghi chú: Gọi đến API GET /Dealers/basic để lấy danh sách đại lý gọn nhẹ.
+    return await apiClient.get('/Dealers/basic');
   }
   static async getAllDealersBasic() {
-    // Ghi chú: Gọi đến API GET /api/Dealers/basic để lấy danh sách đại lý gọn nhẹ.
-    return await apiClient.get('/api/Dealers/basic');
+    // Ghi chú: Gọi đến API GET /Dealers/basic để lấy danh sách đại lý gọn nhẹ.
+    return await apiClient.get('/Dealers/basic');
   }
 }
 

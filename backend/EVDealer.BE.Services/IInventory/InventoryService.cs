@@ -1,6 +1,8 @@
 ﻿using EVDealer.BE.Common.DTOs;
+using EVDealer.BE.DAL.Data;
 using EVDealer.BE.DAL.Models;
 using EVDealer.BE.DAL.Repositories;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +14,13 @@ namespace EVDealer.BE.Services.IInventory
     public class InventoryService : IInventoryService
     {
         private readonly IInventoryRepository _inventoryRepo;
-        public InventoryService(IInventoryRepository inventoryRepo) => _inventoryRepo = inventoryRepo;
+        private readonly ApplicationDbContext _context;
+        
+        public InventoryService(IInventoryRepository inventoryRepo, ApplicationDbContext context)
+        {
+            _inventoryRepo = inventoryRepo;
+            _context = context;
+        }
 
         // Nghiệp vụ: Nhập/xuất kho tại một địa điểm duy nhất.
         public async Task<bool> UpdateStockAsync(UpdateStockDto dto)
@@ -124,6 +132,199 @@ namespace EVDealer.BE.Services.IInventory
                 ActualDate = d.ActualDate,
                 Status = d.Status
             });
+        }
+
+        // ==================== DEALER INVENTORY IMPLEMENTATIONS ====================
+
+        public async Task<IEnumerable<DealerInventoryDto>> GetDealerInventoryAsync(int dealerId, string? search)
+        {
+            // Query from existing Inventory table using LocationType="Dealer" and LocationId=dealerId
+            var query = _context.Inventories
+                .Include(i => i.Vehicle)
+                .Include(i => i.Config)
+                .Include(i => i.Location)
+                .Where(i => i.LocationType == "Dealer" && i.LocationId == dealerId);
+
+            // Apply search filter if provided
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                query = query.Where(i => 
+                    i.Vehicle.Brand.ToLower().Contains(search) ||
+                    i.Vehicle.Model.ToLower().Contains(search) ||
+                    (i.Config.Color != null && i.Config.Color.ToLower().Contains(search))
+                );
+            }
+
+            var inventories = await query
+                .OrderBy(i => i.Vehicle.Brand)
+                .ThenBy(i => i.Vehicle.Model)
+                .ToListAsync();
+
+            return inventories.Select(inv => new DealerInventoryDto
+            {
+                InventoryId = inv.InventoryId,
+                VehicleId = inv.VehicleId,
+                VehicleName = $"{inv.Vehicle.Brand} {inv.Vehicle.Model}",
+                Model = inv.Vehicle.Model,
+                Brand = inv.Vehicle.Brand,
+                Color = inv.Config.Color,
+                Quantity = inv.Quantity,
+                BasePrice = inv.Vehicle.BasePrice ?? 0,
+                Status = inv.Quantity > 0 ? "Available" : "OutOfStock",
+                DealerId = dealerId,
+                DealerName = inv.Location?.Name ?? "N/A",
+                LastUpdated = inv.UpdatedAt
+            });
+        }
+
+        public async Task<DealerInventoryDetailDto?> GetInventoryItemDetailAsync(int dealerId, int inventoryId)
+        {
+            // Query from Inventory table
+            var item = await _context.Inventories
+                .Include(i => i.Vehicle)
+                .Include(i => i.Config)
+                .Include(i => i.Location)
+                .FirstOrDefaultAsync(i => 
+                    i.InventoryId == inventoryId && 
+                    i.LocationType == "Dealer" && 
+                    i.LocationId == dealerId
+                );
+
+            if (item == null)
+            {
+                return null;
+            }
+
+            // Calculate available, reserved, sold quantities from orders/reservations
+            var availableQty = item.Quantity; // TODO: minus reserved
+            var reservedQty = 0; // TODO: count from orders with status Reserved
+            var soldQty = 0; // TODO: count from completed orders
+
+            return new DealerInventoryDetailDto
+            {
+                InventoryId = item.InventoryId,
+                VehicleId = item.VehicleId,
+                VehicleName = $"{item.Vehicle.Brand} {item.Vehicle.Model}",
+                Model = item.Vehicle.Model,
+                Brand = item.Vehicle.Brand,
+                Color = item.Config.Color,
+                TotalQuantity = item.Quantity,
+                AvailableQuantity = availableQty,
+                ReservedQuantity = reservedQty,
+                SoldQuantity = soldQty,
+                BasePrice = item.Vehicle.BasePrice ?? 0,
+                DealerId = dealerId,
+                DealerName = item.Location?.Name ?? "N/A",
+                VehicleImages = string.IsNullOrEmpty(item.Vehicle.ImageUrl) 
+                    ? new List<string>() 
+                    : item.Vehicle.ImageUrl.Split(',').ToList(),
+                Specifications = null, // TODO: Add if available
+                LastRestockDate = item.UpdatedAt
+            };
+        }
+
+        public async Task<DealerInventoryDto> UpdateInventoryAsync(UpdateInventoryDto dto)
+        {
+            // Query Inventory table
+            var item = await _context.Inventories
+                .Include(i => i.Vehicle)
+                .Include(i => i.Config)
+                .Include(i => i.Location)
+                .FirstOrDefaultAsync(i => i.InventoryId == dto.InventoryId);
+
+            if (item == null)
+            {
+                throw new Exception("Inventory item not found");
+            }
+
+            // Update fields
+            item.Quantity = dto.Quantity;
+            item.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new DealerInventoryDto
+            {
+                InventoryId = item.InventoryId,
+                VehicleId = item.VehicleId,
+                VehicleName = $"{item.Vehicle.Brand} {item.Vehicle.Model}",
+                Model = item.Vehicle.Model,
+                Brand = item.Vehicle.Brand,
+                Color = item.Config.Color,
+                Quantity = item.Quantity,
+                BasePrice = item.Vehicle.BasePrice ?? 0,
+                Status = item.Quantity > 0 ? "Available" : "OutOfStock",
+                DealerId = item.LocationId,
+                DealerName = item.Location?.Name ?? "N/A",
+                LastUpdated = item.UpdatedAt
+            };
+        }
+
+        // ==================== STOCK REQUEST IMPLEMENTATIONS ====================
+        // TODO: Implement StockRequest workflow if needed later
+        // For now, use PurchaseRequest directly or Distribution workflow
+
+        public Task<IEnumerable<StockRequestDto>> GetStockRequestsAsync(int dealerId, string? status, string? search)
+        {
+            // Return empty list for now
+            return Task.FromResult(Enumerable.Empty<StockRequestDto>());
+        }
+
+        public Task<StockRequestDto?> GetStockRequestByIdAsync(int requestId)
+        {
+            return Task.FromResult<StockRequestDto?>(null);
+        }
+
+        public Task<StockRequestDto> CreateStockRequestAsync(CreateStockRequestDto dto, int dealerId, int userId)
+        {
+            throw new NotImplementedException("StockRequest workflow not implemented yet. Use Distribution or PurchaseRequest instead.");
+        }
+
+        public Task<StockRequestDto> ApproveStockRequestAsync(int requestId, int managerId)
+        {
+            throw new NotImplementedException("StockRequest workflow not implemented yet.");
+        }
+
+        public Task<StockRequestDto> RejectStockRequestAsync(int requestId, int managerId, string reason)
+        {
+            throw new NotImplementedException("StockRequest workflow not implemented yet.");
+        }
+
+        // ==================== INVENTORY INCREASE (EVM FULFILLMENT) ====================
+        
+        public async Task IncreaseInventoryAsync(int dealerId, int vehicleId, int configId, int quantity)
+        {
+            // Find existing Inventory record for this dealer + vehicle + config
+            var inventory = await _context.Inventories
+                .FirstOrDefaultAsync(i => 
+                    i.LocationType == "Dealer" && 
+                    i.LocationId == dealerId && 
+                    i.VehicleId == vehicleId &&
+                    i.ConfigId == configId);
+
+            if (inventory == null)
+            {
+                // Create new inventory record if not exists
+                inventory = new Inventory
+                {
+                    VehicleId = vehicleId,
+                    ConfigId = configId,
+                    LocationType = "Dealer",
+                    LocationId = dealerId,
+                    Quantity = quantity,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _context.Inventories.Add(inventory);
+            }
+            else
+            {
+                // Increase existing quantity
+                inventory.Quantity += quantity;
+                inventory.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _context.SaveChangesAsync();
         }
     }
 }

@@ -70,7 +70,9 @@ public partial class ApplicationDbContext : DbContext
 
     public virtual DbSet<Region> Regions { get; set; }
 
-
+    public virtual DbSet<StockRequest> StockRequests { get; set; }
+    
+    public virtual DbSet<DealerInventory> DealerInventories { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
@@ -649,6 +651,75 @@ public partial class ApplicationDbContext : DbContext
             entity.HasOne(rp => rp.Permission)
                 .WithMany(p => p.RolePermissions) // 'RolePermissions' là thuộc tính collection trong lớp Permission.
                 .HasForeignKey(rp => rp.PermissionId); // Khóa ngoại là cột PermissionId.
+        });
+
+        // StockRequest Configuration
+        modelBuilder.Entity<StockRequest>(entity =>
+        {
+            entity.ToTable("StockRequest");
+            entity.HasKey(e => e.StockRequestId);
+
+            entity.Property(e => e.Priority).HasDefaultValue("Normal");
+            entity.Property(e => e.Status).HasDefaultValue("Pending");
+            entity.Property(e => e.RequestDate).HasDefaultValueSql("GETDATE()");
+
+            entity.HasOne(d => d.Vehicle)
+                .WithMany()
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_StockRequest_Vehicle");
+
+            entity.HasOne(d => d.Config)
+                .WithMany()
+                .HasForeignKey(d => d.ConfigId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_StockRequest_VehicleConfig");
+
+            entity.HasOne(d => d.Dealer)
+                .WithMany()
+                .HasForeignKey(d => d.DealerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_StockRequest_Dealer");
+
+            entity.HasOne(d => d.RequestedBy)
+                .WithMany()
+                .HasForeignKey(d => d.RequestedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_StockRequest_RequestedByUser");
+
+            entity.HasOne(d => d.ProcessedBy)
+                .WithMany()
+                .HasForeignKey(d => d.ProcessedByUserId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_StockRequest_ProcessedByUser");
+        });
+
+        // DealerInventory Configuration
+        modelBuilder.Entity<DealerInventory>(entity =>
+        {
+            entity.ToTable("DealerInventory");
+            entity.HasKey(e => e.DealerInventoryId);
+
+            entity.Property(e => e.Status).HasDefaultValue("Available");
+            entity.Property(e => e.LastUpdated).HasDefaultValueSql("GETDATE()");
+
+            entity.HasOne(d => d.Vehicle)
+                .WithMany()
+                .HasForeignKey(d => d.VehicleId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_DealerInventory_Vehicle");
+
+            entity.HasOne(d => d.Dealer)
+                .WithMany()
+                .HasForeignKey(d => d.DealerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_DealerInventory_Dealer");
+
+            entity.HasOne(d => d.Config)
+                .WithMany()
+                .HasForeignKey(d => d.ConfigId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .HasConstraintName("FK_DealerInventory_VehicleConfig");
         });
 
         // Ghi chú: Dòng này được tool tự sinh ra, giữ lại nó.

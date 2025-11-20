@@ -85,5 +85,207 @@ namespace EVDealer.BE.API.Controllers
             var summary = await _inventoryService.GetDistributionSummaryAsync();
             return Ok(summary);
         }
+
+        // ==================== DEALER INVENTORY ENDPOINTS ====================
+
+        /// <summary>
+        /// Lấy danh sách kho xe của dealer
+        /// GET /api/Inventory/dealer/{dealerId}
+        /// </summary>
+        [HttpGet("dealer/{dealerId}")]
+        [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
+        public async Task<IActionResult> GetDealerInventory(int dealerId, [FromQuery] string? search)
+        {
+            try
+            {
+                Console.WriteLine($"📞 [InventoryController] GetDealerInventory called - dealerId: {dealerId}, search: {search}");
+                var inventory = await _inventoryService.GetDealerInventoryAsync(dealerId, search);
+                var inventoryList = inventory.ToList();
+                Console.WriteLine($"📦 [InventoryController] Returning {inventoryList.Count} items");
+                if (inventoryList.Count > 0)
+                {
+                    Console.WriteLine($"📦 [InventoryController] First item: {System.Text.Json.JsonSerializer.Serialize(inventoryList[0])}");
+                }
+                return Ok(inventoryList);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ [InventoryController] Error: {ex.Message}");
+                Console.WriteLine($"❌ [InventoryController] StackTrace: {ex.StackTrace}");
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lấy chi tiết một item trong kho
+        /// GET /api/Inventory/dealer/{dealerId}/item/{inventoryId}
+        /// </summary>
+        [HttpGet("dealer/{dealerId}/item/{inventoryId}")]
+        [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
+        public async Task<IActionResult> GetInventoryItemDetail(int dealerId, int inventoryId)
+        {
+            try
+            {
+                var item = await _inventoryService.GetInventoryItemDetailAsync(dealerId, inventoryId);
+                if (item == null)
+                    return NotFound(new { message = "Không tìm thấy thông tin kho" });
+                
+                return Ok(item);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật thông tin kho
+        /// PUT /api/Inventory/update
+        /// </summary>
+        [HttpPut("update")]
+        [Authorize(Policy = "ManageInventory")]
+        public async Task<IActionResult> UpdateInventory([FromBody] UpdateInventoryDto dto)
+        {
+            try
+            {
+                var result = await _inventoryService.UpdateInventoryAsync(dto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        // ==================== STOCK REQUEST ENDPOINTS (Staff → Manager Flow) ====================
+
+        /// <summary>
+        /// Lấy danh sách yêu cầu nhập hàng (cho Manager xem)
+        /// GET /api/Inventory/distributions/requests
+        /// </summary>
+        [HttpGet("distributions/requests")]
+        [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
+        public async Task<IActionResult> GetStockRequests([FromQuery] string? status, [FromQuery] string? search)
+        {
+            try
+            {
+                var dealerIdClaim = User.FindFirstValue("dealerId");
+                if (dealerIdClaim == null || !int.TryParse(dealerIdClaim, out int dealerId))
+                {
+                    return BadRequest(new { message = "Không xác định được dealer" });
+                }
+
+                var requests = await _inventoryService.GetStockRequestsAsync(dealerId, status, search);
+                return Ok(requests);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Lấy chi tiết yêu cầu nhập hàng
+        /// GET /api/Inventory/distributions/requests/{requestId}
+        /// </summary>
+        [HttpGet("distributions/requests/{requestId}")]
+        [Authorize(Roles = "DealerStaff,DealerManager,EVMStaff,Admin")]
+        public async Task<IActionResult> GetStockRequestById(int requestId)
+        {
+            try
+            {
+                var request = await _inventoryService.GetStockRequestByIdAsync(requestId);
+                if (request == null)
+                    return NotFound(new { message = "Không tìm thấy yêu cầu" });
+                
+                return Ok(request);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Tạo yêu cầu nhập hàng (Staff tạo)
+        /// POST /api/Inventory/distributions/requests
+        /// </summary>
+        [HttpPost("distributions/requests")]
+        [Authorize(Roles = "DealerStaff,DealerManager")]
+        public async Task<IActionResult> CreateStockRequest([FromBody] CreateStockRequestDto dto)
+        {
+            try
+            {
+                var dealerIdClaim = User.FindFirstValue("dealerId");
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                
+                if (dealerIdClaim == null || !int.TryParse(dealerIdClaim, out int dealerId))
+                {
+                    return BadRequest(new { message = "Không xác định được dealer" });
+                }
+                
+                if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+                {
+                    return BadRequest(new { message = "Không xác định được user" });
+                }
+
+                var result = await _inventoryService.CreateStockRequestAsync(dto, dealerId, userId);
+                return CreatedAtAction(nameof(GetStockRequestById), new { requestId = result.Id }, result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Manager duyệt yêu cầu nhập hàng
+        /// PUT /api/Inventory/distributions/requests/{requestId}/approve
+        /// </summary>
+        [HttpPut("distributions/requests/{requestId}/approve")]
+        [Authorize(Roles = "DealerManager,Admin")]
+        public async Task<IActionResult> ApproveStockRequest(int requestId)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim, out int managerId))
+                {
+                    return BadRequest(new { message = "Không xác định được manager" });
+                }
+
+                var result = await _inventoryService.ApproveStockRequestAsync(requestId, managerId);
+                return Ok(new { success = true, message = "Đã duyệt yêu cầu", data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Manager từ chối yêu cầu nhập hàng
+        /// PUT /api/Inventory/distributions/requests/{requestId}/reject
+        /// </summary>
+        [HttpPut("distributions/requests/{requestId}/reject")]
+        [Authorize(Roles = "DealerManager,Admin")]
+        public async Task<IActionResult> RejectStockRequest(int requestId, [FromBody] RejectStockRequestDto dto)
+        {
+            try
+            {
+                var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userIdClaim == null || !int.TryParse(userIdClaim, out int managerId))
+                {
+                    return BadRequest(new { message = "Không xác định được manager" });
+                }
+
+                var result = await _inventoryService.RejectStockRequestAsync(requestId, managerId, dto.Reason);
+                return Ok(new { success = true, message = "Đã từ chối yêu cầu", data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

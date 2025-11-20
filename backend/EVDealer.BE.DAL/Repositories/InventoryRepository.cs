@@ -77,5 +77,135 @@ namespace EVDealer.BE.DAL.Repositories
                 .OrderByDescending(d => d.ScheduledDate)
                 .ToListAsync();
         }
+
+        // ===== DEALER INVENTORY MANAGEMENT IMPLEMENTATIONS =====
+        
+        public async Task<IEnumerable<DealerInventory>> GetDealerInventoryAsync(int dealerId, string? search)
+        {
+            var query = _context.DealerInventories
+                .Include(di => di.Vehicle)
+                .Include(di => di.Dealer)
+                .Include(di => di.Config)
+                .Where(di => di.DealerId == dealerId);
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(di =>
+                    di.Vehicle.Model.Contains(search) ||
+                    di.Vehicle.Brand.Contains(search) ||
+                    di.Color.Contains(search));
+            }
+
+            return await query
+                .OrderByDescending(di => di.LastUpdated)
+                .ToListAsync();
+        }
+
+        public async Task<DealerInventory?> GetInventoryItemByIdAsync(int inventoryId)
+        {
+            return await _context.DealerInventories
+                .Include(di => di.Vehicle)
+                .Include(di => di.Dealer)
+                .Include(di => di.Config)
+                .FirstOrDefaultAsync(di => di.DealerInventoryId == inventoryId);
+        }
+
+        public async Task<DealerInventory?> GetDealerInventoryByVehicleAsync(int dealerId, int vehicleId, string? color = null)
+        {
+            var query = _context.DealerInventories
+                .Where(di => di.DealerId == dealerId && di.VehicleId == vehicleId);
+
+            if (!string.IsNullOrEmpty(color))
+            {
+                query = query.Where(di => di.Color == color);
+            }
+
+            return await query.FirstOrDefaultAsync();
+        }
+
+        public async Task<DealerInventory> UpdateInventoryItemAsync(DealerInventory item)
+        {
+            item.LastUpdated = DateTime.UtcNow;
+            _context.DealerInventories.Update(item);
+            return item;
+        }
+
+        public async Task<DealerInventory?> GetOrCreateDealerInventoryAsync(int dealerId, int vehicleId, string color)
+        {
+            var inventory = await _context.DealerInventories
+                .FirstOrDefaultAsync(di => 
+                    di.DealerId == dealerId && 
+                    di.VehicleId == vehicleId && 
+                    di.Color == color);
+
+            if (inventory == null)
+            {
+                inventory = new DealerInventory
+                {
+                    DealerId = dealerId,
+                    VehicleId = vehicleId,
+                    Color = color,
+                    Quantity = 0,
+                    Status = "Available",
+                    LastUpdated = DateTime.UtcNow
+                };
+                await _context.DealerInventories.AddAsync(inventory);
+            }
+
+            return inventory;
+        }
+
+        // ===== STOCK REQUEST MANAGEMENT IMPLEMENTATIONS =====
+        
+        public async Task<IEnumerable<StockRequest>> GetStockRequestsAsync(int dealerId, string? status, string? search)
+        {
+            var query = _context.StockRequests
+                .Include(sr => sr.Vehicle)
+                .Include(sr => sr.Config)
+                .Include(sr => sr.Dealer)
+                .Include(sr => sr.RequestedBy)
+                .Include(sr => sr.ProcessedBy)
+                .Where(sr => sr.DealerId == dealerId);
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(sr => sr.Status == status);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(sr =>
+                    sr.Vehicle.Model.Contains(search) ||
+                    sr.Vehicle.Brand.Contains(search) ||
+                    sr.Reason.Contains(search));
+            }
+
+            return await query
+                .OrderByDescending(sr => sr.RequestDate)
+                .ToListAsync();
+        }
+
+        public async Task<StockRequest?> GetStockRequestByIdAsync(int requestId)
+        {
+            return await _context.StockRequests
+                .Include(sr => sr.Vehicle)
+                .Include(sr => sr.Config)
+                .Include(sr => sr.Dealer)
+                .Include(sr => sr.RequestedBy)
+                .Include(sr => sr.ProcessedBy)
+                .FirstOrDefaultAsync(sr => sr.StockRequestId == requestId);
+        }
+
+        public async Task<StockRequest> CreateStockRequestAsync(StockRequest request)
+        {
+            await _context.StockRequests.AddAsync(request);
+            return request;
+        }
+
+        public async Task<StockRequest> UpdateStockRequestAsync(StockRequest request)
+        {
+            _context.StockRequests.Update(request);
+            return request;
+        }
     }
 }

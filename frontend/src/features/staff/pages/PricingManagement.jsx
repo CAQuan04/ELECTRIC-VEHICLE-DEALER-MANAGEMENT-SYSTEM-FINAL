@@ -24,8 +24,8 @@ const PricingManagement = () => {
         setLoading(true);
         try {
             const [priceRes, promoRes] = await Promise.all([
-                apiClient.get('/api/pricing/wholesale-prices-summary'), // Cần API GET có JOIN
-                apiClient.get('/api/pricing/promotion-policies-summary') // Cần API GET có JOIN
+                apiClient.get('/pricing/wholesale-prices-summary'), // Cần API GET có JOIN
+                apiClient.get('/pricing/promotion-policies-summary') // Cần API GET có JOIN
             ]);
             setPricingList(priceRes.data);
             setPromotions(promoRes.data);
@@ -44,8 +44,8 @@ const PricingManagement = () => {
         if (vehicles.length === 0 || dealers.length === 0) {
             try {
                 const [vehRes, dealRes] = await Promise.all([
-                    apiClient.get('/api/admin/vehicles'),
-                    apiClient.get('/api/dealers/basic')
+                    apiClient.get('/admin/vehicles'),
+                    apiClient.get('/dealers/basic')
                 ]);
                 setVehicles(vehRes.data);
                 setDealers(dealRes.data);
@@ -86,7 +86,7 @@ const PricingManagement = () => {
             validTo: form.validTo,
         };
         try {
-            await apiClient.post('/api/pricing/wholesale-prices', payload);
+            await apiClient.post('/pricing/wholesale-prices', payload);
             setShowModal(false);
             fetchData();
         } catch (error) {
@@ -124,7 +124,7 @@ const PricingManagement = () => {
             endDate: form.endDate,
         };
         try {
-            await apiClient.post('/api/pricing/promotion-policies', payload);
+            await apiClient.post('/pricing/promotion-policies', payload);
             setShowModal(false);
             fetchData();
         } catch (error) {

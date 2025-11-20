@@ -48,4 +48,10 @@ namespace EVDealer.BE.Common.DTOs
         public List<OrderItemDto> Items { get; set; } = new List<OrderItemDto>();
         public SalesOrderContractDto? Contract { get; set; }
     }
+
+    public class OrderStatusUpdateDto
+    {
+        [Required]
+        public string Status { get; set; } = null!;
+    }
 }

@@ -26,5 +26,18 @@ namespace EVDealer.BE.DAL.Repositories
 
         // Hợp đồng: Phải có chức năng lưu tất cả các thay đổi vào CSDL.
         Task<bool> SaveChangesAsync();
+
+        // ===== NEW: Dealer Inventory Management =====
+        Task<IEnumerable<DealerInventory>> GetDealerInventoryAsync(int dealerId, string? search);
+        Task<DealerInventory?> GetInventoryItemByIdAsync(int inventoryId);
+        Task<DealerInventory?> GetDealerInventoryByVehicleAsync(int dealerId, int vehicleId, string? color = null);
+        Task<DealerInventory> UpdateInventoryItemAsync(DealerInventory item);
+        Task<DealerInventory?> GetOrCreateDealerInventoryAsync(int dealerId, int vehicleId, string color);
+        
+        // ===== NEW: Stock Request Management =====
+        Task<IEnumerable<StockRequest>> GetStockRequestsAsync(int dealerId, string? status, string? search);
+        Task<StockRequest?> GetStockRequestByIdAsync(int requestId);
+        Task<StockRequest> CreateStockRequestAsync(StockRequest request);
+        Task<StockRequest> UpdateStockRequestAsync(StockRequest request);
     }
 }

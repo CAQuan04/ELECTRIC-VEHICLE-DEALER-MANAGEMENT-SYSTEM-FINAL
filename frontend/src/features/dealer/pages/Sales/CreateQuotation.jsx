@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { AuthService } from '@utils';
 import { notifications } from '@utils/notifications';
 
 // Import các UI Component chuẩn
@@ -115,13 +116,32 @@ const CreateOrder = () => {
         ]);
 
         if (customerResult.success && customerResult.data) {
-          const customerList = Array.isArray(customerResult.data) ? customerResult.data : customerResult.data.data || [];
+          console.log('Customers data:', customerResult.data);
+          const customerList = Array.isArray(customerResult.data) 
+            ? customerResult.data 
+            : (customerResult.data.items || customerResult.data.data || []);
+          console.log('Parsed customer list:', customerList);
           setCustomers(customerList);
         }
 
         if (inventoryResult.success && inventoryResult.data) {
-          const inventoryList = Array.isArray(inventoryResult.data) ? inventoryResult.data : inventoryResult.data.data || [];
-          setInventory(inventoryList.filter(v => v.available > 0));
+          console.log('Inventory data:', inventoryResult.data);
+          const inventoryList = Array.isArray(inventoryResult.data) 
+            ? inventoryResult.data 
+            : (inventoryResult.data.items || inventoryResult.data.data || []);
+          console.log('Parsed inventory list:', inventoryList);
+          // Lọc xe có quantity > 0
+          const filteredInventory = inventoryList.filter(v => (v.quantity || 0) > 0);
+          console.log('Filtered inventory (quantity > 0):', filteredInventory);
+          setInventory(filteredInventory);
+          
+          if (filteredInventory.length === 0) {
+            console.warn('⚠️ No inventory items with quantity > 0');
+            notifications.warning('Cảnh báo', 'Kho hiện không có xe nào. Vui lòng liên hệ quản lý.');
+          }
+        } else {
+          console.error('Failed to load inventory:', inventoryResult.message);
+          notifications.error('Lỗi', inventoryResult.message || 'Không thể tải danh sách xe trong kho');
         }
         // --- Logic cho Chế độ SỬA ---
         if (isEditMode) {
@@ -158,7 +178,9 @@ const CreateOrder = () => {
       } catch (error) {
         console.error('Error loading prerequisites:', error);
         notifications.error('Lỗi', 'Không thể tải dữ liệu khách hàng hoặc kho xe.');
-        navigate('/dealer/quotations');// Về danh sách nếu lỗi
+        const currentUser = AuthService.getCurrentUser();
+        const dealerId = currentUser?.dealerId;
+        navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
       } finally {
         setIsDataLoading(false);
       }
@@ -180,25 +202,27 @@ const CreateOrder = () => {
   };
 
   const handleCustomerChange = (customerId) => {
-    const selected = customers.find(c => c.id === customerId);
+    const selected = customers.find(c => (c.customerId || c.id) === customerId);
     if (selected) {
+      console.log('Selected customer:', selected);
       setFormData(prev => ({
         ...prev,
-        customerId: selected.id,
-        customerName: selected.name,
-        customerPhone: selected.phone,
-        customerEmail: selected.email,
+        customerId: selected.customerId || selected.id,
+        customerName: selected.fullName || selected.name || '',
+        customerPhone: selected.phone || '',
+        customerEmail: selected.email || '',
       }));
     }
   };
 
   const handleVehicleChange = (vehicleId) => {
-    const selected = inventory.find(v => v.id === vehicleId);
+    const selected = inventory.find(v => (v.vehicleId || v.id) === vehicleId);
     if (selected) {
+      console.log('Selected vehicle:', selected);
       setFormData(prev => ({
         ...prev,
-        vehicleId: selected.id,
-        basePrice: selected.price || 0,
+        vehicleId: selected.vehicleId || selected.id,
+        basePrice: selected.price || selected.basePrice || 0,
       }));
     }
   };
@@ -298,7 +322,9 @@ const CreateOrder = () => {
 
       if (result.success) {
         notifications.success('Thành công', isEditMode ? 'Cập nhật báo giá thành công!' : 'Tạo báo giá thành công!');
-        navigate('/dealer/quotations');
+        const currentUser = AuthService.getCurrentUser();
+        const dealerId = currentUser?.dealerId;
+        navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
@@ -310,15 +336,29 @@ const CreateOrder = () => {
     }
   };
 
-  const customerOptions = customers.map(c => ({
-    label: `${c.name} - ${c.phone}`,
-    value: c.id
-  }));
+  const customerOptions = customers.map(c => {
+    const customerId = c.customerId || c.id;
+    const name = c.fullName || c.name || 'N/A';
+    const phone = c.phone || 'N/A';
+    return {
+      label: `${name} - ${phone}`,
+      value: customerId
+    };
+  });
 
-  const vehicleOptions = inventory.map(v => ({
-    label: `${v.model} - ${v.color} (SL: ${v.available})`,
-    value: v.id
-  }));
+  const vehicleOptions = inventory.map(v => {
+    const vehicleId = v.vehicleId || v.id;
+    const vehicleName = v.vehicleName || `${v.brand || ''} ${v.model || 'N/A'}`.trim();
+    const configName = v.configName || v.color || '';
+    const quantity = v.quantity || 0;
+    const basePrice = v.basePrice || v.price || 0;
+    const priceText = basePrice > 0 ? ` - ${(basePrice / 1000000).toFixed(0)}tr` : '';
+    const configText = configName ? ` (${configName})` : '';
+    return {
+      label: `${vehicleName}${configText} - SL: ${quantity}${priceText}`,
+      value: vehicleId
+    };
+  });
 
   const paymentOptions = [
     { value: 'cash', label: 'Tiền mặt' },
@@ -340,7 +380,11 @@ const CreateOrder = () => {
         subtitle={isEditMode ? `Đang chỉnh sửa Báo giá ID: ${quotationId}` : 'Tạo báo giá chi tiết cho khách hàng'}
         icon={isEditMode ? <Edit className="w-16 h-16" /> : <FileText className="w-16 h-16" />}
         showBackButton
-        onBack={() => navigate('/dealer/quotations')}
+        onBack={() => {
+          const currentUser = AuthService.getCurrentUser();
+          const dealerId = currentUser?.dealerId;
+          navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
+        }}
       />
 
       <form onSubmit={handleSubmit} className="mt-8">

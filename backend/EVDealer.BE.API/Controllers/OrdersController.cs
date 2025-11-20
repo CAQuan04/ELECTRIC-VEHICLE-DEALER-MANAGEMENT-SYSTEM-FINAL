@@ -85,6 +85,66 @@ namespace EVDealer.BE.API.Controllers
             return Ok(order);
         }
 
+        /// <summary>
+        /// Lấy danh sách đơn hàng của dealer
+        /// Auth: DealerStaff, DealerManager
+        /// </summary>
+        [HttpGet("dealer/{dealerId}")]
+        [Authorize(Roles = "DealerStaff,DealerManager,Admin")]
+        public async Task<IActionResult> GetDealerOrders(int dealerId, [FromQuery] string? status = null, [FromQuery] string? search = null)
+        {
+            try
+            {
+                var orders = await _orderService.GetDealerOrdersAsync(dealerId, status, search);
+                return Ok(new { success = true, data = orders });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Cập nhật trạng thái đơn hàng
+        /// Auth: DealerStaff, DealerManager
+        /// </summary>
+        [HttpPut("{orderId}/status")]
+        [Authorize(Roles = "DealerStaff,DealerManager,Admin")]
+        public async Task<IActionResult> UpdateOrderStatus(int orderId, [FromBody] OrderStatusUpdateDto statusDto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            try
+            {
+                await _orderService.UpdateOrderStatusAsync(orderId, statusDto.Status);
+                return Ok(new { success = true, message = "Order status updated" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Hoàn thành đơn hàng (cập nhật inventory)
+        /// Auth: DealerManager
+        /// </summary>
+        [HttpPost("{orderId}/complete")]
+        [Authorize(Roles = "DealerManager,Admin")]
+        public async Task<IActionResult> CompleteOrder(int orderId)
+        {
+            try
+            {
+                await _orderService.CompleteOrderAsync(orderId);
+                return Ok(new { success = true, message = "Order completed and inventory updated" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         private int? GetCurrentUserId()
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

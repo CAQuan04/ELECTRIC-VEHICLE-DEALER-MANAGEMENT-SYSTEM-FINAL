@@ -175,10 +175,9 @@ const PurchaseRequestList = () => {
       key: 'actions', 
       label: 'Thao tác', 
       render: (item) => (
-        // ✨ 4. THAY THẾ 'alert' BẰNG 'navigate' (Chi tiết)
         <button 
           className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-md hover:shadow-lg"
-          onClick={() => navigate(`/dealer-dashboard/purchase-requests/${item.id}`)}
+          onClick={() => navigate(`/dealer/purchase-requests/${item.id}`)}
         >
           Chi tiết
         </button>
@@ -195,13 +194,12 @@ const PurchaseRequestList = () => {
         breadcrumbs={breadcrumbs} 
         variant="darkTheme"
         actions={
-          // ✨ 5. THAY THẾ 'alert' BẰNG 'navigate' (Tạo mới)
           <Button
             variant="gradient"
             icon={<Plus />}
             onClick={() => navigate('/dealer/purchase-requests/create')}
           >
-            Yêu cầu nhập hàng
+            + Tạo yêu cầu mới
           </Button>
         }
       />
@@ -303,8 +301,7 @@ const PurchaseRequestList = () => {
           }
           action={{
             label: '+ Tạo yêu cầu mới',
-            // ✨ 6. THAY THẾ 'alert' BẰNG 'navigate' (Empty State)
-            onClick: () => navigate('/dealer/purchase-requests/new')
+            onClick: () => navigate('/dealer/purchase-requests/create')
           }}
         />
       )}

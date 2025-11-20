@@ -23,5 +23,20 @@ namespace EVDealer.BE.Services.IInventory
 
         Task<IEnumerable<InventoryySummaryDto>> GetInventorySummaryAsync();
         Task<IEnumerable<DistributionSummaryDto>> GetDistributionSummaryAsync();
+
+        // ==================== DEALER INVENTORY ====================
+        Task<IEnumerable<DealerInventoryDto>> GetDealerInventoryAsync(int dealerId, string? search);
+        Task<DealerInventoryDetailDto?> GetInventoryItemDetailAsync(int dealerId, int inventoryId);
+        Task<DealerInventoryDto> UpdateInventoryAsync(UpdateInventoryDto dto);
+
+        // ==================== STOCK REQUEST (Staff → Manager Flow) ====================
+        Task<IEnumerable<StockRequestDto>> GetStockRequestsAsync(int dealerId, string? status, string? search);
+        Task<StockRequestDto?> GetStockRequestByIdAsync(int requestId);
+        Task<StockRequestDto> CreateStockRequestAsync(CreateStockRequestDto dto, int dealerId, int userId);
+        Task<StockRequestDto> ApproveStockRequestAsync(int requestId, int managerId);
+        Task<StockRequestDto> RejectStockRequestAsync(int requestId, int managerId, string reason);
+
+        // ==================== INVENTORY MANAGEMENT (EVM → Dealer) ====================
+        Task IncreaseInventoryAsync(int dealerId, int vehicleId, int configId, int quantity);
     }
 }

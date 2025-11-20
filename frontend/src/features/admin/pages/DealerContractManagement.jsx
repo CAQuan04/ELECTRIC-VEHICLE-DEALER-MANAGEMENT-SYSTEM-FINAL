@@ -47,7 +47,7 @@ const DealerContractManagement = () => {
   useEffect(() => {
     const fetchDealers = async () => {
       try {
-        const response = await apiClient.get('/api/Dealers');
+        const response = await apiClient.get('/Dealers');
         setDealers(response.data);
         // Tự động chọn đại lý đầu tiên trong danh sách để hiển thị chi tiết.
         if (response.data && response.data.length > 0) {

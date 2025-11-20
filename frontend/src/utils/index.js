@@ -23,7 +23,7 @@ export {
 export * from './api/mock/data';
 
 // Notifications
-export { AuthNotifications } from './notifications';
+export { AuthNotifications, notifications } from './notifications';
 
 // Default export - apiClient
 import { apiClient } from './api';

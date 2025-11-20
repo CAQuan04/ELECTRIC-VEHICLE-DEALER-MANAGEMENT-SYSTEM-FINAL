@@ -37,22 +37,25 @@ const CreatePurchaseRequest = () => {
   const [errors, setErrors] = useState({});
   const [isConfirming, setIsConfirming] = useState(false);
 
-  // Tải danh sách xe (Logic giữ nguyên)
+  // Tải danh sách xe
   useEffect(() => {
     const fetchVehicles = async () => {
       startLoading('Đang tải danh sách xe...');
       try {
         const result = await dealerAPI.getVehicles();
-        if (result.success && result.data) {
-          const vehicleList = Array.isArray(result.data) ? result.data : result.data.data || [];
+        if (result && result.success && result.data) {
+          // Backend returns PagedResult: { items: [], pagination: {} }
+          const vehicleList = result.data.items || [];
           setVehicles(vehicleList);
         } else {
-          throw new Error(result.message || 'Không thể tải danh sách xe');
+          const errorMsg = result?.message || 'Không thể tải danh sách xe';
+          console.error('Lỗi khi tải danh sách xe:', errorMsg);
         }
       } catch (error) {
-        console.error('Lỗi khi tải danh sách xe:', error);
+        console.error('Lỗi khi tải danh sách xe:', error.message || error);
+      } finally {
+        stopLoading();
       }
-      stopLoading();
     };
     
     fetchVehicles();
@@ -107,11 +110,11 @@ const CreatePurchaseRequest = () => {
 
   // 4. Render
   const vehicleOptions = vehicles.map((v) => ({
-    label: `${v.name} - ${v.color || 'N/A'}`,
-    value: v.id,
+    label: `${v.brand || ''} ${v.model || 'N/A'}`,
+    value: v.vehicleId,
   }));
   
-  const selectedVehicle = vehicles.find(v => v.id === formData.productId);
+  const selectedVehicle = vehicles.find(v => v.vehicleId === formData.productId);
 
   // 2. SỬ DỤNG PAGE CONTAINER LÀM GỐC (Giống CustomerList)
   return (

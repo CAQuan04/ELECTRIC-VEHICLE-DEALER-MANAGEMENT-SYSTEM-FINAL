@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { AuthService } from '@utils';
 import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
@@ -22,6 +23,7 @@ const TestDriveForm = () => {
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
+  const [hasCheckedAvailability, setHasCheckedAvailability] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [vehicles, setVehicles] = useState([]);
   const [availableSlots, setAvailableSlots] = useState([]);
@@ -54,23 +56,47 @@ const TestDriveForm = () => {
   const loadPrerequisites = async () => {
     setIsDataLoading(true);
     try {
+      console.log('🔄 Starting to load customers and vehicles...');
+      
       const [customerResult, vehicleResult] = await Promise.all([
-        dealerAPI.getCustomers(),
-        dealerAPI.getVehicles({ available: true })
+        dealerAPI.getCustomers({ Page: 1, Size: 100 }),
+        dealerAPI.getVehicles({ Page: 1, Size: 100 })
       ]);
-
-      if (customerResult.success && customerResult.data) {
-        const customerList = Array.isArray(customerResult.data) ? customerResult.data : customerResult.data.data || [];
+      
+      // Debug: Log full response structure
+      console.log('📦 Customer Result:', JSON.stringify(customerResult, null, 2));
+      console.log('📦 Vehicle Result:', JSON.stringify(vehicleResult, null, 2));
+      
+      // Handle customers with proper error checking
+      if (customerResult && customerResult.success && customerResult.data) {
+        // Backend returns PagedResult: { items: [], pagination: {} }
+        const customerList = customerResult.data.items || [];
+        console.log('👥 Customer List length:', customerList.length);
+        console.log('👥 First customer:', customerList[0]);
         setCustomers(customerList);
+      } else {
+        const errorMsg = customerResult?.message || 'Không thể tải danh sách khách hàng';
+        console.error('❌ Customer load failed. Result structure:', customerResult);
+        console.warn('⚠️ Failed to load customers:', errorMsg);
+        notifications.error('Lỗi', errorMsg);
       }
       
-      if (vehicleResult.success && vehicleResult.data) {
-        const vehicleList = Array.isArray(vehicleResult.data) ? vehicleResult.data : vehicleResult.data.data || [];
+      // Handle vehicles with proper error checking
+      if (vehicleResult && vehicleResult.success && vehicleResult.data) {
+        // Backend returns PagedResult: { items: [], pagination: {} }
+        const vehicleList = vehicleResult.data.items || [];
+        console.log('🚙 Vehicle List length:', vehicleList.length);
+        console.log('🚙 First vehicle:', vehicleList[0]);
         setVehicles(vehicleList);
+      } else {
+        const errorMsg = vehicleResult?.message || 'Không thể tải danh sách xe';
+        console.error('❌ Vehicle load failed. Result structure:', vehicleResult);
+        console.warn('⚠️ Failed to load vehicles:', errorMsg);
+        notifications.error('Lỗi', errorMsg);
       }
 
     } catch (error) {
-      console.error('Error loading prerequisites:', error);
+      console.error('❌ Error loading prerequisites:', error);
       notifications.error('Lỗi tải dữ liệu', 'Không thể tải dữ liệu');
     } finally {
       setIsDataLoading(false);
@@ -79,20 +105,29 @@ const TestDriveForm = () => {
 
   const checkAvailability = async () => {
     setIsCheckingAvailability(true);
+    setHasCheckedAvailability(false);
     try {
+      console.log('🔍 Checking availability for:', { vehicleId: formData.vehicleId, date: formData.date });
       const result = await dealerAPI.checkTestDriveAvailability(
         formData.vehicleId,
         formData.date
       );
       
+      console.log('✅ Availability result:', result);
       if (result.success && result.data) {
-        setAvailableSlots(result.data.availableSlots || []);
+        const slots = result.data.availableSlots || [];
+        console.log('📅 Available slots:', slots);
+        setAvailableSlots(slots);
+        setHasCheckedAvailability(true);
       } else {
+        console.log('⚠️ No data in result');
         setAvailableSlots([]);
+        setHasCheckedAvailability(true);
       }
     } catch (error) {
-      console.error('Error checking availability:', error);
+      console.error('❌ Error checking availability:', error);
       setAvailableSlots([]);
+      setHasCheckedAvailability(true);
     } finally {
       setIsCheckingAvailability(false);
     }
@@ -100,29 +135,49 @@ const TestDriveForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
+    // Reset availability when date changes
+    if (name === 'date') {
+      setHasCheckedAvailability(false);
+      setAvailableSlots([]);
+    }
+    
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleCustomerChange = (customerId) => {
-    const selected = customers.find(c => c.id === customerId);
+  const handleCustomerChange = (e) => {
+    const customerId = parseInt(e.target.value);
+    const selected = customers.find(c => c.customerId === customerId);
     if (selected) {
       setFormData(prev => ({
         ...prev,
-        customerId: selected.id,
-        customerName: selected.name,
+        customerId: selected.customerId,
+        customerName: selected.fullName || selected.name,
         customerPhone: selected.phone,
-        customerEmail: selected.email,
+        customerEmail: selected.email || '',
       }));
     }
   };
 
-  const handleVehicleChange = (vehicleId) => {
-    const selected = vehicles.find(v => v.id === vehicleId);
+  const handleVehicleChange = (e) => {
+    const vehicleId = parseInt(e.target.value);
+    const selected = vehicles.find(v => v.vehicleId === vehicleId);
+    console.log('🚗 Selected vehicle:', selected);
+    
+    // Reset availability when vehicle changes
+    setHasCheckedAvailability(false);
+    setAvailableSlots([]);
+    
     if (selected) {
       setFormData(prev => ({
         ...prev,
-        vehicleId: selected.id,
+        vehicleId: selected.vehicleId,
         vehicleName: selected.model || selected.name,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        vehicleId: vehicleId,
       }));
     }
   };
@@ -145,23 +200,29 @@ const TestDriveForm = () => {
 
     setIsSubmitting(true);
     try {
+      const currentUser = AuthService.getCurrentUser();
+      const dealerId = currentUser?.dealerId;
+      
+      if (!dealerId) {
+        notifications.error('Lỗi', 'Không tìm thấy thông tin đại lý');
+        setIsSubmitting(false);
+        return;
+      }
+      
       const scheduleDatetime = `${formData.date}T${formData.time}:00`;
       
       const testDriveData = {
-        customerId: formData.customerId,
-        customerName: formData.customerName,
-        customerPhone: formData.customerPhone,
-        customerEmail: formData.customerEmail,
-        vehicleId: formData.vehicleId,
+        customerId: parseInt(formData.customerId),
+        vehicleId: parseInt(formData.vehicleId),
+        dealerId: parseInt(dealerId),
         scheduleDatetime,
-        duration: parseInt(formData.duration),
-        notes: formData.notes
+        status: 'Pending'
       };
 
       const result = await dealerAPI.createTestDrive(testDriveData);
       if (result.success) {
         notifications.success('Thành công', 'Đăng ký lái thử thành công! Thông báo xác nhận đã được gửi đến khách hàng.');
-        navigate('/dealer/test-drives');
+        navigate(`/${dealerId}/dealer/test-drives`);
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
@@ -174,13 +235,13 @@ const TestDriveForm = () => {
   };
 
   const customerOptions = customers.map(c => ({
-    label: `${c.name} - ${c.phone}`,
-    value: c.id
+    label: `${c.fullName || c.name} - ${c.phone}`,
+    value: c.customerId
   }));
 
   const vehicleOptions = vehicles.map(v => ({
-    label: `${v.model || v.name} - ${v.color || ''}`,
-    value: v.id
+    label: `${v.model || v.name} - ${v.brand || ''} ${v.color || ''}`.trim(),
+    value: v.vehicleId
   }));
 
   const durationOptions = [
@@ -216,9 +277,10 @@ const TestDriveForm = () => {
                   <Label htmlFor="customer-search">Tìm khách hàng (Nếu có)</Label>
                   <Select
                     id="customer-search"
+                    value={formData.customerId}
                     options={customerOptions}
-                    onChange={(e) => handleCustomerChange(e.target.value)}
-                    placeholder={isDataLoading ? "Đang tải khách..." : "-- Chọn khách hàng có sẵn --"}
+                    onChange={handleCustomerChange}
+                    placeholder={isDataLoading ? "\u0110ang t\u1ea3i kh\u00e1ch..." : "-- Ch\u1ecdn kh\u00e1ch h\u00e0ng c\u00f3 s\u1eb5n --"}
                     disabled={isLoading}
                   />
                 </FormGroup>
@@ -276,9 +338,10 @@ const TestDriveForm = () => {
                   <Select
                     id="vehicleId"
                     name="vehicleId"
+                    value={formData.vehicleId}
                     options={vehicleOptions}
-                    onChange={(e) => handleVehicleChange(e.target.value)}
-                    placeholder={isDataLoading ? "Đang tải xe..." : "-- Chọn xe --"}
+                    onChange={handleVehicleChange}
+                    placeholder={isDataLoading ? "\u0110ang t\u1ea3i xe..." : "-- Ch\u1ecdn xe --"}
                     error={errors.vehicleId}
                     disabled={isLoading}
                   />
@@ -348,7 +411,7 @@ const TestDriveForm = () => {
                       }))}
                       placeholder="-- Chọn giờ --"
                     />
-                  ) : formData.vehicleId && formData.date ? (
+                  ) : hasCheckedAvailability && formData.vehicleId && formData.date ? (
                     <div className="text-center py-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-200 dark:border-yellow-800">
                       <p className="text-sm text-yellow-700 dark:text-yellow-400">
                         ⚠️ Không có khung giờ trống cho ngày này
