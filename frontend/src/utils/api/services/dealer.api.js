@@ -11,6 +11,16 @@ import apiClient from '../client';
  * - Analytics and reports
  */
 class DealerAPI {
+  // ==================== HELPER ====================
+  // Hàm phụ trợ để xử lý dữ liệu trả về an toàn
+  _handleResponse(response) {
+    // Nếu response là mảng hoặc object data trực tiếp (do interceptor bóc sẵn) -> dùng luôn
+    if (Array.isArray(response) || (response && !response.data && !response.status)) {
+       return response;
+    }
+    // Trường hợp axios response chuẩn -> lấy .data
+    return response.data || response;
+  }
   
   // ==================== DASHBOARD ====================
   
@@ -322,29 +332,20 @@ async getStockRequests(filters = {}) {
 
   // ==================== CUSTOMER MANAGEMENT ====================
 
-  /**
-   * Get all customers
-   * GET /api/Customers/paged?Search=...&Phone=...&Page=...&Size=...
+ /**
+   * Get all customers (paged)
+   * GET /api/Customers/paged
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} Customer list
    */
   async getCustomers(params = {}) {
     try {
-      console.log('📤 getCustomers called with params:', params);
       const response = await apiClient.get('/Customers/paged', { params });
-      console.log('✅ getCustomers response:', response);
-      console.log('✅ getCustomers response.data:', response.data);
-      // Axios response structure: response.data contains the actual data
-      return { success: true, data: response.data || response };
+      return { success: true, data: this._handleResponse(response) };
     } catch (error) {
-      console.error('❌ getCustomers error:', error);
-      console.error('❌ Error response:', error.response);
-      console.error('❌ Error status:', error.response?.status);
-      console.error('❌ Error data:', error.response?.data);
-      return { success: false, message: error.response?.data?.message || error.message || 'Lỗi khi lấy danh sách khách hàng' };
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng' };
     }
   }
-
   /**
    * Get customer details by ID
    * GET /api/Customers/{customerId}
@@ -853,28 +854,29 @@ async getStockRequests(filters = {}) {
 
   /**
    * Get all orders
-   * GET /dealer/orders?status=...&page=1&limit=10
+   * GET /api/Orders
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} Order list
    */
   async getOrders(params = {}) {
     try {
-      const response = await apiClient.get('/dealer/orders', { params });
+      const response = await apiClient.get('/Orders', { params });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng' };
     }
   }
 
+
   /**
    * Get order details by ID
-   * GET /dealer/orders/:id
+   * GET /api/Orders/{id}
    * @param {string|number} id - Order ID
    * @returns {Promise<Object>} Order details
    */
   async getOrderById(id) {
     try {
-      const response = await apiClient.get(`/dealer/orders/${id}`);
+      const response = await apiClient.get(`/Orders/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin đơn hàng' };
@@ -883,13 +885,13 @@ async getStockRequests(filters = {}) {
 
   /**
    * Create new order
-   * POST /dealer/orders
+   * POST /api/Orders
    * @param {Object} orderData - Order data
    * @returns {Promise<Object>} Created order
    */
   async createOrder(orderData) {
     try {
-      const response = await apiClient.post('/dealer/orders', orderData);
+      const response = await apiClient.post('/Orders', orderData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo đơn hàng' };
@@ -897,24 +899,8 @@ async getStockRequests(filters = {}) {
   }
 
   /**
-   * Update order
-   * PUT /dealer/orders/:id
-   * @param {string|number} orderId - Order ID
-   * @param {Object} updateData - Update data
-   * @returns {Promise<Object>} Updated order
-   */
-  async updateOrder(orderId, updateData) {
-    try {
-      const response = await apiClient.put(`/dealer/orders/${orderId}`, updateData);
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật đơn hàng' };
-    }
-  }
-
-  /**
    * Update order status
-   * PUT /dealer/orders/:id/status
+   * PUT /api/Orders/{id}/status
    * @param {string|number} id - Order ID
    * @param {string} status - New status
    * @param {string} note - Optional note
@@ -922,7 +908,7 @@ async getStockRequests(filters = {}) {
    */
   async updateOrderStatus(id, status, note = '') {
     try {
-      const response = await apiClient.put(`/dealer/orders/${id}/status`, { status, note });
+      const response = await apiClient.put(`/Orders/${id}/status`, { status, note });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
@@ -931,20 +917,19 @@ async getStockRequests(filters = {}) {
 
   /**
    * Cancel order
-   * POST /dealer/orders/:id/cancel
+   * POST /api/Orders/{id}/cancel
    * @param {string|number} orderId - Order ID
    * @param {string} reason - Cancellation reason
    * @returns {Promise<Object>} Cancellation result
    */
   async cancelOrder(orderId, reason) {
     try {
-      const response = await apiClient.post(`/dealer/orders/${orderId}/cancel`, { reason });
+      const response = await apiClient.post(`/Orders/${orderId}/cancel`, { reason });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi hủy đơn hàng' };
     }
   }
-
   // ==================== QUOTATION MANAGEMENT ====================
 
   /**
@@ -962,15 +947,15 @@ async getStockRequests(filters = {}) {
     }
   }
 
-  /**
+   /**
    * Get quotation details by ID
-   * GET /dealer/quotations/:id
+   * GET /api/Quotations/{id}
    * @param {string|number} id - Quotation ID
    * @returns {Promise<Object>} Quotation details
    */
   async getQuotationById(id) {
     try {
-      const response = await apiClient.get(`/dealer/quotations/${id}`);
+      const response = await apiClient.get(`/Quotations/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin báo giá' };
@@ -979,13 +964,13 @@ async getStockRequests(filters = {}) {
 
   /**
    * Create new quotation
-   * POST /dealer/quotations
+   * POST /api/Quotations
    * @param {Object} quotationData - Quotation data
    * @returns {Promise<Object>} Created quotation
    */
   async createQuotation(quotationData) {
     try {
-      const response = await apiClient.post('/dealer/quotations', quotationData);
+      const response = await apiClient.post('/Quotations', quotationData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo báo giá' };

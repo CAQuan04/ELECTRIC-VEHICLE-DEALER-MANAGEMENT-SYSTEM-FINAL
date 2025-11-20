@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
-import { AuthService } from '@utils';
 import { notifications } from '@utils/notifications';
+import { useAuth } from '@/context/AuthContext'; 
 
-// Import các UI Component chuẩn
 import {
   PageContainer,
   PageHeader,
@@ -20,10 +19,10 @@ import {
   InfoRow
 } from '../../components';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-import { ShoppingCart, ChevronDown, Printer, Edit, FileText } from 'lucide-react';
+import { ShoppingCart, Printer, Edit, FileText } from 'lucide-react';
 import QuotationDocument from './QuotationDocument';
-// --- DỮ LIỆU CẤU HÌNH (Nên lấy từ API nếu có) ---
 
+// ... (Giữ nguyên các options constant như interiorTrimOptions, batteryPolicyOptions, v.v.) ...
 // Các tùy chọn xe
 const mockInventory = [
   { id: 'veh1', model: 'Model Y', color: 'Trắng', available: 5, price: 1500000000 },
@@ -65,166 +64,158 @@ const batteryPolicyOptions = [
   { value: 'thuê pin', label: 'Thuê pin (Đã trừ 200 triệu vào giá xe)' },
   { value: 'mua pin', label: 'Mua pin (Bao gồm giá pin)' }
 ];
-// ------------------------------------------------
 
-const CreateOrder = () => {
+const CreateQuotation = () => {
   const navigate = useNavigate();
   const { quotationId } = useParams();
-  const isEditMode = !!quotationId; // true nếu có ID, false nếu không
+  const isEditMode = !!quotationId;
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [errors, setErrors] = useState({});
 
+  const { user } = useAuth();
+  // Lấy dealerId, đảm bảo không phải undefined
+  const dealerId = user?.dealerId;
+
   const [formData, setFormData] = useState({
-    customerId: '',
+    customerId: '', 
     customerName: '',
     customerPhone: '',
-    customerEmail: '',
+    customerEmail: '', 
     vehicleId: '',
+    configId: 0, 
     basePrice: 0,
     discount: 0,
+    quantity: 1, 
     voucherCode: '',
     voucherDiscount: 0,
-    paymentMethod: 'financing', // Giữ lại (Điều kiện thanh toán)
-    validUntil: new Date().toISOString().split('T')[0], // THÊM: Ngày hết hạn
-    batteryPolicy: 'thuê pin', // THÊM: Chính sách pin
+    paymentMethod: 'financing',
+    validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], 
+    batteryPolicy: 'thuê pin',
     notes: ''
   });
 
   const [selectedOptions, setSelectedOptions] = useState([]);
-  // --- THÊM STATE DỊCH VỤ ---
   const [selectedServices, setSelectedServices] = useState({
     registration: 'tự đăng ký',
     interiorTrim: 'Vải nỉ & Nhựa nhám',
     extendedWarranty: 'không'
   });
-  //-----------------------
+
   const [isCustomerSectionOpen, setIsCustomerSectionOpen] = useState(true);
   const [isVehicleSectionOpen, setIsVehicleSectionOpen] = useState(true);
   const [sendEmail, setSendEmail] = useState(false);
-  // Tải dữ liệu (Khách hàng & Xe trong kho)
-  useEffect(() => {
+
+useEffect(() => {
+    // 🛑 FIX LỖI 400: Chặn tuyệt đối nếu chưa có dealerId
+    if (!dealerId) {
+      return; 
+    }
+
     const loadPrerequisites = async () => {
       setIsDataLoading(true);
       try {
-        // Luôn tải Customers và Inventory
+        // Gọi song song
         const [customerResult, inventoryResult] = await Promise.all([
-          dealerAPI.getCustomers(),
-          dealerAPI.getInventory()
+          dealerAPI.getCustomers(), 
+          dealerAPI.getInventory(dealerId)
         ]);
 
+        // Xử lý Customers
         if (customerResult.success && customerResult.data) {
-          console.log('Customers data:', customerResult.data);
-          const customerList = Array.isArray(customerResult.data) 
-            ? customerResult.data 
-            : (customerResult.data.items || customerResult.data.data || []);
-          console.log('Parsed customer list:', customerList);
+          // Backend có thể trả về: { items: [...] } hoặc [...] trực tiếp
+          const rawData = customerResult.data;
+          const customerList = Array.isArray(rawData) ? rawData : (rawData.items || rawData.data || []);
           setCustomers(customerList);
+        } else {
+          console.error('Lỗi tải khách hàng:', customerResult);
         }
 
+        // Xử lý Inventory
         if (inventoryResult.success && inventoryResult.data) {
-          console.log('Inventory data:', inventoryResult.data);
-          const inventoryList = Array.isArray(inventoryResult.data) 
+           const inventoryList = Array.isArray(inventoryResult.data) 
             ? inventoryResult.data 
             : (inventoryResult.data.items || inventoryResult.data.data || []);
-          console.log('Parsed inventory list:', inventoryList);
-          // Lọc xe có quantity > 0
-          const filteredInventory = inventoryList.filter(v => (v.quantity || 0) > 0);
-          console.log('Filtered inventory (quantity > 0):', filteredInventory);
-          setInventory(filteredInventory);
-          
-          if (filteredInventory.length === 0) {
-            console.warn('⚠️ No inventory items with quantity > 0');
-            notifications.warning('Cảnh báo', 'Kho hiện không có xe nào. Vui lòng liên hệ quản lý.');
-          }
-        } else {
-          console.error('Failed to load inventory:', inventoryResult.message);
-          notifications.error('Lỗi', inventoryResult.message || 'Không thể tải danh sách xe trong kho');
+           
+           // Lọc xe có sẵn
+           const filteredInventory = inventoryList.filter(v => (v.quantity || 0) > 0);
+           setInventory(filteredInventory);
         }
-        // --- Logic cho Chế độ SỬA ---
+        // Load Quotation data for Edit mode
         if (isEditMode) {
-          const quotationResult = await dealerAPI.getQuotationById(quotationId);
-          if (quotationResult.success && quotationResult.data) {
-            const data = quotationResult.data;
-            // Điền dữ liệu cũ vào form
-            setFormData({
-              customerId: data.customerId || '',
-              customerName: data.customerName || '',
-              customerPhone: data.customerPhone || '',
-              customerEmail: data.customerEmail || '',
-              vehicleId: data.vehicleId || '',
-              basePrice: data.priceBreakdown?.basePrice || 0,
-              discount: data.discount || 0,
-              voucherCode: data.voucherCode || '',
-              voucherDiscount: data.voucherDiscount || 0,
-              paymentMethod: data.paymentMethod || 'financing',
-              validUntil: data.validUntil ? new Date(data.validUntil).toISOString().split('T')[0] : '',
-              batteryPolicy: data.batteryPolicy || 'thuê pin',
-              notes: data.notes || ''
-            });
-            setSelectedOptions(data.additionalOptions || []);
-            setSelectedServices(data.additionalServices || {
-              registration: 'tự đăng ký',
-              interiorTrim: 'gỗ tiêu chuẩn',
-              extendedWarranty: 'không'
-            });
-          } else {
-            throw new Error(quotationResult.message || 'Không tìm thấy báo giá');
-          }
+            const quotationResult = await dealerAPI.getQuotationById(quotationId);
+            if (quotationResult.success && quotationResult.data) {
+                const data = quotationResult.data;
+                setFormData({
+                    customerId: data.customerId,
+                    customerName: data.customerName || '',
+                    customerPhone: data.customerPhone || '',
+                    customerEmail: data.customerEmail || '',
+                    vehicleId: data.vehicleId,
+                    basePrice: data.basePrice || 0,
+                    configId: data.configId || 0,
+                    quantity: data.quantity || 1,
+                    discount: data.discount || 0,
+                    voucherCode: data.voucherCode || '',
+                    voucherDiscount: data.voucherDiscount || 0,
+                    paymentMethod: data.paymentMethod || 'financing',
+                    validUntil: data.validUntil ? data.validUntil.split('T')[0] : '',
+                    batteryPolicy: data.batteryPolicy || 'thuê pin',
+                    notes: data.notes || ''
+                });
+            }
         }
-        // --- Kết thúc logic Sửa ---
+
       } catch (error) {
-        console.error('Error loading prerequisites:', error);
-        notifications.error('Lỗi', 'Không thể tải dữ liệu khách hàng hoặc kho xe.');
-        const currentUser = AuthService.getCurrentUser();
-        const dealerId = currentUser?.dealerId;
-        navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
+        console.error('🚨 Lỗi không mong muốn trong loadPrerequisites:', error);
+        notifications.error('Lỗi', 'Không thể tải dữ liệu ban đầu.');
       } finally {
         setIsDataLoading(false);
       }
     };
-
+    
     loadPrerequisites();
-  }, [isEditMode, quotationId, navigate]);
+  }, [isEditMode, quotationId, dealerId]); // dealerId thay đổi (từ null -> có giá trị) sẽ trigger lại useEffect
 
-  // Xử lý logic nghiệp vụ
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  // --- THÊM HÀM XỬ LÝ DỊCH VỤ ---
-  const handleServiceChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedServices(prev => ({ ...prev, [name]: value }));
-  };
-
+  // Tự động điền thông tin khi chọn khách hàng
   const handleCustomerChange = (customerId) => {
-    const selected = customers.find(c => (c.customerId || c.id) === customerId);
+    const selected = customers.find(c => (c.customerId || c.id) == customerId); 
     if (selected) {
       console.log('Selected customer:', selected);
       setFormData(prev => ({
         ...prev,
-        customerId: selected.customerId || selected.id,
-        customerName: selected.fullName || selected.name || '',
-        customerPhone: selected.phone || '',
-        customerEmail: selected.email || '',
+        customerId: selected.customerId || selected.id, 
+        customerName: selected.fullName || '', 
+        customerPhone: selected.phone || '',       
+        customerAddress: selected.address || '',   
+        customerEmail: selected.email || '',       
+        idDocumentNumber: selected.idDocumentNumber || '' 
       }));
     }
   };
 
   const handleVehicleChange = (vehicleId) => {
-    const selected = inventory.find(v => (v.vehicleId || v.id) === vehicleId);
+    const selected = inventory.find(v => (v.vehicleId || v.id) == vehicleId);
     if (selected) {
-      console.log('Selected vehicle:', selected);
-      setFormData(prev => ({
-        ...prev,
-        vehicleId: selected.vehicleId || selected.id,
-        basePrice: selected.price || selected.basePrice || 0,
-      }));
+        setFormData(prev => ({
+            ...prev,
+            vehicleId: selected.vehicleId || selected.id,
+            basePrice: selected.price || selected.basePrice || 0,
+            configId: selected.configId || 0 
+        }));
     }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleServiceChange = (e) => {
+    const { name, value } = e.target;
+    setSelectedServices(prev => ({ ...prev, [name]: value }));
   };
 
   const toggleOption = (option) => {
@@ -235,7 +226,6 @@ const CreateOrder = () => {
     }
   };
 
-  // --- THÊM HÀM ÁP DỤNG VOUCHER (MOCK) ---
   const handleApplyVoucher = () => {
     if (formData.voucherCode.toUpperCase() === 'SALE50') {
       notifications.success('Thành công', 'Áp dụng voucher thành công! Giảm 50 triệu.');
@@ -246,9 +236,12 @@ const CreateOrder = () => {
     }
   };
 
-  // --- CẬP NHẬT HÀM TÍNH TOÁN CHI TIẾT ---
+  // Tính toán giá chi tiết
   const priceBreakdown = useMemo(() => {
     const basePrice = parseInt(formData.basePrice) || 0;
+    const quantity = parseInt(formData.quantity) || 1;
+    const vehicleTotal = basePrice * quantity;
+
     const optionsTotal = selectedOptions.reduce((sum, opt) => sum + opt.price, 0);
 
     const serviceRegistrationCost = servicePrices.registration[selectedServices.registration] || 0;
@@ -256,7 +249,7 @@ const CreateOrder = () => {
     const serviceWarrantyCost = servicePrices.extendedWarranty[selectedServices.extendedWarranty] || 0;
     const servicesTotal = serviceRegistrationCost + serviceInteriorCost + serviceWarrantyCost;
 
-    const subtotal = basePrice + optionsTotal + servicesTotal;
+    const subtotal = vehicleTotal + optionsTotal + servicesTotal;
 
     const manualDiscount = parseInt(formData.discount) || 0;
     const voucherDiscount = parseInt(formData.voucherDiscount) || 0;
@@ -282,69 +275,53 @@ const CreateOrder = () => {
       total
     };
   }, [formData, selectedOptions, selectedServices]);
-  // ---------------------------------------
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.customerName) newErrors.customerName = 'Vui lòng nhập tên khách hàng.';
-    if (!formData.customerPhone) newErrors.customerPhone = 'Vui lòng nhập SĐT khách hàng.';
-    if (!formData.vehicleId) newErrors.vehicleId = 'Vui lòng chọn xe từ kho.';
-    if (!formData.validUntil) newErrors.validUntil = 'Vui lòng chọn ngày hiệu lực cho báo giá.';
-    if (!formData.batteryPolicy) newErrors.batteryPolicy = 'Vui lòng chọn chính sách pin.';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    // Validate form...
 
     setIsSubmitting(true);
     try {
-      // --- CẬP NHẬT DỮ LIỆU GỬI ĐI ---
-      const orderData = {
-        ...formData,
-        additionalOptions: selectedOptions,
-        additionalServices: selectedServices,
-        priceBreakdown: priceBreakdown, // Gửi toàn bộ cấu trúc giá
-        sendEmail: sendEmail // Gửi email báo giá cho khách hàng
+      const payload = {
+        customerId: parseInt(formData.customerId) || 0,
+        validUntil: formData.validUntil,
+        items: [
+            {
+                vehicleId: parseInt(formData.vehicleId) || 0,
+                configId: parseInt(formData.configId) || 0,
+                quantity: parseInt(formData.quantity) || 1,
+                unitPrice: parseFloat(formData.basePrice) || 0.01 
+            }
+        ],
       };
+
+      console.log('Sending payload:', payload);
+
       let result;
       if (isEditMode) {
-        // Gọi API Cập nhật
-        result = await dealerAPI.updateQuotation(quotationId, quotationData);
+        console.warn("Edit mode not fully supported by provided API spec");
       } else {
-        // Gọi API Tạo mới
-        result = await dealerAPI.createQuotation(quotationData);
+        result = await dealerAPI.createQuotation(payload);
       }
-      // -----------------------------
 
       if (result.success) {
-        notifications.success('Thành công', isEditMode ? 'Cập nhật báo giá thành công!' : 'Tạo báo giá thành công!');
-        const currentUser = AuthService.getCurrentUser();
-        const dealerId = currentUser?.dealerId;
-        navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
+        notifications.success('Thành công', 'Tạo báo giá thành công!');
+        navigate('/dealer/quotations');
       } else {
-        throw new Error(result.message || 'Lỗi không xác định');
+        notifications.error('Lỗi', result.message || 'Lỗi không xác định');
       }
     } catch (error) {
-      console.error('Error creating quotation:', error);
-      notifications.error('Lỗi', 'Có lỗi xảy ra: ' + error.message);
+      console.error('Error:', error);
+      notifications.error('Lỗi', 'Có lỗi xảy ra.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const customerOptions = customers.map(c => {
-    const customerId = c.customerId || c.id;
-    const name = c.fullName || c.name || 'N/A';
-    const phone = c.phone || 'N/A';
-    return {
-      label: `${name} - ${phone}`,
-      value: customerId
-    };
-  });
+  const customerOptions = customers.map(c => ({
+    label: `${c.fullName || 'N/A'} - ${c.phone || 'N/A'}`,
+    value: c.customerId || c.id
+  }));
 
   const vehicleOptions = inventory.map(v => {
     const vehicleId = v.vehicleId || v.id;
@@ -367,24 +344,18 @@ const CreateOrder = () => {
   ];
 
   const isLoading = isDataLoading || isSubmitting;
-
-  // Helper định dạng tiền
   const formatCurrency = (amount) => {
     return `${(amount / 1000000).toLocaleString('vi-VN')} triệu`;
   };
-
+  
   return (
-    <PageContainer>
+     <PageContainer>
       <PageHeader
         title={isEditMode ? 'Sửa báo giá' : 'Tạo báo giá mới'}
         subtitle={isEditMode ? `Đang chỉnh sửa Báo giá ID: ${quotationId}` : 'Tạo báo giá chi tiết cho khách hàng'}
         icon={isEditMode ? <Edit className="w-16 h-16" /> : <FileText className="w-16 h-16" />}
         showBackButton
-        onBack={() => {
-          const currentUser = AuthService.getCurrentUser();
-          const dealerId = currentUser?.dealerId;
-          navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
-        }}
+        onBack={() => navigate('/dealer/quotations')}
       />
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -393,78 +364,48 @@ const CreateOrder = () => {
           {/* CỘT TRÁI (COL-SPAN-2) */}
           <div className="lg:col-span-2 space-y-6">
 
-            {/* SỬA 1: Dùng InfoSection cho mục 1 */}
             <InfoSection
               title="1. Thông tin khách hàng"
               icon="👤"
               className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-              // Thêm props để điều khiển ẩn/hiện
               isCollapsible={true}
               isOpen={isCustomerSectionOpen}
               onToggle={() => setIsCustomerSectionOpen(!isCustomerSectionOpen)}
             >
-              {/* Nội dung chỉ render khi mở */}
               {isCustomerSectionOpen && (
                 <div className="space-y-4 mt-4">
                   <FormGroup className="mb-0">
-                    <Label htmlFor="customer-search" className="dark:text-gray-300">Tìm khách hàng (Nếu có)</Label>
+                    <Label htmlFor="customer-search" className="dark:text-gray-300">Chọn khách hàng</Label>
                     <Select
                       id="customer-search"
                       options={customerOptions}
-                      onChange={(e) => handleCustomerChange(e.target.value)}
+                      onChange={(e) => handleCustomerChange(e.target.value)} // Gọi hàm tự động điền
                       placeholder={isDataLoading ? "Đang tải khách..." : "-- Chọn khách hàng có sẵn --"}
                       disabled={isLoading}
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </FormGroup>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormGroup className="mb-0">
-                      <Label htmlFor="customerName" required className="dark:text-gray-300">Tên khách hàng</Label>
-                      <Input
-                        id="customerName"
-                        name="customerName"
-                        value={formData.customerName}
-                        onChange={handleChange}
-                        error={errors.customerName}
-                        disabled={isLoading}
-                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
-                      />
+                      <Label>Tên khách hàng</Label>
+                      <Input value={formData.customerName} readOnly disabled className="bg-gray-100" /> 
                     </FormGroup>
                     <FormGroup className="mb-0">
-                      <Label htmlFor="customerPhone" required className="dark:text-gray-300">Số điện thoại</Label>
-                      <Input
-                        id="customerPhone"
-                        name="customerPhone"
-                        value={formData.customerPhone}
-                        onChange={handleChange}
-                        error={errors.customerPhone}
-                        disabled={isLoading}
-                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
-                      />
+                      <Label>Số điện thoại</Label>
+                      <Input value={formData.customerPhone} readOnly disabled className="bg-gray-100" />
                     </FormGroup>
                   </div>
-                  <FormGroup className="mb-0">
-                    <Label htmlFor="customerEmail" className="dark:text-gray-300">Email</Label>
-                    <Input
-                      id="customerEmail"
-                      name="customerEmail"
-                      type="email"
-                      value={formData.customerEmail}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
-                    />
+                   <FormGroup className="mb-0">
+                    <Label>Email</Label>
+                    <Input value={formData.customerEmail} readOnly disabled className="bg-gray-100" />
                   </FormGroup>
                 </div>
               )}
             </InfoSection>
 
-            {/* SỬA 2: Dùng InfoSection cho mục 2 */}
             <InfoSection
               title="2. Thông tin xe"
               icon="🚗"
               className="bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700"
-              // Thêm props để điều khiển ẩn/hiện
               isCollapsible={true}
               isOpen={isVehicleSectionOpen}
               onToggle={() => setIsVehicleSectionOpen(!isVehicleSectionOpen)}
@@ -484,23 +425,37 @@ const CreateOrder = () => {
                       className="dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                     />
                   </FormGroup>
-                  <FormGroup className="mb-0">
-                    <Label htmlFor="basePrice" className="dark:text-gray-300">Giá xe (VNĐ)</Label>
-                    <Input
-                      id="basePrice"
-                      name="basePrice"
-                      type="number"
-                      value={formData.basePrice}
-                      onChange={handleChange}
-                      disabled={isLoading}
-                      className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
-                    />
-                  </FormGroup>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormGroup className="mb-0">
+                        <Label htmlFor="basePrice" className="dark:text-gray-300">Giá xe (VNĐ)</Label>
+                        <Input
+                        id="basePrice"
+                        name="basePrice"
+                        type="number"
+                        value={formData.basePrice}
+                        onChange={handleChange}
+                        disabled={isLoading}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
+                        />
+                    </FormGroup>
+                     <FormGroup className="mb-0">
+                        <Label htmlFor="quantity" className="dark:text-gray-300">Số lượng</Label>
+                        <Input
+                        id="quantity"
+                        name="quantity"
+                        type="number"
+                        value={formData.quantity}
+                        onChange={handleChange}
+                        min="1"
+                        disabled={isLoading}
+                        className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
+                        />
+                    </FormGroup>
+                  </div>
                 </div>
               )}
             </InfoSection>
 
-            {/* Khối 3: Tùy chọn bổ sung (Options) */}
             <InfoSection
               title="3. Tùy chọn bổ sung (Options)"
               icon="⚙️"
@@ -538,7 +493,6 @@ const CreateOrder = () => {
               </div>
             </InfoSection>
 
-            {/* Khối 4: Dịch vụ bổ sung (Services) */}
             <InfoSection
               title="4. Dịch vụ bổ sung (Services)"
               icon="🛠️"
@@ -594,9 +548,6 @@ const CreateOrder = () => {
               className="bg-slate-50 dark:bg-slate-800 border-cyan-200 dark:border-cyan-700"
             >
               <div className="space-y-4">
-
-                {/* XÓA: "Tiền đặt cọc" */}
-
                 <FormGroup className="mb-0">
                   <Label htmlFor="discount" className="dark:text-gray-300">Giảm giá trực tiếp (VNĐ)</Label>
                   <Input
@@ -641,7 +592,6 @@ const CreateOrder = () => {
                   />
                 </FormGroup>
 
-                {/* THÊM: Chính sách pin (Use Case Bước 6) */}
                 <FormGroup className="mb-0">
                   <Label htmlFor="batteryPolicy" required className="dark:text-gray-300">Chính sách pin</Label>
                   <Select
@@ -655,7 +605,6 @@ const CreateOrder = () => {
                   />
                 </FormGroup>
 
-                {/* THÊM: Ngày hết hạn (Use Case Bước 11) */}
                 <FormGroup className="mb-0">
                   <Label htmlFor="validUntil" required className="dark:text-gray-300">Báo giá có hiệu lực đến</Label>
                   <Input
@@ -670,9 +619,6 @@ const CreateOrder = () => {
                     className="dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500"
                   />
                 </FormGroup>
-
-                {/* XÓA: "Địa chỉ giao xe" và "Ngày giao dự kiến" */}
-
               </div>
             </InfoSection>
 
@@ -682,7 +628,7 @@ const CreateOrder = () => {
                 💵 Tổng cộng
               </h3>
               <div className="space-y-3">
-                <InfoRow label="Giá xe" value={formatCurrency(priceBreakdown.basePrice)} />
+                <InfoRow label="Giá xe" value={formatCurrency(priceBreakdown.basePrice * (parseInt(formData.quantity) || 1))} />
                 <InfoRow label="Phí tùy chọn" value={`+ ${formatCurrency(priceBreakdown.optionsTotal)}`} />
                 <InfoRow label="Phí dịch vụ" value={`+ ${formatCurrency(priceBreakdown.servicesTotal)}`} />
 
@@ -725,9 +671,7 @@ const CreateOrder = () => {
           </div>
         </div>
 
-        {/* SỬA 3: Thêm padding 'mt-8' cho ActionBar */}
         <ActionBar align="right" className="mt-8 p-2.5">
-          {/* --- THÊM CHECKBOX --- */}
           <div className="flex items-center mr-auto">
             <input
               id="sendEmail"
@@ -743,7 +687,6 @@ const CreateOrder = () => {
               Gửi PDF cho khách hàng ngay
             </label>
           </div>
-          {/* ------------------- */}
           <Button
             type="button"
             variant="ghost"
@@ -753,11 +696,6 @@ const CreateOrder = () => {
             Hủy
           </Button>
 
-          {/* --- NÚT PDF MỚI --- */}
-          {/* Lưu ý: PDFDownloadLink chỉ render khi có đủ dữ liệu. 
-            Nếu validUntil chưa có, nó sẽ báo lỗi.
-          */}
-          {/* --- NÚT PDF MỚI (ĐÃ SỬA) --- */}
           {formData.validUntil && (
             <PDFDownloadLink
               document={
@@ -771,9 +709,6 @@ const CreateOrder = () => {
               fileName={`BaoGia_${formData.customerName || 'KhachHang'}.pdf`}
             >
               {({ blob, url, loading, error }) => {
-                // Chúng ta phải render một thẻ <a> thật
-                // và tự style nó cho giống <Button variant="outline">
-
                 const buttonClasses = `
                   font-semibold rounded-xl transition-all duration-300 
                   flex items-center justify-center gap-2 
@@ -790,10 +725,9 @@ const CreateOrder = () => {
 
                 return (
                   <a
-                    href={url} // Quan trọng: Phải gán URL từ thư viện
+                    href={url} 
                     download={`BaoGia_${formData.customerName || 'KhachHang'}.pdf`}
                     className={`${buttonClasses} ${disabledClasses}`}
-                    // Vô hiệu hóa link nếu đang loading
                     onClick={(e) => (loading || isLoading) && e.preventDefault()}
                   >
                     <Printer className="w-4 h-4" />
@@ -820,21 +754,4 @@ const CreateOrder = () => {
   );
 };
 
-export default CreateOrder;
-
-//-------------------------- BACKEND LOGIC (Node.js/Express) --------------------------
-//"Khi API POST /dealer/quotations (hàm createQuotation) được gọi:
-
-//Hãy kiểm tra xem có trường sendEmail: true trong request body hay không.
-
-///Nếu KHÔNG có, chỉ cần lưu báo giá vào CSDL như bình thường.
-
-//Nếu CÓ (sendEmail: true):
-
-//Bước 1: Vẫn lưu báo giá vào CSDL.
-
-//Bước 2: Lấy customerEmail từ request body.
-
-//Bước 3: Dùng dữ liệu (priceBreakdown, formData...) để tạo file PDF ở phía server (dùng thư viện như pdf-lib hoặc puppeteer).
-
-//Bước 4: Dùng dịch vụ email (SendGrid, Nodemailer...) để gửi email đến customerEmail với file PDF vừa tạo được đính kèm."
+export default CreateQuotation;

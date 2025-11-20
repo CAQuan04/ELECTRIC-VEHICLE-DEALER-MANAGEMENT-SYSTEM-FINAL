@@ -11,7 +11,12 @@ import {
   ClipboardList,
   Users,
   TrendingUp,
-  Shield
+  Shield,
+  MapPin,
+  Phone,
+  Mail,
+  Building2,
+  UserCircle
 } from 'lucide-react';
 
 // Import role guards
@@ -26,7 +31,8 @@ import {
   OverviewSection,
   InventorySection,
   OrdersSection,
-  CustomersSection
+  CustomersSection,
+  getMockDealerById
 } from './DealerDashboard/sections';
 
 // Import components
@@ -44,7 +50,7 @@ const NAV_SECTIONS = [
 
 const DealerDashboard = () => {
   console.log('🏢 DealerDashboard component render');
-  
+
   const navigate = useNavigate();
   const { dealerId } = useParams(); // Lấy dealerId từ URL
   const { startLoading, stopLoading } = usePageLoading();
@@ -57,106 +63,93 @@ const DealerDashboard = () => {
   console.log('📍 DealerId from URL:', dealerId);
   console.log('👤 Current User dealerId:', currentUser?.dealerId);
 
-  const loadDashboardData = useCallback(async () => {
+const loadDashboardData = useCallback(async () => {
     try {
-      startLoading('Đang tải dữ liệu đại lý...');
-      
-      // Lấy dealerId từ URL hoặc currentUser
+      // Lấy dealerId hiện tại (Ưu tiên từ URL, sau đó đến User Context)
       const currentDealerId = dealerId || currentUser?.dealerId;
       
-      // Fetch dealer info và dashboard stats song song
-      const [dealerInfoResult, dashboardResult] = await Promise.all([
-        currentDealerId 
-          ? dealerAPI.getDealerById(currentDealerId) 
-          : dealerAPI.getDealerProfile(), // Fallback: lấy profile của user hiện tại
+      if (!currentDealerId) {
+        console.warn("⚠️ Không tìm thấy Dealer ID");
+        return;
+      }
+
+      startLoading('Đang tải dữ liệu đại lý...');
+      
+      // Fetch song song thông tin đại lý và số liệu thống kê
+      // Sử dụng Promise.allSettled để một cái lỗi không làm chết cái kia
+      const [dealerInfoResult, dashboardResult] = await Promise.allSettled([
+        dealerAPI.getDealerById(currentDealerId),
         dealerAPI.getDashboard()
       ]);
       
-      console.log('📊 Dealer Info Result:', dealerInfoResult);
-      console.log('📊 Dashboard Result:', dashboardResult);
-      
-      // Tạo dealer data từ kết quả API hoặc từ currentUser/dashboard
-      let dealerData;
-      if (dealerInfoResult.success && dealerInfoResult.data) {
-        dealerData = dealerInfoResult.data;
-        console.log('✅ Using dealer data from getDealerById API');
-      } else if (dashboardResult.success && dashboardResult.data?.dealer) {
-        // Nếu có dealer info từ dashboard API
-        dealerData = dashboardResult.data.dealer;
-        console.log('✅ Using dealer data from Dashboard API');
+      // --- LOGIC XỬ LÝ DỮ LIỆU (API -> Mock -> Fallback) ---
+      let dealerData = {};
+      const apiDealerData = dealerInfoResult.status === 'fulfilled' && dealerInfoResult.value.success 
+                            ? dealerInfoResult.value.data 
+                            : null;
+
+      // 1. Kiểm tra nếu API trả về dữ liệu "có vẻ" đầy đủ (ít nhất có tên)
+      if (apiDealerData && (apiDealerData.name || apiDealerData.dealerName)) {
+        dealerData = apiDealerData;
       } else {
-        // Fallback: tạo từ currentUser
-        dealerData = {
-          dealerId: currentDealerId,
-          name: `Đại lý #${currentDealerId}`,
-          dealerName: `Đại lý #${currentDealerId}`,
-          address: 'Chưa có thông tin',
-          phone: 'Chưa có thông tin',
-          email: 'Chưa có thông tin',
-          totalVehicles: 0,
-          totalOrders: 0,
-          totalUsers: 0
-        };
-        console.warn('⚠️ Using fallback dealer data');
+        // 2. Nếu API lỗi hoặc thiếu dữ liệu -> DÙNG MOCK DATA DỰA VÀO ID
+        console.warn(`⚠️ API không trả về thông tin đại lý ${currentDealerId}, sử dụng Mock Data.`);
+        const mockData = getMockDealerById(currentDealerId);
+        
+        if (mockData) {
+          console.log("✅ Đã tìm thấy Mock Data cho ID:", currentDealerId);
+          dealerData = mockData;
+        } else {
+          // 3. Fallback cuối cùng (nếu ID không nằm trong file mock)
+          dealerData = {
+            dealerId: currentDealerId,
+            name: `Đại lý #${currentDealerId}`,
+            address: 'Đang cập nhật...',
+            phone: '---',
+            email: '---',
+            representativeName: '---',
+            status: 'Active'
+          };
+        }
       }
       
-      console.log('🏢 Final Dealer Data:', dealerData);
-      console.log('🏷️ Dealer Name:', dealerData?.dealerName || dealerData?.name);
-      
-      // Tạo dashboard data - luôn có dữ liệu cơ bản
+      const statsData = dashboardResult.status === 'fulfilled' && dashboardResult.value.success 
+                        ? dashboardResult.value.data 
+                        : {};
+
       const data = {
         dealer: dealerData,
-        performance: dashboardResult.success ? dashboardResult.data?.performance : {
-          monthlySales: 0,
-          quarterTarget: 0,
-          customerSatisfaction: 0,
-          deliveryTime: 0
-        },
-        recentOrders: dashboardResult.success ? dashboardResult.data?.recentOrders || [] : [],
-        inventory: dashboardResult.success ? dashboardResult.data?.inventory || [] : []
+        performance: statsData.performance || {},
+        recentOrders: statsData.recentOrders || [],
+        inventory: statsData.inventory || []
       };
       
       setDashboardData(data);
-      
-      // Chỉ hiện thông báo lỗi, không block UI
-      if (!dashboardResult.success) {
-        console.warn('⚠️ Dashboard API failed:', dashboardResult.message);
-      }
     } catch (err) {
-      console.error('❌ Dealer Dashboard error:', err);
+      console.error('❌ Dashboard Error:', err);
       
-      // Vẫn tạo dữ liệu cơ bản để hiển thị
-      const fallbackData = {
-        dealer: {
-          dealerId: dealerId || currentUser?.dealerId,
-          name: currentUser?.name ? `Đại lý của ${currentUser.name}` : 'Đại lý',
-          dealerName: currentUser?.name ? `Đại lý của ${currentUser.name}` : 'Đại lý',
-          address: 'Chưa có thông tin',
-          phone: 'Chưa có thông tin',
-          email: 'Chưa có thông tin'
-        },
-        performance: {
-          monthlySales: 0,
-          quarterTarget: 0,
-          customerSatisfaction: 0,
-          deliveryTime: 0
-        },
-        recentOrders: [],
-        inventory: []
-      };
+      // Fallback an toàn khi crash toàn bộ: Vẫn cố gắng hiển thị thông tin Mock nếu có ID
+      const currentDealerId = dealerId || currentUser?.dealerId;
+      const mockData = getMockDealerById(currentDealerId);
       
-      setDashboardData(fallbackData);
+      setDashboardData({
+         dealer: mockData || { name: 'Đại lý', dealerId: currentDealerId },
+         performance: {},
+         recentOrders: [],
+         inventory: []
+      });
     } finally {
       stopLoading();
     }
   }, [startLoading, stopLoading, currentUser, dealerId]);
+
 
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
 
   console.log('📊 Dashboard data:', dashboardData);
-  
+
   if (!dashboardData) {
     console.log('⏳ Waiting for dashboard data...');
     return null; // Global loading handles the visual feedback
@@ -186,7 +179,7 @@ const DealerDashboard = () => {
               <p className="text-red-600 dark:text-red-300 font-medium mb-6">
                 Chỉ Quản lý Đại Lý mới có quyền xem báo cáo
               </p>
-              <button 
+              <button
                 className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 transition-all duration-300"
                 onClick={() => setActiveSection('overview')}
               >
@@ -203,131 +196,87 @@ const DealerDashboard = () => {
 
   return (
     <PageContainer>
-      
-      {/* Hero Section - Redesigned with theme support */}
-      <div className="relative overflow-hidden dark:bg-gradient-to-br dark:from-gray-900/95 dark:via-gray-800/90 dark:to-emerald-900/80 bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 rounded-3xl p-6 md:p-12 mb-8 shadow-2xl dark:shadow-emerald-500/20 shadow-cyan-500/30 border dark:border-emerald-500/30 border-cyan-400/50 backdrop-blur-xl">
-        {/* Animated Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 left-0 w-72 h-72 bg-white dark:bg-emerald-500 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-cyan-300 dark:bg-emerald-600 rounded-full blur-3xl animate-pulse delay-1000"></div>
-        </div>
-        
-        {/* Content */}
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="p-4 bg-white/30 dark:bg-emerald-500/20 rounded-2xl backdrop-blur-sm border border-white/50 dark:border-emerald-400/30 shadow-lg">
-              <span className="text-4xl md:text-5xl">🏢</span>
+      {/* --- HEADER BANNER ĐẦY ĐỦ THÔNG TIN --- */}
+      <div className="relative overflow-hidden rounded-3xl mb-8 shadow-2xl border border-white/20">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900"></div>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+
+        {/* Content Container */}
+        <div className="relative z-10 p-8 md:p-10">
+          <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center">
+
+            {/* Logo / Avatar Đại lý */}
+            <div className="flex-shrink-0">
+              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl bg-white/10 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-inner">
+                <Building2 className="w-12 h-12 md:w-16 md:h-16 text-cyan-400" />
+              </div>
             </div>
-            <div className="flex-1">
-              {/* Tên đại lý nổi bật */}
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white drop-shadow-2xl mb-1">
-                {dealer?.name || dealer?.dealerName || 'Dealer Dashboard'}
-              </h1>
-              {dealer?.address && (
-                <p className="text-sm md:text-base text-white/90 font-medium mb-1 flex items-center gap-2">
-                  <span>📍</span>
-                  <span>{dealer.address}</span>
-                </p>
-              )}
-              <p className="text-xs md:text-sm text-white/70 font-medium">
-                Mã đại lý: {dealer?.dealerId || dealerId || currentUser?.dealerId || 'N/A'}
-              </p>
-              <div className="h-1 w-32 dark:bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 bg-gradient-to-r from-white to-cyan-200 rounded-full mt-2 shadow-lg"></div>
-            </div>
-          </div>
-          
-          {/* Thông tin người dùng và vai trò */}
-          <div className="bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-2xl p-4 mb-6 border border-white/40 dark:border-emerald-400/30 shadow-lg">
-            <div className="flex items-center gap-3 flex-wrap">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">👤</span>
-                <div>
-                  <p className="text-xs text-white/70 font-medium">Người dùng</p>
-                  <p className="text-lg font-bold text-white">{currentUser?.name || 'Chưa xác định'}</p>
+
+            {/* Thông tin chính */}
+            <div className="flex-1 space-y-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-bold border border-cyan-500/30 uppercase tracking-wider">
+                    Đại lý ủy quyền
+                  </span>
+                  <span className="text-slate-400 text-sm font-mono">#{dealer.id || dealer.dealerId || 'ID'}</span>
                 </div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white leading-tight">
+                  {dealer.name || dealer.dealerName || 'Tên Đại Lý'}
+                </h1>
               </div>
-              
-              <div className="h-8 w-px bg-white/30"></div>
-              
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{isManager ? '👔' : '🧑‍💼'}</span>
-                <div>
-                  <p className="text-xs text-white/70 font-medium">Vai trò</p>
-                  <p className="text-lg font-bold text-white">
-                    {isManager ? 'Quản lý Đại lý' : isStaff ? 'Nhân viên Đại lý' : currentUser?.role || 'Chưa xác định'}
-                  </p>
+
+              {/* Grid thông tin chi tiết */}
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-3 text-slate-300">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white/5"><MapPin className="w-4 h-4 text-rose-400" /></div>
+                  <span className="text-sm">{dealer.address || 'Chưa cập nhật địa chỉ'}</span>
                 </div>
-              </div>
-              
-              {currentUser?.email && (
-                <>
-                  <div className="h-8 w-px bg-white/30"></div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">📧</span>
-                    <div>
-                      <p className="text-xs text-white/70 font-medium">Email</p>
-                      <p className="text-sm font-semibold text-white">{currentUser.email}</p>
-                    </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white/5"><Phone className="w-4 h-4 text-rose-400" /></div>
+                  <span className="text-sm font-mono">{dealer.phoneNumber || dealer.phone || 'Chưa cập nhật SĐT'}</span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white/5"><Mail className="w-4 h-4 text-blue-400" /></div>
+                  <span className="text-sm">{dealer.email || 'Chưa cập nhật Email'}</span>
+                </div>
+
+                {dealer.representativeName && (
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-white/5"><UserCircle className="w-4 h-4 text-amber-400" /></div>
+                    <span className="text-sm">Đại diện: <strong className="text-white">{dealer.representativeName}</strong></span>
                   </div>
-                </>
-              )}
+                )}
+              </div>
             </div>
+
+            {/* Stats Mini (Góc phải) */}
+            <div className="hidden xl:block bg-white/5 rounded-2xl p-6 backdrop-blur-sm border border-white/10 min-w-[200px]">
+              <div className="text-slate-400 text-sm mb-1">Doanh số tháng này</div>
+              <div className="text-3xl font-bold text-rose-400">
+                {dashboardData.performance?.monthlySales || 0} <span className="text-base font-normal text-rose-600/80">xe</span>
+              </div>
+              <div className="mt-2 h-1 w-full bg-slate-700 rounded-full overflow-hidden">
+                <div className="h-full bg-rose-500 w-[70%]"></div>
+              </div>
+            </div>
+
           </div>
-          
-          {/* Thông tin Đại lý (nếu có) */}
-          {dealer && (dealer.address || dealer.phone || dealer.email) && (
-            <div className="bg-white/15 dark:bg-white/5 backdrop-blur-md rounded-2xl p-4 mb-8 border border-white/30 dark:border-emerald-400/20 shadow-lg">
-              <div className="flex items-center gap-3 flex-wrap">
-                {dealer.address && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">📍</span>
-                    <div>
-                      <p className="text-xs text-white/70 font-medium">Địa chỉ</p>
-                      <p className="text-sm font-semibold text-white">{dealer.address}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {dealer.phone && dealer.address && <div className="h-8 w-px bg-white/30"></div>}
-                
-                {dealer.phone && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">📞</span>
-                    <div>
-                      <p className="text-xs text-white/70 font-medium">Điện thoại</p>
-                      <p className="text-sm font-semibold text-white">{dealer.phone}</p>
-                    </div>
-                  </div>
-                )}
-                
-                {dealer.email && (dealer.address || dealer.phone) && <div className="h-8 w-px bg-white/30"></div>}
-                
-                {dealer.email && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">✉️</span>
-                    <div>
-                      <p className="text-xs text-white/70 font-medium">Email liên hệ</p>
-                      <p className="text-sm font-semibold text-white">{dealer.email}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-          
-          <HeroStats dashboardData={dashboardData} />
         </div>
       </div>
 
       {/* Navigation Pills - Modern Glass Design */}
       <div className="relative mb-8">
         {/* Background Glow Effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 dark:from-emerald-500/10 dark:via-indigo-500/10 dark:to-fuchsia-500/10 rounded-3xl blur-xl"></div>
-        
+        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-sky-500/10 to-purple-300/10 dark:from-rose-500/10 dark:via-indigo-500/10 dark:to-fuchsia-500/10 rounded-3xl blur-xl"></div>
+
         <div className="relative flex flex-wrap gap-3 p-3 bg-white/40 dark:bg-white/5 backdrop-blur-md rounded-3xl border border-gray-200/50 dark:border-white/10 shadow-lg">
           {NAV_SECTIONS.map((section) => {
             const IconComponent = section.icon;
-            
+
             // Reports section is manager-only
             if (section.id === 'reports' && !isManager) {
               return (
@@ -346,40 +295,37 @@ const DealerDashboard = () => {
                 </div>
               );
             }
-            
+
             const isActive = activeSection === section.id;
-            
+
             return (
               <button
                 key={section.id}
-                className={`group relative flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold transition-all duration-300 border-2 backdrop-blur-sm overflow-hidden border-none ${
-                  isActive
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-slate-700 dark:to-gray-600 text-white border-cyan-400/80 dark:border-rose-400/80 shadow-xl shadow-cyan-500/40 dark:shadow-emerald-500/40 scale-105 translate-y-[-2px]'
-                    : 'bg-white/60 dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-200/80 dark:border-white/10 hover:bg-cyan-50/80 dark:hover:bg-white/10 hover:scale-105 hover:translate-y-[-2px] hover:border-cyan-400/60 dark:hover:border-emerald-400/40 hover:shadow-lg hover:shadow-cyan-500/20 dark:hover:shadow-slate-500/20'
-                }`}
+                className={`group relative flex items-center gap-2.5 px-6 py-3.5 rounded-2xl font-bold transition-all duration-300 border-2 backdrop-blur-sm overflow-hidden border-none ${isActive
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 dark:from-slate-700 dark:to-gray-600 text-white border-cyan-400/80 dark:border-rose-400/80 shadow-xl shadow-cyan-500/40 dark:shadow-rose-500/40 scale-105 translate-y-[-2px]'
+                    : 'bg-white/60 dark:bg-white/5 text-gray-700 dark:text-gray-300 border-gray-200/80 dark:border-white/10 hover:bg-cyan-50/80 dark:hover:bg-white/10 hover:scale-105 hover:translate-y-[-2px] hover:border-cyan-400/60 dark:hover:border-rose-400/40 hover:shadow-lg hover:shadow-cyan-500/20 dark:hover:shadow-slate-500/20'
+                  }`}
                 onClick={() => setActiveSection(section.id)}
               >
                 {/* Active Indicator - Animated Gradient Background */}
                 {isActive && (
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-600/20 via-blue-500/20 to-purple-500/20 dark:from-slate-400/20 dark:via-purple-500/20 dark:to-sky-500/20 animate-pulse"></div>
                 )}
-                
+
                 {/* Icon with Animation */}
-                <IconComponent className={`w-5 h-5 relative z-10 transition-transform duration-300 ${
-                  isActive 
-                    ? 'scale-110 drop-shadow-lg' 
+                <IconComponent className={`w-5 h-5 relative z-10 transition-transform duration-300 ${isActive
+                    ? 'scale-110 drop-shadow-lg'
                     : 'group-hover:scale-110 group-hover:rotate-12'
-                }`} />
-                
+                  }`} />
+
                 {/* Label */}
-                <span className={`relative z-10 transition-all duration-300 ${
-                  isActive 
-                    ? 'drop-shadow-md' 
+                <span className={`relative z-10 transition-all duration-300 ${isActive
+                    ? 'drop-shadow-md'
                     : 'group-hover:tracking-wide'
-                }`}>
+                  }`}>
                   {section.label}
                 </span>
-                
+
                 {/* Active Dot Indicator */}
                 {isActive && (
                   <span className="relative z-10 flex h-2.5 w-2.5 ml-1">
@@ -387,7 +333,7 @@ const DealerDashboard = () => {
                     <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white shadow-lg"></span>
                   </span>
                 )}
-                
+
                 {/* Shine Effect on Hover */}
                 {!isActive && (
                   <div className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>

@@ -24,25 +24,23 @@ const OrderList = () => {
     loadOrders();
   }, []);
 
-  const loadOrders = async () => {
+ const loadOrders = async () => {
     setIsLoading(true);
     try {
-      const result = await dealerAPI.getOrders();
+      const result = await dealerAPI.getOrders(); // Gọi GET /api/Orders
       if (result.success && result.data) {
-        const orderList = Array.isArray(result.data) ? result.data : result.data.data || [];
+        // Kiểm tra cấu trúc trả về, có thể là mảng trực tiếp hoặc wrapped trong object
+        const orderList = Array.isArray(result.data) ? result.data : (result.data.data || result.data.items || []);
         setOrders(orderList);
       } else {
-        console.error('Failed to load orders:', result.message);
         setOrders([]);
       }
     } catch (error) {
-      console.error('Error loading orders:', error);
       setOrders([]);
     } finally {
       setIsLoading(false);
     }
   };
-
   const getStatusBadge = (status) => {
     const statusMap = {
       'pending': 'warning',

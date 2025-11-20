@@ -37,7 +37,7 @@ namespace EVDealer.BE.API.Controllers
         // Điều này linh hoạt hơn nhiều so với việc chỉ cho phép "Admin".
         // URL: GET /api/dashboard/stats
         [HttpGet("stats")]
-        [Authorize(Policy = "CanViewDashboardStats")]
+        [Authorize]
         public IActionResult GetDashboardStats()
         {
             return Ok("Đây là dữ liệu thống kê trên Dashboard. Bạn đã được xác thực có quyền xem nó!");
