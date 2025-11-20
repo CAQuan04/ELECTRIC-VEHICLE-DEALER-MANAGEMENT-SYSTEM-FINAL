@@ -21,40 +21,49 @@ import {
 } from '@/features/dealer/components'; 
 
 const StockDetail = () => {
-  const { stockId } = useParams();
+  const { dealerId, stockId } = useParams();
   const navigate = useNavigate();
   const { isLoading, startLoading, stopLoading } = usePageLoading();
   const [stockDetail, setStockDetail] = useState(null);
 
   // ✨ 2. TẠO BREADCRUMBS
   const breadcrumbs = useMemo(() => [
-    { label: 'Kho hàng', path: '/dealer/inventory' },
+    { label: 'Kho hàng', path: `/${dealerId}/dealer/inventory` },
     { label: stockDetail ? `${stockDetail.model} - ${stockDetail.color}` : 'Chi tiết xe' }
-  ], [stockDetail]);
+  ], [dealerId, stockDetail]);
 
   useEffect(() => {
     const loadStockDetail = async () => {
-      if (!stockId) return;
+      if (!dealerId || !stockId) {
+        console.error('❌ Missing dealerId or stockId');
+        return;
+      }
       try {
         startLoading('Đang tải chi tiết kho...');
-        const result = await dealerAPI.getStockById(stockId); 
+        console.log('🔍 Loading stock detail - dealerId:', dealerId, 'stockId:', stockId);
+        const result = await dealerAPI.getStockById(dealerId, stockId); 
+        console.log('✅ Detail API result:', result);
+        console.log('📦 result.success:', result.success);
+        console.log('📦 result.data:', result.data);
         
         if (result.success && result.data) {
+          console.log('✅ Setting stock detail:', result.data);
           setStockDetail(result.data);
         } else {
+          console.error('❌ Failed to load detail:', result);
           notifications.error('Lỗi', result.message || 'Không thể tải chi tiết kho');
-          navigate('/dealer/inventory');
+          navigate(`/${dealerId}/dealer/inventory`);
         }
       } catch (error) {
         notifications.error('Lỗi hệ thống', error.message || 'Không thể tải chi tiết kho');
-        navigate('/dealer/inventory');
+        navigate(`/${dealerId}/dealer/inventory`);
       } finally {
         stopLoading();
       }
     };
     
     loadStockDetail();
-  }, [stockId, navigate, startLoading, stopLoading]);
+  }, [dealerId, stockId, navigate, startLoading, stopLoading]);
 
   // --- Columns Definition ---
   const vehicleColumns = [
@@ -118,7 +127,7 @@ const StockDetail = () => {
   const handleRefresh = async () => {
     try {
       startLoading('Đang làm mới dữ liệu...');
-      const result = await dealerAPI.getStockById(stockId);
+      const result = await dealerAPI.getStockById(dealerId, stockId);
       if (result.success && result.data) {
         setStockDetail(result.data);
         notifications.success('Đã cập nhật', 'Dữ liệu đã được làm mới');

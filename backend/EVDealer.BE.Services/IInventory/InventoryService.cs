@@ -15,7 +15,7 @@ namespace EVDealer.BE.Services.IInventory
     {
         private readonly IInventoryRepository _inventoryRepo;
         private readonly ApplicationDbContext _context;
-        
+
         public InventoryService(IInventoryRepository inventoryRepo, ApplicationDbContext context)
         {
             _inventoryRepo = inventoryRepo;
@@ -149,7 +149,7 @@ namespace EVDealer.BE.Services.IInventory
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.ToLower();
-                query = query.Where(i => 
+                query = query.Where(i =>
                     i.Vehicle.Brand.ToLower().Contains(search) ||
                     i.Vehicle.Model.ToLower().Contains(search) ||
                     (i.Config.Color != null && i.Config.Color.ToLower().Contains(search))
@@ -180,19 +180,26 @@ namespace EVDealer.BE.Services.IInventory
 
         public async Task<DealerInventoryDetailDto?> GetInventoryItemDetailAsync(int dealerId, int inventoryId)
         {
-            // Query from Inventory table
+            Console.WriteLine($"[Service] Querying InventoryId={inventoryId}, dealerId={dealerId}");
             var item = await _context.Inventories
                 .Include(i => i.Vehicle)
                 .Include(i => i.Config)
                 .Include(i => i.Location)
-                .FirstOrDefaultAsync(i => 
-                    i.InventoryId == inventoryId && 
-                    i.LocationType == "Dealer" && 
+                .FirstOrDefaultAsync(i =>
+                    i.InventoryId == inventoryId &&
+                    i.LocationType.ToLower() == "dealer" &&
                     i.LocationId == dealerId
                 );
-
+            Console.WriteLine($"[Service] Query result: {(item == null ? "null" : "found")}");
+            if (item != null)
+            {
+                Console.WriteLine($"[Service] Vehicle: {(item.Vehicle == null ? "null" : item.Vehicle.Model)}");
+                Console.WriteLine($"[Service] Config: {(item.Config == null ? "null" : item.Config.Color)}");
+                Console.WriteLine($"[Service] Location: {(item.Location == null ? "null" : item.Location.Name)}");
+            }
             if (item == null)
             {
+                Console.WriteLine("[Service] No inventory found for detail API!");
                 return null;
             }
 
@@ -216,8 +223,8 @@ namespace EVDealer.BE.Services.IInventory
                 BasePrice = item.Vehicle.BasePrice ?? 0,
                 DealerId = dealerId,
                 DealerName = item.Location?.Name ?? "N/A",
-                VehicleImages = string.IsNullOrEmpty(item.Vehicle.ImageUrl) 
-                    ? new List<string>() 
+                VehicleImages = string.IsNullOrEmpty(item.Vehicle.ImageUrl)
+                    ? new List<string>()
                     : item.Vehicle.ImageUrl.Split(',').ToList(),
                 Specifications = null, // TODO: Add if available
                 LastRestockDate = item.UpdatedAt
@@ -292,14 +299,14 @@ namespace EVDealer.BE.Services.IInventory
         }
 
         // ==================== INVENTORY INCREASE (EVM FULFILLMENT) ====================
-        
+
         public async Task IncreaseInventoryAsync(int dealerId, int vehicleId, int configId, int quantity)
         {
             // Find existing Inventory record for this dealer + vehicle + config
             var inventory = await _context.Inventories
-                .FirstOrDefaultAsync(i => 
-                    i.LocationType == "Dealer" && 
-                    i.LocationId == dealerId && 
+                .FirstOrDefaultAsync(i =>
+                    i.LocationType == "Dealer" &&
+                    i.LocationId == dealerId &&
                     i.VehicleId == vehicleId &&
                     i.ConfigId == configId);
 
@@ -327,4 +334,5 @@ namespace EVDealer.BE.Services.IInventory
             await _context.SaveChangesAsync();
         }
     }
+
 }

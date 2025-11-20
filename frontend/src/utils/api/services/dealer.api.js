@@ -165,18 +165,27 @@ class DealerAPI {
 
   /**
    * Get stock details by ID
-   * GET /dealer/inventory/:id
-   * @param {string|number} stockId - Stock ID
+   * GET /Inventory/dealer/{dealerId}/item/{inventoryId}
+   * @param {number} dealerId - Dealer ID
+   * @param {string|number} inventoryId - Inventory ID
    * @returns {Promise<Object>} Stock details
    */
-  async getStockById(stockId) {
-    try {
-      const response = await apiClient.get(`/dealer/inventory/${stockId}`);
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho' };
-    }
+async getStockById(dealerId, inventoryId) {
+  try {
+    console.log('🔍 [dealer.api] Getting inventory detail - dealerId:', dealerId, 'inventoryId:', inventoryId);
+    const response = await apiClient.get(`/Inventory/dealer/${dealerId}/item/${inventoryId}`);
+    // --- SỬA LỖI TẠI ĐÂY ---
+    // Kiểm tra: Nếu response.data tồn tại thì dùng nó (trường hợp Axios gốc), 
+    // ngược lại thì dùng chính response (trường hợp đã qua interceptor).
+    const data = response.data || response; 
+    
+    console.log('📦 [dealer.api] Inventory detail:', data);
+    return { success: true, data };
+  } catch (error) {
+    console.error('❌ [dealer.api] Error getting inventory detail:', error);
+    return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho' };
   }
+}
 
   /**
    * Create distribution request

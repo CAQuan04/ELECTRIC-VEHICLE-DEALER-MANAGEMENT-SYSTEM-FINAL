@@ -93,7 +93,7 @@ const DealerInventory = () => {
               console.error('❌ No dealerId in user context:', user);
               return;
             }
-            navigate(`/${dealerId}/dealer/inventory/${item.inventoryId || item.id}`);
+            navigate(`/${dealerId}/dealer/inventory/${item.inventoryId}`);
           }}
         >
           Chi tiết →
