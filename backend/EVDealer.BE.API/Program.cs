@@ -12,10 +12,14 @@ using EVDealer.BE.Services.Auth;
 using EVDealer.BE.Services.Customers;
 using EVDealer.BE.Services.DealerManagement;
 using EVDealer.BE.Services.Dealers;
-// Ghi chú: Đổi tên namespace 'IInventory' thành 'Inventory' cho nhất quán nếu bạn đã đổi.
+using EVDealer.BE.Services.Deliveries;
 using EVDealer.BE.Services.IInventory;
+using EVDealer.BE.Services.Orders;
 using EVDealer.BE.Services.Planning;
 using EVDealer.BE.Services.Pricing;
+using EVDealer.BE.Services.Procurement;
+using EVDealer.BE.Services.Promotions;
+using EVDealer.BE.Services.Quotations;
 using EVDealer.BE.Services.TestDrives;
 using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
@@ -65,10 +69,15 @@ builder.Services.AddScoped<IDealerManagementRepository, DealerManagementReposito
 builder.Services.AddScoped<IPricingRepository, PricingRepository>();
 builder.Services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
 builder.Services.AddScoped<IDemandForecastRepository, DemandForecastRepository>();
+builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
 // Thêm bất kỳ repository nào khác bạn có ở đây...
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IDealerRepository, DealerRepository>();
-
+builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
+builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
+builder.Services.AddScoped<IDistributionRepository, DistributionRepository>();
 // Ghi chú: Đăng ký Unit of Work, quản lý tất cả Repository.
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // ===================================================================================
@@ -86,9 +95,18 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<IDealerManagementService, DealerManagementService>();
 builder.Services.AddScoped<IPricingService, PricingService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
+builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IDeliveryService, DeliveryService>();
+builder.Services.AddScoped<IPurchaseRequestService, PurchaseRequestService>();
+builder.Services.AddScoped<IDistributionService, DistributionService>();
 // Đăng ký Service AI
 builder.Services.AddScoped<IDemandForecastService, DemandForecastService>();
 builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+
+// Ghi chú: Đăng ký AutoMapper ở đây.
+builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Logging.ClearProviders();
 builder.Services.AddScoped<IDistributionSuggestionRepository, DistributionSuggestionRepository>();

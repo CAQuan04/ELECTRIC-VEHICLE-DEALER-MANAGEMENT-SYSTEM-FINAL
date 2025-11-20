@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 
 namespace EVDealer.BE.DAL.Models;
 
@@ -21,6 +22,10 @@ public partial class SalesOrder
 
     public int? ApprovedBy { get; set; }
 
+    public string? ApprovalNote { get; set; }
+
+    public DateTime? ApprovedAt { get; set; }
+
     public virtual User? ApprovedByNavigation { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
@@ -32,4 +37,10 @@ public partial class SalesOrder
     public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
 
     public virtual Quotation? Quotation { get; set; }
+
+    public virtual Contract? Contract { get; set; }
+
+    public virtual ICollection<OrderPromotion> OrderPromotions { get; set; } = new List<OrderPromotion>();
+
+    public virtual Delivery? Delivery { get; set; }
 }

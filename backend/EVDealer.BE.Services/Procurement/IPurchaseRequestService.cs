@@ -1,0 +1,15 @@
+using EVDealer.BE.Common.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace EVDealer.BE.Services.Procurement
+{
+    public interface IPurchaseRequestService
+    {
+        Task<PurchaseRequestDto> CreateRequestAsync(PurchaseRequestCreateDto dto, int dealerId);
+        Task<IEnumerable<PurchaseRequestDto>> GetRequestsForDealerAsync(int dealerId);
+        Task<IEnumerable<PurchaseRequestDto>> GetPendingRequestsAsync();
+        Task<PurchaseRequestDto> ApproveRequestAsync(int requestId);
+        Task<PurchaseRequestDto> RejectRequestAsync(int requestId);
+    }
+}

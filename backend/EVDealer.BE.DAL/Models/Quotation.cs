@@ -21,5 +21,7 @@ public partial class Quotation
 
     public virtual Customer Customer { get; set; } = null!;
 
+    public virtual ICollection<QuotationItem> QuotationItems { get; set; } = new List<QuotationItem>();
+
     public virtual SalesOrder? SalesOrder { get; set; }
 }

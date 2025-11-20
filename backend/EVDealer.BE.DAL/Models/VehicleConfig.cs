@@ -23,6 +23,10 @@ public partial class VehicleConfig
     public virtual Vehicle Vehicle { get; set; } = null!;
     public virtual ICollection<Distribution> Distributions { get; set; }
 
+    public virtual ICollection<QuotationItem> QuotationItems { get; set; } = new List<QuotationItem>();
+
+    public virtual ICollection<PurchaseRequest> PurchaseRequests { get; set; } = new List<PurchaseRequest>();
+
     [Required]
     [Column(TypeName = "varchar(20)")]
     public string Status { get; set; }

@@ -32,6 +32,7 @@ public partial class Vehicle
 
     public virtual ICollection<VehicleConfig> VehicleConfigs { get; set; } = new List<VehicleConfig>();
 
+    public virtual ICollection<QuotationItem> QuotationItems { get; set; } = new List<QuotationItem>();
     // === PHẦN BỔ SUNG: THÊM THUỘC TÍNH LƯU LINK HÌNH ẢNH ===
     // Ghi chú: Chúng ta sẽ lưu URL của hình ảnh dưới dạng một chuỗi.
     // Dấu '?' cho biết thuộc tính này có thể là null (không bắt buộc phải có hình ảnh).
