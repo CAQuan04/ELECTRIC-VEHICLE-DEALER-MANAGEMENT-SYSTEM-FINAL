@@ -25,7 +25,7 @@ namespace EVDealer.BE.API.Controllers
         /// Auth: DealerStaff
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = "DealerStaff,Admin")]
+        [Authorize(Roles = "DealerManager,DealerStaff,Admin")]
         public async Task<IActionResult> CreateQuotation([FromBody] QuotationCreateDto createDto)
         {
             if (!ModelState.IsValid)
