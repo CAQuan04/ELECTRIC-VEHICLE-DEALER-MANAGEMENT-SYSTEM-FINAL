@@ -56,6 +56,7 @@ export { default as SupplierDebtReport } from './pages/Reports/SupplierDebtRepor
 // Promotion Management
 export { default as PromotionList } from './pages/Promotion/PromotionList';
 export { default as PromotionDetail } from './pages/Promotion/PromotionDetail';
+export {default as CreatePromotion } from './pages/Promotion/CreatePromotion';
 
 // Staff Management
 export { default as StaffList } from './pages/StaffManagement/StaffList';

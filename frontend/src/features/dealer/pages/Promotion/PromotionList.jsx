@@ -2,58 +2,46 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api';
-import { notifications } from '@utils/notifications';
-
+import { notifications } from '@/utils/notifications'; // Sửa path import nếu cần
+import { useAuth } from '@/context/AuthContext';
 // Import Lucide icons
 import {
-  Plus,
-  Search,
-  Filter,
-  Tag,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Eye,
-  Edit,
-  Trash2,
-  Percent,
-  DollarSign,
-  Gift,
-  Package
+  Plus, Search, Filter, Tag, CheckCircle, XCircle,
+  Clock, Eye, Edit, Trash2, Percent, DollarSign, Gift, Package
 } from 'lucide-react';
 
 // Import components
 import {
-  PageContainer,
-  PageHeader,
-  SearchBar,
-  Table,
-  Badge,
-  Button,
-  EmptyState,
-  MetricCard
+  PageContainer, PageHeader, SearchBar, Table,
+  Badge, Button, EmptyState, MetricCard
 } from '../../components';
 
 const PromotionList = () => {
   const navigate = useNavigate();
   const { startLoading, stopLoading } = usePageLoading();
-  
+  const { user } = useAuth();
   const [promotions, setPromotions] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
-    loadPromotions();
-  }, []);
+    if (user?.dealerId) {
+      loadPromotions();
+    }
+  }, [user?.dealerId]);
 
   const loadPromotions = async () => {
     try {
       startLoading('Đang tải danh sách khuyến mãi...');
-      const result = await dealerAPI.getPromotions();
-      
+      const params = { dealerId: user?.dealerId };
+      const result = await dealerAPI.getPromotions(params);
+
       if (result.success) {
-        setPromotions(Array.isArray(result.data) ? result.data : []);
+        // Đảm bảo luôn là mảng
+        const list = Array.isArray(result.data) ? result.data : [];
+        console.log('✅ Promotions API Data:', list); // Debug data từ API
+        setPromotions(list);
       } else {
         notifications.error('Lỗi', result.message);
         setPromotions([]);
@@ -67,25 +55,30 @@ const PromotionList = () => {
     }
   };
 
-  // Filter promotions
+  // --- 1. BỘ LỌC AN TOÀN ---
   const filteredPromotions = useMemo(() => {
     let result = [...promotions];
 
     // Search filter
     if (searchTerm) {
-      result = result.filter(promo =>
-        promo.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        promo.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        promo.promoId?.toString().includes(searchTerm)
-      );
-    }
+      const term = searchTerm.toLowerCase();
+      result = result.filter(promo => {
+        // ✅ FIX: Thêm promotionId vào đây luôn
+        const id = promo.promotionId || promo.promoId || promo.id;
 
+        return (
+          (promo.name && promo.name.toLowerCase().includes(term)) ||
+          (promo.description && promo.description.toLowerCase().includes(term)) ||
+          (id && id.toString().includes(term))
+        );
+      });
+    }
     // Status filter
     if (statusFilter !== 'all') {
       result = result.filter(promo => promo.status === statusFilter);
     }
 
-    // Type filter
+    // Type filter (Dùng camelCase theo Swagger)
     if (typeFilter !== 'all') {
       result = result.filter(promo => promo.discountType === typeFilter);
     }
@@ -99,7 +92,6 @@ const PromotionList = () => {
     const active = promotions.filter(p => p.status === 'Active').length;
     const inactive = promotions.filter(p => p.status === 'Inactive').length;
     const expired = promotions.filter(p => p.status === 'Expired').length;
-
     return { total, active, inactive, expired };
   }, [promotions]);
 
@@ -108,115 +100,90 @@ const PromotionList = () => {
     const badges = {
       'Active': { variant: 'success', icon: <CheckCircle size={14} />, text: 'Đang hiệu lực' },
       'Inactive': { variant: 'gray', icon: <XCircle size={14} />, text: 'Ngừng hoạt động' },
-      'Expired': { variant: 'danger', icon: <Clock size={14} />, text: 'Hết hạn' }
+      'Expired': { variant: 'danger', icon: <Clock size={14} />, text: 'Hết hạn' },
+      'Draft': { variant: 'info', icon: <Edit size={14} />, text: 'Nháp' }
     };
-    const badge = badges[status] || badges['Inactive'];
-    
+    // Fallback
+    const normalized = status === 'Đang diễn ra' ? 'Active' : status;
+    const badge = badges[normalized] || badges['Inactive'];
+
     return (
       <Badge variant={badge.variant}>
-        <span className="flex items-center gap-1">
-          {badge.icon}
-          {badge.text}
-        </span>
+        <span className="flex items-center gap-1">{badge.icon} {badge.text}</span>
       </Badge>
     );
   };
 
   // Get discount type badge
   const getDiscountTypeBadge = (type, value) => {
+    const safeValue = value ? Number(value) : 0;
     const badges = {
-      'Percentage': { 
-        variant: 'info', 
-        icon: <Percent size={14} />, 
-        text: `${value}%` 
-      },
-      'FixedAmount': { 
-        variant: 'success', 
-        icon: <DollarSign size={14} />, 
-        text: `${value.toLocaleString('vi-VN')}đ` 
-      },
-      'Gift': { 
-        variant: 'purple', 
-        icon: <Gift size={14} />, 
-        text: 'Quà tặng' 
-      },
-      'Bundle': { 
-        variant: 'warning', 
-        icon: <Package size={14} />, 
-        text: 'Combo' 
-      }
+      'Percentage': { variant: 'info', icon: <Percent size={14} />, text: `${safeValue}%` },
+      'FixedAmount': { variant: 'success', icon: <DollarSign size={14} />, text: `${safeValue.toLocaleString('vi-VN')}đ` },
+      'Gift': { variant: 'purple', icon: <Gift size={14} />, text: 'Quà tặng' },
+      'Bundle': { variant: 'warning', icon: <Package size={14} />, text: 'Combo' }
     };
     const badge = badges[type] || badges['Percentage'];
-    
+
     return (
       <Badge variant={badge.variant}>
-        <span className="flex items-center gap-1">
-          {badge.icon}
-          {badge.text}
-        </span>
+        <span className="flex items-center gap-1">{badge.icon} {badge.text}</span>
       </Badge>
     );
   };
 
-  // Handle delete
-  const handleDelete = async (promotionId) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa chương trình khuyến mãi này?')) {
-      return;
-    }
-
+  const handleDelete = async (id) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa chương trình này?')) return;
     try {
       startLoading('Đang xóa...');
-      const result = await dealerAPI.deletePromotion(promotionId);
-      
+      const result = await dealerAPI.deletePromotion(id);
       if (result.success) {
-        notifications.success('Thành công', 'Đã xóa chương trình khuyến mãi');
+        notifications.success('Thành công', 'Đã xóa chương trình');
         loadPromotions();
       } else {
         notifications.error('Lỗi', result.message);
       }
     } catch (error) {
-      console.error('Error deleting promotion:', error);
-      notifications.error('Lỗi', 'Không thể xóa chương trình khuyến mãi');
+      notifications.error('Lỗi', 'Không thể xóa chương trình');
     } finally {
       stopLoading();
     }
   };
 
-  // Handle toggle status
-  const handleToggleStatus = async (promotionId, currentStatus) => {
+  const handleToggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    
     try {
       startLoading('Đang cập nhật...');
-      const result = await dealerAPI.updatePromotionStatus(promotionId, newStatus);
-      
+      const result = await dealerAPI.updatePromotionStatus(id, newStatus);
       if (result.success) {
-        notifications.success('Thành công', `Đã ${newStatus === 'Active' ? 'kích hoạt' : 'tạm dừng'} chương trình`);
+        notifications.success('Thành công', 'Đã cập nhật trạng thái');
         loadPromotions();
       } else {
         notifications.error('Lỗi', result.message);
       }
     } catch (error) {
-      console.error('Error updating status:', error);
       notifications.error('Lỗi', 'Không thể cập nhật trạng thái');
     } finally {
       stopLoading();
     }
   };
 
-  // Table columns configuration
   const columns = [
     {
-      key: 'promoId',
+      key: 'col_id',
       label: 'Mã',
-      render: (value) => <span className="font-bold text-cyan-600 dark:text-cyan-400">#{value}</span>
+      render: (row) => {
+        // ✅ FIX: Thêm row.promotionId vào danh sách tìm kiếm
+        const id = row.promotionId || row.promoId || row.id || row.promo_id;
+        return <span className="font-bold text-cyan-600">#{id || '???'}</span>;
+      }
     },
     {
       key: 'name',
       label: 'Tên chương trình',
-      render: (value, row) => (
+      render: (row) => (
         <div>
-          <div className="font-semibold text-gray-900 dark:text-white">{value}</div>
+          <div className="font-semibold text-gray-900 dark:text-white">{row.name}</div>
           <div className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
             {row.description || 'Không có mô tả'}
           </div>
@@ -226,28 +193,19 @@ const PromotionList = () => {
     {
       key: 'discountType',
       label: 'Loại giảm giá',
-      render: (value, row) => getDiscountTypeBadge(value, row.discountValue)
-    },
-    {
-      key: 'condition',
-      label: 'Điều kiện',
-      render: (value) => (
-        <div className="max-w-xs">
-          <p className="text-sm text-gray-700 dark:text-gray-300 line-clamp-2">
-            {value || 'Không có điều kiện'}
-          </p>
-        </div>
-      )
+      // Log cho thấy: discountType="FixedAmount", discountValue=1000000 -> CamelCase đúng rồi
+      render: (row) => getDiscountTypeBadge(row.discountType, row.discountValue)
     },
     {
       key: 'startDate',
       label: 'Thời gian',
-      render: (value, row) => (
+      // Log cho thấy: startDate="2025-11-22" -> CamelCase đúng rồi
+      render: (row) => (
         <div className="text-sm">
           <div className="text-gray-900 dark:text-white">
-            {value ? new Date(value).toLocaleDateString('vi-VN') : 'N/A'}
+            {row.startDate ? new Date(row.startDate).toLocaleDateString('vi-VN') : 'N/A'}
           </div>
-          <div className="text-gray-500 dark:text-gray-400">
+          <div className="text-gray-500">
             đến {row.endDate ? new Date(row.endDate).toLocaleDateString('vi-VN') : 'N/A'}
           </div>
         </div>
@@ -256,57 +214,66 @@ const PromotionList = () => {
     {
       key: 'status',
       label: 'Trạng thái',
-      render: (value) => getStatusBadge(value)
+      render: (row) => getStatusBadge(row.status)
     },
     {
       key: 'actions',
       label: 'Thao tác',
-      render: (_, row) => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="info"
-            size="sm"
-            onClick={() => navigate(`/dealer/promotions/${row.promoId}`)}
-            icon={<Eye size={14} />}
-          >
-            Chi tiết
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => navigate(`/dealer/promotions/edit/${row.promoId}`)}
-            icon={<Edit size={14} />}
-          >
-            Sửa
-          </Button>
-          {row.status !== 'Expired' && (
+      render: (row) => {
+        // ✅ FIX QUAN TRỌNG: Thêm row.promotionId vào đây để nút bấm hoạt động
+        const id = row.promotionId || row.promoId || row.id || row.promo_id;
+
+        if (!id) return <span className="text-xs text-red-500 font-bold">Thiếu ID</span>;
+
+        return (
+          <div className="flex items-center gap-2">
             <Button
-              variant={row.status === 'Active' ? 'warning' : 'success'}
+              variant="info"
               size="sm"
-              onClick={() => handleToggleStatus(row.promoId, row.status)}
+              onClick={() => navigate(`/dealer/promotions/${id}`)}
+              icon={<Eye size={14} />}
             >
-              {row.status === 'Active' ? 'Tạm dừng' : 'Kích hoạt'}
+              Chi tiết
             </Button>
-          )}
-          <Button
-            variant="danger"
-            size="sm"
-            onClick={() => handleDelete(row.promoId)}
-            icon={<Trash2 size={14} />}
-          >
-            Xóa
-          </Button>
-        </div>
-      )
+
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => navigate(`/dealer/promotions/edit/${id}`)}
+              icon={<Edit size={14} />}
+            >
+              Sửa
+            </Button>
+
+            {row.status !== 'Expired' && (
+              <Button
+                variant={row.status === 'Active' ? 'warning' : 'success'}
+                size="sm"
+                onClick={() => handleToggleStatus(id, row.status)}
+              >
+                {row.status === 'Active' ? 'Tạm dừng' : 'Kích hoạt'}
+              </Button>
+            )}
+
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => handleDelete(id)}
+              icon={<Trash2 size={14} />}
+            >
+              Xóa
+            </Button>
+          </div>
+        );
+      }
     }
   ];
-
   return (
     <PageContainer>
       <PageHeader
         title="🎁 Quản lý khuyến mãi"
         description="Tạo và quản lý các chương trình khuyến mãi"
-        action={
+        actions={
           <Button
             variant="primary"
             onClick={() => navigate('/dealer/promotions/create')}
@@ -319,30 +286,10 @@ const PromotionList = () => {
 
       {/* Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <MetricCard
-          title="Tổng chương trình"
-          value={metrics.total}
-          icon={<Tag className="w-8 h-8" />}
-          variant="info"
-        />
-        <MetricCard
-          title="Đang hiệu lực"
-          value={metrics.active}
-          icon={<CheckCircle className="w-8 h-8" />}
-          variant="success"
-        />
-        <MetricCard
-          title="Tạm dừng"
-          value={metrics.inactive}
-          icon={<XCircle className="w-8 h-8" />}
-          variant="gray"
-        />
-        <MetricCard
-          title="Hết hạn"
-          value={metrics.expired}
-          icon={<Clock className="w-8 h-8" />}
-          variant="danger"
-        />
+        <MetricCard title="Tổng chương trình" value={metrics.total} icon={<Tag className="w-8 h-8" />} variant="info" />
+        <MetricCard title="Đang hiệu lực" value={metrics.active} icon={<CheckCircle className="w-8 h-8" />} variant="success" />
+        <MetricCard title="Tạm dừng" value={metrics.inactive} icon={<XCircle className="w-8 h-8" />} variant="gray" />
+        <MetricCard title="Hết hạn" value={metrics.expired} icon={<Clock className="w-8 h-8" />} variant="danger" />
       </div>
 
       {/* Filters */}
@@ -350,41 +297,28 @@ const PromotionList = () => {
         <SearchBar
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Tìm theo tên, mô tả, mã..."
+          placeholder="Tìm theo tên, mô tả..."
         />
-
         <div>
-          <label className="block text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-3">
-            <Filter size={16} className="inline mr-2" />
-            Loại giảm giá
-          </label>
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="w-full px-6 py-4 rounded-2xl dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-300"
+            className="w-full px-4 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700"
           >
-            <option value="all">Tất cả</option>
-            <option value="Percentage">Theo phần trăm</option>
-            <option value="FixedAmount">Giá trị cố định</option>
-            <option value="Gift">Quà tặng</option>
-            <option value="Bundle">Combo</option>
+            <option value="all">Tất cả loại</option>
+            <option value="Percentage">Phần trăm</option>
+            <option value="FixedAmount">Số tiền</option>
           </select>
         </div>
-
         <div>
-          <label className="block text-sm font-bold uppercase tracking-wider text-gray-700 dark:text-gray-300 mb-3">
-            <Filter size={16} className="inline mr-2" />
-            Trạng thái
-          </label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-full px-6 py-4 rounded-2xl dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 dark:text-white focus:outline-none focus:ring-4 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all duration-300"
+            className="w-full px-4 py-3 rounded-xl border dark:bg-gray-800 dark:border-gray-700"
           >
-            <option value="all">Tất cả</option>
-            <option value="Active">Đang hiệu lực</option>
+            <option value="all">Tất cả trạng thái</option>
+            <option value="Active">Hiệu lực</option>
             <option value="Inactive">Tạm dừng</option>
-            <option value="Expired">Hết hạn</option>
           </select>
         </div>
       </div>
@@ -399,16 +333,14 @@ const PromotionList = () => {
         <EmptyState
           icon={<Tag size={64} />}
           title="Chưa có chương trình khuyến mãi nào"
-          description={searchTerm || statusFilter !== 'all' || typeFilter !== 'all'
-            ? "Không tìm thấy chương trình khuyến mãi phù hợp với bộ lọc"
-            : "Bắt đầu bằng cách tạo chương trình khuyến mãi mới"}
+          description="Thử thay đổi bộ lọc hoặc tạo mới."
           action={
             <Button
               variant="primary"
               onClick={() => navigate('/dealer/promotions/create')}
               icon={<Plus size={20} />}
             >
-              Tạo chương trình đầu tiên
+              Tạo mới
             </Button>
           }
         />

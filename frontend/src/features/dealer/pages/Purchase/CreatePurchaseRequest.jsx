@@ -37,25 +37,22 @@ const CreatePurchaseRequest = () => {
   const [errors, setErrors] = useState({});
   const [isConfirming, setIsConfirming] = useState(false);
 
-  // Tải danh sách xe
+  // Tải danh sách xe (Logic giữ nguyên)
   useEffect(() => {
     const fetchVehicles = async () => {
       startLoading('Đang tải danh sách xe...');
       try {
         const result = await dealerAPI.getVehicles();
-        if (result && result.success && result.data) {
-          // Backend returns PagedResult: { items: [], pagination: {} }
-          const vehicleList = result.data.items || [];
+        if (result.success && result.data) {
+          const vehicleList = Array.isArray(result.data) ? result.data : result.data.data || [];
           setVehicles(vehicleList);
         } else {
-          const errorMsg = result?.message || 'Không thể tải danh sách xe';
-          console.error('Lỗi khi tải danh sách xe:', errorMsg);
+          throw new Error(result.message || 'Không thể tải danh sách xe');
         }
       } catch (error) {
-        console.error('Lỗi khi tải danh sách xe:', error.message || error);
-      } finally {
-        stopLoading();
+        console.error('Lỗi khi tải danh sách xe:', error);
       }
+      stopLoading();
     };
     
     fetchVehicles();

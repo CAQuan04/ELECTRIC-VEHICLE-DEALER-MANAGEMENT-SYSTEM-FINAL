@@ -92,6 +92,7 @@ import {
   PromotionList,
   PromotionList as DealerPromotionList,
   PromotionDetail,
+  CreatePromotion,
   // Staff
   StaffList,
   StaffList as DealerStaffManagement,
@@ -734,7 +735,7 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-
+    
               {/* Dealer Routes with dealerId - Promotions */}
               <Route
                 path="/:dealerId/dealer/promotions"
@@ -1144,8 +1145,7 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-
-              {/* Dealer Routes - Promotions */}
+{/* Dealer Routes - Promotions */}
               <Route
                 path="/dealer/promotions"
                 element={
@@ -1158,6 +1158,36 @@ const App = () => {
                   </DealerGuard>
                 }
               />
+              
+              {/* 🟢 [THÊM MỚI] Route tạo khuyến mãi */}
+              <Route
+                path="/dealer/promotions/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreatePromotion />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+               {/* 🟢 [THÊM MỚI] Route chỉnh sửa khuyến mãi */}
+               <Route
+                path="/dealer/promotions/edit/:promoId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreatePromotion /> 
+                        {/* Lưu ý: CreatePromotion cần được sửa để hỗ trợ cả mode Edit nếu muốn */}
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               <Route
                 path="/dealer/promotions/:promoId"
                 element={

@@ -165,27 +165,18 @@ class DealerAPI {
 
   /**
    * Get stock details by ID
-   * GET /Inventory/dealer/{dealerId}/item/{inventoryId}
-   * @param {number} dealerId - Dealer ID
-   * @param {string|number} inventoryId - Inventory ID
+   * GET /dealer/inventory/:id
+   * @param {string|number} stockId - Stock ID
    * @returns {Promise<Object>} Stock details
    */
-async getStockById(dealerId, inventoryId) {
-  try {
-    console.log('🔍 [dealer.api] Getting inventory detail - dealerId:', dealerId, 'inventoryId:', inventoryId);
-    const response = await apiClient.get(`/Inventory/dealer/${dealerId}/item/${inventoryId}`);
-    // --- SỬA LỖI TẠI ĐÂY ---
-    // Kiểm tra: Nếu response.data tồn tại thì dùng nó (trường hợp Axios gốc), 
-    // ngược lại thì dùng chính response (trường hợp đã qua interceptor).
-    const data = response.data || response; 
-    
-    console.log('📦 [dealer.api] Inventory detail:', data);
-    return { success: true, data };
-  } catch (error) {
-    console.error('❌ [dealer.api] Error getting inventory detail:', error);
-    return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho' };
+  async getStockById(stockId) {
+    try {
+      const response = await apiClient.get(`/dealer/inventory/${stockId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết kho' };
+    }
   }
-}
 
   /**
    * Create distribution request
@@ -193,15 +184,14 @@ async getStockById(dealerId, inventoryId) {
    * @param {Object} requestData - Distribution data {vehicleId, configId, quantity, fromLocation, toDealerId, scheduledDate}
    * @returns {Promise<Object>} Request result
    */
-  async requestStock(requestData) {
+async requestStock(requestData) {
     try {
-      const response = await apiClient.post('/Inventory/distributions', requestData);
+      const response = await apiClient.post('/Inventory/distributions/requests', requestData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi yêu cầu nhập kho' };
     }
   }
-
   /**
    * Update stock information
    * POST /Inventory/stock
@@ -267,11 +257,19 @@ async getStockById(dealerId, inventoryId) {
    * @param {Object} filters - Filter options {status, search}
    * @returns {Promise<Object>} List of stock requests
    */
-  async getStockRequests(filters = {}) {
+async getStockRequests(filters = {}) {
     try {
       const response = await apiClient.get('/Inventory/distributions/requests', { params: filters });
-      return { success: true, data: response.data };
+      
+      // 🟢 SỬA: Logic chuẩn để lấy data, bất kể API trả về bọc hay không bọc
+      // Nếu response là mảng (đã qua interceptor) -> dùng luôn
+      // Nếu response.data tồn tại -> dùng response.data
+      // Fallback -> dùng chính response
+      const data = Array.isArray(response) ? response : (response.data || response);
+      
+      return { success: true, data: data };
     } catch (error) {
+      console.error("API Error:", error);
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách yêu cầu' };
     }
   }
@@ -1254,11 +1252,18 @@ async getStockById(dealerId, inventoryId) {
    * @param {Object} params - Query parameters (Status, StartDate, EndDate)
    * @returns {Promise<Object>} Promotion list
    */
-  async getPromotions(params = {}) {
+async getPromotions(params = {}) {
     try {
+      console.log('🔍 Calling getPromotions with params:', params);
       const response = await apiClient.get('/Promotions', { params });
-      return { success: true, data: response.data };
+      
+      // SỬA LỖI: Xử lý trường hợp response là array trực tiếp hoặc object bọc
+      const data = Array.isArray(response) ? response : (response.data || response);
+      
+      console.log('✅ Promotions data loaded:', data);
+      return { success: true, data: data };
     } catch (error) {
+      console.error('❌ getPromotions error:', error);
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khuyến mãi' };
     }
   }
@@ -1269,12 +1274,32 @@ async getStockById(dealerId, inventoryId) {
    * @param {number} promotionId - Promotion ID
    * @returns {Promise<Object>} Promotion details
    */
-  async getPromotionById(promotionId) {
+async getPromotionById(promotionId) {
     try {
+      console.log(`🔍 [dealer.api] Đang lấy khuyến mãi ID: ${promotionId}`);
+      
+      // Cách 1: Gọi chuẩn theo cấu hình apiClient
       const response = await apiClient.get(`/Promotions/${promotionId}`);
-      return { success: true, data: response.data };
+      
+      // Xử lý dữ liệu trả về (chống lỗi undefined)
+      const data = response.data || response;
+      return { success: true, data: data };
+      
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khuyến mãi' };
+      console.warn("⚠️ [dealer.api] Gọi lần 1 thất bại, thử thêm prefix '/api'...");
+      
+      
+      try {
+        const retryResponse = await apiClient.get(`/api/Promotions/${promotionId}`);
+        const retryData = retryResponse.data || retryResponse;
+        return { success: true, data: retryData };
+      } catch (retryError) {
+        console.error("❌ [dealer.api] Cả 2 cách đều thất bại:", retryError);
+        return { 
+          success: false, 
+          message: retryError.response?.data?.message || 'Không thể kết nối đến server' 
+        };
+      }
     }
   }
 
@@ -1324,8 +1349,9 @@ async getStockById(dealerId, inventoryId) {
    * @param {Object} promotionData - Updated promotion data
    * @returns {Promise<Object>} Updated promotion
    */
-  async updatePromotion(promotionId, promotionData) {
+async updatePromotion(promotionId, promotionData) {
     try {
+      // ✅ ĐÚNG: Gọi API PUT
       const response = await apiClient.put(`/Promotions/${promotionId}`, promotionData);
       return { success: true, data: response.data };
     } catch (error) {
