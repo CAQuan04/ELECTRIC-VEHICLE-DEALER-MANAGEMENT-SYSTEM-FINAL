@@ -28,7 +28,7 @@ import { useDealerRole } from '../components/auth/DealerRoleGuard';
 import PageContainer from '../components/layout/PageContainer';
 import ReportsSection from '../components/ReportsSection';
 
-// Import sections (CHỈ IMPORT GIAO DIỆN, KHÔNG IMPORT MOCK TỪ ĐÂY)
+// Import sections 
 import {
   OverviewSection,
   InventorySection,
@@ -37,7 +37,6 @@ import {
 } from './DealerDashboard/sections';
 
 // ==================== MOCK DATA & HELPER (ĐỊNH NGHĨA TRỰC TIẾP TẠI ĐÂY) ====================
-// Đặt ở đây để đảm bảo hàm luôn tồn tại, không bị lỗi import
 const MOCK_DEALERS = [
   {
     dealerId: 2,
