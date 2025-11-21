@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 // Ghi chú: Import apiClient để thực hiện các lời gọi API.
 import apiClient from "../../../utils/api/apiClient";
-
+  
 // --- Helper utils (Hàm tiện ích để định dạng số tiền) ---
 const formatMoney = (n) => typeof n === "number" ? n.toLocaleString("vi-VN") + ' VNĐ' : n;
 
@@ -15,7 +15,7 @@ const DealerContractManagement = () => {
   const [contracts, setContracts] = useState([]);
   const [targets, setTargets] = useState([]);
   const [debts, setDebts] = useState([]);
-    
+
   const [loadingData, setLoadingData] = useState(false); // State để hiển thị "Đang tải..."
   const [tab, setTab] = useState("contracts"); // State quản lý tab đang hoạt động
 
