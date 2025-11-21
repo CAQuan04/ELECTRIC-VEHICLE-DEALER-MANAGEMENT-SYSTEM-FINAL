@@ -6,7 +6,6 @@ import { usePageLoading } from '@modules/loading';
 import Table from '../../../components/ui/Table';
 import Badge from '../../../components/ui/Badge';
 import StatCard from '../../../components/ui/StatCard';
-import { mockOrders, mockOrderStats } from '../mockData';
 
 const OrdersSection = ({ navigate }) => {
   const { isManager } = useDealerRole();

@@ -3,9 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@utils/api';
 
-import { MOCK_TEST_DRIVE_APPOINTMENTS as MOCK_TEST_DRIVE_DETAIL_APPOINTMENTS } from '../../data/mockData'; 
-
-
 const TestDriveCalendarDetail = () => {
   const navigate = useNavigate();
   const { date } = useParams(); // Format: YYYY-MM-DD
