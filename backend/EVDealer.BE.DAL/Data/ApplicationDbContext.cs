@@ -74,9 +74,6 @@ public partial class ApplicationDbContext : DbContext
     
     public virtual DbSet<DealerInventory> DealerInventories { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        => optionsBuilder.UseSqlServer("Name=ConnectionStrings:DefaultConnection");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Contract>(entity =>
@@ -555,7 +552,7 @@ public partial class ApplicationDbContext : DbContext
             entity.HasIndex(e => e.Email, "UQ_User_Email").IsUnique()
                     .HasFilter("[email] IS NOT NULL");
 
-            entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETDATE()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
         });
 
         modelBuilder.Entity<Vehicle>(entity =>
@@ -661,7 +658,7 @@ public partial class ApplicationDbContext : DbContext
 
             entity.Property(e => e.Priority).HasDefaultValue("Normal");
             entity.Property(e => e.Status).HasDefaultValue("Pending");
-            entity.Property(e => e.RequestDate).HasDefaultValueSql("GETDATE()");
+            entity.Property(e => e.RequestDate).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             entity.HasOne(d => d.Vehicle)
                 .WithMany()
@@ -701,7 +698,7 @@ public partial class ApplicationDbContext : DbContext
             entity.HasKey(e => e.DealerInventoryId);
 
             entity.Property(e => e.Status).HasDefaultValue("Available");
-            entity.Property(e => e.LastUpdated).HasDefaultValueSql("GETDATE()");
+            entity.Property(e => e.LastUpdated).HasDefaultValueSql("CURRENT_TIMESTAMP");
 
             entity.HasOne(d => d.Vehicle)
                 .WithMany()
