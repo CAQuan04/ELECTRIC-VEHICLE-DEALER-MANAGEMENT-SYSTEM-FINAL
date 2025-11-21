@@ -4,7 +4,6 @@ import { dealerAPI } from '@utils/api/services';
 import Table from '../../../components/ui/Table';
 import Badge from '../../../components/ui/Badge';
 import StatCard from '../../../components/ui/StatCard';
-import { mockCustomers, mockCustomerStats } from '../mockData';
 
 const CustomersSection = ({ navigate }) => {
   const [customers, setCustomers] = useState([]);
