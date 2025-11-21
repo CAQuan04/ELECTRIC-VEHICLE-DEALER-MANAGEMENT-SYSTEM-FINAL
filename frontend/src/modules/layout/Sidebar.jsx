@@ -625,7 +625,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
             )}
 
             {/* Dark Mode Toggle */}
-            <button
+           {/* <button
               onClick={toggleDarkMode}
               className={`w-full p-3 flex items-center hover:bg-slate-800/50 rounded-xl group relative transition-all duration-200 ${
                 isExpanded ? "gap-3 justify-start" : "justify-center"
@@ -658,7 +658,7 @@ const Sidebar = ({ isOpen = false, onClose }) => {
                   <span className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 border-4 border-transparent border-r-slate-800"></span>
                 </span>
               )}
-            </button>
+            </button> /}
 
             {/* Create New Button */}
             <div className="relative" ref={createMenuRef}>
