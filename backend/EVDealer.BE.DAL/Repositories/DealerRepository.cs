@@ -123,4 +123,13 @@ public class DealerRepository : IDealerRepository
         // Ghi chú: Chỉ lấy dữ liệu từ bảng Dealers, không Join với bất kỳ bảng nào khác.
         return await _context.Dealers.AsNoTracking().OrderBy(d => d.Name).ToListAsync();
     }
+
+    public async Task<IEnumerable<Dealer>> GetDealerListAsync()
+    {
+        // Ghi chú: Tương tự như GetAllBasicAsync, câu lệnh này an toàn và hiệu quả.
+        return await _context.Dealers
+            .AsNoTracking()
+            .OrderBy(d => d.Name)
+            .ToListAsync();
+    }
 }
