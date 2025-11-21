@@ -1,60 +1,74 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { usePageLoading } from '@modules/loading'; // Giả sử path đúng
-import { dealerAPI } from '@/utils/api/services/dealer.api.js'; // Sửa path
-import { Package, Info, Ban } from 'lucide-react';
+import { usePageLoading } from '@modules/loading';
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { Package, Ban, ShoppingCart, FileText, RefreshCw, Truck, ArrowLeft } from 'lucide-react';
+import { notifications } from '@/utils/notifications';
 
-// Import UI components
-import  Button  from '@/features/dealer/components/ui/Button.jsx';
-import  Badge  from '@/features/dealer/components/ui/Badge.jsx';
-import  Card  from '@/features/dealer/components/ui/Card.jsx';
-import  Table  from '@/features/dealer/components/ui/Table.jsx'; // Giả sử bạn có
-import { 
-  DetailHeader, 
-  InfoSection, 
-  InfoRow 
-} from '@/features/dealer/components/ui/AdvancedComponents.jsx';
-import  EmptyState  from '@/features/dealer/components/ui/EmptyState.jsx';
+// --- UI Components ---
+import Button from '@/features/dealer/components/ui/Button.jsx';
+import Badge from '@/features/dealer/components/ui/Badge.jsx';
+import Card from '@/features/dealer/components/ui/Card.jsx';
+import Table from '@/features/dealer/components/ui/Table.jsx';
+import EmptyState from '@/features/dealer/components/ui/EmptyState.jsx';
+import { InfoSection, InfoRow } from '@/features/dealer/components/ui/AdvancedComponents.jsx';
+
+// ✨ 1. FIX IMPORT: Giả sử PageContainer/PageHeader nằm ở thư mục components gốc của Dealer
+// (Hãy kiểm tra lại đường dẫn '../../components' giống file PurchaseRequestList của bạn)
+import {
+  PageContainer,
+  PageHeader 
+} from '@/features/dealer/components'; 
 
 const StockDetail = () => {
-  const { stockId } = useParams();
+  const { dealerId, stockId } = useParams();
   const navigate = useNavigate();
   const { isLoading, startLoading, stopLoading } = usePageLoading();
   const [stockDetail, setStockDetail] = useState(null);
 
+  // ✨ 2. TẠO BREADCRUMBS
+  const breadcrumbs = useMemo(() => [
+    { label: 'Kho hàng', path: `/${dealerId}/dealer/inventory` },
+    { label: stockDetail ? `${stockDetail.model} - ${stockDetail.color}` : 'Chi tiết xe' }
+  ], [dealerId, stockDetail]);
+
   useEffect(() => {
-    // 1. TÁI CẤU TRÚC HÀM LOAD DATA
     const loadStockDetail = async () => {
-      if (!stockId) return; // Không làm gì nếu không có ID
+      if (!dealerId || !stockId) {
+        console.error('❌ Missing dealerId or stockId');
+        return;
+      }
       try {
         startLoading('Đang tải chi tiết kho...');
-        // 2. GỌI API THẬT
-        const result = await dealerAPI.getStockById(stockId); 
+        console.log('🔍 Loading stock detail - dealerId:', dealerId, 'stockId:', stockId);
+        const result = await dealerAPI.getStockById(dealerId, stockId); 
+        console.log('✅ Detail API result:', result);
+        console.log('📦 result.success:', result.success);
+        console.log('📦 result.data:', result.data);
         
         if (result.success && result.data) {
+          console.log('✅ Setting stock detail:', result.data);
           setStockDetail(result.data);
         } else {
-          console.error('Lỗi khi tải chi tiết kho:', result.message);
-          alert('Không thể tải chi tiết kho.');
-          navigate('/dealer/inventory'); // Quay lại nếu lỗi
+          console.error('❌ Failed to load detail:', result);
+          notifications.error('Lỗi', result.message || 'Không thể tải chi tiết kho');
+          navigate(`/${dealerId}/dealer/inventory`);
         }
       } catch (error) {
-        console.error('Error loading stock detail:', error);
-        alert('Lỗi hệ thống: ' + (error.message || 'Không thể tải chi tiết kho'));
-        navigate('/dealer/inventory');
+        notifications.error('Lỗi hệ thống', error.message || 'Không thể tải chi tiết kho');
+        navigate(`/${dealerId}/dealer/inventory`);
       } finally {
         stopLoading();
       }
     };
     
     loadStockDetail();
-  }, [stockId, navigate, startLoading, stopLoading]); // Thêm dependencies
+  }, [dealerId, stockId, navigate, startLoading, stopLoading]);
 
-  // 3. ĐỊNH NGHĨA CỘT CHO BẢNG VIN
+  // --- Columns Definition ---
   const vehicleColumns = [
     { key: 'vin', label: 'Số VIN', render: (item) => <span className="font-semibold theme-text-primary">{item.vin}</span> },
     { key: 'status', label: 'Trạng thái', render: (item) => {
-        // Tùy biến màu badge theo trạng thái
         const variant = item.status.toLowerCase() === 'sẵn bán' ? 'success'
                       : item.status.toLowerCase() === 'đã đặt' ? 'warning'
                       : 'info';
@@ -71,58 +85,136 @@ const StockDetail = () => {
     }
   ];
 
-  // Hiển thị loading (nếu cần, vì đã có global loader)
-  if (isLoading && !stockDetail) {
-    return null; // Global loader đang chạy
-  }
+  // --- Loading State ---
+  if (isLoading && !stockDetail) return null;
 
-  // Nếu không có data
+  // --- Empty State wrapped in PageContainer ---
   if (!stockDetail) {
     return (
-      <div className="container mx-auto p-4 md:p-8">
-        <DetailHeader title="Chi tiết kho" onBack={() => navigate(-1)} />
+      <PageContainer>
+        <PageHeader 
+          title="Chi tiết kho" 
+          breadcrumbs={[{ label: 'Kho hàng', path: '/dealer/inventory' }, { label: 'Chi tiết' }]}
+        />
         <EmptyState
           title="Không tìm thấy"
           message="Không tìm thấy thông tin chi tiết cho mã kho này."
           action={{ label: 'Quay lại', onClick: () => navigate(-1) }}
         />
-      </div>
+      </PageContainer>
     );
   }
 
-  // 4. RENDER GIAO DIỆN HIỆN ĐẠI
+  // --- Handlers ---
+  const handleCreateQuotation = () => {
+    navigate('/dealer/quotations/create', { 
+      state: { preselectedVehicleId: stockDetail.vehicleId, preselectedConfigId: stockDetail.configId } 
+    });
+  };
+
+  const handleCreateOrder = () => {
+    navigate('/dealer/orders/create', { 
+      state: { preselectedVehicleId: stockDetail.vehicleId, preselectedConfigId: stockDetail.configId } 
+    });
+  };
+
+  const handleRequestMore = () => {
+    navigate('/dealer/inventory/import', {
+      state: { preselectedVehicleId: stockDetail.vehicleId, preselectedConfigId: stockDetail.configId }
+    });
+  };
+
+  const handleRefresh = async () => {
+    try {
+      startLoading('Đang làm mới dữ liệu...');
+      const result = await dealerAPI.getStockById(dealerId, stockId);
+      if (result.success && result.data) {
+        setStockDetail(result.data);
+        notifications.success('Đã cập nhật', 'Dữ liệu đã được làm mới');
+      }
+    } catch (error) {
+      notifications.error('Lỗi', 'Không thể làm mới dữ liệu');
+    } finally {
+      stopLoading();
+    }
+  };
+
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      {/* Header với nút quay lại */}
-      <DetailHeader
+    <PageContainer>
+      {/* ✨ 3. SỬ DỤNG PAGEHEADER & ĐƯA BUTTON VÀO ACTIONS */}
+      <PageHeader
         title={`${stockDetail.model} - ${stockDetail.color}`}
-        subtitle={`Chi tiết tồn kho cho mã sản phẩm`}
-        onBack={() => navigate(-1)}
+        subtitle="Chi tiết tồn kho và danh sách VIN"
+        icon={<Package className="w-8 h-8" />}
+        breadcrumbs={breadcrumbs}
+        actions={
+          <div className="flex flex-wrap gap-2">
+             {/* Nút Back nhỏ nếu cần, hoặc dựa vào breadcrumbs */}
+            <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="md:hidden">
+               <ArrowLeft className="w-4 h-4" />
+            </Button>
+
+            <Button variant="ghost" onClick={handleRefresh}>
+              <RefreshCw className="w-4 h-4 mr-2" /> Làm mới
+            </Button>
+            <Button variant="outline" onClick={handleRequestMore}>
+              <Truck className="w-4 h-4 mr-2" /> Nhập thêm
+            </Button>
+            {/* Nhóm nút thao tác chính */}
+            <Button variant="primary" onClick={handleCreateQuotation} disabled={stockDetail.available === 0}>
+              <FileText className="w-4 h-4 mr-2" /> Báo giá
+            </Button>
+            <Button variant="gradient" onClick={handleCreateOrder} disabled={stockDetail.available === 0}>
+              <ShoppingCart className="w-4 h-4 mr-2" /> Đơn hàng
+            </Button>
+          </div>
+        }
       />
 
-      {/* Thông tin tóm tắt */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <InfoSection title="Tổng quan số lượng" icon={<Package className="w-5 h-5" />}>
-          <InfoRow label="Tổng số lượng" value={<span className="text-xl font-bold theme-text-primary">{stockDetail.total}</span>} />
-          <InfoRow label="Sẵn sàng bán" value={<span className="text-xl font-bold text-emerald-500">{stockDetail.available}</span>} />
-          <InfoRow label="Đã đặt cọc" value={<span className="text-xl font-bold text-yellow-500">{stockDetail.reserved}</span>} />
+      {/* Alert */}
+      {stockDetail.available === 0 && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <div className="flex items-center gap-2 text-yellow-800">
+            <Ban className="w-5 h-5" />
+            <span className="font-semibold">Xe này đã hết hàng. Vui lòng nhập thêm xe để tiếp tục bán.</span>
+          </div>
+        </div>
+      )}
+
+      {/* Info Section Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <InfoSection title="Tồn kho" icon={<Package className="w-5 h-5" />}>
+          <InfoRow label="Tổng số xe" value={<span className="text-2xl font-bold theme-text-primary">{stockDetail.total || 0}</span>} />
+          <InfoRow label="Sẵn sàng bán" value={<span className="text-xl font-bold text-emerald-500">{stockDetail.available || 0}</span>} />
+          <InfoRow label="Đã đặt cọc" value={<span className="text-xl font-bold text-yellow-500">{stockDetail.reserved || 0}</span>} />
         </InfoSection>
 
-        <InfoSection title="Thông tin lô hàng" icon={<Info className="w-5 h-5" />}>
-          <InfoRow label="Mã sản phẩm" value={stockDetail.productId || stockId} />
+        <InfoSection title="Doanh số" icon={<ShoppingCart className="w-5 h-5" />}>
+          <InfoRow label="Đã bán (tháng)" value={<span className="text-xl font-bold text-green-600">{stockDetail.soldThisMonth || 0}</span>} />
+          <InfoRow label="Đã bán (tổng)" value={<span className="text-xl font-bold text-blue-600">{stockDetail.totalSold || 0}</span>} />
+          <InfoRow label="Doanh thu" value={<span className="text-lg font-semibold text-green-600">{((stockDetail.revenueThisMonth || 0) / 1000000000).toFixed(2)} tỷ</span>} />
+        </InfoSection>
+
+        <InfoSection title="Xuất xưởng" icon={<Truck className="w-5 h-5" />}>
+          <InfoRow label="Chờ xuất" value={<span className="text-xl font-bold text-orange-500">{stockDetail.pendingDelivery || 0}</span>} />
+          <InfoRow label="Đang vận chuyển" value={<span className="text-xl font-bold text-blue-500">{stockDetail.inTransit || 0}</span>} />
           <InfoRow label="Trạng thái" value={<Badge variant={stockDetail.available > 0 ? 'success' : 'warning'}>{stockDetail.available > 0 ? 'Còn hàng' : 'Hết hàng'}</Badge>} />
-          <InfoRow label="Lần cập nhật cuối" value={stockDetail.updatedAt ? new Date(stockDetail.updatedAt).toLocaleString('vi-VN') : 'N/A'} />
         </InfoSection>
       </div>
 
-      {/* Bảng chi tiết các xe (VIN) */}
-      <Card>
+      {/* Table Section */}
+      {/* ✨ FIX: Card có overflow-hidden và Table có wrapper overflow-x-auto */}
+      <Card className="overflow-hidden">
         <h3 className="text-xl font-bold mb-4 p-6 pb-0 theme-text-primary">Danh sách xe (theo VIN)</h3>
-        <Table
-          columns={vehicleColumns}
-          data={stockDetail.vehicles || []}
-          keyField="vin"
-        />
+        
+        <div className="overflow-x-auto w-full">
+          <Table
+            columns={vehicleColumns}
+            data={stockDetail.vehicles || []}
+            keyField="vin"
+          />
+        </div>
+
         {(!stockDetail.vehicles || stockDetail.vehicles.length === 0) && (
           <EmptyState
             icon={<Ban className="w-12 h-12" />}
@@ -132,7 +224,7 @@ const StockDetail = () => {
           />
         )}
       </Card>
-    </div>
+    </PageContainer>
   );
 };
 

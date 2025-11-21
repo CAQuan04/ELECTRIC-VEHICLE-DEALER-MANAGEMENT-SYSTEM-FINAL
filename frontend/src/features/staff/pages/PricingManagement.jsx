@@ -24,11 +24,16 @@ const PricingManagement = () => {
         setLoading(true);
         try {
             const [priceRes, promoRes] = await Promise.all([
-                apiClient.get('/api/pricing/wholesale-prices-summary'), // Cần API GET có JOIN
-                apiClient.get('/api/pricing/promotion-policies-summary') // Cần API GET có JOIN
+                apiClient.get('/pricing/wholesale-prices-summary'),
+                apiClient.get('/pricing/promotion-policies-summary')
             ]);
-            setPricingList(priceRes.data);
-            setPromotions(promoRes.data);
+            
+            // SẮP XẾP DỮ LIỆU TĂNG DẦN THEO ID
+            const sortedPricingList = priceRes.data.sort((a, b) => a.priceId - b.priceId);
+            const sortedPromotions = promoRes.data.sort((a, b) => a.policyId - b.policyId);
+
+            setPricingList(sortedPricingList);
+            setPromotions(sortedPromotions);
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu:", error);
         } finally {
@@ -44,8 +49,8 @@ const PricingManagement = () => {
         if (vehicles.length === 0 || dealers.length === 0) {
             try {
                 const [vehRes, dealRes] = await Promise.all([
-                    apiClient.get('/api/admin/vehicles'),
-                    apiClient.get('/api/dealers/basic')
+                    apiClient.get('/admin/vehicles'),
+                    apiClient.get('/dealers/basic')
                 ]);
                 setVehicles(vehRes.data);
                 setDealers(dealRes.data);
@@ -86,7 +91,7 @@ const PricingManagement = () => {
             validTo: form.validTo,
         };
         try {
-            await apiClient.post('/api/pricing/wholesale-prices', payload);
+            await apiClient.post('/pricing/wholesale-prices', payload);
             setShowModal(false);
             fetchData();
         } catch (error) {
@@ -124,7 +129,7 @@ const PricingManagement = () => {
             endDate: form.endDate,
         };
         try {
-            await apiClient.post('/api/pricing/promotion-policies', payload);
+            await apiClient.post('/pricing/promotion-policies', payload);
             setShowModal(false);
             fetchData();
         } catch (error) {
@@ -186,9 +191,9 @@ const PricingManagement = () => {
                             </thead>
                             <tbody>
                                 {loading ? (<tr><td colSpan="7" className="text-center p-4">Đang tải...</td></tr>) :
-                                    pricingList.map((p) => (
+                                    pricingList.map((p, index) => ( // SỬ DỤNG index ĐỂ LÀM SỐ THỨ TỰ
                                         <tr key={p.priceId} className="border-t border-slate-800 hover:bg-slate-800/40">
-                                            <td className="p-3">{`PR${String(p.priceId).padStart(3, "0")}`}</td>
+                                            <td className="p-3 font-semibold">{index + 1}</td> {/* HIỂN THỊ SỐ THỨ TỰ 1, 2, 3... */}
                                             <td className="p-3 font-medium">{p.productName}</td>
                                             <td className="p-3">{p.dealerName || "Tất cả (Giá chung)"}</td>
                                             <td className="p-3 font-semibold">{p.price.toLocaleString()}</td>
@@ -216,7 +221,7 @@ const PricingManagement = () => {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="min-w-full border-collapse text-sm md:text-base">
-                             <thead className="bg-slate-800/60 text-sky-300">
+                            <thead className="bg-slate-800/60 text-sky-300">
                                 <tr>
                                     <th className="p-3 text-left">Mã KM</th>
                                     <th className="p-3 text-left">Mô tả</th>
@@ -229,9 +234,9 @@ const PricingManagement = () => {
                             </thead>
                             <tbody>
                                 {loading ? (<tr><td colSpan="7" className="text-center p-4">Đang tải...</td></tr>) :
-                                    promotions.map((pm) => (
+                                    promotions.map((pm, index) => ( // SỬ DỤNG index ĐỂ LÀM SỐ THỨ TỰ
                                         <tr key={pm.policyId} className="border-t border-slate-800 hover:bg-slate-800/40">
-                                            <td className="p-3">{`KM${String(pm.policyId).padStart(3, "0")}`}</td>
+                                            <td className="p-3 font-semibold">{index + 1}</td> {/* HIỂN THỊ SỐ THỨ TỰ 1, 2, 3... */}
                                             <td className="p-3 font-medium">{pm.description}</td>
                                             <td className="p-3">{pm.dealerName}</td>
                                             <td className="p-3 font-semibold">{pm.discountPercent}%</td>
@@ -303,8 +308,8 @@ const PricingManagement = () => {
 
                         {/* Form cho Khuyến mãi */}
                         {activeTab === 'promotion' && (
-                           <form onSubmit={savePromo} className="px-5 py-4 space-y-4">
-                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <form onSubmit={savePromo} className="px-5 py-4 space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="md:col-span-2">
                                         <label className="text-slate-300">Mô tả khuyến mãi *</label>
                                         <input name="description" value={form.description} onChange={handleFormChange} required className="w-full mt-1 rounded-xl bg-slate-900/60 p-2 border border-slate-700" />
@@ -333,13 +338,13 @@ const PricingManagement = () => {
                                     <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-xl border border-slate-700">Hủy</button>
                                     <button type="submit" className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 text-white font-semibold">{isEdit ? "Lưu thay đổi" : "Tạo mới"}</button>
                                 </div>
-                           </form>
+                            </form>
                         )}
                     </div>
                 </div>
             )}
 
-            
+
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { AuthService } from '@utils';
 import {
   PageContainer,
   PageHeader,
@@ -206,7 +207,11 @@ const QuotationList = () => {
         actions={
           <Button
             variant="gradient"
-            onClick={() => navigate('/dealer/quotations/create')}
+            onClick={() => {
+              const currentUser = AuthService.getCurrentUser();
+              const dealerId = currentUser?.dealerId;
+              navigate(dealerId ? `/${dealerId}/dealer/quotations/create` : '/dealer/quotations/create');
+            }}
           >
             + Tạo báo giá mới
           </Button>

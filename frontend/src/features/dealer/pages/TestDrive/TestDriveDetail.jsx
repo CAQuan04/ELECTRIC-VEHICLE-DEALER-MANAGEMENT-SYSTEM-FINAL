@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { AuthService } from '@utils';
 import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
@@ -17,6 +18,9 @@ import { Car, Calendar, User, Phone, Mail, MessageSquare } from 'lucide-react';
 const TestDriveDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  console.log('🆔 TestDriveDetail - id from useParams:', id);
+  console.log('🌐 TestDriveDetail - current URL:', window.location.href);
+  
   const [testDrive, setTestDrive] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState('');
@@ -28,9 +32,13 @@ const TestDriveDetail = () => {
   const [durationMinutes, setDurationMinutes] = useState(null);
 
   useEffect(() => {
-    loadTestDriveDetail();
-    // Load thời gian từ localStorage nếu có
-    loadTimingDataFromStorage();
+    if (id) {
+      loadTestDriveDetail();
+      // Load thời gian từ localStorage nếu có
+      loadTimingDataFromStorage();
+    } else {
+      console.error('❌ No id found in URL params');
+    }
   }, [id]);
 
   // Load thời gian đã lưu từ localStorage
@@ -68,14 +76,19 @@ const TestDriveDetail = () => {
   const loadTestDriveDetail = async () => {
     setIsLoading(true);
     try {
+      console.log('🔍 Loading test drive detail for id:', id);
       const result = await dealerAPI.getTestDriveById(id);
+      console.log('✅ Test drive detail result:', result);
+      
       if (result.success && result.data) {
         setTestDrive(result.data);
         setFeedback(result.data.feedback || '');
       } else {
-        console.error('Failed to load test drive:', result.message);
+        console.error('❌ Failed to load test drive:', result.message);
         notifications.error('Lỗi', 'Không thể tải thông tin lịch lái thử');
-        navigate('/dealer/test-drives');
+        const currentUser = AuthService.getCurrentUser();
+        const dealerId = currentUser?.dealerId;
+        navigate(dealerId ? `/${dealerId}/dealer/test-drives` : '/dealer/test-drives');
       }
     } catch (error) {
       console.error('Error loading test drive:', error);

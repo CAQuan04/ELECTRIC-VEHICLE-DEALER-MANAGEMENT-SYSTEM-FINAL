@@ -54,6 +54,87 @@ namespace EVDealer.BE.Services.Quotations
             return quotation != null ? MapToQuotationDto(quotation) : null;
         }
 
+        public async Task<System.Collections.Generic.IEnumerable<QuotationDto>> GetDealerQuotationsAsync(int dealerId, string? status, string? search)
+        {
+            var quotations = await _quotationRepository.GetAllAsync();
+            
+            // Filter by dealer through CreatedByUser
+            var dealerQuotations = quotations.Where(q => q.CreatedByUser?.DealerId == dealerId);
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                dealerQuotations = dealerQuotations.Where(q => q.Status == status);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                dealerQuotations = dealerQuotations.Where(q => 
+                    q.Customer.FullName.Contains(search) ||
+                    q.QuotationId.ToString().Contains(search));
+            }
+
+            return dealerQuotations.Select(MapToQuotationDto).ToList();
+        }
+
+        public async Task<QuotationDto> UpdateAsync(int quotationId, QuotationUpdateDto updateDto)
+        {
+            var quotation = await _quotationRepository.GetByIdAsync(quotationId);
+            if (quotation == null)
+            {
+                throw new Exception("Quotation not found");
+            }
+
+            if (updateDto.ValidUntil.HasValue)
+            {
+                quotation.ValidUntil = updateDto.ValidUntil;
+            }
+
+            if (!string.IsNullOrEmpty(updateDto.Status))
+            {
+                quotation.Status = updateDto.Status;
+            }
+
+            if (updateDto.Items != null && updateDto.Items.Any())
+            {
+                // Clear existing items and add new ones
+                quotation.QuotationItems.Clear();
+                foreach (var itemDto in updateDto.Items)
+                {
+                    quotation.QuotationItems.Add(new QuotationItem
+                    {
+                        VehicleId = itemDto.VehicleId,
+                        ConfigId = itemDto.ConfigId,
+                        Quantity = itemDto.Quantity,
+                        UnitPrice = itemDto.UnitPrice
+                    });
+                }
+                quotation.TotalAmount = updateDto.Items.Sum(i => i.Quantity * i.UnitPrice);
+            }
+
+            var updated = await _quotationRepository.UpdateAsync(quotation);
+            return MapToQuotationDto(updated);
+        }
+
+        public async Task SendQuotationAsync(int quotationId)
+        {
+            var quotation = await _quotationRepository.GetByIdAsync(quotationId);
+            
+            if (quotation == null)
+            {
+                throw new Exception("Quotation not found");
+            }
+
+            if (quotation.Status != "Draft")
+            {
+                throw new Exception("Only draft quotations can be sent");
+            }
+
+            quotation.Status = "Sent";
+            await _quotationRepository.UpdateAsync(quotation);
+            
+            // TODO: Send email/notification to customer
+        }
+
         private QuotationDto MapToQuotationDto(Quotation quotation)
         {
             return new QuotationDto

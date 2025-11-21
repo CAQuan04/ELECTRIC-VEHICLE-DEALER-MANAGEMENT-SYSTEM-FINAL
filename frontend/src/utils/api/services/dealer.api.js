@@ -11,6 +11,16 @@ import apiClient from '../client';
  * - Analytics and reports
  */
 class DealerAPI {
+  // ==================== HELPER ====================
+  // Hàm phụ trợ để xử lý dữ liệu trả về an toàn
+  _handleResponse(response) {
+    // Nếu response là mảng hoặc object data trực tiếp (do interceptor bóc sẵn) -> dùng luôn
+    if (Array.isArray(response) || (response && !response.data && !response.status)) {
+       return response;
+    }
+    // Trường hợp axios response chuẩn -> lấy .data
+    return response.data || response;
+  }
   
   // ==================== DASHBOARD ====================
   
@@ -44,15 +54,23 @@ class DealerAPI {
    */
   async getVehicles(params = {}) {
     try {
+      console.log('📤 getVehicles called with params:', params);
       const response = await apiClient.get('/Vehicles', { params });
+      console.log('✅ getVehicles response:', response);
+      console.log('✅ getVehicles response.data:', response.data);
+      // Axios response structure: response.data contains the actual data
       return {
         success: true,
-        data: response.data
+        data: response.data || response
       };
     } catch (error) {
+      console.error('❌ getVehicles error:', error);
+      console.error('❌ Error response:', error.response);
+      console.error('❌ Error status:', error.response?.status);
+      console.error('❌ Error data:', error.response?.data);
       return {
         success: false,
-        message: error.response?.data?.message || 'Lỗi khi lấy danh sách xe'
+        message: error.response?.data?.message || error.message || 'Lỗi khi lấy danh sách xe'
       };
     }
   }
@@ -130,16 +148,27 @@ class DealerAPI {
 
   /**
    * Get dealer's inventory
-   * Note: Backend doesn't have a GET inventory list endpoint, using placeholder
-   * @param {Object} filters - Filter options
+   * GET /api/Inventory/dealer/{dealerId}
+   * @param {number} dealerId - Dealer ID
+   * @param {Object} filters - Filter options (search, etc.)
    * @returns {Promise<Object>} Inventory list
    */
-  async getInventory(filters = {}) {
+  async getInventory(dealerId, filters = {}) {
     try {
-      // TODO: Update when backend provides inventory list endpoint
-      const response = await apiClient.get('/dealer/inventory', { params: filters });
-      return { success: true, data: response.data };
+      console.log('🔍 [dealer.api] Calling GET /Inventory/dealer/' + dealerId, filters);
+      const response = await apiClient.get(`/Inventory/dealer/${dealerId}`, { params: filters });
+      console.log('📦 [dealer.api] Raw response:', response);
+      console.log('📦 [dealer.api] Response type:', typeof response);
+      console.log('📦 [dealer.api] Is array?', Array.isArray(response));
+      
+      // Handle case where response is array directly (interceptor might transform it)
+      const data = Array.isArray(response) ? response : response.data;
+      console.log('📦 [dealer.api] Final data:', data);
+      
+      return { success: true, data };
     } catch (error) {
+      console.error('❌ [dealer.api] Error:', error);
+      console.error('❌ [dealer.api] Error response:', error.response);
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy kho hàng' };
     }
   }
@@ -165,15 +194,14 @@ class DealerAPI {
    * @param {Object} requestData - Distribution data {vehicleId, configId, quantity, fromLocation, toDealerId, scheduledDate}
    * @returns {Promise<Object>} Request result
    */
-  async requestStock(requestData) {
+async requestStock(requestData) {
     try {
-      const response = await apiClient.post('/Inventory/distributions', requestData);
+      const response = await apiClient.post('/Inventory/distributions/requests', requestData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi yêu cầu nhập kho' };
     }
   }
-
   /**
    * Update stock information
    * POST /Inventory/stock
@@ -218,23 +246,106 @@ class DealerAPI {
     }
   }
 
-  // ==================== CUSTOMER MANAGEMENT ====================
+  /**
+   * Update inventory
+   * PUT /Inventory/update
+   * @param {Object} updateData - Inventory update data
+   * @returns {Promise<Object>} Update result
+   */
+  async updateInventory(updateData) {
+    try {
+      const response = await apiClient.put('/Inventory/update', updateData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật kho' };
+    }
+  }
 
   /**
-   * Get all customers
-   * GET /api/Customers/paged?Search=...&Phone=...&Page=...&Size=...
+   * Get stock/distribution requests (from Staff to Manager)
+   * GET /Inventory/distributions/requests
+   * @param {Object} filters - Filter options {status, search}
+   * @returns {Promise<Object>} List of stock requests
+   */
+async getStockRequests(filters = {}) {
+    try {
+      const response = await apiClient.get('/Inventory/distributions/requests', { params: filters });
+      
+      // 🟢 SỬA: Logic chuẩn để lấy data, bất kể API trả về bọc hay không bọc
+      // Nếu response là mảng (đã qua interceptor) -> dùng luôn
+      // Nếu response.data tồn tại -> dùng response.data
+      // Fallback -> dùng chính response
+      const data = Array.isArray(response) ? response : (response.data || response);
+      
+      return { success: true, data: data };
+    } catch (error) {
+      console.error("API Error:", error);
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách yêu cầu' };
+    }
+  }
+
+  /**
+   * Get stock request by ID
+   * GET /Inventory/distributions/requests/{requestId}
+   * @param {string|number} requestId - Request ID
+   * @returns {Promise<Object>} Request details
+   */
+  async getStockRequestById(requestId) {
+    try {
+      const response = await apiClient.get(`/Inventory/distributions/requests/${requestId}`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy chi tiết yêu cầu' };
+    }
+  }
+
+  /**
+   * Approve stock request (Manager approves Staff request)
+   * PUT /Inventory/distributions/requests/{requestId}/approve
+   * @param {string|number} requestId - Request ID
+   * @returns {Promise<Object>} Approval result
+   */
+  async approveStockRequest(requestId) {
+    try {
+      const response = await apiClient.put(`/Inventory/distributions/requests/${requestId}/approve`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi duyệt yêu cầu' };
+    }
+  }
+
+  /**
+   * Reject stock request (Manager rejects Staff request)
+   * PUT /Inventory/distributions/requests/{requestId}/reject
+   * @param {string|number} requestId - Request ID
+   * @param {string} reason - Rejection reason
+   * @returns {Promise<Object>} Rejection result
+   */
+  async rejectStockRequest(requestId, reason) {
+    try {
+      const response = await apiClient.put(`/Inventory/distributions/requests/${requestId}/reject`, { reason });
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi từ chối yêu cầu' };
+    }
+  }
+
+  // ==================== CUSTOMER MANAGEMENT ====================
+
+ /**
+   * Get all customers (paged)
+   * GET /api/Customers/paged
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} Customer list
    */
   async getCustomers(params = {}) {
     try {
-            const response = await apiClient.get('/Customers/paged', { params });
-      return { success: true, data: response.data };
+      const response = await apiClient.get('/Customers/paged', { params });
+      return { success: true, data: this._handleResponse(response) };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khách hàng' };
     }
   }
-
   /**
    * Get customer details by ID
    * GET /api/Customers/{customerId}
@@ -743,28 +854,29 @@ class DealerAPI {
 
   /**
    * Get all orders
-   * GET /dealer/orders?status=...&page=1&limit=10
+   * GET /api/Orders
    * @param {Object} params - Query parameters
    * @returns {Promise<Object>} Order list
    */
   async getOrders(params = {}) {
     try {
-      const response = await apiClient.get('/dealer/orders', { params });
+      const response = await apiClient.get('/Orders', { params });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách đơn hàng' };
     }
   }
 
+
   /**
    * Get order details by ID
-   * GET /dealer/orders/:id
+   * GET /api/Orders/{id}
    * @param {string|number} id - Order ID
    * @returns {Promise<Object>} Order details
    */
   async getOrderById(id) {
     try {
-      const response = await apiClient.get(`/dealer/orders/${id}`);
+      const response = await apiClient.get(`/Orders/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin đơn hàng' };
@@ -773,13 +885,13 @@ class DealerAPI {
 
   /**
    * Create new order
-   * POST /dealer/orders
+   * POST /api/Orders
    * @param {Object} orderData - Order data
    * @returns {Promise<Object>} Created order
    */
   async createOrder(orderData) {
     try {
-      const response = await apiClient.post('/dealer/orders', orderData);
+      const response = await apiClient.post('/Orders', orderData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo đơn hàng' };
@@ -787,24 +899,8 @@ class DealerAPI {
   }
 
   /**
-   * Update order
-   * PUT /dealer/orders/:id
-   * @param {string|number} orderId - Order ID
-   * @param {Object} updateData - Update data
-   * @returns {Promise<Object>} Updated order
-   */
-  async updateOrder(orderId, updateData) {
-    try {
-      const response = await apiClient.put(`/dealer/orders/${orderId}`, updateData);
-      return { success: true, data: response.data };
-    } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật đơn hàng' };
-    }
-  }
-
-  /**
    * Update order status
-   * PUT /dealer/orders/:id/status
+   * PUT /api/Orders/{id}/status
    * @param {string|number} id - Order ID
    * @param {string} status - New status
    * @param {string} note - Optional note
@@ -812,7 +908,7 @@ class DealerAPI {
    */
   async updateOrderStatus(id, status, note = '') {
     try {
-      const response = await apiClient.put(`/dealer/orders/${id}/status`, { status, note });
+      const response = await apiClient.put(`/Orders/${id}/status`, { status, note });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật trạng thái' };
@@ -821,20 +917,19 @@ class DealerAPI {
 
   /**
    * Cancel order
-   * POST /dealer/orders/:id/cancel
+   * POST /api/Orders/{id}/cancel
    * @param {string|number} orderId - Order ID
    * @param {string} reason - Cancellation reason
    * @returns {Promise<Object>} Cancellation result
    */
   async cancelOrder(orderId, reason) {
     try {
-      const response = await apiClient.post(`/dealer/orders/${orderId}/cancel`, { reason });
+      const response = await apiClient.post(`/Orders/${orderId}/cancel`, { reason });
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi hủy đơn hàng' };
     }
   }
-
   // ==================== QUOTATION MANAGEMENT ====================
 
   /**
@@ -852,15 +947,15 @@ class DealerAPI {
     }
   }
 
-  /**
+   /**
    * Get quotation details by ID
-   * GET /dealer/quotations/:id
+   * GET /api/Quotations/{id}
    * @param {string|number} id - Quotation ID
    * @returns {Promise<Object>} Quotation details
    */
   async getQuotationById(id) {
     try {
-      const response = await apiClient.get(`/dealer/quotations/${id}`);
+      const response = await apiClient.get(`/Quotations/${id}`);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin báo giá' };
@@ -869,13 +964,13 @@ class DealerAPI {
 
   /**
    * Create new quotation
-   * POST /dealer/quotations
+   * POST /api/Quotations
    * @param {Object} quotationData - Quotation data
    * @returns {Promise<Object>} Created quotation
    */
   async createQuotation(quotationData) {
     try {
-      const response = await apiClient.post('/dealer/quotations', quotationData);
+      const response = await apiClient.post('/Quotations', quotationData);
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi tạo báo giá' };
@@ -1142,11 +1237,18 @@ class DealerAPI {
    * @param {Object} params - Query parameters (Status, StartDate, EndDate)
    * @returns {Promise<Object>} Promotion list
    */
-  async getPromotions(params = {}) {
+async getPromotions(params = {}) {
     try {
+      console.log('🔍 Calling getPromotions with params:', params);
       const response = await apiClient.get('/Promotions', { params });
-      return { success: true, data: response.data };
+      
+      // SỬA LỖI: Xử lý trường hợp response là array trực tiếp hoặc object bọc
+      const data = Array.isArray(response) ? response : (response.data || response);
+      
+      console.log('✅ Promotions data loaded:', data);
+      return { success: true, data: data };
     } catch (error) {
+      console.error('❌ getPromotions error:', error);
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách khuyến mãi' };
     }
   }
@@ -1157,12 +1259,32 @@ class DealerAPI {
    * @param {number} promotionId - Promotion ID
    * @returns {Promise<Object>} Promotion details
    */
-  async getPromotionById(promotionId) {
+async getPromotionById(promotionId) {
     try {
+      console.log(`🔍 [dealer.api] Đang lấy khuyến mãi ID: ${promotionId}`);
+      
+      // Cách 1: Gọi chuẩn theo cấu hình apiClient
       const response = await apiClient.get(`/Promotions/${promotionId}`);
-      return { success: true, data: response.data };
+      
+      // Xử lý dữ liệu trả về (chống lỗi undefined)
+      const data = response.data || response;
+      return { success: true, data: data };
+      
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khuyến mãi' };
+      console.warn("⚠️ [dealer.api] Gọi lần 1 thất bại, thử thêm prefix '/api'...");
+      
+      
+      try {
+        const retryResponse = await apiClient.get(`/api/Promotions/${promotionId}`);
+        const retryData = retryResponse.data || retryResponse;
+        return { success: true, data: retryData };
+      } catch (retryError) {
+        console.error("❌ [dealer.api] Cả 2 cách đều thất bại:", retryError);
+        return { 
+          success: false, 
+          message: retryError.response?.data?.message || 'Không thể kết nối đến server' 
+        };
+      }
     }
   }
 
@@ -1212,8 +1334,9 @@ class DealerAPI {
    * @param {Object} promotionData - Updated promotion data
    * @returns {Promise<Object>} Updated promotion
    */
-  async updatePromotion(promotionId, promotionData) {
+async updatePromotion(promotionId, promotionData) {
     try {
+      // ✅ ĐÚNG: Gọi API PUT
       const response = await apiClient.put(`/Promotions/${promotionId}`, promotionData);
       return { success: true, data: response.data };
     } catch (error) {

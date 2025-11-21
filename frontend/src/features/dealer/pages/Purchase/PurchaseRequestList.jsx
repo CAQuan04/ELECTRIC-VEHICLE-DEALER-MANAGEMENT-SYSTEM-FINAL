@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 // ✨ 1. IMPORT useNavigate
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { Search, Plus, TrendingUp, Clock, CheckCircle, Package } from 'lucide-react';
-
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 // (Import các component chuẩn)
 import {
   PageContainer,
@@ -13,19 +13,15 @@ import {
   Table,
   EmptyState
 } from '../../components';
-
+import { usePageLoading } from '@modules/loading';
 const PurchaseRequestList = () => {
   const [requests, setRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('date-desc');
-
+  const { startLoading, stopLoading } = usePageLoading();
   // ✨ 2. KHỞI TẠO useNavigate
-  const navigate = useNavigate(); 
-
-  useEffect(() => {
-    loadRequests();
-  }, []);
+  const navigate = useNavigate();
 
   // ✨ 3. SỬA BREADCRUMBS
   //    (Mục cuối cùng là trang hiện tại, không nên có 'path')
@@ -33,21 +29,61 @@ const PurchaseRequestList = () => {
     { label: 'Trang chủ', path: '/dealer-dashboard' },
     { label: 'Yêu cầu mua hàng' } // <-- Đã xóa path
   ];
-  
-  // (Logic loadRequests, requestMetrics, filteredRequests... giữ nguyên)
-  
-  const loadRequests = async () => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    const mockRequests = [
-      { id: 1, vehicle: 'Model 3', quantity: 5, requestDate: '2025-10-01', status: 'Chờ duyệt', priority: 'Cao', estimatedCost: 6000000000 },
-      { id: 2, vehicle: 'Model Y', quantity: 3, requestDate: '2025-09-28', status: 'Đã duyệt', priority: 'Bình thường', estimatedCost: 4500000000 },
-      { id: 3, vehicle: 'Model S', quantity: 2, requestDate: '2025-10-05', status: 'Đang xử lý', priority: 'Khẩn cấp', estimatedCost: 5600000000 },
-      { id: 4, vehicle: 'Model X', quantity: 1, requestDate: '2025-10-06', status: 'Từ chối', priority: 'Bình thường', estimatedCost: 3100000000 },
-      { id: 5, vehicle: 'Cybertruck', quantity: 2, requestDate: '2025-10-08', status: 'Chờ duyệt', priority: 'Cao', estimatedCost: 7200000000 },
-    ];
-    setRequests(mockRequests);
-  };
 
+  // (Logic loadRequests, requestMetrics, filteredRequests... giữ nguyên)
+  useEffect(() => {
+    loadRequests();
+  }, []);
+  const loadRequests = async () => {
+    try {
+      startLoading('Đang tải danh sách yêu cầu...');
+
+      // Gọi API lấy danh sách yêu cầu nhập hàng
+      // Lưu ý: dealerAPI.getStockRequests() cần được define trong dealer.api.js
+      // Thường là GET /api/Inventory/distributions/requests hoặc tương tự
+      const result = await dealerAPI.getStockRequests();
+
+      if (result.success && result.data) {
+        // 🟢 4. Ánh xạ dữ liệu từ Backend sang cấu trúc Frontend mong đợi
+        // Backend thường trả về: requestId, vehicleName, status (Enum), createdDate...
+        const mappedRequests = Array.isArray(result.data) ? result.data.map(item => ({
+          id: item.requestId || item.id, // Map ID
+          vehicle: item.vehicleName || item.productName || 'Xe chưa đặt tên', // Map tên xe
+          quantity: item.quantity || 0,
+          // Nếu backend chưa tính estimatedCost, có thể cần tính tay hoặc để 0
+          estimatedCost: item.totalAmount || item.estimatedCost || 0,
+          requestDate: item.createdDate || item.requestDate || new Date().toISOString(),
+          status: mapStatusBackendToFrontend(item.status), // Xử lý trạng thái
+          priority: item.priority || 'Bình thường'
+        })) : [];
+
+        setRequests(mappedRequests);
+      } else {
+        console.error('Lỗi tải dữ liệu:', result.message);
+        // Có thể show thông báo lỗi nhẹ ở đây nếu muốn
+      }
+    } catch (error) {
+      console.error('Lỗi hệ thống khi tải yêu cầu:', error);
+    } finally {
+      stopLoading();
+    }
+  };
+  // Hàm phụ trợ: Map trạng thái từ Backend (thường là tiếng Anh hoặc số) sang hiển thị
+  const mapStatusBackendToFrontend = (backendStatus) => {
+    // Giả sử backend trả về: Pending, Approved, Rejected, Processing
+    const statusMap = {
+      'Pending': 'Chờ duyệt',
+      'Approved': 'Đã duyệt',
+      'Processing': 'Đang xử lý',
+      'Rejected': 'Từ chối',
+      // Fallback nếu backend đã trả về tiếng Việt
+      'Chờ duyệt': 'Chờ duyệt',
+      'Đã duyệt': 'Đã duyệt',
+      'Đang xử lý': 'Đang xử lý',
+      'Từ chối': 'Từ chối'
+    };
+    return statusMap[backendStatus] || backendStatus || 'Chờ duyệt';
+  };
   const requestMetrics = useMemo(() => {
     const total = requests.length;
     const pending = requests.filter(r => r.status === 'Chờ duyệt').length;
@@ -116,69 +152,68 @@ const PurchaseRequestList = () => {
   };
 
   const columns = [
-    { 
-      key: 'id', 
-      label: 'Mã YC', 
+    {
+      key: 'id',
+      label: 'Mã YC',
       render: (item) => (
         <span className="font-bold text-cyan-600 dark:text-cyan-400">
           PR-{String(item.id).padStart(4, '0')}
         </span>
       )
     },
-    { 
-      key: 'vehicle', 
-      label: 'Xe', 
+    {
+      key: 'vehicle',
+      label: 'Xe',
       render: (row) => (
         <div className="font-semibold text-gray-900 dark:text-white">
           {row.vehicle}
         </div>
       )
     },
-    { 
-      key: 'quantity', 
-      label: 'Số lượng', 
+    {
+      key: 'quantity',
+      label: 'Số lượng',
       render: (row) => (
         <span className="text-gray-700 dark:text-gray-300 font-medium">
           {row.quantity} xe
         </span>
       )
     },
-    { 
-      key: 'estimatedCost', 
-      label: 'Chi phí', 
+    {
+      key: 'estimatedCost',
+      label: 'Chi phí',
       render: (item) => (
         <span className="text-gray-900 dark:text-white font-semibold">
           {(item.estimatedCost / 1000000000).toFixed(2)} tỷ
         </span>
       )
     },
-    { 
-      key: 'requestDate', 
-      label: 'Ngày tạo', 
+    {
+      key: 'requestDate',
+      label: 'Ngày tạo',
       render: (item) => (
         <span className="text-gray-600 dark:text-gray-400 text-sm">
           {new Date(item.requestDate).toLocaleDateString('vi-VN')}
         </span>
       )
     },
-    { 
-      key: 'priority', 
-      label: 'Ưu tiên', 
-      render: (item) => <Badge variant={getPriorityVariant(item.priority)}>{item.priority}</Badge> 
+    {
+      key: 'priority',
+      label: 'Ưu tiên',
+      render: (item) => <Badge variant={getPriorityVariant(item.priority)}>{item.priority}</Badge>
     },
-    { 
-      key: 'status', 
-      label: 'Trạng thái', 
-      render: (item) => <Badge variant={getStatusVariant(item.status)}>{item.status}</Badge> 
+    {
+      key: 'status',
+      label: 'Trạng thái',
+      render: (item) => <Badge variant={getStatusVariant(item.status)}>{item.status}</Badge>
     },
-    { 
-      key: 'actions', 
-      label: 'Thao tác', 
+    {
+      key: 'actions',
+      label: 'Thao tác',
       render: (item) => (
-        // ✨ 4. THAY THẾ 'alert' BẰNG 'navigate' (Chi tiết)
-        <button 
+        <button
           className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-md hover:shadow-lg"
-          onClick={() => navigate(`/dealer-dashboard/purchase-requests/${item.id}`)}
+          onClick={() => navigate(`/dealer/purchase-requests/${item.id}`)}
         >
           Chi tiết
         </button>
@@ -192,16 +227,15 @@ const PurchaseRequestList = () => {
         title="Yêu cầu mua hàng"
         subtitle="Danh sách các yêu cầu nhập xe đã gửi đến EVM"
         icon={<Package className="w-8 h-8" />}
-        breadcrumbs={breadcrumbs} 
+        breadcrumbs={breadcrumbs}
         variant="darkTheme"
         actions={
-          // ✨ 5. THAY THẾ 'alert' BẰNG 'navigate' (Tạo mới)
           <Button
             variant="gradient"
             icon={<Plus />}
             onClick={() => navigate('/dealer/purchase-requests/create')}
           >
-            Yêu cầu nhập hàng
+            + Tạo yêu cầu mới
           </Button>
         }
       />
@@ -303,8 +337,7 @@ const PurchaseRequestList = () => {
           }
           action={{
             label: '+ Tạo yêu cầu mới',
-            // ✨ 6. THAY THẾ 'alert' BẰNG 'navigate' (Empty State)
-            onClick: () => navigate('/dealer/purchase-requests/new')
+            onClick: () => navigate('/dealer/purchase-requests/create')
           }}
         />
       )}

@@ -30,8 +30,8 @@ const InventoryManagement = () => {
         try {
             // Cần các API GET mới để lấy dữ liệu đã được JOIN
             const [invRes, distRes] = await Promise.all([
-                apiClient.get('/api/inventory/summary'), 
-                apiClient.get('/api/inventory/distributions/summary')
+                apiClient.get('/inventory/summary'), 
+                apiClient.get('/inventory/distributions/summary')
             ]);
             setInventories(invRes.data);
             setDistributions(distRes.data);
@@ -50,8 +50,8 @@ const InventoryManagement = () => {
         if (vehicles.length === 0 || dealers.length === 0) {
             try {
                 const [vehRes, dealRes] = await Promise.all([
-                    apiClient.get('/api/admin/vehicles'),
-                    apiClient.get('/api/dealers/basic')
+                    apiClient.get('/admin/vehicles'),
+                    apiClient.get('/dealers/basic')
                 ]);
                 setVehicles(vehRes.data);
                 setDealers(dealRes.data);
@@ -96,7 +96,7 @@ const InventoryManagement = () => {
     const saveInventory = async (e) => {
         e.preventDefault();
         try {
-            await apiClient.post('/api/inventory/stock', {
+            await apiClient.post('/inventory/stock', {
                 ...form,
                 quantity: parseInt(form.quantity)
             });
@@ -125,7 +125,7 @@ const InventoryManagement = () => {
     const saveDistribution = async (e) => {
         e.preventDefault();
         try {
-            await apiClient.post('/api/inventory/distributions', {
+            await apiClient.post('/inventory/distributions', {
                 ...form,
                 quantity: parseInt(form.quantity)
             });

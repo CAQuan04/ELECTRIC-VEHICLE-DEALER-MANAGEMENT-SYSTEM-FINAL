@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
+import { useAuth } from '@/context/AuthContext';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { Package, CheckCircle, Tag, Archive } from 'lucide-react';
 
@@ -19,6 +20,7 @@ import PageContainer from '../../components/layout/PageContainer';
 
 const DealerInventory = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { startLoading, stopLoading } = usePageLoading();
   const [inventory, setInventory] = useState([]);
   const [filters, setFilters] = useState({ search: '' });
@@ -30,16 +32,34 @@ const DealerInventory = () => {
   const loadInventory = async () => {
     try {
       startLoading('Đang tải kho xe...');
-      // 1. GỌI API THẬT
-      const result = await dealerAPI.getInventory(filters); 
+      
+      // Get dealerId from user context
+      console.log('🔍 Full user object:', user);
+      const dealerId = user?.dealerId;
+      console.log('🆔 Extracted dealerId:', dealerId);
+      
+      if (!dealerId) {
+        console.error('❌ Không tìm thấy dealerId trong thông tin user');
+        console.error('User object keys:', Object.keys(user || {}));
+        alert('Không thể xác định dealer. Vui lòng đăng nhập lại.');
+        return;
+      }
+      
+      console.log('📞 Calling API with dealerId:', dealerId, 'filters:', filters);
+      // Call API with dealerId
+      const result = await dealerAPI.getInventory(dealerId, filters); 
+      console.log('✅ API Response:', result);
 
       if (result.success && result.data) {
-        // Giả định API trả về { success: true, data: [...] }
-        const inventoryList = Array.isArray(result.data) ? result.data : result.data.data || [];
+        // Backend trả về array trực tiếp
+        const inventoryList = Array.isArray(result.data) ? result.data : [];
+        console.log('📦 Inventory loaded:', inventoryList.length, 'items');
         setInventory(inventoryList);
       } else {
-        console.error('Lỗi khi tải kho:', result.message);
-        alert('Không thể tải dữ liệu kho');
+        const errorMsg = result.message || 'Unknown error';
+        console.error('❌ Lỗi khi tải kho:', errorMsg);
+        console.error('Full result:', result);
+        alert(`Không thể tải dữ liệu kho.\n\nLỗi: ${errorMsg}\n\n⚠️ Kiểm tra:\n1. Backend có đang chạy?\n2. Token JWT còn hợp lệ?\n3. Có quyền truy cập dealer này?`);
       }
     } catch (error) {
       console.error('Error loading inventory:', error);
@@ -49,20 +69,15 @@ const DealerInventory = () => {
     }
   };
 
-  const handleRequestStock = () => {
-    navigate('/dealer/inventory/request');
-  };
-
   const inventoryColumns = [
-    { key: 'model', label: 'Dòng xe', render: (item) => <span className="font-semibold">{item.model || item.productInfo?.name}</span> },
-    { key: 'color', label: 'Màu sắc', render: (item) => item.color || item.productInfo?.color || 'N/A' },
-    { key: 'total', label: 'Tổng số', render: (item) => <span className="font-bold theme-text-primary">{item.total}</span> },
-    { key: 'available', label: 'Sẵn bán', render: (item) => <span className="text-emerald-500 font-semibold">{item.available}</span> },
-    { key: 'reserved', label: 'Đã đặt', render: (item) => <span className="text-yellow-500 font-semibold">{item.reserved}</span> },
+    { key: 'model', label: 'Dòng xe', render: (item) => <span className="font-semibold">{item.model || item.vehicleName}</span> },
+    { key: 'color', label: 'Màu sắc', render: (item) => item.color || 'N/A' },
+    { key: 'quantity', label: 'Số lượng', render: (item) => <span className="font-bold theme-text-primary">{item.quantity || 0}</span> },
+    { key: 'basePrice', label: 'Giá cơ sở', render: (item) => item.basePrice ? `${(item.basePrice / 1000000).toFixed(0)}M VNĐ` : 'N/A' },
     { 
       key: 'status', 
       label: 'Trạng thái', 
-      render: (item) => <Badge variant={item.available > 0 ? 'success' : 'warning'}>{item.available > 0 ? 'Sẵn sàng' : 'Hết hàng'}</Badge> 
+      render: (item) => <Badge variant={item.status === 'Available' ? 'success' : item.status === 'Reserved' ? 'warning' : 'default'}>{item.status === 'Available' ? 'Sẵn sàng' : item.status === 'Reserved' ? 'Đã đặt' : 'Đã bán'}</Badge> 
     },
     { 
       key: 'actions', 
@@ -71,8 +86,15 @@ const DealerInventory = () => {
         <Button 
           variant="ghost" 
           size="sm"
-          // 2. Điều hướng tới trang chi tiết với ID thật
-          onClick={() => navigate(`/dealer/inventory/${item.id}`)}
+          onClick={() => {
+            const dealerId = user?.dealerId;
+            console.log('🔍 Navigation - dealerId from auth:', dealerId, 'inventoryId:', item.inventoryId || item.id);
+            if (!dealerId) {
+              console.error('❌ No dealerId in user context:', user);
+              return;
+            }
+            navigate(`/${dealerId}/dealer/inventory/${item.inventoryId}`);
+          }}
         >
           Chi tiết →
         </Button>
@@ -88,12 +110,17 @@ const DealerInventory = () => {
     <PageContainer>
       <PageHeader
         title="Kho xe"
-        subtitle="Quản lý tồn kho và đặt hàng mới"
+        subtitle="Quản lý tồn kho và theo dõi nhập xuất"
         icon={<Package className="w-16 h-16" />}
         actions={
-          <Button variant="gradient" onClick={handleRequestStock}>
-            + Yêu cầu nhập xe
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate('/dealer/inventory/distributions')}>
+              📦 Phiếu nhập hàng
+            </Button>
+            <Button variant="gradient" onClick={() => navigate('/dealer/purchase-requests')}>
+              🛒 Yêu cầu mua hàng
+            </Button>
+          </div>
         }
       />
 
@@ -102,18 +129,18 @@ const DealerInventory = () => {
         <StatCard
           icon={<Package className="w-6 h-6" />}
           title="Tổng xe trong kho"
-          value={inventory.reduce((sum, item) => sum + (item.total || 0), 0)}
+          value={inventory.reduce((sum, item) => sum + (item.quantity || 0), 0)}
         />
         <StatCard
           icon={<CheckCircle className="w-6 h-6" />}
           title="Xe sẵn sàng bán"
-          value={inventory.reduce((sum, item) => sum + (item.available || 0), 0)}
+          value={inventory.filter(item => item.status === 'Available').reduce((sum, item) => sum + (item.quantity || 0), 0)}
           trend="up"
         />
         <StatCard
           icon={<Tag className="w-6 h-6" />}
           title="Xe đã đặt cọc"
-          value={inventory.reduce((sum, item) => sum + (item.reserved || 0), 0)}
+          value={inventory.filter(item => item.status === 'Reserved').reduce((sum, item) => sum + (item.quantity || 0), 0)}
         />
       </div>
 

@@ -21,7 +21,8 @@ export { default as CompareVehicles } from './pages/Vehicles/CompareVehicles';
 // Inventory Management
 export { default as DealerInventory } from './pages/Inventory/DealerInventory';
 export { default as StockDetail } from './pages/Inventory/StockDetail';
-export { default as RequestStock } from './pages/Inventory/RequestStock';
+export { default as DistributionList } from './pages/Inventory/DistributionList';
+export { default as DistributionRequestDetail } from './pages/Inventory/DistributionRequestDetail';
 
 // Customer Management
 export { default as CustomerList } from './pages/Customers/CustomerList';
@@ -55,6 +56,7 @@ export { default as SupplierDebtReport } from './pages/Reports/SupplierDebtRepor
 // Promotion Management
 export { default as PromotionList } from './pages/Promotion/PromotionList';
 export { default as PromotionDetail } from './pages/Promotion/PromotionDetail';
+export {default as CreatePromotion } from './pages/Promotion/CreatePromotion';
 
 // Staff Management
 export { default as StaffList } from './pages/StaffManagement/StaffList';

@@ -92,6 +92,65 @@ namespace EVDealer.BE.Services.Orders
             };
         }
 
+        public async Task<System.Collections.Generic.IEnumerable<OrderDto>> GetDealerOrdersAsync(int dealerId, string? status, string? search)
+        {
+            var orders = await _orderRepository.GetAllAsync();
+            var dealerOrders = orders.Where(o => o.DealerId == dealerId);
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                dealerOrders = dealerOrders.Where(o => o.Status == status);
+            }
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                dealerOrders = dealerOrders.Where(o => 
+                    o.Customer.FullName.Contains(search) ||
+                    o.OrderId.ToString().Contains(search));
+            }
+
+            return dealerOrders.Select(MapToOrderDto).ToList();
+        }
+
+        public async Task UpdateOrderStatusAsync(int orderId, string status)
+        {
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            if (order == null)
+            {
+                throw new Exception("Order not found");
+            }
+
+            order.Status = status;
+            await _orderRepository.UpdateAsync(order);
+        }
+
+        public async Task CompleteOrderAsync(int orderId)
+        {
+            var order = await _orderRepository.GetByIdAsync(orderId);
+            
+            if (order == null)
+            {
+                throw new Exception("Order not found");
+            }
+
+            // Note: In real implementation, this should use a transaction
+            // and integrate with IInventoryService to decrease inventory
+            
+            order.Status = "Completed";
+            await _orderRepository.UpdateAsync(order);
+
+            // TODO: Integrate with IInventoryService.DecreaseInventoryAsync
+            // For each order item, decrease dealer inventory
+            // foreach (var item in order.OrderItems)
+            // {
+            //     await _inventoryService.DecreaseInventoryAsync(
+            //         order.DealerId, 
+            //         item.VehicleId, 
+            //         item.Quantity
+            //     );
+            // }
+        }
+
         private OrderDto MapToOrderDto(SalesOrder order)
         {
             return new OrderDto

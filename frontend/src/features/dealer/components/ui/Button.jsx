@@ -25,7 +25,7 @@ const Button = ({
       dark:hover:from-rose-600 dark:hover:to-cyan-700
       text-white shadow-xl hover:shadow-2xl 
       hover:scale-105 active:scale-95
-      shadow-cyan-500/30 dark:shadow-emerald-500/30
+      shadow-cyan-500/30 dark:shadow-rose-500/30
       before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
     `,
     secondary: `
@@ -47,7 +47,7 @@ const Button = ({
     `,
     ghost: `
       bg-transparent 
-      hover:bg-cyan-50 dark:hover:bg-emerald-500/10
+      hover:bg-cyan-50 dark:hover:bg-rose-500/10
       text-gray-700 dark:text-gray-300
       hover:text-cyan-600 dark:hover:text-cyan-400
       hover:scale-105 active:scale-95
@@ -66,10 +66,10 @@ const Button = ({
       bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600
       dark:from-slate-500 dark:via-cyan-700 dark:to-sky-800
       hover:from-cyan-600 hover:via-blue-700 hover:to-purple-700
-      dark:hover:from-emerald-600 dark:hover:via-emerald-700 dark:hover:to-green-700
+      dark:hover:from-rose-600 dark:hover:via-rose-700 dark:hover:to-green-700
       text-white shadow-xl hover:shadow-2xl
       hover:scale-105 active:scale-95
-      shadow-purple-500/30 dark:shadow-emerald-500/30
+      shadow-purple-500/30 dark:shadow-rose-500/30
       before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/20 before:to-transparent before:translate-x-[-100%] hover:before:translate-x-[100%] before:transition-transform before:duration-700
     `
   };

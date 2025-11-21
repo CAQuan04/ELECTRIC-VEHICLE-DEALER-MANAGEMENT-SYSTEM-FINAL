@@ -55,7 +55,8 @@ import {
   // Inventory
   DealerInventory,
   StockDetail,
-  RequestStock,
+  DistributionList,
+  DistributionRequestDetail,
   // Customers
   CustomerList as DealerCustomerList,
   CustomerForm,
@@ -91,6 +92,7 @@ import {
   PromotionList,
   PromotionList as DealerPromotionList,
   PromotionDetail,
+  CreatePromotion,
   // Staff
   StaffList,
   StaffList as DealerStaffManagement,
@@ -118,6 +120,7 @@ import DealerContractManagement from "./features/admin/pages/DealerContractManag
 
 // Feature imports - Staff
 import { StaffDashboard } from "./features/staff";
+import { RequestStock } from "./features/staff";
 import CatalogueViewer from "./features/staff/pages/CatalogueViewer";
 import InventoryManagement from "./features/staff/pages/InventoryManagement";
 import PricingManagement from "./features/staff/pages/PricingManagement";
@@ -540,6 +543,54 @@ const App = () => {
                   </DealerGuard>
                 }
               />
+              <Route
+                path="/:dealerId/dealer/inventory/:stockId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <StockDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/inventory/distributions"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DistributionList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/inventory/distributions/:requestId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DistributionRequestDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/inventory/request"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <RequestStock />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
 
               {/* Dealer Routes with dealerId - Customers */}
               <Route
@@ -587,6 +638,30 @@ const App = () => {
                     <DealerShopGuard>
                       <AppLayout>
                         <CreateTestDrive />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/test-drives/calendar"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <TestDriveCalendar />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/test-drives/:id"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <TestDriveDetail />
                       </AppLayout>
                     </DealerShopGuard>
                   </DealerGuard>
@@ -660,7 +735,7 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-
+    
               {/* Dealer Routes with dealerId - Promotions */}
               <Route
                 path="/:dealerId/dealer/promotions"
@@ -779,6 +854,30 @@ const App = () => {
                     <DealerShopGuard>
                       <AppLayout>
                         <StockDetail />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/inventory/distributions"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DistributionList />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/dealer/inventory/distributions/:requestId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <DistributionRequestDetail />
                       </AppLayout>
                     </DealerShopGuard>
                   </DealerGuard>
@@ -1046,8 +1145,7 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-
-              {/* Dealer Routes - Promotions */}
+{/* Dealer Routes - Promotions */}
               <Route
                 path="/dealer/promotions"
                 element={
@@ -1060,6 +1158,36 @@ const App = () => {
                   </DealerGuard>
                 }
               />
+              
+              {/* 🟢 [THÊM MỚI] Route tạo khuyến mãi */}
+              <Route
+                path="/dealer/promotions/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreatePromotion />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
+               {/* 🟢 [THÊM MỚI] Route chỉnh sửa khuyến mãi */}
+               <Route
+                path="/dealer/promotions/edit/:promoId"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreatePromotion /> 
+                        {/* Lưu ý: CreatePromotion cần được sửa để hỗ trợ cả mode Edit nếu muốn */}
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+
               <Route
                 path="/dealer/promotions/:promoId"
                 element={

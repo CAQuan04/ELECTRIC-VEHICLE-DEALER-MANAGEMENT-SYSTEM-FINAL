@@ -37,7 +37,7 @@ const SalesReport = () => {
         EndDate: filters.endDate,
         GroupBy: filters.groupBy,
       };
-      const response = await apiClient.get('/api/Analytics/sales-report', { params });
+      const response = await apiClient.get('/Analytics/sales-report', { params });
       
       const data = response.data.reportData || [];
       setReportData(data);
@@ -67,8 +67,8 @@ const SalesReport = () => {
   // --- UI ---
   return (
     <div className="space-y-6 p-4 text-white">
-      <h1 className="text-2xl font-bold text-sky-400">
-        Báo cáo doanh số
+      <h1 className="text-2xl font-bold text-sky-400 py-2">
+        Báo cáo doanh thu
       </h1>
 
       {/* Bộ lọc */}

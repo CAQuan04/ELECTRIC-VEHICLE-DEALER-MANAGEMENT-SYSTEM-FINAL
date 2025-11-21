@@ -47,3 +47,10 @@ public class QuotationCreateDto
     [MinLength(1, ErrorMessage = "Quotation must have at least one item.")]
     public List<QuotationItemCreateDto> Items { get; set; } = new List<QuotationItemCreateDto>();
 }
+
+public class QuotationUpdateDto
+{
+    public DateOnly? ValidUntil { get; set; }
+    public string? Status { get; set; }
+    public List<QuotationItemCreateDto>? Items { get; set; }
+}

@@ -15,7 +15,7 @@ const DealerContractManagement = () => {
   const [contracts, setContracts] = useState([]);
   const [targets, setTargets] = useState([]);
   const [debts, setDebts] = useState([]);
-  
+    
   const [loadingData, setLoadingData] = useState(false); // State để hiển thị "Đang tải..."
   const [tab, setTab] = useState("contracts"); // State quản lý tab đang hoạt động
 
@@ -47,7 +47,7 @@ const DealerContractManagement = () => {
   useEffect(() => {
     const fetchDealers = async () => {
       try {
-        const response = await apiClient.get('/api/Dealers/basic');
+        const response = await apiClient.get('/Dealers/basic');
         setDealers(response.data);
         // Tự động chọn đại lý đầu tiên trong danh sách để hiển thị chi tiết.
         if (response.data && response.data.length > 0) {
@@ -69,9 +69,9 @@ const DealerContractManagement = () => {
         try {
             // Gọi song song 3 API để lấy dữ liệu của đại lý được chọn.
             const [contractsRes, targetsRes, debtsRes] = await Promise.all([
-                apiClient.get(`/api/manage/dealers/${selectedDealerId}/contracts`),
-                apiClient.get(`/api/manage/dealers/${selectedDealerId}/targets`),
-                apiClient.get(`/api/manage/dealers/${selectedDealerId}/debts`)
+                apiClient.get(`/manage/dealers/${selectedDealerId}/contracts`),
+                apiClient.get(`/manage/dealers/${selectedDealerId}/targets`),
+                apiClient.get(`/manage/dealers/${selectedDealerId}/debts`)
             ]);
             setContracts(contractsRes.data);
             setTargets(targetsRes.data);
@@ -92,10 +92,10 @@ const DealerContractManagement = () => {
     e.preventDefault();
     if (!selectedDealerId) return alert("Vui lòng chọn một đại lý.");
     try {
-      await apiClient.post(`/api/manage/dealers/${selectedDealerId}/contracts`, contractForm);
+      await apiClient.post(`/manage/dealers/${selectedDealerId}/contracts`, contractForm);
       setShowContractModal(false);
       // Tải lại chỉ riêng tab hợp đồng để cập nhật.
-      const contractsRes = await apiClient.get(`/api/manage/dealers/${selectedDealerId}/contracts`);
+      const contractsRes = await apiClient.get(`/manage/dealers/${selectedDealerId}/contracts`);
       setContracts(contractsRes.data);
     } catch (error) {
       console.error("Lỗi khi lưu hợp đồng:", error);
@@ -111,10 +111,10 @@ const DealerContractManagement = () => {
       salesTarget: Number(targetForm.salesTarget)
     };
     try {
-      await apiClient.post(`/api/manage/dealers/${selectedDealerId}/targets`, payload);
+      await apiClient.post(`/manage/dealers/${selectedDealerId}/targets`, payload);
       setShowTargetModal(false);
       // Tải lại chỉ riêng tab chỉ tiêu để cập nhật.
-      const targetsRes = await apiClient.get(`/api/manage/dealers/${selectedDealerId}/targets`);
+      const targetsRes = await apiClient.get(`/manage/dealers/${selectedDealerId}/targets`);
       setTargets(targetsRes.data);
     } catch (error) {
       console.error("Lỗi khi lưu chỉ tiêu:", error);

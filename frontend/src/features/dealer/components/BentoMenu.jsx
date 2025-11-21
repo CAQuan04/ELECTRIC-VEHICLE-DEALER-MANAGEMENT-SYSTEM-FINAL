@@ -41,6 +41,20 @@ const menuData = [
     ]
   },
   {
+    id: 'inventory',
+    icon: '📦',
+    title: 'Quản lý kho',
+    description: 'Tồn kho, nhập xuất, yêu cầu',
+    tag: 'UC 1.e',
+    color: 'amber',
+    requiredRole: null, // Accessible by all dealer users
+    subModules: [
+      { icon: '📊', title: 'Tồn kho hiện tại', path: '/dealer/inventory', tag: 'UC 1.e.1' },
+      { icon: '📝', title: 'Yêu cầu nhập hàng', path: '/dealer/inventory/request-stock', tag: 'UC 1.e.2', staffAccess: true },
+      { icon: '📋', title: 'Phiếu điều phối', path: '/dealer/inventory/distributions', tag: 'UC 1.e.3', managerOnly: true }
+    ]
+  },
+  {
     id: 'customers',
     icon: '👥',
     title: 'Quản lý khách hàng',
@@ -341,7 +355,10 @@ const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {module.subModules.map((subModule, idx) => {
                 // Lock manager-only items for staff
-                if (subModule.managerOnly && !isManager) {
+                if (subModule.staffAccess && isManager) {
+                  return null;
+                }
+                 if (subModule.managerOnly && !isManager) {
                   return (
                     <div
                       key={idx}

@@ -107,11 +107,11 @@ const CreatePurchaseRequest = () => {
 
   // 4. Render
   const vehicleOptions = vehicles.map((v) => ({
-    label: `${v.name} - ${v.color || 'N/A'}`,
-    value: v.id,
+    label: `${v.brand || ''} ${v.model || 'N/A'}`,
+    value: v.vehicleId,
   }));
   
-  const selectedVehicle = vehicles.find(v => v.id === formData.productId);
+  const selectedVehicle = vehicles.find(v => v.vehicleId === formData.productId);
 
   // 2. SỬ DỤNG PAGE CONTAINER LÀM GỐC (Giống CustomerList)
   return (

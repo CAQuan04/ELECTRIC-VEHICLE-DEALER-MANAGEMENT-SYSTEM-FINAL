@@ -80,6 +80,45 @@ namespace EVDealer.BE.API.Controllers
             }
         }
 
+        /// <summary>
+        /// Tạo Purchase Request từ Stock Request đã được duyệt
+        /// Auth: DealerManager
+        /// </summary>
+        [HttpPost("from-stock-request/{stockRequestId}")]
+        [Authorize(Roles = "DealerManager,Admin")]
+        public async Task<IActionResult> CreateFromStockRequest(int stockRequestId)
+        {
+            try
+            {
+                var managerId = GetUserIdFromClaims();
+                var result = await _requestService.CreateFromStockRequestAsync(stockRequestId, managerId);
+                return Ok(new { success = true, data = result });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Gửi Purchase Request tới EVM
+        /// Auth: DealerManager (requires password confirmation)
+        /// </summary>
+        [HttpPost("{purchaseRequestId}/send-to-evm")]
+        [Authorize(Roles = "DealerManager,Admin")]
+        public async Task<IActionResult> SendToEVM(int purchaseRequestId, [FromBody] SendToEVMDto dto)
+        {
+            try
+            {
+                var success = await _requestService.SendToEVMAsync(purchaseRequestId, dto.ManagerPassword);
+                return Ok(new { success = true, message = "Purchase request sent to EVM successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
         private int? GetDealerIdFromClaims()
         {
             var dealerIdClaim = User.FindFirst("dealerId")?.Value;
@@ -89,5 +128,24 @@ namespace EVDealer.BE.API.Controllers
             }
             return null;
         }
+
+        private int GetUserIdFromClaims()
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out var userId))
+            {
+                throw new UnauthorizedAccessException("Invalid user identifier");
+            }
+            return userId;
+        }
+    }
+}
+
+// DTO for SendToEVM endpoint
+namespace EVDealer.BE.Common.DTOs
+{
+    public class SendToEVMDto
+    {
+        public string ManagerPassword { get; set; } = null!;
     }
 }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { AuthService } from '@utils';
 import { notifications } from '@utils/notifications';
 import {
   PageContainer,
@@ -28,12 +29,26 @@ const TestDriveList = () => {
   const loadTestDrives = async () => {
     setIsLoading(true);
     try {
-      const result = await dealerAPI.getTestDrives();
+      const currentUser = AuthService.getCurrentUser();
+      const dealerId = currentUser?.dealerId;
+      
+      if (!dealerId) {
+        notifications.error('Lỗi', 'Không tìm thấy thông tin đại lý');
+        setAllTestDrives([]);
+        setIsLoading(false);
+        return;
+      }
+      
+      console.log('🔍 Loading test drives for dealerId:', dealerId);
+      const result = await dealerAPI.getTestDrives(dealerId);
+      console.log('✅ Test drives result:', result);
+      
       if (result.success && result.data) {
-        const testDriveList = Array.isArray(result.data) ? result.data : result.data.data || [];
+        const testDriveList = Array.isArray(result.data) ? result.data : [];
+        console.log('📋 Test drive list:', testDriveList);
         setAllTestDrives(testDriveList);
       } else {
-        console.error('Failed to load test drives:', result.message);
+        console.error('❌ Failed to load test drives:', result.message);
         setAllTestDrives([]);
       }
     } catch (error) {
@@ -193,7 +208,10 @@ const TestDriveList = () => {
             size="sm"
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/dealer/test-drives/${row.id}`);
+              console.log('👁️ View test drive:', row);
+              const currentUser = AuthService.getCurrentUser();
+              const dealerId = currentUser?.dealerId;
+              navigate(dealerId ? `/${dealerId}/dealer/test-drives/${row.testId}` : `/dealer/test-drives/${row.testId}`);
             }}
           >
             👁️ Chi tiết
@@ -300,13 +318,21 @@ const TestDriveList = () => {
             <Button 
               variant="secondary"
               icon={<Calendar className="w-5 h-5" />}
-              onClick={() => navigate('/dealer/test-drives/calendar')}
+              onClick={() => {
+                const currentUser = AuthService.getCurrentUser();
+                const dealerId = currentUser?.dealerId;
+                navigate(dealerId ? `/${dealerId}/dealer/test-drives/calendar` : '/dealer/test-drives/calendar');
+              }}
             >
               Xem lịch
             </Button>
             <Button 
               variant="gradient"
-              onClick={() => navigate('/dealer/test-drives/new')}
+              onClick={() => {
+                const currentUser = AuthService.getCurrentUser();
+                const dealerId = currentUser?.dealerId;
+                navigate(dealerId ? `/${dealerId}/dealer/test-drives/new` : '/dealer/test-drives/new');
+              }}
             >
               + Đăng ký mới
             </Button>
@@ -364,7 +390,12 @@ const TestDriveList = () => {
         <Table
           columns={columns}
           data={filteredTestDrives}
-          onRowClick={(row) => navigate(`/dealer/test-drives/${row.id}`)}
+          onRowClick={(row) => {
+            console.log('📋 Row clicked:', row);
+            const currentUser = AuthService.getCurrentUser();
+            const dealerId = currentUser?.dealerId;
+            navigate(dealerId ? `/${dealerId}/dealer/test-drives/${row.testId}` : `/dealer/test-drives/${row.testId}`);
+          }}
         />
       ) : (
         <EmptyState
@@ -373,7 +404,11 @@ const TestDriveList = () => {
           message={searchQuery ? "Không tìm thấy lịch lái thử phù hợp" : "Chưa có lịch hẹn lái thử nào"}
           action={{
             label: "Đăng ký lái thử mới",
-            onClick: () => navigate('/dealer/test-drives/new')
+            onClick: () => {
+              const currentUser = AuthService.getCurrentUser();
+              const dealerId = currentUser?.dealerId;
+              navigate(dealerId ? `/${dealerId}/dealer/test-drives/new` : '/dealer/test-drives/new');
+            }
           }}
         />
       )}

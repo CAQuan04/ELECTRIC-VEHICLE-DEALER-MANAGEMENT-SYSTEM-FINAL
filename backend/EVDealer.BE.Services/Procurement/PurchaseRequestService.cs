@@ -12,11 +12,16 @@ namespace EVDealer.BE.Services.Procurement
     {
         private readonly IPurchaseRequestRepository _purchaseRequestRepo;
         private readonly IDistributionRepository _distributionRepo;
+        private readonly IInventoryRepository _inventoryRepo;
 
-        public PurchaseRequestService(IPurchaseRequestRepository purchaseRequestRepo, IDistributionRepository distributionRepo)
+        public PurchaseRequestService(
+            IPurchaseRequestRepository purchaseRequestRepo, 
+            IDistributionRepository distributionRepo,
+            IInventoryRepository inventoryRepo)
         {
             _purchaseRequestRepo = purchaseRequestRepo;
             _distributionRepo = distributionRepo;
+            _inventoryRepo = inventoryRepo;
         }
 
         public async Task<PurchaseRequestDto> CreateRequestAsync(PurchaseRequestCreateDto dto, int dealerId)
@@ -93,6 +98,74 @@ namespace EVDealer.BE.Services.Procurement
                 Status = request.Status,
                 CreatedAt = request.CreatedAt
             };
+        }
+
+        // ==================== NEW: STOCK REQUEST INTEGRATION ====================
+        
+        public async Task<PurchaseRequestDto> CreateFromStockRequestAsync(int stockRequestId, int managerId)
+        {
+            // 1. Get approved stock request
+            var stockRequest = await _inventoryRepo.GetStockRequestByIdAsync(stockRequestId);
+
+            if (stockRequest == null || stockRequest.Status != "Approved")
+            {
+                throw new Exception("Stock request must be approved first");
+            }
+
+            // 2. Create purchase request
+            var purchaseRequest = new PurchaseRequest
+            {
+                VehicleId = stockRequest.VehicleId,
+                ConfigId = stockRequest.ConfigId ?? 0,
+                DealerId = stockRequest.DealerId,
+                Quantity = stockRequest.Quantity,
+                Priority = stockRequest.Priority,
+                Status = "Pending",
+                Notes = $"From Stock Request #{stockRequest.StockRequestId}: {stockRequest.Reason}",
+                RequestedByUserId = managerId,
+                CreatedAt = DateTime.UtcNow,
+                SourceStockRequestId = stockRequestId
+            };
+
+            var created = await _purchaseRequestRepo.CreateAsync(purchaseRequest);
+            return MapToDto(created);
+        }
+
+        public async Task<bool> SendToEVMAsync(int purchaseRequestId, string managerPassword)
+        {
+            // TODO: Implement password verification with IAuthService
+            // var managerId = GetCurrentUserId();
+            // var isValid = await _authService.VerifyPasswordAsync(managerId, managerPassword);
+            // if (!isValid) throw new UnauthorizedException("Invalid password");
+
+            // Get purchase request
+            var request = await _purchaseRequestRepo.GetByIdAsync(purchaseRequestId);
+            if (request == null)
+            {
+                throw new Exception("Purchase request not found");
+            }
+
+            // Mock: Send to EVM (in real scenario, call EVM API)
+            await Task.Delay(100); // Simulate API call
+            var success = true;
+
+            if (success)
+            {
+                request.Status = "Sent";
+                request.SentToEVMDate = DateTime.UtcNow;
+                request.EVMOrderId = $"EVM-{purchaseRequestId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+                await _purchaseRequestRepo.UpdateAsync(request);
+            }
+
+            return success;
+        }
+
+        public async Task<PurchaseRequestDto?> GetByEVMOrderIdAsync(string evmOrderId)
+        {
+            var requests = await _purchaseRequestRepo.GetAllPendingAsync();
+            var request = requests.FirstOrDefault(r => r.EVMOrderId == evmOrderId);
+            
+            return request == null ? null : MapToDto(request);
         }
     }
 }

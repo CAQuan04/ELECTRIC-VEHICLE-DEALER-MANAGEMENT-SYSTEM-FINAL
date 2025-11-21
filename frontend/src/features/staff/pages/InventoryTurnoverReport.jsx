@@ -30,7 +30,7 @@ const InventoryTurnoverReport = () => {
   useEffect(() => {
     const fetchDealers = async () => {
       try {
-        const response = await apiClient.get('/api/Dealers/basic');
+        const response = await apiClient.get('/Dealers/basic');
         setDealers(response.data);
       } catch (error) {
         console.error("Lỗi khi tải danh sách đại lý:", error);
@@ -49,7 +49,7 @@ const InventoryTurnoverReport = () => {
         // Chỉ truyền dealerId nếu nó được chọn
         DealerId: filters.dealerId ? parseInt(filters.dealerId) : undefined,
       };
-      const response = await apiClient.get('/api/Analytics/inventory-turnover', { params });
+      const response = await apiClient.get('/Analytics/inventory-turnover', { params });
       setReportData(response.data);
     } catch (error) {
       console.error("Lỗi khi tải báo cáo tồn kho:", error);
