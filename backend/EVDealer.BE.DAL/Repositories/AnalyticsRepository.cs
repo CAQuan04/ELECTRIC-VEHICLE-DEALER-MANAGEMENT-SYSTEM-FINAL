@@ -17,38 +17,38 @@ namespace EVDealer.BE.DAL.Repositories
 
         // --- Báo cáo Doanh số ---
         // --- Triển khai Báo cáo Doanh số (Linh hoạt) ---
-        public async Task<IEnumerable<SalesReportItemDto>> GetSalesDataAsync(DateOnly startDate, DateOnly endDate, string groupBy, int? dealerId, int? vehicleId)
+         public async Task<IEnumerable<SalesReportItemDto>> GetSalesDataAsync(DateOnly startDate, DateOnly endDate, string groupBy, int? dealerId, int? vehicleId)
         {
-            // Ghi chú: Bắt đầu xây dựng câu truy vấn trên bảng OrderItem, là nguồn dữ liệu chi tiết nhất.
-            var query = _context.OrderItems
-                .Where(item => item.Order.Status == "Completed" &&
-                               item.Order.OrderDate >= startDate &&
-                               item.Order.OrderDate <= endDate);
+            // Ghi chú: Bắt đầu xây dựng câu truy vấn trên bảng SalesOrder.
+            // Cách tiếp cận này đơn giản hơn và tránh được lỗi DISTINCT.
+            var query = _context.SalesOrders
+                .Where(o => o.Status == "Completed" && o.OrderDate >= startDate && o.OrderDate <= endDate);
 
-            // Ghi chú: Áp dụng các bộ lọc trực tiếp trên dữ liệu chi tiết.
+            // Ghi chú: Áp dụng các bộ lọc như cũ.
             if (dealerId.HasValue)
             {
-                query = query.Where(item => item.Order.DealerId == dealerId.Value);
+                query = query.Where(o => o.DealerId == dealerId.Value);
             }
             if (vehicleId.HasValue)
             {
-                query = query.Where(item => item.VehicleId == vehicleId.Value);
+                query = query.Where(o => o.OrderItems.Any(i => i.VehicleId == vehicleId.Value));
             }
 
             if (groupBy.Equals("region", StringComparison.OrdinalIgnoreCase))
             {
                 // --- Nhóm theo Khu vực ---
                 return await query
-                    .Include(item => item.Order.Dealer.Region)
-                    .GroupBy(item => item.Order.Dealer.Region.Name)
+                    .Include(o => o.Dealer.Region)
+                    .GroupBy(o => o.Dealer.Region.Name) // Nhóm các đơn hàng theo tên khu vực.
                     .Select(group => new SalesReportItemDto
                     {
                         GroupingKey = group.Key,
-                        // Ghi chú: Doanh thu phải được tính tổng từ các Đơn hàng (Order),
-                        // nhưng phải cẩn thận để không tính trùng lặp.
-                        // Chúng ta sẽ nhóm theo OrderId trước, lấy TotalAmount, rồi mới Sum.
-                        TotalRevenue = group.Select(item => item.Order).Distinct().Sum(order => order.TotalAmount),
-                        TotalQuantitySold = group.Sum(item => item.Quantity)
+                        // Ghi chú: 'group' bây giờ là một tập hợp các đối tượng SalesOrder.
+                        // Chúng ta có thể Sum trực tiếp trên các đối tượng này.
+                        TotalRevenue = group.Sum(o => o.TotalAmount),
+                        // Ghi chú: SelectMany để "làm phẳng" tất cả OrderItems của các đơn hàng trong nhóm
+                        // thành một danh sách duy nhất, sau đó Sum() trên đó.
+                        TotalQuantitySold = group.SelectMany(o => o.OrderItems).Sum(i => i.Quantity)
                     })
                     .OrderByDescending(r => r.TotalRevenue)
                     .ToListAsync();
@@ -56,14 +56,14 @@ namespace EVDealer.BE.DAL.Repositories
             else // --- Mặc định nhóm theo Đại lý ---
             {
                 return await query
-                    .Include(item => item.Order.Dealer)
-                    .GroupBy(item => item.Order.Dealer.Name)
+                    .Include(o => o.Dealer)
+                    .GroupBy(o => o.Dealer.Name) // Nhóm các đơn hàng theo tên đại lý.
                     .Select(group => new SalesReportItemDto
                     {
                         GroupingKey = group.Key,
-                        // Tương tự, tính tổng doanh thu cẩn thận.
-                        TotalRevenue = group.Select(item => item.Order).Distinct().Sum(order => order.TotalAmount),
-                        TotalQuantitySold = group.Sum(item => item.Quantity)
+                        // Logic tính toán tương tự.
+                        TotalRevenue = group.Sum(o => o.TotalAmount),
+                        TotalQuantitySold = group.SelectMany(o => o.OrderItems).Sum(i => i.Quantity)
                     })
                     .OrderByDescending(r => r.TotalRevenue)
                     .ToListAsync();

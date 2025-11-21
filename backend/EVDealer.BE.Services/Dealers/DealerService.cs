@@ -79,8 +79,21 @@ public class DealerService : IDealerService
 
     public async Task<IEnumerable<DealerDto>> GetAllAsync()
     {
-        var dealers = await _dealerRepository.GetAllAsync();
-        return dealers.Select(MapToDealerDto);
+        // Ghi chú: Thay vì gọi _dealerRepository.GetAllAsync() (đang bị lỗi),
+        // chúng ta gọi phương thức GetDealerListAsync() mới, an toàn và hiệu quả hơn.
+        var dealers = await _dealerRepository.GetDealerListAsync();
+
+        // Ghi chú: Chúng ta sẽ không map sang DTO ở đây vì DTO cần các thông tin
+        // từ các bảng được Include. Thay vào đó, Controller sẽ trả về trực tiếp Model.
+        // Điều này sẽ gây lỗi vòng lặp, chúng ta sẽ sửa ở Controller.
+        // Tạm thời, chúng ta sẽ trả về một DTO đơn giản.
+        return dealers.Select(d => new DealerDto
+        {
+            DealerId = d.DealerId,
+            Name = d.Name,
+            Address = d.Address,
+            Phone = d.Phone
+        });
     }
 
     public async Task<PagedResult<DealerDto>> GetWithPagingAsync(DealerQueryDto query)

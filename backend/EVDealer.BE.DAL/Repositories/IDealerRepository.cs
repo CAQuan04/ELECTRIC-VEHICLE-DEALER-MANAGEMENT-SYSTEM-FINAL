@@ -16,6 +16,8 @@ public interface IDealerRepository
     Task<Dealer?> GetByNameAsync(string name);
 
     Task<IEnumerable<Dealer>> GetAllBasicAsync();
+
+    Task<IEnumerable<Dealer>> GetDealerListAsync();
 }
 
 #region Query DTO

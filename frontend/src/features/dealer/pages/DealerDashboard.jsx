@@ -32,7 +32,7 @@ import {
   InventorySection,
   OrdersSection,
   CustomersSection,
-  getMockDealerById
+  //getMockDealerById
 } from './DealerDashboard/sections';
 
 // Import components

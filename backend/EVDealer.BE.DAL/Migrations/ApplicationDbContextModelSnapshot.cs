@@ -22,6 +22,42 @@ namespace EVDealer.BE.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Contract", b =>
+                {
+                    b.Property<int>("ContractId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("contract_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ContractId"));
+
+                    b.Property<DateTime>("ContractDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("contract_date");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Terms")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("terms");
+
+                    b.HasKey("ContractId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Contract", (string)null);
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Customer", b =>
                 {
                     b.Property<int>("CustomerId")
@@ -144,6 +180,66 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("DealerContract");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerInventory", b =>
+                {
+                    b.Property<int>("DealerInventoryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_inventory_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DealerInventoryId"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("color");
+
+                    b.Property<int?>("ConfigId")
+                        .HasColumnType("int")
+                        .HasColumnName("config_id");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<DateTime?>("LastRestockDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("last_restock_date");
+
+                    b.Property<DateTime?>("LastUpdated")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("last_updated")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Available")
+                        .HasColumnName("status");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int")
+                        .HasColumnName("vehicle_id");
+
+                    b.HasKey("DealerInventoryId");
+
+                    b.HasIndex("ConfigId");
+
+                    b.HasIndex("DealerId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("DealerInventory", (string)null);
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerTarget", b =>
                 {
                     b.Property<int>("TargetId")
@@ -212,6 +308,51 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("DealerId");
 
                     b.ToTable("Debt");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Delivery", b =>
+                {
+                    b.Property<int>("DeliveryId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("delivery_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DeliveryId"));
+
+                    b.Property<DateOnly?>("ActualDate")
+                        .HasColumnType("date")
+                        .HasColumnName("actual_date");
+
+                    b.Property<string>("CarrierInfo")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("carrier_info");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int")
+                        .HasColumnName("order_id");
+
+                    b.Property<DateOnly>("ScheduledDate")
+                        .HasColumnType("date")
+                        .HasColumnName("scheduled_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TrackingNo")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("tracking_no");
+
+                    b.HasKey("DeliveryId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Delivery", (string)null);
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DemandForecast", b =>
@@ -436,6 +577,21 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("OrderItem", (string)null);
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.OrderPromotion", b =>
+                {
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PromotionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("OrderId", "PromotionId");
+
+                    b.HasIndex("PromotionId");
+
+                    b.ToTable("OrderPromotion", (string)null);
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Payment", b =>
                 {
                     b.Property<int>("PaymentId")
@@ -505,6 +661,54 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("Permission", (string)null);
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Promotion", b =>
+                {
+                    b.Property<int>("PromotionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("promo_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PromotionId"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<string>("DiscountType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("discount_type");
+
+                    b.Property<decimal>("DiscountValue")
+                        .HasColumnType("decimal(18, 2)")
+                        .HasColumnName("discount_value");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date")
+                        .HasColumnName("end_date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("name");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date")
+                        .HasColumnName("start_date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("status");
+
+                    b.HasKey("PromotionId");
+
+                    b.ToTable("Promotion", (string)null);
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PromotionPolicy", b =>
                 {
                     b.Property<int>("PolicyId")
@@ -555,13 +759,52 @@ namespace EVDealer.BE.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RequestId"));
 
+                    b.Property<DateTime?>("CompletedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("completed_date");
+
+                    b.Property<int>("ConfigId")
+                        .HasColumnType("int")
+                        .HasColumnName("config_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
                     b.Property<int>("DealerId")
                         .HasColumnType("int")
                         .HasColumnName("dealer_id");
 
+                    b.Property<string>("EVMOrderId")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("evm_order_id");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Priority")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("priority");
+
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("quantity");
+
+                    b.Property<int?>("RequestedByUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("requested_by_user_id");
+
+                    b.Property<DateTime?>("SentToEVMDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("sent_to_evm_date");
+
+                    b.Property<int?>("SourceStockRequestId")
+                        .HasColumnType("int")
+                        .HasColumnName("source_stock_request_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -579,7 +822,13 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasKey("RequestId")
                         .HasName("PK__Purchase__18D3B90F9530E59F");
 
+                    b.HasIndex("ConfigId");
+
                     b.HasIndex("DealerId");
+
+                    b.HasIndex("RequestedByUserId");
+
+                    b.HasIndex("SourceStockRequestId");
 
                     b.HasIndex("VehicleId");
 
@@ -628,6 +877,32 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("CustomerId");
 
                     b.ToTable("Quotation", (string)null);
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.QuotationItem", b =>
+                {
+                    b.Property<int>("QuotationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConfigId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("QuotationId", "VehicleId", "ConfigId");
+
+                    b.HasIndex("ConfigId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("QuotationItem", (string)null);
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Region", b =>
@@ -696,6 +971,14 @@ namespace EVDealer.BE.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OrderId"));
 
+                    b.Property<string>("ApprovalNote")
+                        .HasColumnType("TEXT")
+                        .HasColumnName("approval_note");
+
+                    b.Property<DateTime?>("ApprovedAt")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("approved_at");
+
                     b.Property<int?>("ApprovedBy")
                         .HasColumnType("int")
                         .HasColumnName("approved_by");
@@ -707,6 +990,9 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Property<int>("DealerId")
                         .HasColumnType("int")
                         .HasColumnName("dealer_id");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(MAX)");
 
                     b.Property<DateOnly>("OrderDate")
                         .HasColumnType("date")
@@ -743,6 +1029,93 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasFilter("[quotation_id] IS NOT NULL");
 
                     b.ToTable("SalesOrder", (string)null);
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.StockRequest", b =>
+                {
+                    b.Property<int>("StockRequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("stock_request_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StockRequestId"));
+
+                    b.Property<int?>("ConfigId")
+                        .HasColumnType("int")
+                        .HasColumnName("config_id");
+
+                    b.Property<int>("DealerId")
+                        .HasColumnType("int")
+                        .HasColumnName("dealer_id");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(MAX)")
+                        .HasColumnName("notes");
+
+                    b.Property<string>("Priority")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Normal")
+                        .HasColumnName("priority");
+
+                    b.Property<int?>("ProcessedByUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("processed_by_user_id");
+
+                    b.Property<DateTime?>("ProcessedDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("processed_date");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("quantity");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("reason");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<DateTime>("RequestDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("request_date")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int>("RequestedByUserId")
+                        .HasColumnType("int")
+                        .HasColumnName("requested_by_user_id");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasDefaultValue("Pending")
+                        .HasColumnName("status");
+
+                    b.Property<int>("VehicleId")
+                        .HasColumnType("int")
+                        .HasColumnName("vehicle_id");
+
+                    b.HasKey("StockRequestId");
+
+                    b.HasIndex("ConfigId");
+
+                    b.HasIndex("DealerId");
+
+                    b.HasIndex("ProcessedByUserId");
+
+                    b.HasIndex("RequestedByUserId");
+
+                    b.HasIndex("VehicleId");
+
+                    b.ToTable("StockRequest", (string)null);
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.TestDrive", b =>
@@ -1005,6 +1378,18 @@ namespace EVDealer.BE.DAL.Migrations
                     b.ToTable("WholesalePrices");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Contract", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.SalesOrder", "Order")
+                        .WithOne("Contract")
+                        .HasForeignKey("EVDealer.BE.DAL.Models.Contract", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Contract_SalesOrder");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Dealer", b =>
                 {
                     b.HasOne("EVDealer.BE.DAL.Models.Region", "Region")
@@ -1023,6 +1408,35 @@ namespace EVDealer.BE.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Dealer");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerInventory", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.VehicleConfig", "Config")
+                        .WithMany()
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_DealerInventory_VehicleConfig");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_DealerInventory_Dealer");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_DealerInventory_Vehicle");
+
+                    b.Navigation("Config");
+
+                    b.Navigation("Dealer");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DealerTarget", b =>
@@ -1045,6 +1459,18 @@ namespace EVDealer.BE.DAL.Migrations
                         .IsRequired();
 
                     b.Navigation("Dealer");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Delivery", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.SalesOrder", "Order")
+                        .WithOne("Delivery")
+                        .HasForeignKey("EVDealer.BE.DAL.Models.Delivery", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_Delivery_SalesOrder");
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.DemandForecast", b =>
@@ -1165,6 +1591,27 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Vehicle");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.OrderPromotion", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.SalesOrder", "Order")
+                        .WithMany("OrderPromotions")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_OrderPromotion_Order");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Promotion", "Promotion")
+                        .WithMany("OrderPromotions")
+                        .HasForeignKey("PromotionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("FK_OrderPromotion_Promotion");
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Promotion");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Payment", b =>
                 {
                     b.HasOne("EVDealer.BE.DAL.Models.SalesOrder", "Order")
@@ -1189,11 +1636,25 @@ namespace EVDealer.BE.DAL.Migrations
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.PurchaseRequest", b =>
                 {
+                    b.HasOne("EVDealer.BE.DAL.Models.VehicleConfig", "Config")
+                        .WithMany("PurchaseRequests")
+                        .HasForeignKey("ConfigId")
+                        .IsRequired()
+                        .HasConstraintName("FK_PurchaseRequest_Config");
+
                     b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
                         .WithMany("PurchaseRequests")
                         .HasForeignKey("DealerId")
                         .IsRequired()
                         .HasConstraintName("FK_PurchaseRequest_Dealer");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.User", "RequestedBy")
+                        .WithMany()
+                        .HasForeignKey("RequestedByUserId");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.StockRequest", "SourceStockRequest")
+                        .WithMany()
+                        .HasForeignKey("SourceStockRequestId");
 
                     b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
                         .WithMany("PurchaseRequests")
@@ -1201,7 +1662,13 @@ namespace EVDealer.BE.DAL.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_PurchaseRequest_Vehicle");
 
+                    b.Navigation("Config");
+
                     b.Navigation("Dealer");
+
+                    b.Navigation("RequestedBy");
+
+                    b.Navigation("SourceStockRequest");
 
                     b.Navigation("Vehicle");
                 });
@@ -1223,6 +1690,33 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("CreatedByUser");
 
                     b.Navigation("Customer");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.QuotationItem", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.VehicleConfig", "Config")
+                        .WithMany("QuotationItems")
+                        .HasForeignKey("ConfigId")
+                        .IsRequired()
+                        .HasConstraintName("FK_QuotationItem_Config");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Quotation", "Quotation")
+                        .WithMany("QuotationItems")
+                        .HasForeignKey("QuotationId")
+                        .IsRequired()
+                        .HasConstraintName("FK_QuotationItem_Quotation");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                        .WithMany("QuotationItems")
+                        .HasForeignKey("VehicleId")
+                        .IsRequired()
+                        .HasConstraintName("FK_QuotationItem_Vehicle");
+
+                    b.Navigation("Config");
+
+                    b.Navigation("Quotation");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.RolePermission", b =>
@@ -1275,6 +1769,52 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Dealer");
 
                     b.Navigation("Quotation");
+                });
+
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.StockRequest", b =>
+                {
+                    b.HasOne("EVDealer.BE.DAL.Models.VehicleConfig", "Config")
+                        .WithMany()
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_StockRequest_VehicleConfig");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Dealer", "Dealer")
+                        .WithMany()
+                        .HasForeignKey("DealerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_StockRequest_Dealer");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.User", "ProcessedBy")
+                        .WithMany()
+                        .HasForeignKey("ProcessedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("FK_StockRequest_ProcessedByUser");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.User", "RequestedBy")
+                        .WithMany()
+                        .HasForeignKey("RequestedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_StockRequest_RequestedByUser");
+
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                        .WithMany()
+                        .HasForeignKey("VehicleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("FK_StockRequest_Vehicle");
+
+                    b.Navigation("Config");
+
+                    b.Navigation("Dealer");
+
+                    b.Navigation("ProcessedBy");
+
+                    b.Navigation("RequestedBy");
+
+                    b.Navigation("Vehicle");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.TestDrive", b =>
@@ -1339,7 +1879,7 @@ namespace EVDealer.BE.DAL.Migrations
                         .WithMany()
                         .HasForeignKey("DealerId");
 
-                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
+                    b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Product")
                         .WithMany("WholesalePrices")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1347,7 +1887,7 @@ namespace EVDealer.BE.DAL.Migrations
 
                     b.Navigation("Dealer");
 
-                    b.Navigation("Vehicle");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Customer", b =>
@@ -1379,8 +1919,15 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("RolePermissions");
                 });
 
+            modelBuilder.Entity("EVDealer.BE.DAL.Models.Promotion", b =>
+                {
+                    b.Navigation("OrderPromotions");
+                });
+
             modelBuilder.Entity("EVDealer.BE.DAL.Models.Quotation", b =>
                 {
+                    b.Navigation("QuotationItems");
+
                     b.Navigation("SalesOrder");
                 });
 
@@ -1398,7 +1945,13 @@ namespace EVDealer.BE.DAL.Migrations
 
             modelBuilder.Entity("EVDealer.BE.DAL.Models.SalesOrder", b =>
                 {
+                    b.Navigation("Contract");
+
+                    b.Navigation("Delivery");
+
                     b.Navigation("OrderItems");
+
+                    b.Navigation("OrderPromotions");
 
                     b.Navigation("Payments");
                 });
@@ -1422,6 +1975,8 @@ namespace EVDealer.BE.DAL.Migrations
 
                     b.Navigation("PurchaseRequests");
 
+                    b.Navigation("QuotationItems");
+
                     b.Navigation("TestDrives");
 
                     b.Navigation("VehicleConfigs");
@@ -1436,6 +1991,10 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Inventories");
 
                     b.Navigation("OrderItems");
+
+                    b.Navigation("PurchaseRequests");
+
+                    b.Navigation("QuotationItems");
                 });
 #pragma warning restore 612, 618
         }
