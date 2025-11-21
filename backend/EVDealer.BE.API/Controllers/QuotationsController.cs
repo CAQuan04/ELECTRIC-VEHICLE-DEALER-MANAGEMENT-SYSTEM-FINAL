@@ -53,7 +53,7 @@ namespace EVDealer.BE.API.Controllers
         /// Auth: DealerStaff
         /// </summary>
         [HttpGet("{id}")]
-        [Authorize(Roles = "DealerStaff,Admin")]
+        [Authorize(Roles = "DealerStaff,Admin,EVMStaff")]
         public async Task<IActionResult> GetQuotationById(int id)
         {
             var quotation = await _quotationService.GetByIdAsync(id);
@@ -68,7 +68,7 @@ namespace EVDealer.BE.API.Controllers
         /// Auth: DealerStaff, DealerManager
         /// </summary>
         [HttpGet("dealer/{dealerId}")]
-        [Authorize(Roles = "DealerStaff,DealerManager,Admin")]
+        [Authorize(Roles = "DealerStaff,DealerManager,Admin,EVMStaff")]
         public async Task<IActionResult> GetDealerQuotations(int dealerId, [FromQuery] string? status = null, [FromQuery] string? search = null)
         {
             try
@@ -87,7 +87,7 @@ namespace EVDealer.BE.API.Controllers
         /// Auth: DealerStaff
         /// </summary>
         [HttpPut("{id}")]
-        [Authorize(Roles = "DealerStaff,Admin")]
+        [Authorize(Roles = "DealerStaff,Admin,EVMStaff")]
         public async Task<IActionResult> UpdateQuotation(int id, [FromBody] QuotationUpdateDto updateDto)
         {
             if (!ModelState.IsValid)
