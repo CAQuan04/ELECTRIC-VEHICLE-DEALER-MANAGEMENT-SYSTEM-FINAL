@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import AuthComponent from '@modules/auth/AuthComponent';
 import { USER_ROLES } from '@utils';
 import { useAuth } from '../../context/AuthContext';
@@ -10,9 +10,48 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [activeSubmenu, setActiveSubmenu] = useState(null);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  
   const location = useLocation();
+  const navigate = useNavigate(); // Hook điều hướng
+  
   const { user: currentUser, logout } = useAuth();
   const userRole = currentUser?.role;
+
+  // Hàm xử lý điều hướng Dashboard thông minh
+  const handleDashboardNavigation = () => {
+    setIsUserMenuOpen(false);
+
+    if (!currentUser) {
+      navigate('/'); 
+      return;
+    }
+
+    // Logic định tuyến dựa trên Role
+    // Dealer: Cần dealerId trong URL nếu có
+    if (userRole === USER_ROLES.DEALER || userRole === 'DealerManager' || userRole === 'DealerStaff') {
+      if (currentUser.dealerId) {
+        navigate(`/${currentUser.dealerId}/dealer-dashboard`);
+      } else {
+        navigate('/dealer-dashboard');
+      }
+    } 
+    // Admin
+    else if (userRole === USER_ROLES.EVM_ADMIN || userRole === 'Admin') {
+      navigate('/evm-dashboard');
+    } 
+    // Staff (EVM Staff)
+    else if (userRole === USER_ROLES.STAFF || userRole === 'EVMStaff') {
+      navigate('/staff-dashboard');
+    } 
+    // Customer
+    else if (userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') {
+      navigate('/customer-dashboard');
+    } 
+    // Fallback
+    else {
+      navigate('/');
+    }
+  };
 
   const getMenuItems = () => {
     const baseMenuItems = [
@@ -75,26 +114,44 @@ const Header = () => {
     ];
 
     // Add role-specific menu items
-    if (userRole === USER_ROLES.DEALER) {
+    // Dealer Menu
+    if (userRole === USER_ROLES.DEALER || userRole === 'DealerManager') {
+      // Tự động thêm prefix dealerId vào các link nếu có
+      const prefix = currentUser?.dealerId ? `/${currentUser.dealerId}` : '';
+      
       baseMenuItems.push({
         id: 6,
         title: 'Business',
         submenu: [
-          { name: 'Dealer Dashboard', path: '/dealer-dashboard' },
-          { name: 'Inventory', path: '/inventory' },
-          { name: 'Orders', path: '/sales/orders' },
-          { name: 'Customer Management', path: '/customers' }
+          { name: 'Dealer Dashboard', path: `${prefix}/dealer-dashboard` },
+          { name: 'Inventory', path: `${prefix}/dealer/inventory` },
+          { name: 'Orders', path: `${prefix}/dealer/orders` },
+          { name: 'Customer Management', path: `${prefix}/dealer/customers` }
         ]
       });
-    } else if (userRole === USER_ROLES.EVM_ADMIN) {
+    } 
+    // Admin Menu
+    else if (userRole === USER_ROLES.EVM_ADMIN || userRole === 'Admin') {
       baseMenuItems.push({
         id: 6,
         title: 'Admin',
         submenu: [
           { name: 'EVM Dashboard', path: '/evm-dashboard' },
-          { name: 'Reports', path: '/reports' },
+          { name: 'Reports', path: '/admin/reports' },
           { name: 'Dealer Management', path: '/admin/dealers' },
           { name: 'System Overview', path: '/admin/system' }
+        ]
+      });
+    }
+    // Staff Menu
+    else if (userRole === USER_ROLES.STAFF || userRole === 'EVMStaff') {
+      baseMenuItems.push({
+        id: 6,
+        title: 'Work',
+        submenu: [
+          { name: 'Staff Dashboard', path: '/staff-dashboard' },
+          { name: 'Inventory', path: '/staff/inventory' },
+          { name: 'Catalog', path: '/staff/catalog' }
         ]
       });
     }
@@ -118,9 +175,9 @@ const Header = () => {
   };
 
   const handleLogout = () => {
-    console.log('Logging out...'); // Debug log
-    logout(); // Dùng logout từ useAuth
+    logout();
     setIsUserMenuOpen(false);
+    navigate('/'); // Quay về trang chủ sau khi logout
   };
 
   const isActivePage = (path) => {
@@ -140,7 +197,7 @@ const Header = () => {
           {menuItems.map((item) => (
             <div key={item.id} className="nav-item">
               <Link 
-                to={`/${item.title.toLowerCase()}`}
+                to={item.submenu && item.submenu.length > 0 ? item.submenu[0].path : `/${item.title.toLowerCase()}`}
                 className={`nav-link ${isActivePage(`/${item.title.toLowerCase()}`) ? 'active' : ''}`}
               >
                 {item.title}
@@ -167,10 +224,11 @@ const Header = () => {
                 aria-label="User menu"
               >
                 <span className={`role-indicator ${userRole}`}>
-                  {userRole === USER_ROLES.DEALER && '🏢'}
-                  {userRole === USER_ROLES.CUSTOMER && '👤'}
-                  {userRole === USER_ROLES.EVM_ADMIN && '⚡'}
-                  {currentUser.name}
+                  {(userRole === USER_ROLES.DEALER || userRole === 'DealerManager') && '🏢'}
+                  {(userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') && '👤'}
+                  {(userRole === USER_ROLES.EVM_ADMIN || userRole === 'Admin') && '⚡'}
+                  {(userRole === USER_ROLES.STAFF || userRole === 'EVMStaff') && '💼'}
+                  {currentUser.name || currentUser.username}
                 </span>
                 <span className={`dropdown-arrow ${isUserMenuOpen ? 'open' : ''}`}>▼</span>
               </button>
@@ -180,12 +238,13 @@ const Header = () => {
                 <div className="user-dropdown-menu">
                   <div className="user-menu-header">
                     <div className="user-avatar">
-                      {userRole === USER_ROLES.DEALER && '🏢'}
-                      {userRole === USER_ROLES.CUSTOMER && '👤'}
-                      {userRole === USER_ROLES.EVM_ADMIN && '⚡'}
+                      {(userRole === USER_ROLES.DEALER || userRole === 'DealerManager') && '🏢'}
+                      {(userRole === USER_ROLES.CUSTOMER || userRole === 'Customer') && '👤'}
+                      {(userRole === USER_ROLES.EVM_ADMIN || userRole === 'Admin') && '⚡'}
+                      {(userRole === USER_ROLES.STAFF || userRole === 'EVMStaff') && '💼'}
                     </div>
                     <div className="user-info">
-                      <div className="user-name">{currentUser.name}</div>
+                      <div className="user-name">{currentUser.name || currentUser.username}</div>
                       <div className="user-role">{userRole}</div>
                     </div>
                   </div>
@@ -193,19 +252,8 @@ const Header = () => {
                   <div className="user-menu-divider"></div>
                   
                   <div className="user-menu-items">
-                    <button className="user-menu-item" onClick={() => {
-                      setIsUserMenuOpen(false);
-                      if (userRole === USER_ROLES.CUSTOMER) {
-                        window.location.href = '/customer-dashboard';
-                      } else if (userRole === USER_ROLES.DEALER) {
-                        window.location.href = '/dealer-dashboard';
-                      } else if (userRole === USER_ROLES.EVM_ADMIN) {
-                        window.location.href = '/evm-dashboard';
-                      } else if (userRole === USER_ROLES.STAFF) {
-                        window.location.href = '/staff-dashboard';
-                      }
-                    }}>
-                      <span className="menu-icon">👤</span>
+                    <button className="user-menu-item" onClick={handleDashboardNavigation}>
+                      <span className="menu-icon">📊</span>
                       <span>Dashboard</span>
                     </button>
                     
@@ -213,18 +261,10 @@ const Header = () => {
                       <>
                         <button className="user-menu-item" onClick={() => {
                           setIsUserMenuOpen(false);
-                          window.location.href = '/customer-dashboard?section=vehicles';
+                          navigate('/customer-dashboard?section=vehicles');
                         }}>
                           <span className="menu-icon">🚗</span>
                           <span>Xe của tôi</span>
-                        </button>
-                        
-                        <button className="user-menu-item" onClick={() => {
-                          setIsUserMenuOpen(false);
-                          window.location.href = '/customer-dashboard?section=financing';
-                        }}>
-                          <span className="menu-icon">💳</span>
-                          <span>Quản lý trả góp</span>
                         </button>
                       </>
                     )}
