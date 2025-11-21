@@ -25,22 +25,24 @@ using EVDealer.BE.Services.Users;
 using EVDealer.BE.Services.Vehicles;
 using FluentValidation.AspNetCore;
 using Hangfire;
+using Hangfire.PostgreSql; // <--- THAY ĐỔI: Thêm namespace này
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
 using System.Text;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 // === 1. CẤU HÌNH CÁC DỊCH VỤ (SERVICE CONFIGURATION) ===
 
-// Ghi chú: Kết nối với CSDL SQL Server sử dụng chuỗi kết nối từ appsettings.json.
+// <--- THAY ĐỔI: Fix lỗi ngày tháng cho PostgreSQL (BẮT BUỘC)
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+// <--- THAY ĐỔI: Dùng UseNpgsql thay vì UseSqlServer
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
 // Ghi chú: Cấu hình CORS.
 builder.Services.AddCors(options =>
@@ -48,17 +50,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", builder =>
     {
         builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+                .AllowAnyMethod()
+                .AllowAnyHeader();
     });
 });
 
 // ===================================================================================
-// === PHẦN SỬA ĐỔI: ĐĂNG KÝ REPOSITORY VÀ UNIT OF WORK ===
-
-// Ghi chú: Đăng ký tất cả các Repository riêng lẻ.
-// Đây là bước quan trọng để giải quyết lỗi. Hệ thống DI cần biết cách tạo ra các
-// Repository này khi các Service yêu cầu chúng.
+// === PHẦN GIỮ NGUYÊN: ĐĂNG KÝ REPOSITORY VÀ UNIT OF WORK ===
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IDealerRepository, DealerRepository>();
@@ -72,16 +70,16 @@ builder.Services.AddScoped<IDemandForecastRepository, DemandForecastRepository>(
 builder.Services.AddScoped<IQuotationRepository, QuotationRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IPromotionRepository, PromotionRepository>();
-// Thêm bất kỳ repository nào khác bạn có ở đây...
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IDealerRepository, DealerRepository>();
 builder.Services.AddScoped<IDeliveryRepository, DeliveryRepository>();
 builder.Services.AddScoped<IPurchaseRequestRepository, PurchaseRequestRepository>();
 builder.Services.AddScoped<IDistributionRepository, DistributionRepository>();
-// Ghi chú: Đăng ký Unit of Work, quản lý tất cả Repository.
+builder.Services.AddScoped<IDistributionSuggestionRepository, DistributionSuggestionRepository>();
+builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // ===================================================================================
-
 
 // Ghi chú: Đăng ký các "phòng ban" nghiệp vụ (Services).
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -101,27 +99,18 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IDeliveryService, DeliveryService>();
 builder.Services.AddScoped<IPurchaseRequestService, PurchaseRequestService>();
 builder.Services.AddScoped<IDistributionService, DistributionService>();
-// Đăng ký Service AI
 builder.Services.AddScoped<IDemandForecastService, DemandForecastService>();
-builder.Services.AddScoped<IVehicleAdminRepository, VehicleAdminRepository>();
+builder.Services.AddScoped<ISupplyPlanningService, SupplyPlanningService>();
 
-// Ghi chú: Đăng ký AutoMapper ở đây.
-builder.Services.AddAutoMapper(typeof(Program));
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Logging.ClearProviders();
-builder.Services.AddScoped<IDistributionSuggestionRepository, DistributionSuggestionRepository>();
-builder.Logging.AddConsole();
-// Ghi chú: Đăng ký AutoMapper, tự động tìm tất cả các Profile trong project API.
+// Ghi chú: Đăng ký AutoMapper.
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IDealerRepository, DealerRepository>();
+// Logging
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
-builder.Services.AddScoped<ISupplyPlanningService, SupplyPlanningService>();
-// Ghi chú: Thiết lập "hệ thống an ninh" JWT (Xác thực - Authentication).
+// Ghi chú: Thiết lập "hệ thống an ninh" JWT.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-
-
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
@@ -136,7 +125,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Ghi chú: Định nghĩa các chính sách phân quyền (Policy-Based Authorization).
+// Ghi chú: Định nghĩa các chính sách phân quyền.
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("CanViewDashboardStats", policy => policy.RequireClaim("permission", "ViewDashboardStats"));
@@ -151,20 +140,17 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("CanViewAnalytics", policy => policy.RequireClaim("permission", "CanViewAnalytics"));
 });
 
-// Ghi chú: Đăng ký các Controller, cấu hình JSON và kích hoạt FluentValidation.
+// Ghi chú: Đăng ký Controller và JSON Converter.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        // Thêm "người phiên dịch" để API hiểu được kiểu dữ liệu DateOnly.
         options.JsonSerializerOptions.Converters.Add(new DateOnlyJsonConverter());
     })
     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<UserCreateDtoValidator>());
 
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    // Cấu hình Swagger để hiển thị nút Authorize.
     options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
@@ -186,16 +172,17 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Ghi chú: Cấu hình dịch vụ Hangfire để chạy các công việc trong nền (background jobs).
-builder.Services.AddHangfire(config => config.UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+// <--- THAY ĐỔI: Cấu hình Hangfire sử dụng PostgreSQL
+builder.Services.AddHangfire(config =>
+    config.UsePostgreSqlStorage(options =>
+        options.UseNpgsqlConnection(builder.Configuration.GetConnectionString("DefaultConnection"))));
+
 builder.Services.AddHangfireServer();
 
-
-// === 2. XÂY DỰNG ỨNG DỤNG (BUILD THE APP) ===
+// === 2. XÂY DỰNG ỨNG DỤNG ===
 var app = builder.Build();
 
-
-// === 3. CẤU HÌNH PIPELINE XỬ LÝ HTTP REQUEST (CONFIGURE THE PIPELINE) ===
+// === 3. CẤU HÌNH PIPELINE ===
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -208,12 +195,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseHangfireDashboard();
 
-// Lên lịch cho công việc dự báo AI chạy vào lúc 18:00 (6 giờ tối) Chủ Nhật hàng tuần.
+// Các Cron Job
 RecurringJob.AddOrUpdate<IDemandForecastService>(
     "weekly-demand-forecast",
     service => service.RunDemandForecastProcessAsync(),
-    // Ghi chú: "0 18 * * SUN" là biểu thức Cron có nghĩa là:
-    // Phút 0, Giờ 18, mỗi Ngày, mỗi Tháng, vào ngày Chủ Nhật (Sunday).
     "0 18 * * SUN",
     new RecurringJobOptions
     {
@@ -221,11 +206,9 @@ RecurringJob.AddOrUpdate<IDemandForecastService>(
     }
 );
 
-// Lên lịch cho công việc tạo đề xuất chạy vào lúc 19:00 (7 giờ tối) Chủ Nhật hàng tuần.
 RecurringJob.AddOrUpdate<ISupplyPlanningService>(
     "weekly-suggestion-generator",
     service => service.GenerateDistributionSuggestionsAsync(),
-    // Ghi chú: Tương tự, "0 19 * * SUN" nghĩa là Phút 0, Giờ 19 vào ngày Chủ Nhật.
     "0 19 * * SUN",
     new RecurringJobOptions
     {

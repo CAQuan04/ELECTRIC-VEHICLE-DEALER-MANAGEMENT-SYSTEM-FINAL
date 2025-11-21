@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AuthService } from '@utils';
-import { dealerAPI } from '@utils/api/services';
+import { dealerAPI } from '@/utils/api/services/dealer.api.js'; 
 import { usePageLoading } from '@modules/loading';
 import { notifications } from '@utils/notifications';
 import '@modules/loading/GlobalLoading.css';
@@ -16,7 +16,9 @@ import {
   Phone,
   Mail,
   Building2,
-  UserCircle
+  UserCircle,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 
 // Import role guards
@@ -26,17 +28,60 @@ import { useDealerRole } from '../components/auth/DealerRoleGuard';
 import PageContainer from '../components/layout/PageContainer';
 import ReportsSection from '../components/ReportsSection';
 
-// Import sections
+// Import sections (CHỈ IMPORT GIAO DIỆN, KHÔNG IMPORT MOCK TỪ ĐÂY)
 import {
   OverviewSection,
   InventorySection,
   OrdersSection,
-  CustomersSection,
-  //getMockDealerById
+  CustomersSection
 } from './DealerDashboard/sections';
 
-// Import components
-import HeroStats from './DealerDashboard/components/HeroStats';
+// ==================== MOCK DATA & HELPER (ĐỊNH NGHĨA TRỰC TIẾP TẠI ĐÂY) ====================
+// Đặt ở đây để đảm bảo hàm luôn tồn tại, không bị lỗi import
+const MOCK_DEALERS = [
+  {
+    dealerId: 2,
+    name: "VinFast Sài Gòn",
+    address: "Landmark 81, Quận Bình Thạnh, TP. Hồ Chí Minh",
+    phone: "0987654321",
+    email: "contact@vinfastsaigon.vn",
+    representativeName: "Nguyễn Văn A",
+    status: "Active"
+  },
+  {
+    dealerId: 3,
+    name: "Đại lý Sài Gòn",
+    address: "456 Nguyễn Huệ, TPHCM",
+    phone: "0987654321",
+    email: "sales@dailysaigon.com",
+    representativeName: "Trần Thị B",
+    status: "Active"
+  },
+  {
+    dealerId: 4,
+    name: "Đại lý A - Hà Nội",
+    address: "55 Tràng Tiền, Hà Nội",
+    phone: "02411112222",
+    email: "info@dailyhanoi-a.vn",
+    representativeName: "Lê Văn C",
+    status: "Active"
+  },
+  {
+    dealerId: 5,
+    name: "Đại lý B - TPHCM",
+    address: "22 Nguyễn Huệ, Quận 1, TPHCM",
+    phone: "02833334444",
+    email: "support@dailyhcm-b.vn",
+    representativeName: "Phạm Thị D",
+    status: "Inactive"
+  }
+];
+
+const getMockDealerById = (id) => {
+  if (!id) return null;
+  return MOCK_DEALERS.find(d => d.dealerId.toString() === id.toString()) || null;
+};
+// ===========================================================================================
 
 const NAV_SECTIONS = [
   { id: 'overview', icon: BarChart3, label: 'Tổng quan' },
@@ -46,26 +91,18 @@ const NAV_SECTIONS = [
   { id: 'reports', icon: TrendingUp, label: 'Báo cáo' }
 ];
 
-// --- MAIN COMPONENT ---
-
 const DealerDashboard = () => {
-  console.log('🏢 DealerDashboard component render');
-
   const navigate = useNavigate();
-  const { dealerId } = useParams(); // Lấy dealerId từ URL
+  const { dealerId } = useParams();
   const { startLoading, stopLoading } = usePageLoading();
   const [dashboardData, setDashboardData] = useState(null);
   const [activeSection, setActiveSection] = useState('overview');
-  const currentUser = AuthService.getCurrentUser();
-  const { dealerRole, isManager, isStaff } = useDealerRole();
+  const { user: currentUser } = AuthService; 
+  const { isManager } = useDealerRole();
 
-  // Log dealerId from URL
-  console.log('📍 DealerId from URL:', dealerId);
-  console.log('👤 Current User dealerId:', currentUser?.dealerId);
-
-const loadDashboardData = useCallback(async () => {
+  const loadDashboardData = useCallback(async () => {
     try {
-      // Lấy dealerId hiện tại (Ưu tiên từ URL, sau đó đến User Context)
+      // Lấy dealerId hiện tại
       const currentDealerId = dealerId || currentUser?.dealerId;
       
       if (!currentDealerId) {
@@ -76,31 +113,30 @@ const loadDashboardData = useCallback(async () => {
       startLoading('Đang tải dữ liệu đại lý...');
       
       // Fetch song song thông tin đại lý và số liệu thống kê
-      // Sử dụng Promise.allSettled để một cái lỗi không làm chết cái kia
+      // Sử dụng Promise.allSettled để tránh crash nếu API lỗi 500
       const [dealerInfoResult, dashboardResult] = await Promise.allSettled([
         dealerAPI.getDealerById(currentDealerId),
         dealerAPI.getDashboard()
       ]);
       
-      // --- LOGIC XỬ LÝ DỮ LIỆU (API -> Mock -> Fallback) ---
+      // --- LOGIC XỬ LÝ DỮ LIỆU ---
       let dealerData = {};
-      const apiDealerData = dealerInfoResult.status === 'fulfilled' && dealerInfoResult.value.success 
-                            ? dealerInfoResult.value.data 
-                            : null;
-
-      // 1. Kiểm tra nếu API trả về dữ liệu "có vẻ" đầy đủ (ít nhất có tên)
-      if (apiDealerData && (apiDealerData.name || apiDealerData.dealerName)) {
-        dealerData = apiDealerData;
+      
+      // Kiểm tra kết quả API Dealer
+      const apiDealerResponse = dealerInfoResult.status === 'fulfilled' ? dealerInfoResult.value : null;
+      
+      // 1. Ưu tiên dữ liệu từ API nếu thành công
+      if (apiDealerResponse && apiDealerResponse.success && apiDealerResponse.data && (apiDealerResponse.data.name || apiDealerResponse.data.dealerName)) {
+        dealerData = apiDealerResponse.data;
       } else {
-        // 2. Nếu API lỗi hoặc thiếu dữ liệu -> DÙNG MOCK DATA DỰA VÀO ID
-        console.warn(`⚠️ API không trả về thông tin đại lý ${currentDealerId}, sử dụng Mock Data.`);
+        // 2. Nếu API lỗi (500, 404, Network Error) -> Dùng Mock Data
+        console.warn(`⚠️ API lỗi hoặc không trả về thông tin đại lý ${currentDealerId}. Sử dụng Mock Data.`);
         const mockData = getMockDealerById(currentDealerId);
         
         if (mockData) {
-          console.log("✅ Đã tìm thấy Mock Data cho ID:", currentDealerId);
           dealerData = mockData;
         } else {
-          // 3. Fallback cuối cùng (nếu ID không nằm trong file mock)
+          // 3. Fallback cuối cùng (nếu ID không nằm trong danh sách Mock)
           dealerData = {
             dealerId: currentDealerId,
             name: `Đại lý #${currentDealerId}`,
@@ -113,9 +149,9 @@ const loadDashboardData = useCallback(async () => {
         }
       }
       
-      const statsData = dashboardResult.status === 'fulfilled' && dashboardResult.value.success 
-                        ? dashboardResult.value.data 
-                        : {};
+      // Kiểm tra kết quả API Dashboard (Stats)
+      const statsResponse = dashboardResult.status === 'fulfilled' ? dashboardResult.value : null;
+      const statsData = (statsResponse && statsResponse.success) ? statsResponse.data : {};
 
       const data = {
         dealer: dealerData,
@@ -125,15 +161,16 @@ const loadDashboardData = useCallback(async () => {
       };
       
       setDashboardData(data);
+
     } catch (err) {
-      console.error('❌ Dashboard Error:', err);
+      console.error('❌ Dashboard Critical Error:', err);
       
-      // Fallback an toàn khi crash toàn bộ: Vẫn cố gắng hiển thị thông tin Mock nếu có ID
+      // Fallback an toàn tuyệt đối khi code JS bị lỗi logic
       const currentDealerId = dealerId || currentUser?.dealerId;
       const mockData = getMockDealerById(currentDealerId);
       
       setDashboardData({
-         dealer: mockData || { name: 'Đại lý', dealerId: currentDealerId },
+         dealer: mockData || { name: `Đại lý #${currentDealerId || '??'}` },
          performance: {},
          recentOrders: [],
          inventory: []
@@ -143,56 +180,28 @@ const loadDashboardData = useCallback(async () => {
     }
   }, [startLoading, stopLoading, currentUser, dealerId]);
 
-
   useEffect(() => {
     loadDashboardData();
   }, [loadDashboardData]);
 
-  console.log('📊 Dashboard data:', dashboardData);
-
-  if (!dashboardData) {
-    console.log('⏳ Waiting for dashboard data...');
-    return null; // Global loading handles the visual feedback
-  }
+  // Tránh render khi chưa có data
+  if (!dashboardData) return null;
 
   const { dealer, inventory } = dashboardData;
 
   const renderActiveSection = () => {
     switch (activeSection) {
-      case 'overview':
-        return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
-      case 'inventory':
-        return <InventorySection inventory={inventory} />;
-      case 'orders':
-        return <OrdersSection navigate={navigate} />;
-      case 'customers':
-        return <CustomersSection navigate={navigate} />;
+      case 'overview': return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
+      case 'inventory': return <InventorySection inventory={inventory} />;
+      case 'orders': return <OrdersSection navigate={navigate} />;
+      case 'customers': return <CustomersSection navigate={navigate} />;
       case 'reports':
-        // Manager-only section
-        if (!isManager) {
-          return (
-            <div className="text-center py-20 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 rounded-3xl border-2 border-red-300 dark:border-red-500/30 shadow-lg">
-              <Shield className="w-20 h-20 text-red-500 mx-auto mb-6 animate-pulse" />
-              <h2 className="text-3xl font-bold text-red-700 dark:text-red-400 mb-4">
-                Quyền truy cập bị hạn chế
-              </h2>
-              <p className="text-red-600 dark:text-red-300 font-medium mb-6">
-                Chỉ Quản lý Đại Lý mới có quyền xem báo cáo
-              </p>
-              <button
-                className="px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-semibold shadow-lg hover:scale-105 transition-all duration-300"
-                onClick={() => setActiveSection('overview')}
-              >
-                ← Quay lại tổng quan
-              </button>
-            </div>
-          );
-        }
+        if (!isManager) return <AccessDeniedSection />;
         return <ReportsSection />;
-      default:
-        return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
+      default: return <OverviewSection dashboardData={dashboardData} navigate={navigate} />;
     }
   };
+
 
   return (
     <PageContainer>
