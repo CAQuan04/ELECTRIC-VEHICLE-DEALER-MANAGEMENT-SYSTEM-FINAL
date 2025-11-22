@@ -45,12 +45,36 @@ const VehicleCatalogue = () => {
   // ... (Giữ nguyên các hàm handle CRUD như cũ) ...
   const handleAddVehicle = () => { setActiveVehicle(null); setOpenVehicleModal(true); };
   const handleEditVehicle = (vehicle) => { setActiveVehicle(vehicle); setOpenVehicleModal(true); };
-  const handleSaveVehicle = async (formData) => {
+  const handleSaveVehicle = async (data) => {
     try {
-      if (formData.vehicleId) await apiClient.put(`/admin/vehicles/${formData.vehicleId}`, formData);
-      else await apiClient.post("/admin/vehicles", formData);
-      setOpenVehicleModal(false); await fetchVehicles();
-    } catch (error) { console.error(error); }
+      const formData = new FormData();
+      formData.append("model", data.model);
+      formData.append("brand", data.brand);
+      if (data.year) formData.append("year", data.year);
+      if (data.basePrice) formData.append("basePrice", data.basePrice);
+      
+      // Quan trọng: Tên field 'image' này phải KHỚP với tên tham số bên Backend
+      if (data.imageFile) {
+        formData.append("image", data.imageFile); 
+      }
+
+      // XÓA dòng config headers thủ công.
+      // Axios sẽ tự động phát hiện FormData và thêm header chính xác kèm boundary.
+      
+      if (data.vehicleId) {
+        // PUT: Lưu ý api put phải hỗ trợ nhận form-data
+        await apiClient.put(`/admin/vehicles/${data.vehicleId}`, formData);
+      } else {
+        // POST
+        await apiClient.post("/admin/vehicles", formData);
+      }
+
+      setOpenVehicleModal(false);
+      await fetchVehicles();
+    } catch (error) {
+      console.error("Lỗi khi lưu xe:", error);
+      alert("Lỗi server: " + (error.response?.data?.message || error.message));
+    }
   };
   const handleDeleteVehicle = async (vehicleId) => {
     if (window.confirm("Bạn có chắc muốn xóa mềm xe này?")) {
@@ -82,6 +106,8 @@ const VehicleCatalogue = () => {
   };
 
   const canManage = user?.role === 'Admin' || user?.role === 'EVMStaff';
+
+  
 
   return (
     <div className="min-h-screen bg-[#0f172a] p-6 text-slate-100">
