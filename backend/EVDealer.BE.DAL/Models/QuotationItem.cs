@@ -8,6 +8,9 @@ namespace EVDealer.BE.DAL.Models
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
 
+        // --- NEW ---
+        public decimal? TotalPrice { get; set; }
+
         public virtual Quotation Quotation { get; set; } = null!;
         public virtual Vehicle Vehicle { get; set; } = null!;
         public virtual VehicleConfig Config { get; set; } = null!;

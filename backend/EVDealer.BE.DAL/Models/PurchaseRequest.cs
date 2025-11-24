@@ -72,4 +72,12 @@ public partial class PurchaseRequest
 
     [ForeignKey("SourceStockRequestId")]
     public virtual StockRequest? SourceStockRequest { get; set; }
+    [Column("order_id")]
+    public int? OrderId { get; set; }
+
+    [Column("remaining_qty")]
+    public int? RemainingQty { get; set; }
+    // --- NEW Navigation ---
+    [ForeignKey("OrderId")]
+    public virtual SalesOrder? Order { get; set; }
 }

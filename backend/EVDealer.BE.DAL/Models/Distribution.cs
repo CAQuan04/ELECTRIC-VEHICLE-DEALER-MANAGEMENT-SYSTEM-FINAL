@@ -28,4 +28,10 @@ public partial class Distribution
 
     public virtual Vehicle Vehicle { get; set; } = null!;
     public virtual VehicleConfig Config { get; set; } = null!;
+
+    public int? ScheduledBy { get; set; }
+    public int? Dispatcher { get; set; }
+    public int? DeliveredBy { get; set; }
+    public DateTime? CreatedAt { get; set; }
+    public DateTime? UpdatedAt { get; set; }
 }
