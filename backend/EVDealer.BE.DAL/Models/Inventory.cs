@@ -23,6 +23,8 @@ public partial class Inventory
 
     [ForeignKey("LocationId")]
     public virtual Dealer Location { get; set; }
+    public int QtyOnHand { get; set; }
+    public int QtyOnHold { get; set; }
 }
 
 #region Seed Query

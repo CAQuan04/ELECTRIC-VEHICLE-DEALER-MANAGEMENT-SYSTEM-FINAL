@@ -43,4 +43,9 @@ public partial class SalesOrder
     public virtual ICollection<OrderPromotion> OrderPromotions { get; set; } = new List<OrderPromotion>();
 
     public virtual Delivery? Delivery { get; set; }
+
+    public decimal? OrderTotalBefore { get; set; }
+    public decimal? OrderTotalDiscount { get; set; }
+    public decimal? OrderTotalAfter { get; set; }
+    public DateTime? CreatedAt { get; set; }
 }

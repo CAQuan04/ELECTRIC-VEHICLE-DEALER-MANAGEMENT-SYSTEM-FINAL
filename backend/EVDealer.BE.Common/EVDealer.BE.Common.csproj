@@ -11,5 +11,5 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.ML" Version="4.0.3" />
 	</ItemGroup>
-	
+
 </Project>
