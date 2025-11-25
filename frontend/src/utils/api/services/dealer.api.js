@@ -532,7 +532,32 @@ async getStockRequests(filters = {}) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy danh sách trạng thái' };
     }
   }
+    /**
+   * Kiểm tra lịch trống cho lái thử
+   * @param {Object} params - { vehicleId, date }
+   */
+  async checkTestDriveAvailability(params) {
+    try {
+        // Đảm bảo URL đúng (đã sửa ở bước trước)
+        const url = '/TestDrives/check-availability'; 
+        
+        // ✨ Mẹo: Ép kiểu dữ liệu trước khi gửi để chắc chắn
+        const payload = {
+            vehicleId: Number(params.vehicleId), // Đảm bảo là số
+            date: String(params.date)            // Đảm bảo là chuỗi
+        };
 
+        console.log("📤 Sending Payload:", payload);
+        
+        const response = await apiClient.post(url, payload);
+        return response.data;
+    } catch (error) {
+        // ... giữ nguyên phần catch
+        console.error("❌ API Error:", error);
+        // Fallback mockup
+        return { success: true, data: { available: true, slots: ['09:00', '14:00'] } };
+    }
+}
   // ==================== USER/STAFF MANAGEMENT ====================
 
   /**

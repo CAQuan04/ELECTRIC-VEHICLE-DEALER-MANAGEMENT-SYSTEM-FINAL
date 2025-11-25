@@ -1,91 +1,17 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useMemo } from 'react'; // Thêm useMemo
 import { gsap } from 'gsap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom'; // Thêm useParams
 import { useDealerRole } from './auth/DealerRoleGuard';
+import { useAuth } from '@/context/AuthContext'; // Nếu cần fallback lấy từ Auth
 
 const DEFAULT_PARTICLE_COUNT = 8;
 const DEFAULT_SPOTLIGHT_RADIUS = 300;
 const DEFAULT_GLOW_COLOR = '16, 185, 129'; // Emerald for dark mode
 const MOBILE_BREAKPOINT = 768;
 
-// Dữ liệu menu dựa theo DealerDashboard
-const menuData = [
-  {
-    id: 'vehicles-info',
-    icon: '🚗',
-    title: 'Quản lý thông tin xe',
-    description: 'Danh mục xe, so sánh mẫu xe',
-    tag: 'UC 1.a',
-    color: 'emerald',
-    requiredRole: null, // Accessible by all dealer users
-    subModules: [
-      { icon: '📋', title: 'Danh mục xe', path: '/dealer/vehicles', tag: 'UC 1.a.1' },
-      { icon: '⚖️', title: 'So sánh xe', path: '/dealer/vehicles/compare', tag: 'UC 1.a.2' }
-    ]
-  },
-  {
-    id: 'sales',
-    icon: '💼',
-    title: 'Quản lý bán hàng',
-    description: 'Báo giá, đơn hàng, khuyến mãi',
-    tag: 'UC 1.b',
-    color: 'purple',
-    requiredRole: null, // Accessible by all dealer users
-    subModules: [
-      { icon: '💰', title: 'Quản lý báo giá', path: '/dealer/quotations', tag: 'UC 1.b.1' },
-      { icon: '📄', title: 'Đơn hàng & Hợp đồng', path: '/dealer/orders', tag: 'UC 1.b.2' },
-      { icon: '🎁', title: 'Khuyến mãi', path: '/dealer/promotions', tag: 'UC 1.b.3' },
-      { icon: '🏭', title: 'Đặt xe từ hãng', path: '/dealer/purchase-requests', tag: 'UC 1.b.4', managerOnly: true },
-      { icon: '🚚', title: 'Theo dõi giao xe', path: '/dealer/deliveries', tag: 'UC 1.b.5' },
-      { icon: '💳', title: 'Quản lý thanh toán', path: '/dealer/payments', tag: 'UC 1.b.6', managerOnly: true }
-    ]
-  },
-  {
-    id: 'inventory',
-    icon: '📦',
-    title: 'Quản lý kho',
-    description: 'Tồn kho, nhập xuất, yêu cầu',
-    tag: 'UC 1.e',
-    color: 'amber',
-    requiredRole: null, // Accessible by all dealer users
-    subModules: [
-      { icon: '📊', title: 'Tồn kho hiện tại', path: '/dealer/inventory', tag: 'UC 1.e.1' },
-      { icon: '📝', title: 'Yêu cầu nhập hàng', path: '/dealer/inventory/request-stock', tag: 'UC 1.e.2', staffAccess: true },
-      { icon: '📋', title: 'Phiếu điều phối', path: '/dealer/inventory/distributions', tag: 'UC 1.e.3', managerOnly: true }
-    ]
-  },
-  {
-    id: 'customers',
-    icon: '👥',
-    title: 'Quản lý khách hàng',
-    description: 'Hồ sơ, lái thử, phản hồi',
-    tag: 'UC 1.c',
-    color: 'blue',
-    requiredRole: null, // Accessible by all dealer users
-    subModules: [
-      { icon: '📇', title: 'Hồ sơ khách hàng', path: '/dealer/customers', tag: 'UC 1.c.1' },
-      { icon: '🚙', title: 'Lịch hẹn lái thử', path: '/dealer/test-drives', tag: 'UC 1.c.2' },
-      { icon: '💬', title: 'Phản hồi & Khiếu nại', path: '/dealer/feedback', tag: 'UC 1.c.4' }
-    ]
-  },
-  {
-    id: 'reports',
-    icon: '📊',
-    title: 'Báo cáo & Phân tích',
-    description: 'Doanh số, công nợ',
-    tag: 'UC 1.d',
-    color: 'pink',
-    requiredRole: 'dealer_manager', // Manager only
-    subModules: [
-      { icon: '📈', title: 'Doanh số nhân viên', path: '/dealer/reports/sales-performance', tag: 'UC 1.d.1', managerOnly: true },
-      { icon: '💸', title: 'Công nợ khách hàng', path: '/dealer/reports/customer-debt', tag: 'UC 1.d.2 (AR)', managerOnly: true },
-      { icon: '🏢', title: 'Công nợ nhà cung cấp', path: '/dealer/reports/supplier-debt', tag: 'UC 1.d.2 (AP)', managerOnly: true }
-    ]
-  }
-];
-
+// --- GIỮ NGUYÊN CÁC HÀM PARTICLE Ở NGOÀI (createParticleElement, ParticleCard) ---
 const createParticleElement = (x, y, isDark) => {
-  const color = isDark ? '16, 185, 129' : '6, 182, 212'; // emerald for dark, cyan for light
+  const color = isDark ? '16, 185, 129' : '6, 182, 212';
   const el = document.createElement('div');
   el.className = 'particle';
   el.style.cssText = `
@@ -231,10 +157,93 @@ const ParticleCard = ({ children, className = '', onClick, disableAnimations = f
   );
 };
 
+// --- COMPONENT CHÍNH ---
 const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
   const navigate = useNavigate();
+  
+  // 1. Lấy dealerId từ URL hoặc Auth Context
+  const { dealerId: paramDealerId } = useParams();
+  const { user } = useAuth();
+  const dealerId = paramDealerId || user?.dealerId;
+
   const gridRef = useRef(null);
   const { isManager, isStaff } = useDealerRole();
+
+  // 2. Di chuyển menuData vào trong Component và dùng useMemo
+  const menuData = useMemo(() => [
+    {
+      id: 'vehicles-info',
+      icon: '🚗',
+      title: 'Quản lý thông tin xe',
+      description: 'Danh mục xe, so sánh mẫu xe',
+      tag: 'UC 1.a',
+      color: 'emerald',
+      requiredRole: null, 
+      subModules: [
+        { icon: '📋', title: 'Danh mục xe', path: `/${dealerId}/dealer/vehicles`, tag: 'UC 1.a.1' },
+        { icon: '⚖️', title: 'So sánh xe', path: `/${dealerId}/dealer/vehicles/compare`, tag: 'UC 1.a.2' }
+      ]
+    },
+    {
+      id: 'sales',
+      icon: '💼',
+      title: 'Quản lý bán hàng',
+      description: 'Báo giá, đơn hàng, khuyến mãi',
+      tag: 'UC 1.b',
+      color: 'purple',
+      requiredRole: null, 
+      subModules: [
+        { icon: '💰', title: 'Quản lý báo giá', path: `/${dealerId}/dealer/quotations`, tag: 'UC 1.b.1' },
+        { icon: '📄', title: 'Đơn hàng & Hợp đồng', path: `/${dealerId}/dealer/orders`, tag: 'UC 1.b.2' },
+        { icon: '🎁', title: 'Khuyến mãi', path: `/${dealerId}/dealer/promotions`, tag: 'UC 1.b.3' },
+        { icon: '🏭', title: 'Đặt xe từ hãng', path: `/${dealerId}/dealer/purchase-requests`, tag: 'UC 1.b.4', managerOnly: true },
+        { icon: '🚚', title: 'Theo dõi giao xe', path: `/${dealerId}/dealer/deliveries`, tag: 'UC 1.b.5' },
+        { icon: '💳', title: 'Quản lý thanh toán', path: `/${dealerId}/dealer/payments`, tag: 'UC 1.b.6', managerOnly: true }
+      ]
+    },
+    {
+      id: 'inventory',
+      icon: '📦',
+      title: 'Quản lý kho',
+      description: 'Tồn kho, nhập xuất, yêu cầu',
+      tag: 'UC 1.e',
+      color: 'amber',
+      requiredRole: null, 
+      subModules: [
+        { icon: '📊', title: 'Tồn kho hiện tại', path: `/${dealerId}/dealer/inventory`, tag: 'UC 1.e.1' },
+        { icon: '📝', title: 'Yêu cầu nhập hàng', path: `/${dealerId}/dealer/inventory/request`, tag: 'UC 1.e.2', staffAccess: true },
+        { icon: '📋', title: 'Phiếu điều phối', path: `/${dealerId}/dealer/inventory/distributions`, tag: 'UC 1.e.3', managerOnly: true }
+      ]
+    },
+    {
+      id: 'customers',
+      icon: '👥',
+      title: 'Quản lý khách hàng',
+      description: 'Hồ sơ, lái thử, phản hồi',
+      tag: 'UC 1.c',
+      color: 'blue',
+      requiredRole: null, 
+      subModules: [
+        { icon: '📇', title: 'Hồ sơ khách hàng', path: `/${dealerId}/dealer/customers`, tag: 'UC 1.c.1' },
+        { icon: '🚙', title: 'Lịch hẹn lái thử', path: `/${dealerId}/dealer/test-drives`, tag: 'UC 1.c.2' },
+        { icon: '💬', title: 'Phản hồi & Khiếu nại', path: `/${dealerId}/dealer/feedback`, tag: 'UC 1.c.4' }
+      ]
+    },
+    {
+      id: 'reports',
+      icon: '📊',
+      title: 'Báo cáo & Phân tích',
+      description: 'Doanh số, công nợ',
+      tag: 'UC 1.d',
+      color: 'pink',
+      requiredRole: 'dealer_manager', 
+      subModules: [
+        { icon: '📈', title: 'Doanh số nhân viên', path: `/${dealerId}/dealer/reports/sales-performance`, tag: 'UC 1.d.1', managerOnly: true },
+        { icon: '💸', title: 'Công nợ khách hàng', path: `/${dealerId}/dealer/reports/customer-debt`, tag: 'UC 1.d.2 (AR)', managerOnly: true },
+        { icon: '🏢', title: 'Công nợ nhà cung cấp', path: `/${dealerId}/dealer/reports/supplier-debt`, tag: 'UC 1.d.2 (AP)', managerOnly: true }
+      ]
+    }
+  ], [dealerId]); // Re-create menu if dealerId changes
 
   const handleSubModuleClick = (path) => {
     if (onModuleClick) {
@@ -269,6 +278,12 @@ const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
         bg: 'dark:bg-pink-500/10 bg-pink-50',
         tag: 'dark:bg-pink-500/20 bg-pink-100 dark:text-pink-300 text-pink-800 dark:border-pink-500/40 border-pink-400',
         hover: 'dark:hover:border-pink-500/50 hover:border-pink-600 dark:hover:shadow-pink-500/20 hover:shadow-pink-500/20'
+      },
+      amber: { // Added Amber for Inventory
+        border: 'dark:border-amber-500 border-amber-600',
+        bg: 'dark:bg-amber-500/10 bg-amber-50',
+        tag: 'dark:bg-amber-500/20 bg-amber-100 dark:text-amber-300 text-amber-800 dark:border-amber-500/40 border-amber-400',
+        hover: 'dark:hover:border-amber-500/50 hover:border-amber-600 dark:hover:shadow-amber-500/20 hover:shadow-amber-500/20'
       }
     };
     return colorMap[color] || colorMap.emerald;

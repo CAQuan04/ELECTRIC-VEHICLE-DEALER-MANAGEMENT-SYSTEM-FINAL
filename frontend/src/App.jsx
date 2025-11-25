@@ -417,7 +417,7 @@ const App = () => {
                 }
               />
 
-                            <Route
+              <Route
                 path="/staff/sales-reports"
                 element={
                   <StaffGuard>
@@ -707,6 +707,18 @@ const App = () => {
                   </DealerGuard>
                 }
               />
+              <Route
+                path="/:dealerId/dealer/quotations/create"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <CreateQuotation />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
 
               {/* Dealer Routes with dealerId - Payments */}
               <Route
@@ -735,7 +747,7 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-    
+
               {/* Dealer Routes with dealerId - Promotions */}
               <Route
                 path="/:dealerId/dealer/promotions"
@@ -763,7 +775,7 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-              
+
               {/* Fallback route cho dealer-dashboard không có dealerId */}
               <Route
                 path="/dealer-dashboard"
@@ -798,7 +810,7 @@ const App = () => {
 
               {/* Dealer Routes - Vehicles */}
               <Route
-                path="/dealer/vehicles"
+                path="/:dealerId/dealer/vehicles"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -822,7 +834,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/vehicles/compare"
+                path="/:dealerId/dealer/vehicles/compare"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -836,7 +848,7 @@ const App = () => {
 
               {/* Dealer Routes - Inventory */}
               <Route
-                path="/dealer/inventory"
+                path="/:dealerId/dealer/inventory"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -848,7 +860,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/inventory/:stockId"
+                path="/:dealerId/dealer/inventory/:stockId"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -860,7 +872,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/inventory/distributions"
+                path="/:dealerId/dealer/inventory/distributions"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -872,7 +884,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/inventory/distributions/:requestId"
+                path="/:dealerId/dealer/inventory/distributions/:requestId"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -884,7 +896,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/inventory/request"
+                path="/:dealerId/dealer/inventory/request"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -898,7 +910,7 @@ const App = () => {
 
               {/* Dealer Routes - Customers */}
               <Route
-                path="/dealer/customers"
+                path="/:dealerId/dealer/customers"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -910,7 +922,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/customers/new"
+                path="/:dealerId/dealer/customers/new"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -922,7 +934,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/customers/:customerId"
+                path="/:dealerId/dealer/customers/:customerId"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -934,7 +946,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/customers/:customerId/edit"
+                path="/:dealerId/dealer/customers/:customerId/edit"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -948,7 +960,7 @@ const App = () => {
 
               {/* Dealer Routes - Test Drive */}
               <Route
-                path="/dealer/test-drives"
+                path="/:dealerId/dealer/test-drives"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -960,7 +972,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/test-drives/new"
+                path="/:dealerId/dealer/test-drives/new"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -972,7 +984,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/test-drives/calendar"
+                path="/:dealerId/dealer/test-drives/calendar"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -984,7 +996,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/test-drives/:id"
+                path="/:dealerId/dealer/test-drives/:id"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -998,7 +1010,7 @@ const App = () => {
 
               {/* Dealer Routes - Sales */}
               <Route
-                path="/dealer/quotations"
+                path="/:dealerId/dealer/quotations"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1010,7 +1022,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/quotations/create"
+                path="/:dealerId/dealer/quotations/create"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1022,7 +1034,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/orders"
+                path="/:dealerId/dealer/orders"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1034,7 +1046,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/orders/create"
+                path="/:dealerId/dealer/orders/create"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1046,7 +1058,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/orders/:id"
+                path="/:dealerId/dealer/orders/:id"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1058,7 +1070,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/payments"
+                path="/:dealerId/dealer/payments"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1070,7 +1082,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/payments/new"
+                path="/:dealerId/dealer/payments/new"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1084,7 +1096,7 @@ const App = () => {
 
               {/* Dealer Routes - Purchase */}
               <Route
-                path="/dealer/purchase-requests"
+                path="/:dealerId/dealer/purchase-requests"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1096,7 +1108,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/purchase-requests/create"
+                path="/:dealerId/dealer/purchase-requests/create"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1110,7 +1122,7 @@ const App = () => {
 
               {/* Dealer Routes - Reports */}
               <Route
-                path="/dealer/reports/sales-performance"
+                path="/:dealerId/dealer/reports/sales-performance"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1122,7 +1134,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/reports/customer-debt"
+                path="/:dealerId/dealer/reports/customer-debt"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1134,7 +1146,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/reports/supplier-debt"
+                path="/:dealerId/dealer/reports/supplier-debt"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1145,9 +1157,9 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-{/* Dealer Routes - Promotions */}
+              {/* Dealer Routes - Promotions */}
               <Route
-                path="/dealer/promotions"
+                path="/:dealerId/dealer/promotions"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1158,10 +1170,10 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-              
+
               {/* 🟢 [THÊM MỚI] Route tạo khuyến mãi */}
               <Route
-                path="/dealer/promotions/create"
+                path="/:dealerId/dealer/promotions/create"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1173,14 +1185,14 @@ const App = () => {
                 }
               />
 
-               {/* 🟢 [THÊM MỚI] Route chỉnh sửa khuyến mãi */}
-               <Route
-                path="/dealer/promotions/edit/:promoId"
+              {/* 🟢 [THÊM MỚI] Route chỉnh sửa khuyến mãi */}
+              <Route
+                path="/:dealerId/dealer/promotions/edit/:promoId"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
                       <AppLayout>
-                        <CreatePromotion /> 
+                        <CreatePromotion />
                         {/* Lưu ý: CreatePromotion cần được sửa để hỗ trợ cả mode Edit nếu muốn */}
                       </AppLayout>
                     </DealerShopGuard>
@@ -1189,7 +1201,7 @@ const App = () => {
               />
 
               <Route
-                path="/dealer/promotions/:promoId"
+                path="/:dealerId/dealer/promotions/:promoId"
                 element={
                   <DealerGuard>
                     <DealerShopGuard>
@@ -1203,7 +1215,7 @@ const App = () => {
 
               {/* Dealer Routes - Staff Management */}
               <Route
-                path="/dealer/staff"
+                path="/:dealerId/dealer/staff"
                 element={
                   <DealerGuard>
                     <AppLayout>
@@ -1213,7 +1225,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/staff/new"
+                path="/:dealerId/dealer/staff/new"
                 element={
                   <DealerGuard>
                     <AppLayout>
@@ -1223,7 +1235,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/staff/:staffId/edit"
+                path="/:dealerId/dealer/staff/:staffId/edit"
                 element={
                   <DealerGuard>
                     <AppLayout>
@@ -1235,7 +1247,7 @@ const App = () => {
 
               {/* Dealer Routes - Feedback */}
               <Route
-                path="/dealer/feedback"
+                path="/:dealerId/dealer/feedback"
                 element={
                   <DealerGuard>
                     <AppLayout>
@@ -1245,7 +1257,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/feedback/create"
+                path="/:dealerId/dealer/feedback/create"
                 element={
                   <DealerGuard>
                     <AppLayout>
@@ -1255,7 +1267,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/feedback/edit/:feedbackId"
+                path="/:dealerId/dealer/feedback/edit/:feedbackId"
                 element={
                   <DealerGuard>
                     <AppLayout>
@@ -1265,7 +1277,7 @@ const App = () => {
                 }
               />
               <Route
-                path="/dealer/feedback/:feedbackId"
+                path="/:dealerId/dealer/feedback/:feedbackId"
                 element={
                   <DealerGuard>
                     <AppLayout>

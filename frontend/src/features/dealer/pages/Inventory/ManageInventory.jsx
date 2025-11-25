@@ -23,10 +23,13 @@ const ManageInventory = () => {
   const [search, setSearch] = useState('');
   const [pendingUpdates, setPendingUpdates] = useState({}); // {vehicleId_configId: quantity}
   const [savingItems, setSavingItems] = useState(new Set());
-
+  const { user } = useAuth()  ;
+  const dealerId = user?.dealerId;
   useEffect(() => {
-    loadData();
-  }, []);
+    if (dealerId) {
+      loadData();
+    }
+  }, [dealerId]);
 
   const loadData = async () => {
     try {
