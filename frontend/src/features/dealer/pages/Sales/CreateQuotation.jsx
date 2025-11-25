@@ -19,9 +19,12 @@ import {
   InfoRow
 } from '../../components';
 import { PDFDownloadLink } from '@react-pdf/renderer';
-// ✨ THÊM 'Search' VÀO IMPORT
 import { ShoppingCart, Printer, Edit, FileText, User, CheckCircle, UserPlus, Save, Search } from 'lucide-react';
 import QuotationDocument from './QuotationDocument';
+
+// 👇 IMPORT DỮ LIỆU ĐỊA CHÍNH (Đảm bảo đường dẫn file đúng như bạn đã cung cấp)
+import provincesData from '@/assets/tinh-xa-sapnhap-main/provinces.json';
+import wardsData from '@/assets/tinh-xa-sapnhap-main/wards.json';
 
 // --- CÁC CONSTANTS GIỮ NGUYÊN ---
 const availableOptions = [
@@ -73,9 +76,9 @@ const CreateQuotation = () => {
   const [promotions, setPromotions] = useState([]);
   const [errors, setErrors] = useState({});
 
-  // ✨ MỚI: State cho ô tìm kiếm
+  // State cho ô tìm kiếm
   const [searchTerm, setSearchTerm] = useState('');
-
+  const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
   // State quản lý logic tạo khách hàng mới
   const [isNewCustomer, setIsNewCustomer] = useState(false);
 
@@ -100,6 +103,13 @@ const CreateQuotation = () => {
     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     batteryPolicy: 'thuê pin',
     notes: ''
+  });
+
+  // ✨ 1. STATE QUẢN LÝ ĐỊA CHỈ RIÊNG (Chỉ khai báo 1 lần)
+  const [addressParts, setAddressParts] = useState({
+    provinceId: '',
+    wardId: '',
+    street: ''
   });
 
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -154,6 +164,7 @@ const CreateQuotation = () => {
               customerName: data.customerName || '',
               customerPhone: data.customerPhone || '',
               customerEmail: data.customerEmail || '',
+              customerAddress: data.customerAddress || '',
               vehicleId: data.vehicleId,
               basePrice: data.basePrice || 0,
               configId: data.configId || 0,
@@ -195,38 +206,74 @@ const CreateQuotation = () => {
     }
   };
 
-  // ✨ HÀM LỌC KHÁCH HÀNG
+  // HÀM LỌC KHÁCH HÀNG
   const filteredCustomers = useMemo(() => {
     if (!searchTerm.trim()) return customers;
-    
+
     const lowerTerm = searchTerm.toLowerCase();
-    return customers.filter(c => 
-      (c.fullName && c.fullName.toLowerCase().includes(lowerTerm)) || 
+    return customers.filter(c =>
+      (c.fullName && c.fullName.toLowerCase().includes(lowerTerm)) ||
       (c.phone && c.phone.includes(lowerTerm)) ||
       (c.idDocumentNumber && c.idDocumentNumber.includes(lowerTerm))
     );
   }, [customers, searchTerm]);
 
-  // ✨ TẠO OPTIONS TỪ DANH SÁCH ĐÃ LỌC
   const customerOptions = filteredCustomers.map(c => ({
     label: `${c.fullName} - ${c.phone} ${c.idDocumentNumber ? `(${c.idDocumentNumber})` : ''}`,
     value: c.customerId || c.id
   }));
 
+  // ✨ 2. LOGIC LỌC QUẬN/HUYỆN (WARDS) THEO TỈNH
+  const filteredWards = useMemo(() => {
+    if (!addressParts.provinceId) return [];
+    return wardsData.filter(w => w.province_id === addressParts.provinceId);
+  }, [addressParts.provinceId]);
+
+  // ✨ 3. HÀM GHÉP ĐỊA CHỈ ĐẦY ĐỦ (Quan trọng để fix lỗi 400)
+  const getFullAddress = () => {
+    if (!isNewCustomer) return formData.customerAddress;
+
+    const province = provincesData.find(p => p.id === addressParts.provinceId);
+    const ward = wardsData.find(w => w.id === addressParts.wardId);
+    const street = addressParts.street.trim();
+    
+    // Validate: Phải có đủ 3 thành phần
+    if (!province || !ward || !street) {
+      return null; 
+    }
+
+    // Format: "Số 10 Đường A, Phường B, Tỉnh C"
+    return `${street}, ${ward.name}, ${province.name}`;
+  };
+
+  // ✨ 4. CẬP NHẬT HÀM TẠO KHÁCH HÀNG
   const handleCreateNewCustomer = async () => {
-    if (!formData.customerName || !formData.customerPhone || !formData.customerAddress || !formData.customerIdDocumentNumber) {
-      notifications.error('Thiếu thông tin', 'Vui lòng nhập đầy đủ: Tên, SĐT, Địa chỉ và CCCD.');
+    // Validate cơ bản
+    if (isCreatingCustomer) return;
+    if (!formData.customerName || !formData.customerPhone || !formData.customerIdDocumentNumber) {
+      notifications.error('Thiếu thông tin', 'Vui lòng nhập đầy đủ: Tên, SĐT và CCCD.');
       return;
     }
 
+    // Lấy địa chỉ đã ghép
+    const finalAddress = getFullAddress();
+
+    // Validate địa chỉ
+    if (!finalAddress) {
+      notifications.error('Lỗi địa chỉ', 'Vui lòng chọn đầy đủ: Tỉnh, Phường/Xã và nhập Số nhà/Đường.');
+      return;
+    }
+    setIsCreatingCustomer(true);
     setIsSubmitting(true);
     try {
       const newCustomerPayload = {
         fullName: formData.customerName,
         phone: formData.customerPhone,
-        address: formData.customerAddress,
+        address: finalAddress, // Sử dụng địa chỉ đầy đủ
         idDocumentNumber: formData.customerIdDocumentNumber
       };
+
+      console.log("🚀 Payload gửi đi:", newCustomerPayload); // Debug log
 
       const result = await dealerAPI.createCustomer(newCustomerPayload);
 
@@ -239,8 +286,9 @@ const CreateQuotation = () => {
         setFormData(prev => ({
           ...prev,
           customerId: newCustomer.customerId || newCustomer.id,
+          customerAddress: finalAddress
         }));
-        
+
         // Reset search term và đóng chế độ nhập mới
         setSearchTerm('');
         setIsNewCustomer(false);
@@ -252,6 +300,7 @@ const CreateQuotation = () => {
       console.error('🚨 Lỗi tạo khách hàng:', error);
       notifications.error('Lỗi', 'Có lỗi xảy ra khi lưu khách hàng.');
     } finally {
+      setIsCreatingCustomer(false);
       setIsSubmitting(false);
     }
   };
@@ -357,8 +406,7 @@ const CreateQuotation = () => {
 
       let result;
       if (isEditMode) {
-        console.warn("Edit mode update not implemented completely");
-        result = { success: true };
+        result = { success: true }; // Placeholder cho edit
       } else {
         result = await dealerAPI.createQuotation(payload);
       }
@@ -433,17 +481,14 @@ const CreateQuotation = () => {
                       size="sm"
                       onClick={() => {
                         setIsNewCustomer(!isNewCustomer);
-                        // Reset form và ô tìm kiếm khi chuyển chế độ
                         setSearchTerm('');
-                        setFormData(prev => ({ 
-                            ...prev, 
-                            customerId: '', 
-                            customerName: '', 
-                            customerPhone: '', 
-                            customerEmail: '',
-                            customerAddress: '',
-                            customerIdDocumentNumber: ''
+                        setFormData(prev => ({
+                          ...prev,
+                          customerId: '', customerName: '', customerPhone: '',
+                          customerEmail: '', customerAddress: '', customerIdDocumentNumber: ''
                         }));
+                        // Reset địa chỉ khi chuyển mode
+                        setAddressParts({ provinceId: '', wardId: '', street: '' });
                       }}
                     >
                       {isNewCustomer ? <CheckCircle className="w-4 h-4 mr-2" /> : <UserPlus className="w-4 h-4 mr-2" />}
@@ -453,7 +498,6 @@ const CreateQuotation = () => {
 
                   {!isNewCustomer ? (
                     <div className="space-y-3">
-                      {/* ✨ Ô TÌM KIẾM KHÁCH HÀNG */}
                       <div className="relative">
                         <Label className="text-xs text-gray-500 uppercase tracking-wider mb-1">Lọc khách hàng nhanh</Label>
                         <div className="relative">
@@ -465,13 +509,11 @@ const CreateQuotation = () => {
                             placeholder="Nhập Tên, SĐT hoặc CCCD..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10  border-blue-200 focus:border-blue-500"
+                            className="pl-10 border-blue-200 focus:border-blue-500"
                           />
                           {searchTerm && (
                             <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                                <span className="text-xs text-gray-400">
-                                    Tìm thấy: {filteredCustomers.length}
-                                </span>
+                              <span className="text-xs text-gray-400">Tìm thấy: {filteredCustomers.length}</span>
                             </div>
                           )}
                         </div>
@@ -479,19 +521,19 @@ const CreateQuotation = () => {
 
                       <FormGroup>
                         <Label>Chọn từ danh sách</Label>
-                        <Select style={{ minWidth: '200px',
+                        <Select style={{
+                          minWidth: '200px',
                           borderColor: errors.customerId ? '#f52c2cff' : '',
                           backgroundColor: isCustomerSectionOpen ? '#3b363b33' : ' ',
                           color: isCustomerSectionOpen ? '#ffffffff' : ' '
-
-                         }}
+                        }}
                           value={formData.customerId}
                           options={customerOptions}
                           onChange={(e) => handleCustomerChange(e.target.value)}
                           placeholder={
-                             isDataLoading ? "Đang tải..." : 
-                             filteredCustomers.length === 0 ? "Không tìm thấy khách hàng nào khớp" :
-                             "-- Chọn khách hàng --"
+                            isDataLoading ? "Đang tải..." :
+                              filteredCustomers.length === 0 ? "Không tìm thấy khách hàng nào khớp" :
+                                "-- Chọn khách hàng --"
                           }
                           disabled={filteredCustomers.length === 0}
                         />
@@ -499,8 +541,10 @@ const CreateQuotation = () => {
                     </div>
                   ) : (
                     <div className="p-6 text-gray-200 rounded-lg text-xl tracking-wider "
-                        style={{ background: 'linear-gradient(90deg, #ec45baff, #feb47b)', 
-                          fontWeight: 'bold', boxShadow: '0 4px 6px rgba(255, 124, 124, 0.57)' }}>
+                      style={{
+                        background: 'linear-gradient(90deg, #ec45baff, #feb47b)',
+                        fontWeight: 'bold', boxShadow: '0 4px 6px rgba(255, 124, 124, 0.57)'
+                      }}>
                       Nhập thông tin để tạo khách hàng mới
                     </div>
                   )}
@@ -540,29 +584,83 @@ const CreateQuotation = () => {
                             className={!isNewCustomer ? "bg-gray-100" : "bg-rose-50"}
                         />
                     </FormGroup>
-                     <FormGroup>
-                        <Label required={isNewCustomer}>Địa chỉ</Label>
-                        <Input
-                            name="customerAddress"
-                            value={formData.customerAddress}
-                            onChange={handleChange}
-                            readOnly={!isNewCustomer}
-                            placeholder={isNewCustomer ? "Nhập địa chỉ liên hệ" : ""}
-                            className={!isNewCustomer ? "bg-gray-100" : "bg-rose-50"}
-                        />
+                    
+                    <FormGroup>
+                      <Label>Email (Tùy chọn)</Label>
+                      <Input
+                        name="customerEmail"
+                        value={formData.customerEmail}
+                        onChange={handleChange}
+                        readOnly={!isNewCustomer}
+                        className={!isNewCustomer ? "bg-gray-100" : "bg-rose-50"}
+                      />
                     </FormGroup>
                   </div>
 
-                  <FormGroup>
-                    <Label>Email (Tùy chọn)</Label>
-                    <Input
-                      name="customerEmail"
-                      value={formData.customerEmail}
-                      onChange={handleChange}
-                      readOnly={!isNewCustomer}
-                      className={!isNewCustomer ? "bg-gray-100" : "bg-rose-50"}
-                    />
-                  </FormGroup>
+                  {/* ✨ PHẦN CHỌN ĐỊA CHỈ ĐƯỢC CẬP NHẬT */}
+                  {!isNewCustomer ? (
+                    // Hiển thị dạng Text khi chọn khách hàng cũ
+                    <FormGroup>
+                        <Label>Địa chỉ</Label>
+                        <Input
+                            name="customerAddress"
+                            value={formData.customerAddress}
+                            readOnly
+                            className="bg-gray-100 text-gray-600"
+                        />
+                    </FormGroup>
+                  ) : (
+                    // Hiển thị bộ chọn khi tạo khách hàng mới
+                    <div className="p-4 dark:bg-slate-750 rounded-lg border border-blue-100 dark:border-slate-600 space-y-3">
+                      <Label required>Địa chỉ liên hệ</Label>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <FormGroup className="mb-0">
+                            <Label className="text-xs text-gray-500 dark:text-gray-400">Tỉnh / Thành phố</Label>
+                            <Select
+                              value={addressParts.provinceId}
+                              onChange={(e) => setAddressParts(prev => ({ 
+                                ...prev, 
+                                provinceId: e.target.value, 
+                                wardId: '' // Reset Ward khi đổi Tỉnh
+                              }))}
+                              options={provincesData.map(p => ({ value: p.id, label: p.name }))}
+                              placeholder="-- Chọn Tỉnh / Thành phố --"
+                              className="dark:bg-gray-600"
+                            />
+                        </FormGroup>
+                        
+                        <FormGroup className="mb-0">
+                            <Label className="text-xs text-gray-500 dark:text-gray-400">Phường / Xã / Thị trấn</Label>
+                            <Select
+                              value={addressParts.wardId}
+                              onChange={(e) => setAddressParts(prev => ({ ...prev, wardId: e.target.value }))}
+                              options={filteredWards.map(w => ({ value: w.id, label: w.name }))}
+                              placeholder={addressParts.provinceId ? "-- Chọn Phường / Xã --" : "-- Vui lòng chọn Tỉnh trước --"}
+                              disabled={!addressParts.provinceId}
+                              className="dark:bg-slate-800"
+                            />
+                        </FormGroup>
+                      </div>
+                      <FormGroup className="mb-0">
+                          <Label className="text-xs text-gray-500 dark:text-gray-400">Số nhà, tên đường, thôn/xóm</Label>
+                          <Input
+                            placeholder="Ví dụ: Số 10, Đường Nguyễn Huệ..."
+                            value={addressParts.street}
+                            onChange={(e) => setAddressParts(prev => ({ ...prev, street: e.target.value }))}
+                            className="dark:bg-slate-800"
+                          />
+                      </FormGroup>
+                      <div className="text-lg text-gray-600 dark:text-gray-400 italic text-right">
+                        Địa chỉ sẽ lưu: <span className="font-semibold text-blue-600 dark:text-rose-400">
+                            {
+                                (addressParts.street ? addressParts.street : '...') + ', ' + 
+                                (wardsData.find(w => w.id === addressParts.wardId)?.name || '...') + ', ' + 
+                                (provincesData.find(p => p.id === addressParts.provinceId)?.name || '...')
+                            }
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {isNewCustomer && (
                     <div className="flex justify-end mt-2">
@@ -583,7 +681,6 @@ const CreateQuotation = () => {
               )}
             </InfoSection>
 
-            {/* CÁC SECTION KHÁC GIỮ NGUYÊN ... */}
             <InfoSection
               title="2. Thông tin xe"
               icon="🚗"
