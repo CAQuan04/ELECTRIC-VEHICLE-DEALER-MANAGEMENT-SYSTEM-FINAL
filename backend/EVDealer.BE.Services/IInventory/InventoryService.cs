@@ -143,7 +143,7 @@ namespace EVDealer.BE.Services.IInventory
                 .Include(i => i.Vehicle)
                 .Include(i => i.Config)
                 .Include(i => i.Location)
-                .Where(i => i.LocationType == "Dealer" && i.LocationId == dealerId);
+                .Where(i => i.LocationId == dealerId);
 
             // Apply search filter if provided
             if (!string.IsNullOrWhiteSpace(search))
