@@ -38,5 +38,11 @@ namespace EVDealer.BE.Services.IInventory
 
         // ==================== INVENTORY MANAGEMENT (EVM → Dealer) ====================
         Task IncreaseInventoryAsync(int dealerId, int vehicleId, int configId, int quantity);
+
+
+        Task<DistributionSummaryDto?> GetDistributionDetailsByIdAsync(int distributionId);
+        Task<IEnumerable<Distribution>> CreateDistributionsFromRequestAsync(CreateDistributionFromRequestDto dto);
+
+        Task<IEnumerable<DistributionSummaryDto>> GetDistributionSummaryForDealerAsync(int dealerId);
     }
 }
