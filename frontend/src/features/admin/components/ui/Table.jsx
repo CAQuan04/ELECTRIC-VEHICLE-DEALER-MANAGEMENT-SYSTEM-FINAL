@@ -1,37 +1,67 @@
 import React from 'react';
+import EmptyState from './EmptyState';
 
 /**
- * Table - Responsive table component
- * @param {array} columns - Array of column definitions: [{ key, label, render }]
+ * Table - Modern responsive table component with enhanced dark mode
+ * @param {array} columns - Array of column definitions: [{ key, label, render, className, tdClassName }]
  * @param {array} data - Array of data objects
  * @param {function} onRowClick - Click handler for rows (optional)
  */
 const Table = ({ columns, data, onRowClick, className = '' }) => {
   return (
-    <div className={`dark:bg-white/5 bg-white backdrop-blur-sm rounded-2xl dark:border-white/10 border-gray-200 border overflow-hidden shadow-lg transition-all duration-300 ${className}`}>
+    <div className={`
+      relative overflow-hidden
+      bg-white/80 dark:bg-gradient-to-br dark:from-gray-800/90 dark:to-gray-900/90
+      backdrop-blur-xl rounded-3xl 
+      border border-gray-200 dark:border-gray-700/50
+      shadow-xl dark:shadow-emerald-500/5
+      ${className}
+    `}>
       <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="dark:bg-white/10 bg-gradient-to-r from-cyan-50 to-blue-50">
-            <tr>
+        <table className="min-w-full">
+          {/* Table Header */}
+          <thead className="bg-gradient-to-r from-cyan-100 to-blue-100 dark:from-gray-600/80 dark:to-gray-700/80 backdrop-blur-sm">
+            <tr className="border-b-2 border-gray-200 dark:border-gray-600">
               {columns.map((column) => (
                 <th 
                   key={column.key}
-                  className={`px-6 py-4 text-left text-sm font-bold dark:text-gray-200 text-gray-800 ${column.className || ''}`}
+                  className={`
+                    px-8 py-5 text-left 
+                    text-sm font-black uppercase tracking-wider
+                    text-gray-800 dark:text-gray-200
+                    ${column.className || ''}
+                  `}
                 >
                   {column.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="dark:divide-white/10 divide-gray-200 divide-y">
-            {data.map((row, rowIndex) => (
+          
+          {/* Table Body */}
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700/50">
+            {data.length > 0 && data.map((row, rowIndex) => (
               <tr 
                 key={row.id || rowIndex}
-                className={`dark:hover:bg-emerald-500/10 hover:bg-cyan-50 dark:hover:shadow-emerald-500/10 hover:shadow-cyan-500/10 transition-all duration-200 ${onRowClick ? 'cursor-pointer' : ''}`}
+                className={`
+                  group transition-all duration-300
+                  ${onRowClick ? 'cursor-pointer hover:bg-cyan-50 dark:hover:bg-emerald-500/10 hover:scale-[1.01]' : ''}
+                  hover:shadow-lg
+                `}
                 onClick={() => onRowClick && onRowClick(row)}
               >
                 {columns.map((column) => (
-                  <td key={column.key} className={`px-6 py-4 dark:text-gray-100 text-gray-900 ${column.tdClassName || ''}`}>
+                  <td 
+                    key={column.key} 
+                    className={`
+                      px-8 py-5 whitespace-nowrap 
+                      text-base font-medium
+                      text-gray-800 dark:text-gray-200
+                      group-hover:text-cyan-700 dark:group-hover:text-emerald-300
+                      transition-colors duration-300
+                      ${column.tdClassName || ''}
+                    `}
+                  >
                     {column.render ? column.render(row) : row[column.key]}
                   </td>
                 ))}
@@ -43,10 +73,12 @@ const Table = ({ columns, data, onRowClick, className = '' }) => {
       
       {/* Empty State */}
       {data.length === 0 && (
-        <div className="text-center py-20">
-          <div className="text-6xl mb-4">📭</div>
-          <h3 className="text-xl font-semibold mb-2 dark:text-white text-gray-900">Không có dữ liệu</h3>
-          <p className="dark:text-gray-400 text-gray-600">Chưa có dữ liệu để hiển thị</p>
+        <div className="p-8">
+          <EmptyState
+            title="Không có dữ liệu"
+            message="Chưa có dữ liệu để hiển thị"
+            icon="📭"
+          />
         </div>
       )}
     </div>
