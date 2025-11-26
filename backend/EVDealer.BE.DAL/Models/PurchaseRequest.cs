@@ -35,27 +35,25 @@ public partial class PurchaseRequest
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
 
-    [Column("requested_by_user_id")]
-    public int? RequestedByUserId { get; set; }
+    //[Column("requested_by_user_id")]
+    //public int? RequestedByUserId { get; set; }
 
-    [StringLength(20)]
-    [Column("priority")]
-    public string? Priority { get; set; }
+    //[StringLength(20)]
+    //[Column("priority")]
+    //public string? Priority { get; set; }
 
     [Column("notes", TypeName = "nvarchar(MAX)")]
     public string? Notes { get; set; }
 
-    [Column("source_stock_request_id")]
-    public int? SourceStockRequestId { get; set; }
+    //[Column("source_stock_request_id")]
+    //public int? SourceStockRequestId { get; set; }
 
-    [Column("sent_to_evm_date")]
-    public DateTime? SentToEVMDate { get; set; }
+    //[Column("sent_to_evm_date")]
+    //public DateTime? SentToEVMDate { get; set; }
 
-    [Column("evm_order_id")]
-    public string? EVMOrderId { get; set; }
+    //[Column("evm_order_id")]
+    //public string? EVMOrderId { get; set; }
 
-    [Column("completed_date")]
-    public DateTime? CompletedDate { get; set; }
 
     // Navigation properties
     [ForeignKey("DealerId")]
@@ -67,11 +65,11 @@ public partial class PurchaseRequest
     [ForeignKey("ConfigId")]
     public virtual VehicleConfig Config { get; set; } = null!;
 
-    [ForeignKey("RequestedByUserId")]
-    public virtual User? RequestedBy { get; set; }
+    //[ForeignKey("RequestedByUserId")]
+    //public virtual User? RequestedBy { get; set; }
 
-    [ForeignKey("SourceStockRequestId")]
-    public virtual StockRequest? SourceStockRequest { get; set; }
+    //[ForeignKey("SourceStockRequestId")]
+    //public virtual StockRequest? SourceStockRequest { get; set; }
     [Column("order_id")]
     public int? OrderId { get; set; }
 

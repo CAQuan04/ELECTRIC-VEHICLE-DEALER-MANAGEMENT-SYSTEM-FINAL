@@ -119,12 +119,12 @@ namespace EVDealer.BE.Services.Procurement
                 ConfigId = stockRequest.ConfigId ?? 0,
                 DealerId = stockRequest.DealerId,
                 Quantity = stockRequest.Quantity,
-                Priority = stockRequest.Priority,
+                //Priority = stockRequest.Priority,
                 Status = "Pending",
                 Notes = $"From Stock Request #{stockRequest.StockRequestId}: {stockRequest.Reason}",
-                RequestedByUserId = managerId,
+                //RequestedByUserId = managerId,
                 CreatedAt = DateTime.UtcNow,
-                SourceStockRequestId = stockRequestId
+                //SourceStockRequestId = stockRequestId
             };
 
             var created = await _purchaseRequestRepo.CreateAsync(purchaseRequest);
@@ -152,8 +152,8 @@ namespace EVDealer.BE.Services.Procurement
             if (success)
             {
                 request.Status = "Sent";
-                request.SentToEVMDate = DateTime.UtcNow;
-                request.EVMOrderId = $"EVM-{purchaseRequestId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
+                //request.SentToEVMDate = DateTime.UtcNow;
+                //request.EVMOrderId = $"EVM-{purchaseRequestId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
                 await _purchaseRequestRepo.UpdateAsync(request);
             }
 
@@ -163,7 +163,7 @@ namespace EVDealer.BE.Services.Procurement
         public async Task<PurchaseRequestDto?> GetByEVMOrderIdAsync(string evmOrderId)
         {
             var requests = await _purchaseRequestRepo.GetAllPendingAsync();
-            var request = requests.FirstOrDefault(r => r.EVMOrderId == evmOrderId);
+            var request = requests.FirstOrDefault();
             
             return request == null ? null : MapToDto(request);
         }
