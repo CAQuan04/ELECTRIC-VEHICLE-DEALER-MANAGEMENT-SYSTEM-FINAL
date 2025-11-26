@@ -39,40 +39,53 @@ const PurchaseRequestList = () => {
       loadRequests();
     }
   }, [dealerId]);
-  const loadRequests = async () => {
+const loadRequests = async () => {
     try {
-      startLoading('Đang tải danh sách yêu cầu...');
+        startLoading('Đang tải...');
+        
+        const [reqResult, vehResult] = await Promise.all([
+            dealerAPI.getPurchaseRequests(),
+            dealerAPI.getVehicles()
+        ]);
 
-      // Gọi API lấy danh sách yêu cầu nhập hàng
-      // Lưu ý: dealerAPI.getStockRequests() cần được define trong dealer.api.js
-      // Thường là GET /api/Inventory/distributions/requests hoặc tương tự
-      const result = await dealerAPI.getStockRequests();
+        console.log("📦 Request Data Result:", reqResult); // Log kiểm tra 1
 
-      if (result.success && result.data) {
-        // 🟢 4. Ánh xạ dữ liệu từ Backend sang cấu trúc Frontend mong đợi
-        // Backend thường trả về: requestId, vehicleName, status (Enum), createdDate...
-        const mappedRequests = Array.isArray(result.data) ? result.data.map(item => ({
-          id: item.requestId || item.id, // Map ID
-          vehicle: item.vehicleName || item.productName || 'Xe chưa đặt tên', // Map tên xe
-          quantity: item.quantity || 0,
-          // Nếu backend chưa tính estimatedCost, có thể cần tính tay hoặc để 0
-          estimatedCost: item.totalAmount || item.estimatedCost || 0,
-          requestDate: item.createdDate || item.requestDate || new Date().toISOString(),
-          status: mapStatusBackendToFrontend(item.status), // Xử lý trạng thái
-          priority: item.priority || 'Bình thường'
-        })) : [];
+        // Tạo map tên xe
+        const vehicleMap = {};
+        if (vehResult.success) {
+            const rawData = vehResult.data;
+            const vList = rawData?.items || rawData?.data || (Array.isArray(rawData) ? rawData : []);
+            vList.forEach(v => {
+                vehicleMap[v.vehicleId || v.id] = v.model || v.vehicleName;
+            });
+        }
 
-        setRequests(mappedRequests);
-      } else {
-        console.error('Lỗi tải dữ liệu:', result.message);
-        // Có thể show thông báo lỗi nhẹ ở đây nếu muốn
-      }
-    } catch (error) {
-      console.error('Lỗi hệ thống khi tải yêu cầu:', error);
+        if (reqResult.success) {
+            // 🔥 Xử lý mảng an toàn
+            const requestList = Array.isArray(reqResult.data) ? reqResult.data : (reqResult.data?.data || []);
+            
+            console.log("✅ Final Request List to Map:", requestList); // Log kiểm tra 2
+
+            const mapped = requestList.map(item => ({
+                id: item.requestId,
+                // Hiển thị tên xe + config
+                vehicle: vehicleMap[item.vehicleId] 
+                         ? `${vehicleMap[item.vehicleId]} (Cấu hình #${item.configId})`
+                         : `Xe #${item.vehicleId} (Cấu hình #${item.configId})`,
+                quantity: item.quantity,
+                estimatedCost: 0, 
+                requestDate: item.createdAt,
+                status: mapStatusBackendToFrontend(item.status),
+                priority: 'Bình thường'
+            }));
+            setRequests(mapped);
+        }
+    } catch (e) {
+        console.error("Lỗi loadRequests:", e);
     } finally {
-      stopLoading();
+        stopLoading();
     }
-  };
+};
   // Hàm phụ trợ: Map trạng thái từ Backend (thường là tiếng Anh hoặc số) sang hiển thị
   const mapStatusBackendToFrontend = (backendStatus) => {
     // Giả sử backend trả về: Pending, Approved, Rejected, Processing
@@ -103,12 +116,6 @@ const PurchaseRequestList = () => {
     if (searchTerm) {
       processedRequests = processedRequests.filter(req =>
         req.vehicle.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (statusFilter !== 'all') {
-      processedRequests = processedRequests.filter(
-        req => req.status === 'statusFilter' // Lỗi logic ở đây, sửa thành req.status === statusFilter
       );
     }
 

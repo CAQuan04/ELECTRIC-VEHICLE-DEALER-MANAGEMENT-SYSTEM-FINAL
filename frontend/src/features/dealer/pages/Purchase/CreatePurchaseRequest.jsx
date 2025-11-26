@@ -157,7 +157,7 @@ const CreatePurchaseRequest = () => {
       const result = await dealerAPI.createProcurementRequest(payload);
       if (result.success) {
         notifications.success("Thành công", "Đã gửi yêu cầu nhập hàng!");
-        navigate('/dealer/purchase-requests');
+        navigate(`/${dealerId}/dealer/purchase-requests`);
       } else {
         notifications.error("Thất bại", result.message);
       }

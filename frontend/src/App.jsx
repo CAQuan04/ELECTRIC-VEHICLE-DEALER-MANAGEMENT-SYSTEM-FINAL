@@ -84,6 +84,7 @@ import {
   // Purchase
   PurchaseRequestList,
   CreatePurchaseRequest,
+  PurchaseRequestDetail,
   // Reports
   SalesPerformanceReport,
   CustomerDebtReport,
@@ -1114,6 +1115,18 @@ const App = () => {
                     <DealerShopGuard>
                       <AppLayout>
                         <CreatePurchaseRequest />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
+              <Route
+                path="/:dealerId/dealer/purchase-requests/:id"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <PurchaseRequestDetail />
                       </AppLayout>
                     </DealerShopGuard>
                   </DealerGuard>
