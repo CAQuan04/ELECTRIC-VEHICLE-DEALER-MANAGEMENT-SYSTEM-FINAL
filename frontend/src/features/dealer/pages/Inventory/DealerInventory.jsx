@@ -24,10 +24,11 @@ const DealerInventory = () => {
   const { startLoading, stopLoading } = usePageLoading();
   const [inventory, setInventory] = useState([]);
   const [filters, setFilters] = useState({ search: '' });
-
-  useEffect(() => {
+  const dealerId = user?.dealerId;
+  useEffect(() => {if (dealerId) {
     loadInventory();
-  }, []); // Tải khi component mount
+  } 
+}, [dealerId]); // Tải khi component mount hoặc dealerId thay đổi
 
   const loadInventory = async () => {
     try {
@@ -114,10 +115,10 @@ const DealerInventory = () => {
         icon={<Package className="w-16 h-16" />}
         actions={
           <div className="flex gap-2">
-            <Button variant="outline" onClick={() => navigate('/dealer/inventory/distributions')}>
+            <Button variant="outline" onClick={() => navigate(`/${dealerId}/dealer/inventory/distributions`)}>
               📦 Phiếu nhập hàng
             </Button>
-            <Button variant="gradient" onClick={() => navigate('/dealer/purchase-requests')}>
+            <Button variant="gradient" onClick={() => navigate(`/${dealerId}/dealer/purchase-requests`)}>
               🛒 Yêu cầu mua hàng
             </Button>
           </div>

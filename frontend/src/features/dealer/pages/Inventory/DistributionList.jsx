@@ -4,7 +4,7 @@ import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { Package, Clock, CheckCircle, XCircle, FileText, Plus } from 'lucide-react';
 import { notifications } from '@utils';
-
+import { useAuth } from '@/context/AuthContext';
 // Import UI components
 import Button from '@/features/dealer/components/ui/Button.jsx';
 import Badge from '@/features/dealer/components/ui/Badge.jsx';
@@ -25,10 +25,11 @@ const DistributionList = () => {
   const [requests, setRequests] = useState([]);
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
-
-  useEffect(() => {
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;  
+  useEffect(() => {if (dealerId) {
     loadRequests();
-  }, [filterStatus, search]);
+  }}, [dealerId, filterStatus, search]);
 
   const loadRequests = async () => {
     try {
@@ -156,7 +157,7 @@ const DistributionList = () => {
         <Button
           variant="primary"
           size="sm"
-          onClick={() => navigate(`/dealer/inventory/distributions/${item.id}`)}
+          onClick={() => navigate(`/${dealerId}/dealer/inventory/distributions/${item.id}`)}
         >
           <FileText className="w-4 h-4 mr-1" />
           Chi tiết
@@ -178,7 +179,7 @@ const DistributionList = () => {
         actions={
           <Button 
             variant="outline" 
-            onClick={() => navigate('/dealer/inventory')}
+            onClick={() => navigate(`/${dealerId}/dealer/inventory`)}
           >
             ← Quay lại kho xe
           </Button>

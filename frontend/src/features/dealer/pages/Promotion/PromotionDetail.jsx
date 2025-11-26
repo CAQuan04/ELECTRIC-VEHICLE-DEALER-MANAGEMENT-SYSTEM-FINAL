@@ -5,7 +5,7 @@ import { dealerAPI } from '@/utils/api/services/dealer.api';
 import { notifications } from '@/utils/notifications';
 // Import các icon cần thiết
 import { ArrowLeft, Tag, Calendar, DollarSign, FileText, CheckCircle, XCircle, Clock, Edit } from 'lucide-react';
-
+import { useAuth } from '@/context/AuthContext';
 import {
   PageContainer,
   Badge,
@@ -24,12 +24,14 @@ const PromotionDetail = () => {
   const navigate = useNavigate();
   const { startLoading, stopLoading } = usePageLoading();
   const [promotion, setPromotion] = useState(null);
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
 
   useEffect(() => {
-    if (promoId) {
+    if (promoId && dealerId) {
       loadPromotionDetail();
     }
-  }, [promoId]);
+  }, [promoId, dealerId]);
 
   const loadPromotionDetail = async () => {
     try {
@@ -101,7 +103,7 @@ const PromotionDetail = () => {
             </Button>
             <Button 
               variant="secondary" 
-              onClick={() => navigate(`/dealer/promotions/edit/${currentId}`)}
+              onClick={() => navigate(`/${dealerId}/dealer/promotions/edit/${currentId}`)}
               icon={<Edit size={18} />}
             >
               Chỉnh sửa

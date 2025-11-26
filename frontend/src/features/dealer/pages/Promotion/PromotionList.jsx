@@ -4,6 +4,7 @@ import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api';
 import { notifications } from '@/utils/notifications'; // Sửa path import nếu cần
 import { useAuth } from '@/context/AuthContext';
+
 // Import Lucide icons
 import {
   Plus, Search, Filter, Tag, CheckCircle, XCircle,
@@ -24,7 +25,7 @@ const PromotionList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
-
+  const dealerId = user?.dealerId;
   useEffect(() => {
     if (user?.dealerId) {
       loadPromotions();
@@ -230,7 +231,7 @@ const PromotionList = () => {
             <Button
               variant="info"
               size="sm"
-              onClick={() => navigate(`/dealer/promotions/${id}`)}
+              onClick={() => navigate(`/${dealerId}/dealer/promotions/${id}`)}
               icon={<Eye size={14} />}
             >
               Chi tiết
@@ -239,7 +240,7 @@ const PromotionList = () => {
             <Button
               variant="secondary"
               size="sm"
-              onClick={() => navigate(`/dealer/promotions/edit/${id}`)}
+              onClick={() => navigate(`/${dealerId}/dealer/promotions/edit/${id}`)}
               icon={<Edit size={14} />}
             >
               Sửa
@@ -276,7 +277,7 @@ const PromotionList = () => {
         actions={
           <Button
             variant="primary"
-            onClick={() => navigate('/dealer/promotions/create')}
+            onClick={() => navigate(`/${dealerId}/dealer/promotions/create`)}
             icon={<Plus size={20} />}
           >
             Tạo khuyến mãi mới
@@ -337,7 +338,7 @@ const PromotionList = () => {
           action={
             <Button
               variant="primary"
-              onClick={() => navigate('/dealer/promotions/create')}
+              onClick={() => navigate(`/${dealerId}/dealer/promotions/create`)}
               icon={<Plus size={20} />}
             >
               Tạo mới

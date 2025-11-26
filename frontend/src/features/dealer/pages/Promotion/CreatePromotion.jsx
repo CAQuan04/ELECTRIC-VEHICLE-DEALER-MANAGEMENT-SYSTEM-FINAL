@@ -4,6 +4,7 @@ import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api';
 import { notifications } from '@/utils/notifications';
 import { Save, ArrowLeft, Edit } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 import {
   PageContainer, PageHeader, Button, FormGroup, Label, Input, Select, Textarea, InfoSection, ActionBar
 } from '../../components';
@@ -12,7 +13,8 @@ const CreatePromotion = () => {
   const navigate = useNavigate();
   const { promoId } = useParams(); // Lấy ID từ URL
   const { isLoading, startLoading, stopLoading } = usePageLoading();
-
+  const { user } = useAuth();
+  
   const isEditMode = !!promoId; // Có ID => Chế độ Edit
 
   const [formData, setFormData] = useState({
@@ -26,13 +28,13 @@ const CreatePromotion = () => {
   });
 
   const [errors, setErrors] = useState({});
-
+  const dealerId = user?.dealerId;
   // Load dữ liệu khi vào trang Edit
   useEffect(() => {
-    if (isEditMode) {
+    if (isEditMode, dealerId) {
       loadPromotionData();
     }
-  }, [promoId]);
+  }, [dealerId, promoId]);
 
   const loadPromotionData = async () => {
     try {
@@ -114,7 +116,7 @@ const CreatePromotion = () => {
         title={isEditMode ? "✏️ Chỉnh sửa khuyến mãi" : "✨ Tạo khuyến mãi mới"}
         subtitle={isEditMode ? `Cập nhật thông tin chương trình #${promoId}` : "Thiết lập chương trình ưu đãi cho khách hàng"}
         actions={
-          <Button variant="ghost" onClick={() => navigate('/dealer/promotions')}>
+          <Button variant="ghost" onClick={() => navigate(`/${dealerId}/dealer/promotions`)}>
             <ArrowLeft size={18} className="mr-2" /> Quay lại
           </Button>
         }
@@ -228,7 +230,7 @@ const CreatePromotion = () => {
         </InfoSection>
 
         <ActionBar align="right" className="mt-6">
-          <Button type="button" variant="ghost" onClick={() => navigate('/dealer/promotions')}>
+          <Button type="button" variant="ghost" onClick={() => navigate(`/${dealerId}/dealer/promotions`)}>
             Hủy bỏ
           </Button>
           <Button
