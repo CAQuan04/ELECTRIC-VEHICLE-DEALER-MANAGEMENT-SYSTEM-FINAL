@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { notifications } from '@utils/notifications';
-
+import { useAuth } from '@/context/AuthContext';
 // Import Lucide icons
 import {
   UserPlus,
@@ -38,7 +38,8 @@ const CustomerList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState('none');
-
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   useEffect(() => {
     loadCustomers();
   }, []);
@@ -47,16 +48,38 @@ const CustomerList = () => {
     try {
       startLoading('Đang tải danh sách khách hàng...');
       const response = await dealerAPI.getCustomers();
+
       if (response.success) {
-        // Ensure data is an array
-        setCustomers(Array.isArray(response.data) ? response.data : []);
+        // Kiểm tra xem data là mảng hay object phân trang
+        const rawData = Array.isArray(response.data)
+          ? response.data
+          : (response.data?.items || []); // Fallback nếu API trả về dạng { items: [...] }
+
+        // MAP DỮ LIỆU BACKEND -> FRONTEND
+        const mappedData = rawData.map(item => ({
+          id: item.customerId,           // Map customerId -> id
+          name: item.fullName,           // Map fullName -> name
+          email: item.email || '',       // Backend thiếu email -> để trống
+          phone: item.phone,
+          address: item.address,
+
+          // Logic tự động tính trạng thái dựa trên số đơn hàng
+          status: item.totalOrders > 0 ? 'Đã mua' : 'Tiềm năng',
+
+          // Các trường thống kê
+          totalOrders: item.totalOrders,
+          totalTestDrives: item.totalTestDrives,
+          lastContact: 'N/A'             // Backend thiếu trường này -> để N/A
+        }));
+
+        setCustomers(mappedData);
       } else {
         notifications.error('Lỗi tải dữ liệu', response.message);
         setCustomers([]);
       }
     } catch (error) {
       console.error('Error loading customers:', error);
-      notifications.error('Lỗi tải dữ liệu', error.response?.data?.message || error.message);
+      notifications.error('Lỗi tải dữ liệu', error.message);
       setCustomers([]);
     } finally {
       stopLoading();
@@ -146,20 +169,30 @@ const CustomerList = () => {
       label: 'Tên khách hàng',
       render: (row) => (
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-emerald-500 dark:to-emerald-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
-            {row.name.charAt(0)}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-rose-500 dark:to-rose-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+            {/* Lấy chữ cái đầu của fullName */}
+            {row.name ? row.name.charAt(0).toUpperCase() : '?'}
           </div>
-          <span className="font-bold text-gray-800 dark:text-gray-200">
-            {row.name}
-          </span>
+          <div>
+            <span className="font-bold text-gray-800 dark:text-gray-200 block">
+              {row.name}
+            </span>
+            {/* Hiển thị địa chỉ phụ bên dưới tên vì JSON có address */}
+            <span className="text-xs text-gray-500 truncate max-w-[150px] block">
+              {row.address}
+            </span>
+          </div>
         </div>
       )
     },
+
     {
       key: 'email',
       label: 'Email',
       render: (row) => (
-        <span className="text-gray-600 dark:text-gray-400">{row.email}</span>
+        <span className="text-gray-600 dark:text-gray-400">
+          {row.email || <span className="italic text-gray-400">Chưa cập nhật</span>}
+        </span>
       )
     },
     {
@@ -182,13 +215,23 @@ const CustomerList = () => {
           variant={
             row.status === 'Đã mua'
               ? 'success'
-              : row.status === 'Đang tư vấn'
-              ? 'warning'
-              : 'info'
+              : row.status === 'Tiềm năng'
+                ? 'info'
+                : 'warning'
           }
         >
           {row.status}
         </Badge>
+      )
+    },
+    {
+      key: 'stats', // Đổi cột Last Contact thành Thống kê vì JSON có số liệu này
+      label: 'Hoạt động',
+      render: (row) => (
+        <div className="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+          <div>🛒 Đơn hàng: <b>{row.totalOrders}</b></div>
+          <div>🚗 Lái thử: <b>{row.totalTestDrives}</b></div>
+        </div>
       )
     },
     {
@@ -209,7 +252,8 @@ const CustomerList = () => {
         <Button
           size="sm"
           variant="primary"
-          onClick={() => navigate(`/dealer/customers/${row.id}`)}
+          // Sử dụng row.id (đã map từ customerId)
+          onClick={() => navigate(`/${dealerId}/dealer/customers/${row.id}`)}
         >
           Xem chi tiết
         </Button>
@@ -233,7 +277,7 @@ const CustomerList = () => {
             <Button
               variant="gradient"
               icon={<UserPlus className="w-5 h-5" />}
-              onClick={() => navigate('/dealer/customers/new')}
+              onClick={() => navigate(`/${dealerId}/dealer/customers/new`)}
             >
               Thêm khách hàng
             </Button>
@@ -296,7 +340,7 @@ const CustomerList = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="px-6 py-3 rounded-2xl bg-white dark:bg-gray-800/50 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20 focus:border-cyan-500 dark:focus:border-emerald-500 transition-all duration-300 font-medium cursor-pointer"
+                className="px-6 py-3 rounded-2xl bg-rose-800/50 border-2 border-gray-200 dark:border-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-cyan-500/20 dark:focus:ring-emerald-500/20 focus:border-cyan-500 dark:focus:border-emerald-500 transition-all duration-300 font-medium cursor-pointer"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="Tiềm năng">Tiềm năng</option>
@@ -378,7 +422,7 @@ const CustomerList = () => {
           <Table
             columns={columns}
             data={filteredCustomers}
-            onRowClick={(row) => navigate(`/dealer/customers/${row.id}`)}
+            onRowClick={(row) => navigate(`/${dealerId}/dealer/customers/${row.id}`)}
           />
         ) : (
           <EmptyState
@@ -391,7 +435,7 @@ const CustomerList = () => {
             }
             action={{
               label: hasActiveFilters ? 'Xóa bộ lọc' : '+ Thêm khách hàng',
-              onClick: hasActiveFilters ? clearFilters : () => navigate('/dealer/customers/new')
+              onClick: hasActiveFilters ? clearFilters : () => navigate(`/${dealerId}/dealer/customers/new`)
             }}
           />
         )}

@@ -353,17 +353,17 @@ const TestDriveForm = () => {
         return;
       }
 
-      const scheduleDatetime = `${formData.date}T${formData.time}:00`;
-
+      const localDateTimeString = `${formData.date}T${formData.time}:00`;
+      const dateObj = new Date(localDateTimeString);
+      const isoSchedule = dateObj.toISOString();
       const testDriveData = {
-        customerId: parseInt(formData.customerId),
-        vehicleId: parseInt(formData.vehicleId),
-        dealerId: parseInt(dealerId),
-        scheduleDatetime,
-        status: 'Pending',
-        note: formData.notes
+        customerId: parseInt(formData.customerId), // Đảm bảo là số nguyên
+        vehicleId: parseInt(formData.vehicleId),   // Đảm bảo là số nguyên
+        dealerId: parseInt(dealerId),              // Đảm bảo là số nguyên
+        scheduleDatetime: isoSchedule,             // Format: "2025-11-26T07:58:16.166Z"
+        status: 'pending',                         // Trạng thái mặc định
       };
-
+      console.log('📤 Payload gửi đi:', testDriveData);
       const result = await dealerAPI.createTestDrive(testDriveData);
       if (result.success) {
         notifications.success('Thành công', 'Đăng ký lái thử thành công!');

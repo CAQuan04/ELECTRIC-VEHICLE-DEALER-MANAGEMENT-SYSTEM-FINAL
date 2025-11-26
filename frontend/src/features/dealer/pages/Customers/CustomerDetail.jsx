@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { notifications } from '@utils/notifications';
-
+import { useAuth } from '@/context/AuthContext';
 // Import Lucide icons
 import {
   User,
@@ -22,11 +22,13 @@ import {
   DollarSign,
   TrendingUp,
   CheckCircle,
-  Building2
+  Building2,
+  Loader // <--- Đã thêm Loader vào đây
 } from 'lucide-react';
 
 // Import enhanced components
 import {
+  PageContainer, // <--- Đã thêm PageContainer
   DetailHeader,
   InfoSection,
   InfoRow,
@@ -44,6 +46,8 @@ const CustomerDetail = () => {
   const { startLoading, stopLoading } = usePageLoading();
   const [customer, setCustomer] = useState(null);
   const [activeTab, setActiveTab] = useState('overview');
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
 
   useEffect(() => {
     loadCustomerDetail();
@@ -52,17 +56,23 @@ const CustomerDetail = () => {
   const loadCustomerDetail = async () => {
     try {
       startLoading('Đang tải thông tin khách hàng...');
+      
+      // Gọi API
       const response = await dealerAPI.getCustomerById(customerId);
-      if (response.success) {
-        setCustomer(response.data);
+      
+      // Logic xử lý an toàn để lấy data dù API trả về format nào
+      const finalData = (response && response.data) ? response.data : response;
+
+      if (finalData) {
+        setCustomer(finalData);
       } else {
-        notifications.error('Lỗi', response.message);
-        navigate('/dealer/customers');
+        // Nếu không có data thì báo lỗi
+        notifications.error('Lỗi', response.message || 'Không tìm thấy dữ liệu khách hàng');
+        // navigate(`/${dealerId}/dealer/customers`); // Có thể bật lại nếu muốn redirect khi lỗi
       }
     } catch (error) {
       console.error('Error loading customer:', error);
       notifications.error('Lỗi', error.response?.data?.message || error.message);
-      navigate('/dealer/customers');
     } finally {
       stopLoading();
     }
@@ -81,7 +91,17 @@ const CustomerDetail = () => {
     }
   };
 
-  if (!customer) return null;
+  // Hiển thị Loader nếu chưa có dữ liệu customer
+  if (!customer) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+        <div className="text-center">
+          <Loader className="w-10 h-10 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-500">Đang tải dữ liệu khách hàng...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Prepare tabs
   const tabs = [
@@ -163,13 +183,14 @@ const CustomerDetail = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-4 sm:p-6 lg:p-8 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+      {/* Sử dụng PageContainer để bọc nội dung */}
+      <PageContainer>
         {/* Header */}
         <DetailHeader
-          title={customer.name}
+          title={customer.fullName}
           subtitle={`ID: ${customer.id} • ${customer.email}`}
-          onBack={() => navigate('/dealer/customers')}
+          onBack={() => navigate(`/${dealerId}/dealer/customers`)}
           badge={
             <Badge variant={getStatusVariant(customer.status)}>
               {customer.status}
@@ -180,7 +201,7 @@ const CustomerDetail = () => {
               <Button
                 variant="primary"
                 icon={<Edit className="w-5 h-5" />}
-                onClick={() => navigate(`/dealer/customers/${customerId}/edit`)}
+                onClick={() => navigate(`/${dealerId}/dealer/customers/${customerId}/edit`)}
               >
                 Chỉnh sửa
               </Button>
@@ -204,7 +225,7 @@ const CustomerDetail = () => {
         />
 
         {/* Tab Content */}
-        <div className="space-y-6">
+        <div className="space-y-6 mt-6">
           {/* Overview Tab */}
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -261,7 +282,7 @@ const CustomerDetail = () => {
             <InfoSection title="Lịch sử mua hàng" icon={<ShoppingCart className="w-6 h-6" />}>
               {customer.purchaseHistory && customer.purchaseHistory.length > 0 ? (
                 <div className="space-y-4">
-                  {customer.purchaseHistory.map((purchase, index) => (
+                  {customer.purchaseHistory.map((purchase) => (
                     <div
                       key={purchase.id}
                       className="group flex justify-between items-center p-6 rounded-2xl bg-gradient-to-r from-emerald-50 to-transparent dark:from-emerald-500/10 dark:to-transparent border-l-4 border-emerald-500 hover:shadow-lg transition-all duration-300"
@@ -372,19 +393,19 @@ const CustomerDetail = () => {
           <Button
             variant="ghost"
             icon={<ArrowLeft className="w-5 h-5" />}
-            onClick={() => navigate('/dealer/customers')}
+            onClick={() => navigate(`/${dealerId}/dealer/customers`)}
           >
             Quay lại danh sách
           </Button>
           <Button
             variant="gradient"
             icon={<Edit className="w-5 h-5" />}
-            onClick={() => navigate(`/dealer/customers/${customerId}/edit`)}
+            onClick={() => navigate(`/${dealerId}/dealer/customers/${customerId}/edit`)}
           >
             Chỉnh sửa thông tin
           </Button>
         </ActionBar>
-      </div>
+      </PageContainer>
     </div>
   );
 };
