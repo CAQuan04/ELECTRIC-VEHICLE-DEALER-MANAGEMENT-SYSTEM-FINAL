@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { 
   Plus, Building2, MapPin, Phone, Edit, 
-  Trash2, Power, AlertCircle 
+  Trash2, Power, AlertCircle,
+  Search, X, ChevronDown // Import thêm icon cho filter bar
 } from "lucide-react";
 
 // Đảm bảo đường dẫn import đúng với cấu trúc thư mục của bạn
@@ -13,9 +14,8 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
-import SearchBar from '../components/ui/SearchBar';
 import EmptyState from '../components/ui/EmptyState';
-// Lưu ý: FormComponents phải export dạng Named Export (export const)
+// Lưu ý: FormComponents vẫn dùng cho Modal
 import { FormGroup, Label, Input, Select } from '../components/ui/FormComponents';
 
 // ==========================================
@@ -75,18 +75,7 @@ const DealerManagement = () => {
 
   const regions = useMemo(() => Array.from(new Set(dealers.map(d => d.region))), [dealers]);
 
-  // Options
-  const regionOptions = [
-    { value: "", label: "Tất cả khu vực" },
-    ...regions.map(r => ({ value: r, label: r }))
-  ];
-
-  const statusOptions = [
-    { value: "", label: "Tất cả trạng thái" },
-    { value: "Active", label: "Hoạt động" },
-    { value: "Inactive", label: "Ngưng hoạt động" }
-  ];
-
+  // Options cho Modal Form
   const formRegionOptions = [
     { value: "Miền Bắc", label: "Miền Bắc" },
     { value: "Miền Trung", label: "Miền Trung" },
@@ -118,35 +107,71 @@ const DealerManagement = () => {
       />
 
       <div className="mt-8 space-y-8">
-        {/* 2. FILTER BAR */}
-        <Card className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-end">
-            <div className="md:col-span-6">
-              <Label>Tìm kiếm</Label>
-              <SearchBar 
-                placeholder="Tìm tên, địa chỉ, SĐT..." 
-                value={filter.searchTerm} 
-                onChange={(e) => setFilter({...filter, searchTerm: e.target.value})}
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Label>Khu vực</Label>
-              <Select 
-                options={regionOptions}
-                value={filter.region}
-                onChange={(e) => setFilter({ ...filter, region: e.target.value })}
-              />
-            </div>
-            <div className="md:col-span-3">
-              <Label>Trạng thái</Label>
-              <Select 
-                options={statusOptions}
-                value={filter.status}
-                onChange={(e) => setFilter({ ...filter, status: e.target.value })}
-              />
-            </div>
+        
+        {/* 2. FILTER BAR (GIAO DIỆN MỚI GIỐNG USER MANAGEMENT) */}
+        <div className="w-full bg-[#13233a] border-y border-gray-700 mb-12 shadow-2xl overflow-x-auto rounded-lg">
+          <div className="flex items-center w-full h-auto md:h-24">
+              
+              {/* Filter Label */}
+              <div className="h-full flex items-center px-6 md:px-8 border-r border-gray-700/60 bg-[#1a2b44]/50 flex-none">
+                  <span className="text-blue-400 font-bold text-lg md:text-xl tracking-wide mr-3">Filter</span>
+                  <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,1)] animate-pulse"></div>
+              </div>
+              
+              {/* Search Section */}
+              <div className="h-full flex items-center flex-[2] px-4 md:px-6 border-r border-gray-700/60 min-w-[280px] group cursor-text hover:bg-[#1a2b44]/20 transition">
+                  <span className="text-gray-300 font-semibold text-base mr-3 group-hover:text-white transition hidden sm:block">Search</span>
+                  <div className="relative flex-1">
+                     <div className="flex items-center bg-[#1e293b] border border-gray-600 rounded-xl px-3 py-2 group-focus-within:border-blue-500 transition">
+                        <input 
+                          type="text" 
+                          placeholder="Tìm tên, địa chỉ, SĐT..." 
+                          value={filter.searchTerm} 
+                          onChange={(e) => setFilter({...filter, searchTerm: e.target.value})} 
+                          className="w-full bg-transparent border-none p-0 text-white placeholder:text-gray-500 focus:ring-0 text-base font-medium" 
+                        />
+                        {filter.searchTerm ? ( 
+                          <button onClick={() => setFilter({...filter, searchTerm: ''})} className="text-gray-400 hover:text-white ml-2">
+                            <X className="w-5 h-5" />
+                          </button> 
+                        ) : (
+                          <Search className="w-5 h-5 text-gray-500 ml-2" />
+                        )}
+                     </div>
+                  </div>
+              </div>
+              
+              {/* Region Filter (Thay thế cho Role Filter bên User) */}
+              <div className="h-full relative px-4 md:px-6 border-r border-gray-700/60 flex-1 min-w-[180px] hover:bg-[#1a2b44]/30 transition cursor-pointer flex items-center">
+                  <span className="text-gray-300 text-base font-semibold mr-2 truncate">Khu vực</span>
+                  <select 
+                    value={filter.region} 
+                    onChange={(e) => setFilter({ ...filter, region: e.target.value })} 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-white"
+                  >
+                    <option value="" className="bg-[#1e293b] text-white">Tất cả khu vực</option>
+                    {regions.map((r) => (<option key={r} value={r} className="bg-[#1e293b] text-white">{r}</option>))}
+                  </select>
+                  <ChevronDown className="ml-auto w-5 h-5 text-gray-400" />
+                  {filter.region && <span className="absolute bottom-2 left-6 text-xs text-purple-400 font-bold tracking-wider truncate">{filter.region}</span>}
+              </div>
+              
+              {/* Status Filter */}
+              <div className="h-full relative px-4 md:px-6 flex-1 min-w-[180px] hover:bg-[#1a2b44]/30 transition flex items-center justify-between cursor-pointer">
+                  <span className="text-gray-300 text-base font-semibold truncate">Trạng thái</span>
+                  <select 
+                    value={filter.status} 
+                    onChange={(e) => setFilter({ ...filter, status: e.target.value })} 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 text-white"
+                  >
+                    <option value="" className="bg-[#1e293b] text-white">Tất cả</option>
+                    <option value="Active" className="bg-[#1e293b] text-white">Hoạt động</option>
+                    <option value="Inactive" className="bg-[#1e293b] text-white">Ngưng</option>
+                  </select>
+                  {filter.status && <span className="absolute bottom-2 left-6 text-xs text-emerald-400 font-bold tracking-wider truncate">{filter.status === 'Active' ? 'Hoạt động' : 'Ngưng'}</span>}
+              </div>
           </div>
-        </Card>
+        </div>
 
         {/* 3. TABLE DATA */}
         <Card className="overflow-hidden p-0">
