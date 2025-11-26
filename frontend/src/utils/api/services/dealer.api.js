@@ -352,12 +352,30 @@ async getStockRequests(filters = {}) {
    * @param {string|number} id - Customer ID
    * @returns {Promise<Object>} Customer details
    */
-  async getCustomerById(id) {
+async getCustomerById(id) {
     try {
+      // Gọi API
       const response = await apiClient.get(`/Customers/${id}`);
-      return { success: true, data: response.data };
+      
+      console.log("📦 Raw API Response:", response); // Log để debug
+
+      // --- LOGIC XỬ LÝ AN TOÀN ---
+      // Nếu response có thuộc tính .data (chuẩn Axios chưa qua interceptor) -> dùng response.data
+      // Nếu response chính là dữ liệu (đã qua interceptor) -> dùng response
+      const finalData = (response && response.data) ? response.data : response;
+      
+      // Kiểm tra lần cuối: nếu finalData vẫn null/undefined thì báo lỗi giả lập
+      if (!finalData) {
+         throw new Error("Dữ liệu trả về rỗng");
+      }
+
+      return { success: true, data: finalData };
     } catch (error) {
-      return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy thông tin khách hàng' };
+      console.error("❌ Error fetching customer:", error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || error.message || 'Lỗi khi lấy thông tin khách hàng' 
+      };
     }
   }
 
