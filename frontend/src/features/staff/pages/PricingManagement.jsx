@@ -359,4 +359,4 @@ const PricingManagement = () => {
   );
 };
 
-export default PricingManagement;
+export default PricingManagement
