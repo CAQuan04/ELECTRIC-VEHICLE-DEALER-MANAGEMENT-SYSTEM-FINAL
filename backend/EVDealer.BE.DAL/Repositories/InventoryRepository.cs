@@ -207,5 +207,27 @@ namespace EVDealer.BE.DAL.Repositories
             _context.StockRequests.Update(request);
             return request;
         }
+
+
+        public async Task<Distribution?> GetDistributionDetailsByIdAsync(int distributionId)
+        {
+            return await _context.Distributions
+                .AsNoTracking()
+                .Include(d => d.Vehicle)
+                .Include(d => d.Config)
+                .Include(d => d.ToDealer)
+                .FirstOrDefaultAsync(d => d.DistId == distributionId);
+        }
+
+        public async Task<IEnumerable<Distribution>> GetDistributionsForDealerAsync(int dealerId)
+        {
+            return await _context.Distributions
+                .AsNoTracking()
+                .Where(d => d.ToDealerId == dealerId) // <-- Lọc theo dealerId
+                .Include(d => d.Vehicle)
+                .Include(d => d.Config)
+                .OrderByDescending(d => d.ScheduledDate)
+                .ToListAsync();
+        }
     }
 }

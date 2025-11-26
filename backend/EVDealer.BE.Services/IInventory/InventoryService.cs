@@ -333,6 +333,77 @@ namespace EVDealer.BE.Services.IInventory
 
             await _context.SaveChangesAsync();
         }
+
+        // Triển khai lấy chi tiết 1 phiếu
+        public async Task<DistributionSummaryDto?> GetDistributionDetailsByIdAsync(int distributionId)
+        {
+            var distribution = await _inventoryRepo.GetDistributionDetailsByIdAsync(distributionId);
+            if (distribution == null) return null;
+
+            // Mapping sang DTO
+            return new DistributionSummaryDto
+            {
+                DistId = distribution.DistId,
+                VehicleName = distribution.Vehicle?.Model,
+                ConfigName = distribution.Config?.Color,
+                Quantity = distribution.Quantity,
+                FromLocation = distribution.FromLocation,
+                ToDealerId = distribution.ToDealerId,
+                ToDealerName = distribution.ToDealer?.Name,
+                ScheduledDate = distribution.ScheduledDate.Value,
+                ActualDate = distribution.ActualDate,
+                Status = distribution.Status
+            };
+        }
+
+        // Triển khai nghiệp vụ tạo nhiều phiếu từ 1 yêu cầu
+        public async Task<IEnumerable<Distribution>> CreateDistributionsFromRequestAsync(CreateDistributionFromRequestDto dto)
+        {
+            var createdDistributions = new List<Distribution>();
+
+            // Mỗi item trong yêu cầu sẽ tạo ra 1 phiếu điều phối riêng
+            foreach (var item in dto.Items)
+            {
+                // TODO: Thêm logic kiểm tra tồn kho tổng trước khi tạo phiếu
+
+                var distribution = new Distribution
+                {
+                    VehicleId = item.VehicleId,
+                    ConfigId = item.ConfigId,
+                    Quantity = item.Quantity,
+                    ToDealerId = dto.ToDealerId,
+                    FromLocation = dto.FromLocation,
+                    ScheduledDate = dto.ScheduledDate,
+                    Status = "InTransit"
+                };
+
+                await _inventoryRepo.AddDistributionAsync(distribution);
+                createdDistributions.Add(distribution);
+            }
+
+            // Lưu tất cả các phiếu mới vào CSDL
+            await _inventoryRepo.SaveChangesAsync();
+
+            return createdDistributions;
+        }
+
+        public async Task<IEnumerable<DistributionSummaryDto>> GetDistributionSummaryForDealerAsync(int dealerId)
+        {
+            var distributions = await _inventoryRepo.GetDistributionsForDealerAsync(dealerId);
+            return distributions.Select(d => new DistributionSummaryDto
+            {
+                DistId = d.DistId,
+                VehicleName = d.Vehicle?.Model ?? "N/A",
+                ConfigName = d.Config?.Color ?? "N/A",
+                Quantity = d.Quantity,
+                FromLocation = d.FromLocation,
+                ToDealerId = d.ToDealerId,
+                ToDealerName = d.ToDealer?.Name ?? "N/A",
+                ScheduledDate = d.ScheduledDate.Value,
+                ActualDate = d.ActualDate,
+                Status = d.Status
+            });
+        }
     }
 
 }

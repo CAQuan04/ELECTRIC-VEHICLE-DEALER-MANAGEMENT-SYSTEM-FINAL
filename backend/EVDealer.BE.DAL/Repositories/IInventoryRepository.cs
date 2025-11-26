@@ -39,5 +39,10 @@ namespace EVDealer.BE.DAL.Repositories
         Task<StockRequest?> GetStockRequestByIdAsync(int requestId);
         Task<StockRequest> CreateStockRequestAsync(StockRequest request);
         Task<StockRequest> UpdateStockRequestAsync(StockRequest request);
+
+        Task<Distribution?> GetDistributionDetailsByIdAsync(int distributionId);
+
+        Task<IEnumerable<Distribution>> GetDistributionsForDealerAsync(int dealerId);
+
     }
 }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EVDealer.BE.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251124175955_InitialSync")]
-    partial class InitialSync
+    [Migration("20251126174738_InitialCreateFromCurrentDb")]
+    partial class InitialCreateFromCurrentDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,6 +73,9 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text")
                         .HasColumnName("address");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
 
                     b.Property<string>("FullName")
                         .IsRequired()
@@ -816,10 +819,6 @@ namespace EVDealer.BE.DAL.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("RequestId"));
 
-                    b.Property<DateTime?>("CompletedDate")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("completed_date");
-
                     b.Property<int>("ConfigId")
                         .HasColumnType("integer")
                         .HasColumnName("config_id");
@@ -834,10 +833,6 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("dealer_id");
 
-                    b.Property<string>("EVMOrderId")
-                        .HasColumnType("text")
-                        .HasColumnName("evm_order_id");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(MAX)")
                         .HasColumnName("notes");
@@ -845,11 +840,6 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Property<int?>("OrderId")
                         .HasColumnType("integer")
                         .HasColumnName("order_id");
-
-                    b.Property<string>("Priority")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("priority");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("integer")
@@ -860,18 +850,6 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasColumnType("integer")
                         .HasDefaultValue(0)
                         .HasColumnName("remaining_qty");
-
-                    b.Property<int?>("RequestedByUserId")
-                        .HasColumnType("integer")
-                        .HasColumnName("requested_by_user_id");
-
-                    b.Property<DateTime?>("SentToEVMDate")
-                        .HasColumnType("timestamp without time zone")
-                        .HasColumnName("sent_to_evm_date");
-
-                    b.Property<int?>("SourceStockRequestId")
-                        .HasColumnType("integer")
-                        .HasColumnName("source_stock_request_id");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -894,10 +872,6 @@ namespace EVDealer.BE.DAL.Migrations
                     b.HasIndex("DealerId");
 
                     b.HasIndex("OrderId");
-
-                    b.HasIndex("RequestedByUserId");
-
-                    b.HasIndex("SourceStockRequestId");
 
                     b.HasIndex("VehicleId");
 
@@ -1821,14 +1795,6 @@ namespace EVDealer.BE.DAL.Migrations
                         .HasForeignKey("OrderId")
                         .HasConstraintName("FK_PurchaseRequest_Order");
 
-                    b.HasOne("EVDealer.BE.DAL.Models.User", "RequestedBy")
-                        .WithMany()
-                        .HasForeignKey("RequestedByUserId");
-
-                    b.HasOne("EVDealer.BE.DAL.Models.StockRequest", "SourceStockRequest")
-                        .WithMany()
-                        .HasForeignKey("SourceStockRequestId");
-
                     b.HasOne("EVDealer.BE.DAL.Models.Vehicle", "Vehicle")
                         .WithMany("PurchaseRequests")
                         .HasForeignKey("VehicleId")
@@ -1840,10 +1806,6 @@ namespace EVDealer.BE.DAL.Migrations
                     b.Navigation("Dealer");
 
                     b.Navigation("Order");
-
-                    b.Navigation("RequestedBy");
-
-                    b.Navigation("SourceStockRequest");
 
                     b.Navigation("Vehicle");
                 });
