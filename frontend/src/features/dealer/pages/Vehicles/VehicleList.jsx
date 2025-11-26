@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@utils/api/services';
 import { notifications } from '@utils/notifications';
@@ -16,6 +17,8 @@ import {
 
 const VehicleList = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { startLoading, stopLoading } = usePageLoading();
   const [vehicles, setVehicles] = useState([]);
   const [pagination, setPagination] = useState({
@@ -85,7 +88,7 @@ const VehicleList = () => {
   };
 
   const handleViewDetail = (vehicleId) => {
-    navigate(`/dealer/vehicles/${vehicleId}`);
+    navigate(dealerId ? `/${dealerId}/dealer/vehicles/${vehicleId}` : `/dealer/vehicles/${vehicleId}`);
   };
 
   const handleFilterChange = (filterName, value) => {
@@ -116,7 +119,7 @@ const VehicleList = () => {
         actions={
           <Button 
             variant="gradient"
-            onClick={() => navigate('/dealer/vehicles/compare')}
+            onClick={() => navigate(dealerId ? `/${dealerId}/dealer/vehicles/compare` : '/dealer/vehicles/compare')}
           >
             So sánh xe
           </Button>

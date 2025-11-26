@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { AuthService } from '@utils';
+import { useAuth } from '@/context/AuthContext';
 import { 
   PageContainer, 
   PageHeader, 
@@ -37,6 +38,8 @@ const THEME = {
 
 const TestDriveCalendar = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const [appointments, setAppointments] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -180,13 +183,13 @@ const TestDriveCalendar = () => {
           <div className="flex flex-col sm:flex-row gap-3">
             <Button
               variant="outline"
-              onClick={() => navigate('/dealer/test-drives')}
+              onClick={() => navigate(dealerId ? `/${dealerId}/dealer/test-drives` : '/dealer/test-drives')}
             >
               ← Danh sách
             </Button>
             <Button
               variant="gradient"
-              onClick={() => navigate('/dealer/test-drives/new')}
+              onClick={() => navigate(dealerId ? `/${dealerId}/dealer/test-drives/new` : '/dealer/test-drives/new')}
             >
               + Đăng ký mới
             </Button>

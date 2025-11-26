@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api';
 import { notifications } from '@utils/notifications';
@@ -34,6 +35,8 @@ import {
 
 const StaffForm = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { staffId } = useParams();
   const { startLoading, stopLoading } = usePageLoading();
   
@@ -104,12 +107,12 @@ const StaffForm = () => {
         });
       } else {
         notifications.error('Lỗi', result.message || 'Không thể tải thông tin nhân viên');
-        navigate('/dealer/staff');
+        navigate(dealerId ? `/${dealerId}/dealer/staff` : '/dealer/staff');
       }
     } catch (error) {
       console.error('Error loading staff data:', error);
       notifications.error('Lỗi', 'Không thể tải thông tin nhân viên');
-      navigate('/dealer/staff');
+      navigate(dealerId ? `/${dealerId}/dealer/staff` : '/dealer/staff');
     } finally {
       stopLoading();
     }
@@ -228,7 +231,7 @@ const StaffForm = () => {
           'Thành công', 
           isEditMode ? 'Cập nhật nhân viên thành công' : 'Tạo nhân viên mới thành công'
         );
-        navigate('/dealer/staff');
+        navigate(dealerId ? `/${dealerId}/dealer/staff` : '/dealer/staff');
       } else {
         notifications.error('Lỗi', result.message);
       }
@@ -242,7 +245,7 @@ const StaffForm = () => {
   };
 
   const handleCancel = () => {
-    navigate('/dealer/staff');
+    navigate(dealerId ? `/${dealerId}/dealer/staff` : '/dealer/staff');
   };
 
   return (
@@ -250,7 +253,7 @@ const StaffForm = () => {
       <PageHeader
         title={isEditMode ? '✏️ Chỉnh sửa nhân viên' : '➕ Thêm nhân viên mới'}
         description={isEditMode ? 'Cập nhật thông tin nhân viên' : 'Tạo tài khoản nhân viên mới'}
-        onBack={() => navigate('/dealer/staff')}
+        onBack={() => navigate(dealerId ? `/${dealerId}/dealer/staff` : '/dealer/staff')}
       />
 
       <form onSubmit={handleSubmit}>

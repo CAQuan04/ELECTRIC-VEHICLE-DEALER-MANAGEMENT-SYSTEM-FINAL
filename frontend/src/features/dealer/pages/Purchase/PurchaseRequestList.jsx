@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, Plus, TrendingUp, Clock, CheckCircle, Package } from 'lucide-react';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { useAuth } from '@/context/AuthContext';
 // (Import các component chuẩn)
 import {
   PageContainer,
@@ -15,6 +16,8 @@ import {
 } from '../../components';
 import { usePageLoading } from '@modules/loading';
 const PurchaseRequestList = () => {
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const [requests, setRequests] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -26,14 +29,16 @@ const PurchaseRequestList = () => {
   // ✨ 3. SỬA BREADCRUMBS
   //    (Mục cuối cùng là trang hiện tại, không nên có 'path')
   const breadcrumbs = [
-    { label: 'Trang chủ', path: '/dealer-dashboard' },
+    { label: 'Trang chủ', path: `/${dealerId}/dealer-dashboard` },
     { label: 'Yêu cầu mua hàng' } // <-- Đã xóa path
   ];
 
   // (Logic loadRequests, requestMetrics, filteredRequests... giữ nguyên)
   useEffect(() => {
-    loadRequests();
-  }, []);
+    if (dealerId) {
+      loadRequests();
+    }
+  }, [dealerId]);
   const loadRequests = async () => {
     try {
       startLoading('Đang tải danh sách yêu cầu...');
@@ -213,7 +218,7 @@ const PurchaseRequestList = () => {
       render: (item) => (
         <button
           className="bg-cyan-600 hover:bg-cyan-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all shadow-md hover:shadow-lg"
-          onClick={() => navigate(`/dealer/purchase-requests/${item.id}`)}
+          onClick={() => navigate(`/${dealerId}/dealer/purchase-requests/${item.id}`)}
         >
           Chi tiết
         </button>
@@ -233,9 +238,9 @@ const PurchaseRequestList = () => {
           <Button
             variant="gradient"
             icon={<Plus />}
-            onClick={() => navigate('/dealer/purchase-requests/create')}
+            onClick={() => navigate(`/${dealerId}/dealer/purchase-requests/create`)}
           >
-            + Tạo yêu cầu mới
+           Tạo yêu cầu mới
           </Button>
         }
       />
@@ -337,7 +342,7 @@ const PurchaseRequestList = () => {
           }
           action={{
             label: '+ Tạo yêu cầu mới',
-            onClick: () => navigate('/dealer/purchase-requests/create')
+            onClick: () => navigate(`/${dealerId}/dealer/purchase-requests/create`)
           }}
         />
       )}

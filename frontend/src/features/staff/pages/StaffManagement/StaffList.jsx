@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
 
 const StaffList = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { startLoading, stopLoading } = usePageLoading();
   const [staff, setStaff] = useState([]);
 
@@ -34,7 +37,7 @@ const StaffList = () => {
     <div className="staff-list-page">
       <div className="page-header">
         <h1>👥 Quản lý nhân viên</h1>
-        <button className="btn-primary" onClick={() => navigate('/dealer/staff/new')}>
+        <button className="btn-primary" onClick={() => navigate(dealerId ? `/${dealerId}/dealer/staff/new` : '/dealer/staff/new')}>
           + Thêm nhân viên
         </button>
       </div>
@@ -66,7 +69,7 @@ const StaffList = () => {
                 <td>
                   <button 
                     className="btn-link"
-                    onClick={() => navigate(`/dealer/staff/${member.id}/edit`)}
+                    onClick={() => navigate(dealerId ? `/${dealerId}/dealer/staff/${member.id}/edit` : `/dealer/staff/${member.id}/edit`)}
                   >
                     Chỉnh sửa
                   </button>

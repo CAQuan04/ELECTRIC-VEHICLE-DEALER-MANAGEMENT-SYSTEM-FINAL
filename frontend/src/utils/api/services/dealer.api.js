@@ -138,7 +138,8 @@ class DealerAPI {
   async getVehicleConfigs(vehicleId) {
     try {
       const response = await apiClient.get(`/Vehicles/${vehicleId}/configs`);
-      return { success: true, data: response.data };
+      const data = Array.isArray(response) ? response : (response.data || response);
+      return { success: true, data: data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy cấu hình xe' };
     }
@@ -1035,7 +1036,7 @@ async getCustomerById(id) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật báo giá' };
     }
   }
-
+  
   // ==================== PAYMENT MANAGEMENT ====================
 
   /**
@@ -1066,6 +1067,26 @@ async getCustomerById(id) {
       return { success: true, data: response.data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi xử lý thanh toán' };
+    }
+  }
+  // ==================== PROCUREMENT (NHẬP HÀNG TỪ HÃNG) ====================
+
+  /**
+   * Tạo yêu cầu nhập hàng (Procurement Request) gửi đến hãng
+   * POST /api/procurement/requests
+   * Payload: { dealerId, items: [{ vehicleId, quantity, config_id }], note }
+   */
+  async createProcurementRequest(data) {
+    try {
+      // Đảm bảo endpoint đúng như yêu cầu
+      const response = await apiClient.post('/procurement/requests', data);
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('❌ Error creating procurement request:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Lỗi khi gửi yêu cầu nhập hàng' 
+      };
     }
   }
 
