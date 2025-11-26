@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { notifications } from '@utils/notifications';
-
+import { useAuth } from '@/context/AuthContext';
 // Import Lucide icons
 import {
   UserPlus,
@@ -44,6 +44,8 @@ const CustomerForm = () => {
   const [isDataLoading, setIsDataLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -75,12 +77,12 @@ const CustomerForm = () => {
             }
           } else {
             notifications.error('Lỗi tải dữ liệu', response.message);
-            navigate('/dealer/customers');
+            navigate(`/${dealerId}/dealer/customers`);
           }
         } catch (error) {
           console.error('Error loading customer:', error);
           notifications.error('Lỗi tải dữ liệu', error.response?.data?.message || error.message);
-          navigate('/dealer/customers');
+          navigate(`/${dealerId}/dealer/customers`);
         } finally {
           setIsDataLoading(false);
         }
@@ -147,7 +149,7 @@ const CustomerForm = () => {
         response = await dealerAPI.updateCustomer(customerId, formData);
         if (response.success) {
           notifications.success('Thành công', 'Cập nhật khách hàng thành công!');
-          navigate('/dealer/customers');
+          navigate(`/${dealerId}/dealer/customers`);
         } else {
           notifications.error('Lỗi cập nhật', response.message);
         }
@@ -155,7 +157,7 @@ const CustomerForm = () => {
         response = await dealerAPI.createCustomer(formData);
         if (response.success) {
           notifications.success('Thành công', 'Thêm khách hàng thành công!');
-          navigate('/dealer/customers');
+          navigate(`/${dealerId}/dealer/customers`);
         } else {
           notifications.error('Lỗi tạo mới', response.message);
         }
@@ -243,7 +245,7 @@ const CustomerForm = () => {
               : 'Điền thông tin cơ bản và địa chỉ để tạo hồ sơ khách hàng mới'
           }
           showBackButton
-          onBack={() => navigate('/dealer/customers')}
+          onBack={() => navigate(`/${dealerId}/dealer/customers`)}
         />
 
         {/* Quick Stats */}
@@ -425,7 +427,7 @@ const CustomerForm = () => {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => navigate('/dealer/customers')}
+              onClick={() => navigate(`/${dealerId}/dealer/customers`)}
               disabled={isLoading}
               icon={<X className="w-5 h-5" />}
             >
