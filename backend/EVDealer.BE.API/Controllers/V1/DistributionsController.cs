@@ -9,7 +9,7 @@ namespace EVDealer.BE.API.Controllers.V1
 {
     [ApiController]
     [Route("api/v1/distributions")]
-    [Authorize(Roles = "EVMStaff,Admin")]
+    [Authorize(Roles = "EVMStaff,Admin, DealerManager")]
     public class DistributionsController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;
@@ -93,7 +93,7 @@ namespace EVDealer.BE.API.Controllers.V1
         /// </summary>
         // POST /api/v1/distributions/{id}/confirm
         [HttpPost("{id}/confirm")]
-        [Authorize(Policy = "ConfirmDistributions")] 
+        [Authorize(Roles = "DealerManager,Admin, EVMStaff")] 
         public async Task<IActionResult> ConfirmReceipt(int id)
         {
             // 1. Lấy dealerId của người dùng đang đăng nhập từ Token.
