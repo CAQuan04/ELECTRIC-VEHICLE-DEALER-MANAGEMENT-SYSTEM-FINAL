@@ -1,4 +1,5 @@
 ﻿using EVDealer.BE.Common.DTOs;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ namespace EVDealer.BE.Services.DealerManagement
         Task<DealerPerformanceDto> TrackPerformanceAsync(int dealerId, DateOnly startDate, DateOnly endDate);
 
         Task<IEnumerable<DebtDto>> GetDebtsAsync(int dealerId);
+
+        Task<ContractDto?> UploadContractFileAsync(int dealerId, int contractId, IFormFile file);
 
     }
 }

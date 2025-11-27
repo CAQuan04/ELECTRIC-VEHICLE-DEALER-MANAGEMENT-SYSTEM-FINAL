@@ -188,7 +188,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+// === PHẦN BỔ SUNG: CHO PHÉP TRUY CẬP CÁC FILE ĐÃ UPLOAD ===
+app.UseStaticFiles(); // Dòng này sẽ phục vụ các file từ thư mục wwwroot
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
 app.UseAuthentication();

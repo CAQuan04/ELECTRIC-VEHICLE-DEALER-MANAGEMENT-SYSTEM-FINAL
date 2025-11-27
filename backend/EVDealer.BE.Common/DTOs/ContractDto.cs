@@ -15,5 +15,6 @@ namespace EVDealer.BE.Common.DTOs
         public DateOnly EndDate { get; set; }
         public string? Terms { get; set; }
         public string Status { get; set; }
+        public string? ContractFileUrl { get; set; }
     }
 }
