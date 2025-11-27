@@ -10,7 +10,7 @@ import {
   Shield
 } from 'lucide-react';
 import { ForManager, ForStaff } from '../../../components/auth/DealerRoleGuard';
-import QuickActions from '../components/QuickActions';
+// QuickActions is rendered at the dashboard level to avoid duplicate imports
 import RecentOrdersList from '../components/RecentOrdersList';
 import BentoMenu from '../../../components/BentoMenu';
 
@@ -113,15 +113,7 @@ const OverviewSection = ({ dashboardData, navigate }) => {
         <RecentOrdersList orders={dashboardData.recentOrders} />
       </div>
 
-      <QuickActions navigate={navigate} />
-
-      {/* Feature Modules - Bento Grid Style */}
-      <div className="mt-12">
-        <h3 className="text-3xl font-extrabold mb-8 bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 from-cyan-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
-          <Package className="w-8 h-8 dark:text-emerald-400 text-cyan-600" /> Các chức năng chính
-        </h3>
-        <BentoMenu onModuleClick={(path) => navigate(path)} />
-      </div>
+      {/* Quick actions and feature modules are rendered at the dashboard level */}
     </div>
   );
 };

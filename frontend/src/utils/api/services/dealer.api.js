@@ -1138,6 +1138,29 @@ async getPurchaseRequests() {
       };
     }
   }
+  /**
+   * Lấy danh sách hàng đang về (Incoming Distributions)
+   */
+  async getIncomingDistributions() {
+    try {
+      const response = await apiClient.get('/v1/distributions/incoming');
+      return { success: true, data: response.data?.data || response.data };
+    } catch (error) {
+      return { success: false, message: 'Lỗi tải danh sách hàng về' };
+    }
+  }
+
+  /**
+   * Xác nhận đã nhận xe
+   */
+  async confirmDistributionReceipt(distId) {
+    try {
+      const response = await apiClient.post(`/api/v1/distributions/${distId}/confirm`);
+      return { success: true, data: response.data };
+    } catch (error) {
+      return { success: false, message: error.response?.data?.message || 'Lỗi xác nhận' };
+    }
+  }
   // ==================== REPORTS & ANALYTICS ====================
 
   /**

@@ -13,7 +13,7 @@ namespace EVDealer.BE.Common.DTOs
         public int VehicleId { get; set; }
         public int ConfigId { get; set; }
         public int Quantity { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; } = null!;
         public DateTime CreatedAt { get; set; }
         public string? Notes { get; set; }
     }
@@ -56,13 +56,13 @@ namespace EVDealer.BE.Common.DTOs
     public class DistributionDto
     {
         public int DistId { get; set; }
-        public string FromLocation { get; set; }
+        public string FromLocation { get; set; } = null!;
         public int ToDealerId { get; set; }
         public int VehicleId { get; set; }
         public int ConfigId { get; set; }
         public int Quantity { get; set; }
         public DateOnly? ScheduledDate { get; set; }
-        public string Status { get; set; }
+        public string Status { get; set; }= null!;
     }
 
     // --- DTO GỬI HÃNG (Fix lỗi thiếu class này) ---

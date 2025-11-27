@@ -23,6 +23,7 @@ export { default as DealerInventory } from './pages/Inventory/DealerInventory';
 export { default as StockDetail } from './pages/Inventory/StockDetail';
 export { default as DistributionList } from './pages/Inventory/DistributionList';
 export { default as DistributionRequestDetail } from './pages/Inventory/DistributionRequestDetail';
+export { default as IncomingShipments } from './pages/Inventory/IncomingShipments';
 
 // Customer Management
 export { default as CustomerList } from './pages/Customers/CustomerList';
@@ -48,6 +49,7 @@ export { default as PaymentForm } from './pages/Sales/PaymentForm';
 export { default as PurchaseRequestList } from './pages/Purchase/PurchaseRequestList';
 export { default as CreatePurchaseRequest } from './pages/Purchase/CreatePurchaseRequest';
 export { default as PurchaseRequestDetail } from './pages/Purchase/PurchaseRequestDetail';
+
 
 // Reports
 export { default as SalesPerformanceReport } from './pages/Reports/SalesPerformanceReport';
