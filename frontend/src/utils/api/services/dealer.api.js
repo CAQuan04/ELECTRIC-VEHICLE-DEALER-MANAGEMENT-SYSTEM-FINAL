@@ -1138,15 +1138,23 @@ async getPurchaseRequests() {
       };
     }
   }
+
   /**
    * Lấy danh sách hàng đang về (Incoming Distributions)
    */
-  async getIncomingDistributions() {
+  async getIncomingDistributions(dealerId) {
     try {
-      const response = await apiClient.get('/v1/distributions/incoming');
-      return { success: true, data: response.data?.data || response.data };
+      const response = await apiClient.get(`/v1/distributions/dealer/${dealerId}`);
+      
+      // ✅ SỬA LOGIC: Lấy dữ liệu an toàn, ưu tiên response.data, sau đó là response (nếu interceptor đã bóc),
+      // HOẶC nếu backend bọc trong một trường 'data' nữa (như trong response.data.data)
+      const data = response.data || response;
+      const finalData = data.data || data; // Hỗ trợ trường hợp { data: [...] } hoặc trực tiếp [...]
+      
+      return { success: true, data: finalData };
     } catch (error) {
-      return { success: false, message: 'Lỗi tải danh sách hàng về' };
+      console.error('❌ Error getting incoming distributions:', error);
+      return { success: false, message: error.response?.data?.message || 'Lỗi tải danh sách hàng về' };
     }
   }
 

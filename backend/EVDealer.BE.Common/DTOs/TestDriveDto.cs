@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 namespace EVDealer.BE.Common.DTOs;
 
 public class TestDriveCreateDto
