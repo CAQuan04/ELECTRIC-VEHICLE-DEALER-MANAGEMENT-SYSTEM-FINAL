@@ -5,7 +5,7 @@ import {
   Building2, Search, X, ArrowUpDown 
 } from "lucide-react";
 
-// Import apiClient (Giữ cấu trúc)
+// Import apiClient
 import apiClient from "../../../utils/api/apiClient";
 
 // Import UI Components
@@ -19,41 +19,7 @@ import EmptyState from '../components/ui/EmptyState';
 import { FormGroup, Label, Input, Select } from '../components/ui/FormComponents';
 
 // ==========================================
-// 1. MOCK DATA
-// ==========================================
-const MOCK_CONTRACTS_DATA = [
-    {
-        contractId: 101,
-        contractNumber: "HD-VF-2024-001",
-        startDate: "2024-01-01",
-        endDate: "2025-01-01",
-        commissionRate: 5.5,
-        terms: "Thưởng quý 2% nếu đạt KPI",
-        status: "Active",
-        documentLink: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        fileName: "hop_dong_mau_2024.pdf"
-    },
-    {
-        contractId: 102,
-        contractNumber: "HD-VF-2024-002",
-        startDate: "2024-06-01",
-        endDate: "2025-06-01",
-        commissionRate: 6.0,
-        terms: "Đại lý cấp 1 khu vực Hà Nội",
-        status: "Active",
-        documentLink: "", 
-        fileName: ""
-    }
-];
-
-const MOCK_DEALERS = [
-    { dealerId: 1, name: "VinFast Thăng Long (Demo)" },
-    { dealerId: 2, name: "VinFast An Thái (Demo)" },
-    { dealerId: 3, name: "VinFast Hải Châu (Demo)" }
-];
-
-// ==========================================
-// 2. HELPER UTILS
+// HELPER UTILS
 // ==========================================
 const formatMoney = (n) => typeof n === "number" ? n.toLocaleString("vi-VN") + ' VNĐ' : n;
 
@@ -62,13 +28,12 @@ const exportToCSV = (data, fileName) => {
         alert("Không có dữ liệu để xuất!");
         return;
     }
-    const headers = ["ID", "So HD", "Ngay bat dau", "Ngay ket thuc", "Hoa hong (%)", "Trang thai", "Ghi chu"];
+    const headers = ["ID", "So HD", "Ngay bat dau", "Ngay ket thuc", "Trang thai", "Ghi chu"];
     const rows = data.map(item => [
         item.contractId,
-        item.contractNumber || "",
+        item.contractNumber || `HD-${item.contractId}`,
         item.startDate,
         item.endDate,
-        item.commissionRate,
         item.status,
         `"${item.terms || ""}"`
     ]);
@@ -84,7 +49,7 @@ const exportToCSV = (data, fileName) => {
 };
 
 // ==========================================
-// 3. MAIN COMPONENT
+// MAIN COMPONENT
 // ==========================================
 const DealerContractManagement = () => {
   // --- STATE ---
@@ -94,26 +59,28 @@ const DealerContractManagement = () => {
   const [contracts, setContracts] = useState([]);
   const [targets, setTargets] = useState([]);
   const [debts, setDebts] = useState([]);
+  const [performance, setPerformance] = useState(null);
 
   const [loadingData, setLoadingData] = useState(false); 
   const [tab, setTab] = useState("contracts");
 
   // Filter & Sort State
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("newest"); // 'newest' | 'oldest'
+  const [sortOrder, setSortOrder] = useState("newest");
 
   // Modal State
   const [showContractModal, setShowContractModal] = useState(false);
   const [contractForm, setContractForm] = useState(null); 
   
   const [showTargetModal, setShowTargetModal] = useState(false);
-  const [targetForm, setTargetForm] = useState(null); 
+  const [targetForm, setTargetForm] = useState(null);
+
+  const [uploadingFile, setUploadingFile] = useState(false);
 
   // --- LOGIC: FILTER & SORT DATA ---
   const processData = (data, idField, searchFields) => {
     let processed = [...data];
 
-    // 1. Filter by Search Term
     if (searchTerm) {
         const lowerTerm = searchTerm.toLowerCase();
         processed = processed.filter(item => 
@@ -123,7 +90,6 @@ const DealerContractManagement = () => {
         );
     }
 
-    // 2. Sort by Time (ID is proxy for creation time)
     processed.sort((a, b) => {
         return sortOrder === 'newest' 
             ? b[idField] - a[idField] 
@@ -142,13 +108,73 @@ const DealerContractManagement = () => {
   [targets, searchTerm, sortOrder]);
 
   const sortedDebts = useMemo(() => 
-    processData(debts, 'debtId', ['debtId', 'status']), 
+    processData(debts, 'debtId', ['status']), 
   [debts, searchTerm, sortOrder]);
+
+  // --- API CALLS ---
+
+  // Fetch list of dealers
+  const fetchDealers = async () => {
+    try {
+      const response = await apiClient.get('/Dealers/basic');
+      setDealers(response.data || []);
+      if (response.data && response.data.length > 0) {
+        setSelectedDealerId(response.data[0].dealerId);
+      }
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách đại lý:", error);
+    }
+  };
+
+  // Fetch contracts for selected dealer
+  const fetchContracts = async (dealerId) => {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/contracts`);
+      setContracts(response.data || []);
+    } catch (error) {
+      console.error("Lỗi khi tải hợp đồng:", error);
+      setContracts([]);
+    }
+  };
+
+  // Fetch targets for selected dealer
+  const fetchTargets = async (dealerId) => {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/targets`);
+      setTargets(response.data || []);
+    } catch (error) {
+      console.error("Lỗi khi tải KPI:", error);
+      setTargets([]);
+    }
+  };
+
+  // Fetch debts for selected dealer
+  const fetchDebts = async (dealerId) => {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/debts`);
+      setDebts(response.data || []);
+    } catch (error) {
+      console.error("Lỗi khi tải công nợ:", error);
+      setDebts([]);
+    }
+  };
+
+  // Fetch performance (optional - có thể dùng cho tab riêng)
+  const fetchPerformance = async (dealerId, startDate, endDate) => {
+    try {
+      const response = await apiClient.get(`/manage/dealers/${dealerId}/performance`, {
+        params: { startDate, endDate }
+      });
+      setPerformance(response.data);
+    } catch (error) {
+      console.error("Lỗi khi tải hiệu suất:", error);
+      setPerformance(null);
+    }
+  };
 
   // --- LOGIC 1: LOAD DEALERS ---
   useEffect(() => {
-    setDealers(MOCK_DEALERS);
-    setSelectedDealerId(MOCK_DEALERS[0].dealerId);
+    fetchDealers();
   }, []); 
 
   // --- LOGIC 2: LOAD DATA ---
@@ -156,56 +182,159 @@ const DealerContractManagement = () => {
     if (!selectedDealerId) return; 
 
     setLoadingData(true);
-    setTimeout(() => {
-        setContracts(MOCK_CONTRACTS_DATA);
-        setTargets([
-            { targetId: 1, periodStart: '2024-01-01', periodEnd: '2024-12-31', salesTarget: 5000000000, actualSales: 4200000000 }
-        ]);
-        setDebts([
-            { debtId: 1, amountDue: 150000000, dueDate: '2024-12-20', status: 'Pending' }
-        ]);
-        setLoadingData(false);
-    }, 500);
+    
+    Promise.all([
+      fetchContracts(selectedDealerId),
+      fetchTargets(selectedDealerId),
+      fetchDebts(selectedDealerId)
+    ]).finally(() => {
+      setLoadingData(false);
+    });
 
   }, [selectedDealerId]); 
 
   // --- LOGIC 3: UPLOAD FILE ---
-  const handleFileChange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
-          const blobUrl = URL.createObjectURL(file);
-          setContractForm({
-              ...contractForm,
-              documentLink: blobUrl,
-              fileName: file.name
-          });
-      }
+  const handleFileChange = async (e, contractId) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      alert("Chỉ chấp nhận file PDF hoặc ảnh (JPG, PNG)!");
+      return;
+    }
+
+    // If this is for creating new contract, just preview
+    if (!contractId) {
+      const blobUrl = URL.createObjectURL(file);
+      setContractForm({
+          ...contractForm,
+          documentLink: blobUrl,
+          fileName: file.name,
+          fileToUpload: file
+      });
+      return;
+    }
+
+    // Upload file to server
+    try {
+      setUploadingFile(true);
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await apiClient.post(
+        `/manage/dealers/${selectedDealerId}/contracts/${contractId}/upload-pdf`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      // Update contract in list
+      setContracts(contracts.map(c => 
+        c.contractId === contractId ? response.data : c
+      ));
+
+      alert("Upload file thành công!");
+    } catch (error) {
+      console.error("Lỗi khi upload file:", error);
+      alert("Lỗi khi upload file: " + (error.response?.data?.message || error.message));
+    } finally {
+      setUploadingFile(false);
+    }
   };
 
   // --- LOGIC 4: SAVE CONTRACT ---
-  const handleContractSave = () => {
+  const handleContractSave = async () => {
+    if (!contractForm.startDate || !contractForm.endDate) {
+      alert("Vui lòng nhập đầy đủ ngày bắt đầu và kết thúc!");
+      return;
+    }
+
     if (new Date(contractForm.endDate) <= new Date(contractForm.startDate)) {
         alert("Ngày kết thúc phải sau ngày bắt đầu!");
         return;
     }
-    const newContract = {
-        ...contractForm,
-        contractId: Math.floor(Math.random() * 10000) + 100,
-        status: "Active"
-    };
-    setContracts([newContract, ...contracts]);
-    setShowContractModal(false);
+
+    try {
+      // Create contract
+      const contractData = {
+        startDate: contractForm.startDate,
+        endDate: contractForm.endDate,
+        terms: contractForm.terms || "",
+        status: contractForm.status || "Active"
+      };
+
+      const response = await apiClient.post(
+        `/manage/dealers/${selectedDealerId}/contracts`,
+        contractData
+      );
+
+      const newContract = response.data;
+
+      // If there's a file to upload, upload it
+      if (contractForm.fileToUpload) {
+        const formData = new FormData();
+        formData.append('file', contractForm.fileToUpload);
+
+        try {
+          const uploadResponse = await apiClient.post(
+            `/manage/dealers/${selectedDealerId}/contracts/${newContract.contractId}/upload-pdf`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            }
+          );
+          // Update with file URL
+          setContracts([uploadResponse.data, ...contracts]);
+        } catch (uploadError) {
+          console.error("Lỗi khi upload file:", uploadError);
+          // Still add contract even if upload fails
+          setContracts([newContract, ...contracts]);
+        }
+      } else {
+        setContracts([newContract, ...contracts]);
+      }
+
+      setShowContractModal(false);
+      alert("Tạo hợp đồng thành công!");
+    } catch (error) {
+      console.error("Lỗi khi tạo hợp đồng:", error);
+      alert("Lỗi khi tạo hợp đồng: " + (error.response?.data?.message || error.message));
+    }
   };
   
   // --- LOGIC 5: SAVE KPI ---
-  const handleTargetSave = () => {
-    const newTarget = {
-        ...targetForm,
-        targetId: Math.floor(Math.random() * 1000),
-        actualSales: 0 
-    };
-    setTargets([newTarget, ...targets]);
-    setShowTargetModal(false);
+  const handleTargetSave = async () => {
+    if (!targetForm.periodStart || !targetForm.periodEnd || !targetForm.salesTarget) {
+      alert("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    try {
+      const targetData = {
+        periodStart: targetForm.periodStart,
+        periodEnd: targetForm.periodEnd,
+        salesTarget: parseFloat(targetForm.salesTarget)
+      };
+
+      const response = await apiClient.post(
+        `/manage/dealers/${selectedDealerId}/targets`,
+        targetData
+      );
+
+      setTargets([response.data, ...targets]);
+      setShowTargetModal(false);
+      alert("Thiết lập KPI thành công!");
+    } catch (error) {
+      console.error("Lỗi khi thiết lập KPI:", error);
+      alert("Lỗi khi thiết lập KPI: " + (error.response?.data?.message || error.message));
+    }
   };
 
   // --- UI ACTIONS ---
@@ -214,18 +343,20 @@ const DealerContractManagement = () => {
       contractNumber: "", 
       startDate: new Date().toISOString().slice(0, 10),
       endDate: "", 
-      commissionRate: 0, 
       documentLink: "", 
       fileName: "",
       terms: "",
       status: "Active",
+      fileToUpload: null
     });
     setShowContractModal(true);
   };
   
   const openCreateTarget = () => {
     setTargetForm({
-      periodStart: "", periodEnd: "", salesTarget: 0,
+      periodStart: "", 
+      periodEnd: "", 
+      salesTarget: 0,
     });
     setShowTargetModal(true);
   };
@@ -235,7 +366,6 @@ const DealerContractManagement = () => {
       exportToCSV(sortedContracts, `HD_${dealerName}.csv`);
   };
   
-  // Options
   const tabOptions = [
       { value: "contracts", label: "Hợp đồng" },
       { value: "targets", label: "KPI Doanh số" },
@@ -244,7 +374,7 @@ const DealerContractManagement = () => {
 
   return (
     <PageContainer>
-      {/* 1. HEADER */}
+      {/* HEADER */}
       <PageHeader
         title="Hợp đồng & KPI"
         subtitle="Hồ sơ đại lý"
@@ -280,17 +410,16 @@ const DealerContractManagement = () => {
 
       <div className="mt-8 space-y-8">
         
-        {/* 2. FILTER BAR (Có Search & Sort) */}
+        {/* FILTER BAR */}
         <div className="w-full bg-[#13233a] border-y border-gray-700 mb-8 shadow-2xl overflow-x-auto rounded-lg">
           <div className="flex items-center w-full h-auto md:h-24">
               
-              {/* Filter Label */}
               <div className="h-full flex items-center px-6 md:px-8 border-r border-gray-700/60 bg-[#1a2b44]/50 flex-none">
                   <span className="text-blue-400 font-bold text-lg md:text-xl tracking-wide mr-3">Filter</span>
                   <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,1)] animate-pulse"></div>
               </div>
               
-              {/* SEARCH BAR (Mới) */}
+              {/* SEARCH BAR */}
               <div className="h-full flex items-center flex-[2] px-4 md:px-6 border-r border-gray-700/60 min-w-[280px] group cursor-text hover:bg-[#1a2b44]/20 transition">
                   <span className="text-gray-300 font-semibold text-base mr-3 group-hover:text-white transition hidden sm:block">Search</span>
                   <div className="relative flex-1">
@@ -331,7 +460,7 @@ const DealerContractManagement = () => {
                   </div>
               </div>
 
-              {/* View/Tab Selector */}
+              {/* Tab Selector */}
               <div className="h-full relative px-4 md:px-6 flex-1 min-w-[180px] border-r border-gray-700/60 hover:bg-[#1a2b44]/30 transition cursor-pointer flex items-center">
                   <span className="text-gray-300 text-base font-semibold mr-2 truncate">Dữ liệu</span>
                   <select 
@@ -349,7 +478,7 @@ const DealerContractManagement = () => {
                   </span>
               </div>
 
-              {/* SORT SELECTOR (Mới) */}
+              {/* SORT SELECTOR */}
               <div className="h-full relative px-4 md:px-6 flex-1 min-w-[160px] hover:bg-[#1a2b44]/30 transition cursor-pointer flex items-center justify-between">
                    <span className="text-gray-300 text-base font-semibold mr-2 truncate">Thời gian</span>
                    <select 
@@ -368,7 +497,7 @@ const DealerContractManagement = () => {
           </div>
         </div>
 
-        {/* 3. MAIN CONTENT */}
+        {/* MAIN CONTENT */}
         {loadingData ? (
              <div className="text-center py-20">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
@@ -379,7 +508,7 @@ const DealerContractManagement = () => {
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
                         
-                        {/* === TAB 1: HỢP ĐỒNG === */}
+                        {/* TAB 1: HỢP ĐỒNG */}
                         {tab === "contracts" && (
                             <>
                                 <thead>
@@ -387,9 +516,9 @@ const DealerContractManagement = () => {
                                         <th className="px-8 py-6">Số Hợp đồng</th>
                                         <th className="px-8 py-6">Hiệu lực</th>
                                         <th className="px-8 py-6">Hết hạn</th>
-                                        <th className="px-8 py-6">Hoa hồng</th>
                                         <th className="px-8 py-6">Điều khoản</th>
                                         <th className="px-8 py-6">Trạng thái</th>
+                                        <th className="px-8 py-6">File</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200 dark:divide-gray-700/50">
@@ -410,14 +539,25 @@ const DealerContractManagement = () => {
                                             <td className="px-8 py-6 text-red-500 dark:text-red-400 font-medium">
                                                 {new Date(c.endDate).toLocaleDateString('vi-VN')}
                                             </td>
-                                            <td className="px-8 py-6 font-bold text-yellow-600 dark:text-yellow-400">
-                                                {c.commissionRate}%
-                                            </td>
                                             <td className="px-8 py-6 text-sm text-gray-500 max-w-xs truncate" title={c.terms}>
                                                 {c.terms}
                                             </td>
                                             <td className="px-8 py-6">
                                                 <Badge variant="success">{c.status}</Badge>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                {c.documentLink ? (
+                                                    <Button 
+                                                        variant="link" 
+                                                        size="sm" 
+                                                        className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                                                        onClick={() => window.open(c.documentLink, "_blank")}
+                                                    >
+                                                        <Download className="w-4 h-4 mr-2" /> Tải xuống
+                                                    </Button>
+                                                ) : (
+                                                    <span className="text-gray-500 text-sm">Chưa có file</span>
+                                                )}
                                             </td>
                                         </tr>
                                     )) : (
