@@ -57,6 +57,7 @@ import {
   StockDetail,
   DistributionList,
   DistributionRequestDetail,
+  IncomingShipments,
   // Customers
   CustomerList as DealerCustomerList,
   CustomerForm,
@@ -908,7 +909,18 @@ const App = () => {
                   </DealerGuard>
                 }
               />
-
+              <Route
+                path="/:dealerId/dealer/inventory/incoming"
+                element={
+                  <DealerGuard>
+                    <DealerShopGuard>
+                      <AppLayout>
+                        <IncomingShipments />
+                      </AppLayout>
+                    </DealerShopGuard>
+                  </DealerGuard>
+                }
+              />
               {/* Dealer Routes - Customers */}
               <Route
                 path="/:dealerId/dealer/customers"

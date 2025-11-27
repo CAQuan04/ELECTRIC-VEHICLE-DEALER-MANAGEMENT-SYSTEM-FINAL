@@ -20,6 +20,9 @@ import {
   CheckCircle,
   XCircle
 } from 'lucide-react';
+import { Package } from 'lucide-react';
+import BentoMenu from '../components/BentoMenu';
+import QuickActions from './DealerDashboard/components/QuickActions';
 
 // Import role guards
 import { useDealerRole } from '../components/auth/DealerRoleGuard';
@@ -354,6 +357,17 @@ const DealerDashboard = () => {
 
       {/* Dynamic Content Section */}
       {renderActiveSection()}
+
+      {/* Feature Modules (Bento Menu) - show when overview is active */}
+      {activeSection === 'overview' && (
+        <div className="mt-12">
+          <QuickActions navigate={navigate} />
+          <h3 className="text-3xl font-extrabold mb-8 bg-gradient-to-r dark:from-emerald-400 dark:to-emerald-600 from-cyan-600 to-blue-600 bg-clip-text text-transparent flex items-center gap-2">
+            <Package className="w-8 h-8 dark:text-emerald-400 text-cyan-600" /> Các chức năng chính
+          </h3>
+          <BentoMenu onModuleClick={(path) => navigate(path)} />
+        </div>
+      )}
 
     </PageContainer>
   );

@@ -211,6 +211,7 @@ const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
       requiredRole: null, 
       subModules: [
         { icon: '📊', title: 'Tồn kho hiện tại', path: `/${dealerId}/dealer/inventory`, tag: 'UC 1.e.1' },
+        { icon: '📥', title: 'Nhập kho', path: `/${dealerId}/dealer/inventory/incoming`, tag: 'UC 1.e.1.a' },
         { icon: '📝', title: 'Yêu cầu nhập hàng', path: `/${dealerId}/dealer/inventory/request`, tag: 'UC 1.e.2', staffAccess: true },
         { icon: '📋', title: 'Phiếu điều phối', path: `/${dealerId}/dealer/inventory/distributions`, tag: 'UC 1.e.3', managerOnly: true }
       ]
@@ -430,6 +431,7 @@ const BentoMenu = ({ onModuleClick, disableAnimations = false }) => {
           </div>
         );
       })}
+
     </div>
   );
 };
