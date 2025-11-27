@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { dealerAPI } from '@/utils/api/services/dealer.api.js'; // Giữ nguyên API import
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
-
-// 1. CHUẨN HÓA IMPORTS (Giống hệt CustomerList.jsx)
-// Giả định rằng các component này đều được export từ file index của components
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
+import { Plus, Trash2, Send, ShoppingCart, AlertCircle } from 'lucide-react';
+import { notifications } from '@utils';
+// UI Components
 import {
   PageContainer,
   PageHeader,
@@ -14,231 +15,287 @@ import {
   Input,
   Select,
   Textarea,
-  InfoSection,
-  ActionBar
-} from '../../components'; // Sửa: Dùng import chuẩn của dự án
-
-// Import Modal xác nhận (đường dẫn này là giả định, hãy kiểm tra lại)
-import RequestStockConfirmationModal from '@/features/dealer/components/RequestStockConfirmationModal.jsx';
+  Card,
+  Table
+} from '../../components';
 
 const CreatePurchaseRequest = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isLoading, startLoading, stopLoading } = usePageLoading();
-  
-  const [formData, setFormData] = useState({
-    productId: '',
-    quantity: 1,
-    priority: 'Bình thường',
-    reason: '',
-    notes: '',
-  });
-  
+  const dealerId = user?.dealerId;
+  // --- STATE ---
   const [vehicles, setVehicles] = useState([]);
-  const [errors, setErrors] = useState({});
-  const [isConfirming, setIsConfirming] = useState(false);
+  const [configs, setConfigs] = useState([]);
 
-  // Tải danh sách xe (Logic giữ nguyên)
+  const [currentItem, setCurrentItem] = useState({
+    vehicleId: '',
+    configId: '',
+    quantity: 1
+  });
+
+  const [requestItems, setRequestItems] = useState([]);
+  const [note, setNote] = useState('');
+
+  // --- 1. LOAD XE (ĐÃ SỬA LOGIC LẤY DATA) ---
   useEffect(() => {
-    const fetchVehicles = async () => {
-      startLoading('Đang tải danh sách xe...');
+    const loadVehicles = async () => {
       try {
         const result = await dealerAPI.getVehicles();
-        if (result.success && result.data) {
-          const vehicleList = Array.isArray(result.data) ? result.data : result.data.data || [];
-          setVehicles(vehicleList);
-        } else {
-          throw new Error(result.message || 'Không thể tải danh sách xe');
+        console.log("🔍 API Vehicles Raw:", result);
+
+        if (result.success) {
+          const rawData = result.data;
+          const list = rawData?.items || rawData?.data || (Array.isArray(rawData) ? rawData : []);
+
+          console.log("✅ Processed List:", list);
+          setVehicles(list);
         }
       } catch (error) {
-        console.error('Lỗi khi tải danh sách xe:', error);
+        console.error(error);
+        notifications.error("Lỗi", "Không thể tải danh sách xe");
       }
-      stopLoading();
     };
-    
-    fetchVehicles();
-  }, [startLoading, stopLoading]);
+    loadVehicles();
+  }, []);
 
-  // Xử lý Form (Logic giữ nguyên)
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
+  // --- 2. XỬ LÝ CHỌN XE ---
+  const handleVehicleChange = async (valOrEvent) => {
+    // Kiểm tra đầu vào là Event hay Value
+    const vId = (valOrEvent && valOrEvent.target) ? valOrEvent.target.value : valOrEvent;
+
+    console.log("🚗 Selected Vehicle ID:", vId);
+
+    // Reset config
+    setCurrentItem(prev => ({ ...prev, vehicleId: vId, configId: '' }));
+    setConfigs([]);
+
+    if (vId) {
+      try {
+        const result = await dealerAPI.getVehicleConfigs(vId);
+        console.log("🔧 API Configs Raw:", result);
+        if (result.success) {
+          const rawData = result.data;
+          // Áp dụng logic tương tự cho config (đề phòng API config cũng trả về items)
+          const configList = rawData?.items || rawData?.data || (Array.isArray(rawData) ? rawData : []);
+          console.log("✅ Processed Config List:", configList);
+          setConfigs(configList);
+        }
+      } catch (e) {
+        console.error("Lỗi load config:", e);
+      }
     }
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.productId) newErrors.productId = 'Vui lòng chọn xe.';
-    if (formData.quantity < 1) newErrors.quantity = 'Số lượng phải lớn hơn 0.';
-    if (!formData.reason) newErrors.reason = 'Vui lòng nhập lý do.';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  const handleConfigChange = (valOrEvent) => {
+    const cId = (valOrEvent && valOrEvent.target) ? valOrEvent.target.value : valOrEvent;
+    setCurrentItem(prev => ({ ...prev, configId: cId }));
   };
 
-  const handleSubmitRequest = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsConfirming(true);
+  // --- 3. THÊM VÀO GIỎ ---
+  const handleAddItem = () => {
+    if (!currentItem.vehicleId || !currentItem.configId) {
+      notifications.error("Thiếu thông tin", "Vui lòng chọn Xe và Cấu hình");
+      return;
     }
+    if (currentItem.quantity <= 0) {
+      notifications.error("Lỗi", "Số lượng phải lớn hơn 0");
+      return;
+    }
+
+    const selectedVehicle = vehicles.find(v => String(v.vehicleId || v.id) === String(currentItem.vehicleId));
+    const selectedConfig = configs.find(c => String(c.configId || c.id) === String(currentItem.configId));
+
+    const newItem = {
+      id: Date.now(),
+      vehicleId: parseInt(currentItem.vehicleId),
+      vehicleName: selectedVehicle ? (selectedVehicle.vehicleName || selectedVehicle.model) : 'Unknown',
+      config_id: parseInt(currentItem.configId),
+      configName: selectedConfig ? (selectedConfig.configName || `${selectedConfig.color || ''} ${selectedConfig.trim || ''}`) : 'Standard',
+      quantity: parseInt(currentItem.quantity)
+    };
+
+    const existingIndex = requestItems.findIndex(
+      i => i.vehicleId === newItem.vehicleId && i.config_id === newItem.config_id
+    );
+
+    if (existingIndex >= 0) {
+      const updatedItems = [...requestItems];
+      updatedItems[existingIndex].quantity += newItem.quantity;
+      setRequestItems(updatedItems);
+    } else {
+      setRequestItems([...requestItems, newItem]);
+    }
+
+    setCurrentItem(prev => ({ ...prev, configId: '', quantity: 1 }));
   };
 
-  // Xử lý API (Logic giữ nguyên)
-  const handleFinalSubmit = async (password) => {
-    startLoading('Đang gửi yêu cầu...');
+  const handleRemoveItem = (id) => {
+    setRequestItems(requestItems.filter(item => item.id !== id));
+  };
+
+  // --- 4. SUBMIT ---
+  const handleSubmit = async () => {
+    if (requestItems.length === 0) {
+      notifications.warning("Giỏ hàng trống", "Vui lòng thêm xe");
+      return;
+    }
+
+    startLoading("Đang gửi yêu cầu...");
+
+    const payload = {
+      dealerId: parseInt(user?.dealerId || 0),
+      items: requestItems.map(item => ({
+        vehicleId: item.vehicleId,
+        quantity: item.quantity,
+        config_id: item.config_id
+      })),
+      note: note || "Tồn kho thấp, cần xe gấp"
+    };
+    console.log("📤 FINAL PAYLOAD:", JSON.stringify(payload, null, 2));
     try {
-      const requestData = {
-        productId: formData.productId,
-        quantity: parseInt(formData.quantity, 10),
-        notes: `Lý do: ${formData.reason}. Ghi chú: ${formData.notes}`,
-        priority: formData.priority,
-      };
-      await dealerAPI.requestStock(requestData);
-      stopLoading();
-      setIsConfirming(false);
-      alert('Tạo yêu cầu mua hàng thành công!');
-      navigate('/dealer/purchase-requests');
+      const result = await dealerAPI.createProcurementRequest(payload);
+      if (result.success) {
+        notifications.success("Thành công", "Đã gửi yêu cầu nhập hàng!");
+        navigate(`/${dealerId}/dealer/purchase-requests`);
+      } else {
+        notifications.error("Thất bại", result.message);
+      }
     } catch (error) {
+      notifications.error("Lỗi", "Lỗi kết nối server");
+    } finally {
       stopLoading();
-      console.error('Lỗi khi gửi yêu cầu:', error);
-      alert(error.response?.data?.message || 'Có lỗi xảy ra!');
     }
   };
 
-  // 4. Render
-  const vehicleOptions = vehicles.map((v) => ({
-    label: `${v.brand || ''} ${v.model || 'N/A'}`,
-    value: v.vehicleId,
+  // --- MAPPING OPTIONS ---
+  const vehicleOptions = vehicles.map(v => ({
+    value: v.vehicleId || v.id,
+    label: v.model || v.vehicleName || (v.brand ? `${v.brand} - Xe #${v.vehicleId}` : `Xe #${v.vehicleId}`)
   }));
-  
-  const selectedVehicle = vehicles.find(v => v.vehicleId === formData.productId);
 
-  // 2. SỬ DỤNG PAGE CONTAINER LÀM GỐC (Giống CustomerList)
+  const configOptions = configs.map(c => ({
+    // Thử fallback các trường ID phổ biến
+    value: c.configId || c.id || c.vehicleConfigId,
+    // Tạo nhãn hiển thị đầy đủ thông tin
+    label: c.configName || [
+      c.color,
+      c.trim,
+      c.batteryKwh ? `${c.batteryKwh}kWh` : null,
+      c.price ? `(${c.price.toLocaleString()}đ)` : null
+    ].filter(Boolean).join(' - ') || `Cấu hình #${c.id || '?'}`
+  }));
+
+  const columns = [
+    { key: 'vehicleName', label: 'Tên xe', render: (row) => <span className="font-bold">{row.vehicleName}</span> },
+    { key: 'configName', label: 'Cấu hình', render: (row) => row.configName },
+    { key: 'quantity', label: 'SL', render: (row) => <span className="font-bold text-blue-600">{row.quantity}</span> },
+    {
+      key: 'actions',
+      label: '',
+      render: (row) => (
+        <Button variant="danger" size="sm" onClick={() => handleRemoveItem(row.id)}>
+          <Trash2 className="w-4 h-4" />
+        </Button>
+      )
+    }
+  ];
+
   return (
     <PageContainer>
-      {/* 3. SỬ DỤNG PAGEHEADER (Giống CustomerList) */}
       <PageHeader
-        title="📝 Tạo Yêu cầu Mua hàng"
-        subtitle="Gửi yêu cầu nhập xe mới đến EVM"
-        // Thêm nút "Quay lại" vào đây cho nhất quán
-        actions={
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => navigate('/dealer/purchase-requests')}
-            disabled={isLoading}
-          >
-            ← Quay lại
-          </Button>
-        }
+        title="Tạo Yêu cầu Nhập hàng (Procurement)"
+        subtitle="Gửi yêu cầu mua xe trực tiếp đến hãng (EVM)"
+        actions={<Button variant="ghost" onClick={() => navigate(`/${dealerId}/dealer/purchase-requests`)}>Quay lại</Button>}
       />
 
-      {/* Phần form sẽ nằm bên trong PageContainer. 
-        PageContainer sẽ tự động xử lý chiều rộng, 
-        ngăn không cho form tràn ra ngoài.
-      */}
-      <form onSubmit={handleSubmitRequest}>
-        <InfoSection title="Thông tin yêu cầu" icon="📦">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4">
-            <FormGroup>
-              <Label htmlFor="productId" required>Dòng xe</Label>
-              <Select
-                id="productId"
-                name="productId"
-                value={formData.productId}
-                onChange={handleChange}
-                options={vehicleOptions}
-                placeholder="-- Chọn xe cần nhập --"
-                error={errors.productId}
-              />
-            </FormGroup>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1 space-y-6">
+          <Card className="p-5">
+            <h3 className="text-lg font-bold mb-4 flex items-center"><Plus className="w-5 h-5 mr-2" /> Chọn xe nhập</h3>
 
-            <FormGroup>
-              <Label htmlFor="quantity" required>Số lượng</Label>
-              <Input
-                id="quantity"
-                name="quantity"
-                type="number"
-                value={formData.quantity}
-                onChange={handleChange}
-                min="1"
-                error={errors.quantity}
-              />
-            </FormGroup>
-          </div>
+            <div className="space-y-4">
+              <FormGroup>
+                <Label required>Dòng xe</Label>
+                <Select
+                  options={vehicleOptions}
+                  value={currentItem.vehicleId}
+                  onChange={handleVehicleChange}
+                  placeholder="-- Chọn dòng xe --"
+                />
+              </FormGroup>
 
-          <div className="p-4 pt-0">
-            <FormGroup>
-              <Label htmlFor="priority" required>Mức độ ưu tiên</Label>
-              <Select
-                id="priority"
-                name="priority"
-                value={formData.priority}
-                onChange={handleChange}
-                options={[
-                  { value: 'Bình thường', label: 'Bình thường' },
-                  { value: 'Cao', label: 'Cao' },
-                  { value: 'Khẩn cấp', label: 'Khẩn cấp' },
-                ]}
-                error={errors.priority}
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label required>Cấu hình</Label>
+                <Select
+                  options={configOptions}
+                  value={currentItem.configId}
+                  onChange={handleConfigChange}
+                  placeholder={currentItem.vehicleId ? "-- Chọn cấu hình --" : "Vui lòng chọn xe trước"}
+                  disabled={!currentItem.vehicleId}
+                />
+              </FormGroup>
 
-            <FormGroup>
-              <Label htmlFor="reason" required>Lý do yêu cầu</Label>
-              <Textarea
-                id="reason"
-                name="reason"
-                value={formData.reason}
-                onChange={handleChange}
-                rows="3"
-                placeholder="Ví dụ: Bổ sung kho, Yêu cầu đặc biệt của khách,..."
-                error={errors.reason}
-              />
-            </FormGroup>
+              <FormGroup>
+                <Label required>Số lượng</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={currentItem.quantity}
+                  onChange={(e) => setCurrentItem({ ...currentItem, quantity: parseInt(e.target.value) || 0 })}
+                />
+              </FormGroup>
 
-            <FormGroup>
-              <Label htmlFor="notes">Ghi chú (Không bắt buộc)</Label>
-              <Textarea
-                id="notes"
-                name="notes"
-                value={formData.notes}
-                onChange={handleChange}
-                rows="3"
-                placeholder="Thông tin bổ sung..."
-              />
-            </FormGroup>
-          </div>
-        </InfoSection>
+              <Button
+                variant="primary"
+                className="w-full mt-2"
+                onClick={handleAddItem}
+                disabled={!currentItem.vehicleId || !currentItem.configId}
+              >
+                Thêm vào danh sách
+              </Button>
+            </div>
+          </Card>
+        </div>
 
-        <ActionBar align="right" className="mt-6">
-          <Button
-            type="button"
-            variant="ghost"
-            onClick={() => navigate('/dealer/purchase-requests')}
-            disabled={isLoading}
-          >
-            Hủy
-          </Button>
-          <Button
-            type="submit"
-            variant="gradient"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Đang xử lý...' : 'Gửi yêu cầu'}
-          </Button>
-        </ActionBar>
-      </form>
+        <div className="lg:col-span-2 space-y-6">
+          <Card className="p-5 min-h-[400px] flex flex-col">
+            <h3 className="text-lg font-bold mb-4 flex items-center justify-between">
+              <div className="flex items-center"><ShoppingCart className="w-5 h-5 mr-2" /> Danh sách ({requestItems.length})</div>
+              <span className="text-sm text-gray-500">Dealer ID: {user?.dealerId}</span>
+            </h3>
 
-      {/* Modal Xác nhận (Giữ nguyên) */}
-      <RequestStockConfirmationModal
-        open={isConfirming}
-        onClose={() => setIsConfirming(false)}
-        onConfirm={handleFinalSubmit}
-        isLoading={isLoading}
-        selectedVehicle={selectedVehicle}
-        quantity={formData.quantity}
-      />
+            {requestItems.length > 0 ? (
+              <div className="flex-1"><Table columns={columns} data={requestItems} keyField="id" /></div>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed rounded-lg p-10">
+                <AlertCircle className="w-12 h-12 mb-2" />
+                <p>Chưa có xe nào</p>
+              </div>
+            )}
+
+            <div className="mt-6 pt-6 border-t border-gray-100">
+              <FormGroup className="mb-4">
+                <Label>Ghi chú</Label>
+                <Textarea rows={2} value={note} onChange={(e) => setNote(e.target.value)} />
+              </FormGroup>
+
+              <div className="flex justify-end gap-3">
+                <Button variant="ghost" onClick={() => setRequestItems([])} disabled={requestItems.length === 0}>Xóa tất cả</Button>
+                <Button
+                  variant="gradient"
+                  onClick={handleSubmit}
+                  disabled={requestItems.length === 0}
+                  loading={isLoading}
+                  icon={<Send className="w-4 h-4" />}
+                >
+                  Gửi yêu cầu
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      </div>
     </PageContainer>
   );
 };

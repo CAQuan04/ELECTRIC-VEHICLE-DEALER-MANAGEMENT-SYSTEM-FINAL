@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
 
 const StaffForm = () => {
   const { staffId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { startLoading, stopLoading } = usePageLoading();
   const isEditMode = !!staffId;
 
@@ -26,7 +29,7 @@ const StaffForm = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       alert(isEditMode ? 'Cập nhật nhân viên thành công!' : 'Thêm nhân viên thành công!');
-      navigate('/dealer/staff');
+      navigate(dealerId ? `/${dealerId}/dealer/staff` : '/dealer/staff');
     } catch (error) {
       console.error('Error saving staff:', error);
       alert('Có lỗi xảy ra!');

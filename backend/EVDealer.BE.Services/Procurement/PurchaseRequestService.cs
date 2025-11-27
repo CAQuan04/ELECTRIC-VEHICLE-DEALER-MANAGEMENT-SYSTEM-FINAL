@@ -1,4 +1,4 @@
-using EVDealer.BE.Common.DTOs;
+﻿using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.DAL.Models;
 using EVDealer.BE.DAL.Repositories;
 using System;
@@ -15,7 +15,7 @@ namespace EVDealer.BE.Services.Procurement
         private readonly IInventoryRepository _inventoryRepo;
 
         public PurchaseRequestService(
-            IPurchaseRequestRepository purchaseRequestRepo, 
+            IPurchaseRequestRepository purchaseRequestRepo,
             IDistributionRepository distributionRepo,
             IInventoryRepository inventoryRepo)
         {
@@ -32,7 +32,8 @@ namespace EVDealer.BE.Services.Procurement
                 VehicleId = dto.VehicleId,
                 ConfigId = dto.ConfigId,
                 Quantity = dto.Quantity,
-                Status = "pending",
+                Status = "draft",
+                Notes = dto.Notes, // Map thêm Notes từ DTO tạo mới
                 CreatedAt = DateTime.UtcNow
             };
             var createdRequest = await _purchaseRequestRepo.CreateAsync(request);
@@ -59,7 +60,7 @@ namespace EVDealer.BE.Services.Procurement
 
             request.Status = "approved";
             await _purchaseRequestRepo.UpdateAsync(request);
-            
+
             var distribution = new Distribution
             {
                 FromLocation = "EVM Central Warehouse",
@@ -85,7 +86,7 @@ namespace EVDealer.BE.Services.Procurement
             var updatedRequest = await _purchaseRequestRepo.UpdateAsync(request);
             return MapToDto(updatedRequest);
         }
-        
+
         private PurchaseRequestDto MapToDto(PurchaseRequest request)
         {
             return new PurchaseRequestDto
@@ -96,12 +97,13 @@ namespace EVDealer.BE.Services.Procurement
                 ConfigId = request.ConfigId,
                 Quantity = request.Quantity,
                 Status = request.Status,
-                CreatedAt = request.CreatedAt
+                CreatedAt = request.CreatedAt,
+                Notes = request.Notes // ✅ Đã thêm Notes vào đây
             };
         }
 
         // ==================== NEW: STOCK REQUEST INTEGRATION ====================
-        
+
         public async Task<PurchaseRequestDto> CreateFromStockRequestAsync(int stockRequestId, int managerId)
         {
             // 1. Get approved stock request
@@ -120,7 +122,7 @@ namespace EVDealer.BE.Services.Procurement
                 DealerId = stockRequest.DealerId,
                 Quantity = stockRequest.Quantity,
                 //Priority = stockRequest.Priority,
-                Status = "Pending",
+                Status = "draft",
                 Notes = $"From Stock Request #{stockRequest.StockRequestId}: {stockRequest.Reason}",
                 //RequestedByUserId = managerId,
                 CreatedAt = DateTime.UtcNow,
@@ -133,39 +135,69 @@ namespace EVDealer.BE.Services.Procurement
 
         public async Task<bool> SendToEVMAsync(int purchaseRequestId, string managerPassword)
         {
-            // TODO: Implement password verification with IAuthService
-            // var managerId = GetCurrentUserId();
-            // var isValid = await _authService.VerifyPasswordAsync(managerId, managerPassword);
-            // if (!isValid) throw new UnauthorizedException("Invalid password");
-
-            // Get purchase request
+            // 1. Tìm đơn hàng
             var request = await _purchaseRequestRepo.GetByIdAsync(purchaseRequestId);
+
             if (request == null)
             {
-                throw new Exception("Purchase request not found");
+                throw new Exception("Không tìm thấy đơn hàng.");
             }
 
-            // Mock: Send to EVM (in real scenario, call EVM API)
-            await Task.Delay(100); // Simulate API call
-            var success = true;
-
-            if (success)
+            if (request.Status != "draft")
             {
-                request.Status = "Sent";
-                //request.SentToEVMDate = DateTime.UtcNow;
-                //request.EVMOrderId = $"EVM-{purchaseRequestId}-{DateTime.UtcNow:yyyyMMddHHmmss}";
-                await _purchaseRequestRepo.UpdateAsync(request);
+                throw new Exception($"Đơn hàng đang ở trạng thái '{request.Status}', không thể gửi lại.");
             }
 
-            return success;
+            // 3. XÁC THỰC MẬT KHẨU (LOGIC QUAN TRỌNG)
+            // ⚠️ TODO: Kết nối với AuthService thực tế của bạn để check pass
+            /* var currentUserId = ...; // Lấy từ UserContext
+               var isValid = await _authService.CheckPasswordAsync(currentUserId, managerPassword);
+               if (!isValid) throw new Exception("Mật khẩu xác nhận không chính xác.");
+            */
+
+            // 👉 Code tạm để test (Chỉ check không được rỗng)
+            if (string.IsNullOrWhiteSpace(managerPassword))
+            {
+                throw new Exception("Vui lòng nhập mật khẩu xác nhận.");
+            }
+            // Nếu muốn test pass cứng: 
+            // if (managerPassword != "123456") throw new Exception("Sai mật khẩu (Demo: 123456)");
+
+            // 4. Cập nhật trạng thái
+            // Đổi sang "Sent" (Đã gửi) hoặc "Processing" (Đang xử lý) tùy quy ước của bạn
+            request.Status = "Pending";
+
+            // (Optional) Lưu thời gian gửi
+            // request.SentDate = DateTime.UtcNow; 
+
+            // 5. Lưu xuống DB
+            await _purchaseRequestRepo.UpdateAsync(request);
+
+            return true;
         }
 
         public async Task<PurchaseRequestDto?> GetByEVMOrderIdAsync(string evmOrderId)
         {
             var requests = await _purchaseRequestRepo.GetAllPendingAsync();
             var request = requests.FirstOrDefault();
-            
+
             return request == null ? null : MapToDto(request);
+        }
+
+        // ✅ FIX: Sử dụng Repository thay vì _context
+        public async Task<PurchaseRequestDto> GetRequestByIdAsync(int requestId, int dealerId)
+        {
+            // 1. Sử dụng Repo có sẵn để lấy request theo ID
+            var request = await _purchaseRequestRepo.GetByIdAsync(requestId);
+
+            // 2. Kiểm tra tồn tại và quyền sở hữu (DealerId)
+            if (request == null || request.DealerId != dealerId)
+            {
+                return null;
+            }
+
+            // 3. Sử dụng hàm MapToDto chung để đồng bộ
+            return MapToDto(request);
         }
     }
 }

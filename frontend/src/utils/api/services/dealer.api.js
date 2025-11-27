@@ -54,23 +54,19 @@ class DealerAPI {
    */
   async getVehicles(params = {}) {
     try {
-      console.log('📤 getVehicles called with params:', params);
+      console.log('📤 getVehicles params:', params);
       const response = await apiClient.get('/Vehicles', { params });
-      console.log('✅ getVehicles response:', response);
-      console.log('✅ getVehicles response.data:', response.data);
-      // Axios response structure: response.data contains the actual data
+      
+      console.log('✅ getVehicles Raw:', response); 
       return {
         success: true,
-        data: response.data || response
+        data: response // 👈 Trả về chính response (chứa items)
       };
     } catch (error) {
       console.error('❌ getVehicles error:', error);
-      console.error('❌ Error response:', error.response);
-      console.error('❌ Error status:', error.response?.status);
-      console.error('❌ Error data:', error.response?.data);
       return {
         success: false,
-        message: error.response?.data?.message || error.message || 'Lỗi khi lấy danh sách xe'
+        message: error.response?.data?.message || 'Lỗi khi lấy danh sách xe'
       };
     }
   }
@@ -138,7 +134,8 @@ class DealerAPI {
   async getVehicleConfigs(vehicleId) {
     try {
       const response = await apiClient.get(`/Vehicles/${vehicleId}/configs`);
-      return { success: true, data: response.data };
+      const data = Array.isArray(response) ? response : (response.data || response);
+      return { success: true, data: data };
     } catch (error) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi lấy cấu hình xe' };
     }
@@ -1035,7 +1032,7 @@ async getCustomerById(id) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi cập nhật báo giá' };
     }
   }
-
+  
   // ==================== PAYMENT MANAGEMENT ====================
 
   /**
@@ -1068,7 +1065,79 @@ async getCustomerById(id) {
       return { success: false, message: error.response?.data?.message || 'Lỗi khi xử lý thanh toán' };
     }
   }
+  // ==================== PROCUREMENT (NHẬP HÀNG TỪ HÃNG) ====================
 
+  /**
+   * Tạo yêu cầu nhập hàng (Procurement Request) gửi đến hãng
+   * POST /api/procurement/requests
+   * Payload: { dealerId, items: [{ vehicleId, quantity, config_id }], note }
+   */
+  async createProcurementRequest(data) {
+    try {
+      // Đảm bảo endpoint đúng như yêu cầu
+      const response = await apiClient.post('/procurement/requests', data);
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('❌ Error creating procurement request:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Lỗi khi gửi yêu cầu nhập hàng' 
+      };
+    }
+  }
+async getPurchaseRequests() {
+    try {
+      console.log("🚀 Calling getPurchaseRequests...");
+      const response = await apiClient.get('/procurement/requests/mine'); 
+      
+      console.log("📥 Raw API Response:", response); // Log để kiểm tra
+
+
+      const data = Array.isArray(response) ? response : (response.data || response);
+
+      return { success: true, data: data };
+    } catch (error) {
+      console.error('❌ Error getting purchase requests:', error);
+      return { success: false, message: error.response?.data?.message || 'Lỗi khi tải danh sách đơn hàng' };
+    }
+  }
+  /**
+   * Lấy chi tiết đơn mua hàng
+   * GET /api/procurement/requests/{id}
+   */
+  async getPurchaseRequestById(id) {
+    try {
+      const response = await apiClient.get(`/procurement/requests/${id}`);
+      
+      // Xử lý an toàn dữ liệu trả về
+      const data = response.data || response;
+      return { success: true, data: data };
+    } catch (error) {
+      console.error('❌ Error getting purchase request detail:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Lỗi khi tải chi tiết đơn hàng' 
+      };
+    }
+  }
+  /**
+   * Gửi Purchase Request tới EVM (Cần mật khẩu xác nhận)
+   * POST /api/procurement/requests/{id}/send-to-evm
+   */
+  async sendPurchaseRequestToEVM(requestId, password) {
+    try {
+      const response = await apiClient.post(`/procurement/requests/${requestId}/send-to-evm`, {
+        managerPassword: password
+      });
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('❌ Error sending to EVM:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.message || 'Mật khẩu sai hoặc lỗi hệ thống' 
+      };
+    }
+  }
   // ==================== REPORTS & ANALYTICS ====================
 
   /**
