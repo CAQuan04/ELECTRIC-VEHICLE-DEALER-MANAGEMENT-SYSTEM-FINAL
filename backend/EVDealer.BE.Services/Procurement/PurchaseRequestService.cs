@@ -199,5 +199,36 @@ namespace EVDealer.BE.Services.Procurement
             // 3. Sử dụng hàm MapToDto chung để đồng bộ
             return MapToDto(request);
         }
+
+        // === PHẦN BỔ SUNG: KHÔNG SỬA CÁI CŨ ===
+        public async Task<PurchaseRequestDto> ProcessApprovalAsync(int requestId, ApproveRequestDto? dto)
+        {
+            var request = await _purchaseRequestRepo.GetByIdAsync(requestId);
+            // Ghi chú: Sử dụng StringComparison.OrdinalIgnoreCase để so sánh không phân biệt hoa thường.
+            if (request == null || !request.Status.Equals("Pending", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Yêu cầu không hợp lệ hoặc đã được xử lý.");
+            }
+
+            // TODO: Bổ sung logic kiểm tra tồn kho tổng trước khi duyệt.
+
+            if (dto == null || dto.ApprovedItems == null || !dto.ApprovedItems.Any())
+            {
+                // Trường hợp 1: Duyệt Toàn bộ (Body rỗng) - Tái sử dụng logic cũ
+                return await ApproveRequestAsync(requestId);
+            }
+            else
+            {
+                // Trường hợp 2: Duyệt Một Phần
+                request.Status = "PartiallyApproved"; // Hoặc "Approved" tùy nghiệp vụ
+                                                      // TODO: Logic xử lý duyệt một phần: Cập nhật số lượng đã duyệt, số lượng còn lại.
+                var updatedRequest = await _purchaseRequestRepo.UpdateAsync(request);
+
+                // TODO: Logic tự động tạo phiếu Distribution dựa trên `dto.ApprovedItems`.
+                // await _distributionRepo.CreateAsync(...);
+
+                return MapToDto(updatedRequest);
+            }
+        }
     }
 }

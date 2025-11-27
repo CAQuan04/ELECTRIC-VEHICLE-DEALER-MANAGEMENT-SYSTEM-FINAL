@@ -11,5 +11,7 @@ namespace EVDealer.BE.DAL.Repositories
         Task<IEnumerable<PurchaseRequest>> GetAllByDealerAsync(int dealerId);
         Task<IEnumerable<PurchaseRequest>> GetAllPendingAsync();
         Task<PurchaseRequest> UpdateAsync(PurchaseRequest request);
+
+
     }
 }

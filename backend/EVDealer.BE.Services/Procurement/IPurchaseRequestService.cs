@@ -16,5 +16,7 @@ namespace EVDealer.BE.Services.Procurement
         // New methods for StockRequest integration
         Task<PurchaseRequestDto> CreateFromStockRequestAsync(int stockRequestId, int managerId);
         Task<PurchaseRequestDto?> GetByEVMOrderIdAsync(string evmOrderId);
+        Task<PurchaseRequestDto> ProcessApprovalAsync(int requestId, ApproveRequestDto? dto);
+
     }
 }
