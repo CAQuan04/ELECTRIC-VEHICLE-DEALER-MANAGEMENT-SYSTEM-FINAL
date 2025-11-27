@@ -86,5 +86,45 @@ namespace EVDealer.BE.API.Controllers.V1
             var distributions = await _inventoryService.GetDistributionSummaryForDealerAsync(dealerId);
             return Ok(distributions);
         }
+        // === PHẦN BỔ SUNG QUAN TRỌNG: ENDPOINT XÁC NHẬN CỦA ĐẠI LÝ ===
+
+        /// <summary>
+        /// Đại lý xác nhận đã nhận hàng từ một phiếu điều phối.
+        /// </summary>
+        // POST /api/v1/distributions/{id}/confirm
+        [HttpPost("{id}/confirm")]
+        [Authorize(Policy = "ConfirmDistributions")] 
+        public async Task<IActionResult> ConfirmReceipt(int id)
+        {
+            // 1. Lấy dealerId của người dùng đang đăng nhập từ Token.
+            var dealerIdClaim = User.FindFirstValue("dealerId");
+            if (dealerIdClaim == null || !int.TryParse(dealerIdClaim, out int dealerId))
+            {
+                return Forbid("Chỉ tài khoản thuộc đại lý mới có thể thực hiện hành động này.");
+            }
+
+            try
+            {
+                // 2. Gọi phương thức Service đã có sẵn, truyền vào cả ID phiếu và ID đại lý để xác thực.
+                var success = await _inventoryService.ConfirmDistributionReceiptAsync(id, dealerId);
+
+                // 3. Xử lý kết quả trả về từ Service.
+                if (!success)
+                {
+                    // Lỗi này có thể do: phiếu không tồn tại, không phải gửi cho đại lý này,
+                    // đã được xác nhận trước đó, hoặc kho tổng hết hàng.
+                    return BadRequest(new { message = "Xác nhận không thành công. Phiếu không hợp lệ, đã được xử lý hoặc kho nguồn không đủ hàng." });
+                }
+
+                // 4. Nếu thành công.
+                return Ok(new { message = "Xác nhận nhận hàng thành công. Tồn kho đã được cập nhật." });
+            }
+            catch (System.Exception ex)
+            {
+                // Bắt các lỗi hệ thống khác nếu có
+                return StatusCode(500, new { message = "Đã có lỗi xảy ra trong quá trình xử lý.", error = ex.Message });
+            }
+        }
+
     }
 }
