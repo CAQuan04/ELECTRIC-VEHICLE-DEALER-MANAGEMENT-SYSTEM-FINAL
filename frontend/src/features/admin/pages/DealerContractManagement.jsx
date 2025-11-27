@@ -113,7 +113,7 @@ const DealerContractManagement = () => {
 
   // --- API CALLS ---
 
-  // Fetch list of dealers
+  // Fetch list of dealers  
   const fetchDealers = async () => {
     try {
       const response = await apiClient.get('/Dealers/basic');
@@ -130,7 +130,14 @@ const DealerContractManagement = () => {
   const fetchContracts = async (dealerId) => {
     try {
       const response = await apiClient.get(`/manage/dealers/${dealerId}/contracts`);
-      setContracts(response.data || []);
+      // Map API response to match UI expectations
+      const mappedContracts = (response.data || []).map(contract => ({
+        ...contract,
+        documentLink: contract.contractFileUrl ? `${apiClient.defaults.baseURL}${contract.contractFileUrl}` : null,
+        fileName: contract.contractFileUrl ? contract.contractFileUrl.split('/').pop() : null,
+        contractNumber: contract.contractNumber || `HD-${contract.contractId}`
+      }));
+      setContracts(mappedContracts);
     } catch (error) {
       console.error("Lỗi khi tải hợp đồng:", error);
       setContracts([]);
@@ -245,6 +252,32 @@ const DealerContractManagement = () => {
     } finally {
       setUploadingFile(false);
     }
+  };
+
+  // Add download handler after handleFileChange
+  const handleDownloadContract = (contractFileUrl, fileName) => {
+    if (!contractFileUrl) {
+      alert("Không có file để tải!");
+      return;
+    }
+    
+    // Create full URL - remove '/api' prefix since contractFileUrl already has it
+    const baseURL = apiClient.defaults.baseURL.replace('/api', '');
+    const fullUrl = contractFileUrl.startsWith('http') 
+      ? contractFileUrl 
+      : `${baseURL}${contractFileUrl}`;
+    
+    console.log("Downloading from:", fullUrl); // Debug log
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a');
+    link.href = fullUrl;
+    link.download = fileName || 'hop-dong.pdf';
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   // --- LOGIC 4: SAVE CONTRACT ---
@@ -525,12 +558,14 @@ const DealerContractManagement = () => {
                                     {sortedContracts.length > 0 ? sortedContracts.map((c) => (
                                         <tr key={c.contractId} className="hover:bg-cyan-50/30 dark:hover:bg-gray-700/30 transition-colors">
                                             <td className="px-8 py-6">
-                                                <div className="font-bold text-gray-900 dark:text-white">{c.contractNumber || `#${c.contractId}`}</div>
-                                                {c.documentLink && (
-                                                    <a href={c.documentLink} target="_blank" rel="noreferrer" download={c.fileName || "hop-dong.pdf"}
-                                                       className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 hover:underline mt-1">
-                                                        <FileText className="w-3 h-3" /> {c.fileName || "Xem file"}
-                                                    </a>
+                                                <div className="font-bold text-gray-900 dark:text-white">
+                                                  {c.contractNumber || `#${c.contractId}`}
+                                                </div>
+                                                {c.fileName && (
+                                                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                    <FileText className="w-3 h-3 inline mr-1" />
+                                                    {c.fileName}
+                                                  </div>
                                                 )}
                                             </td>
                                             <td className="px-8 py-6 text-emerald-600 dark:text-emerald-400 font-medium">
@@ -546,17 +581,17 @@ const DealerContractManagement = () => {
                                                 <Badge variant="success">{c.status}</Badge>
                                             </td>
                                             <td className="px-8 py-6">
-                                                {c.documentLink ? (
-                                                    <Button 
-                                                        variant="link" 
-                                                        size="sm" 
-                                                        className="text-cyan-600 dark:text-cyan-400 hover:underline"
-                                                        onClick={() => window.open(c.documentLink, "_blank")}
-                                                    >
-                                                        <Download className="w-4 h-4 mr-2" /> Tải xuống
-                                                    </Button>
+                                                {c.contractFileUrl ? (
+                                                  <Button 
+                                                    variant="link" 
+                                                    size="sm" 
+                                                    className="text-cyan-600 dark:text-cyan-400 hover:underline"
+                                                    onClick={() => handleDownloadContract(c.contractFileUrl, c.fileName)}
+                                                  >
+                                                    <Download className="w-4 h-4 mr-2" /> Tải xuống
+                                                  </Button>
                                                 ) : (
-                                                    <span className="text-gray-500 text-sm">Chưa có file</span>
+                                                  <span className="text-gray-500 text-sm">Chưa có file</span>
                                                 )}
                                             </td>
                                         </tr>
