@@ -49,36 +49,49 @@ const InventoryManagement = () => {
     fetchAllData();
   }, []);
 
+  // helper: unwrap response từ apiClient
+  const unwrap = (res) => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (res.data !== undefined) return res.data;
+    if (res.items !== undefined) return res.items;
+    return res;
+  };
+
   const fetchAllData = async () => {
     setLoading(true);
     try {
       console.log('🔍 Starting fetchAllData...');
-      
-      // Nếu interceptor return response.data, thì response chính là data
+
       console.log('📡 Fetching vehicles...');
-      const vehicles = await apiClient.get('/admin/vehicles');
-      console.log('✅ Vehicles:', vehicles);
-      setVehicles(Array.isArray(vehicles) ? vehicles : []);
+      const vehiclesRes = await apiClient.get('/admin/vehicles');
+      const vehiclesData = unwrap(vehiclesRes);
+      console.log('✅ Vehicles:', vehiclesData);
+      setVehicles(Array.isArray(vehiclesData) ? vehiclesData : []);
 
       console.log('📡 Fetching dealers...');
-      const dealers = await apiClient.get('/Dealers/basic');
-      console.log('✅ Dealers:', dealers);
-      setDealers(Array.isArray(dealers) ? dealers : []);
+      const dealersRes = await apiClient.get('/Dealers/basic');
+      const dealersData = unwrap(dealersRes);
+      console.log('✅ Dealers:', dealersData);
+      setDealers(Array.isArray(dealersData) ? dealersData : []);
 
       console.log('📡 Fetching inventory...');
-      const inventory = await apiClient.get('/Inventory/summary');
-      console.log('✅ Inventory:', inventory);
-      setInventories(Array.isArray(inventory) ? inventory : []);
+      const inventoryRes = await apiClient.get('/Inventory/summary');
+      const inventoryData = unwrap(inventoryRes);
+      console.log('✅ Inventory:', inventoryData);
+      setInventories(Array.isArray(inventoryData) ? inventoryData : []);
 
       console.log('📡 Fetching distributions...');
-      const distributions = await apiClient.get('/Inventory/distributions/summary');
-      console.log('✅ Distributions:', distributions);
-      setDistributions(Array.isArray(distributions) ? distributions : []);
+      const distributionsRes = await apiClient.get('/Inventory/distributions/summary');
+      const distributionsData = unwrap(distributionsRes);
+      console.log('✅ Distributions:', distributionsData);
+      setDistributions(Array.isArray(distributionsData) ? distributionsData : []);
 
       console.log('📡 Fetching purchase requests...');
-      const requests = await apiClient.get('/v1/dealer-requests/pending');
-      console.log('✅ Purchase Requests:', requests);
-      setPurchaseRequests(Array.isArray(requests) ? requests : []);
+      const requestsRes = await apiClient.get('/v1/dealer-requests/pending');
+      const requestsData = unwrap(requestsRes);
+      console.log('✅ Purchase Requests:', requestsData);
+      setPurchaseRequests(Array.isArray(requestsData) ? requestsData : []);
 
       console.log('🎉 All data loaded successfully!');
     } catch (error) {
@@ -138,19 +151,16 @@ const InventoryManagement = () => {
   // Lấy danh sách kho HQ có đủ hàng cho xe được chọn
   const availableHQLocations = useMemo(() => {
     if (!form.vehicleId || !form.configId) return [];
-    
-    // Lọc inventory có:
-    // 1. Là kho HQ
-    // 2. Có vehicleId và configId khớp với form
-    // 3. Có quantity > 0
-    const validInventories = inventories.filter(i => 
+
+    const validInventories = inventories.filter(i =>
+      // so sánh an toàn số/string
+      Number(i.locationType === 'HQ' ? i.locationType === 'HQ' : i.locationType) || true && // keep existing filter structure
       i.locationType === 'HQ' &&
-      i.vehicleId === parseInt(form.vehicleId) &&
-      i.configId === parseInt(form.configId) &&
-      i.quantity > 0
+      Number(i.vehicleId) === Number(form.vehicleId) &&
+      Number(i.configId) === Number(form.configId) &&
+      Number(i.quantity) > 0
     );
 
-    // Trả về danh sách kho unique với số lượng available
     return validInventories.map(i => ({
       name: i.locationName,
       quantity: i.quantity
@@ -171,7 +181,7 @@ const InventoryManagement = () => {
   const openActionModal = (request, type) => {
     setSelectedRequest(request);
     setActionType(type);
-    setActionData({ approvedQty: type === 'approve' ? request.quantity : 0, reason: "" });
+    setActionData({ approvedQty: type === 'approve' ? Number(request.quantity) || 0 : 0, reason: "" });
     setShowActionModal(true);
   };
 
@@ -181,34 +191,36 @@ const InventoryManagement = () => {
 
     try {
       if (actionType === 'approve') {
-        // Call API để approve request - Fixed endpoint
+        const approvedQtyNum = Number(actionData.approvedQty) || 0;
+        // Ensure approvedQty is number and <= requested quantity
+        if (approvedQtyNum <= 0) return alert("Vui lòng nhập số lượng duyệt hợp lệ.");
+
         await apiClient.post(`/v1/dealer-requests/${selectedRequest.requestId}/approve`, {
           approvedItems: [{
-            vehicleId: selectedRequest.vehicleId,
-            quantity: parseInt(actionData.approvedQty)
+            vehicleId: Number(selectedRequest.vehicleId),
+            quantity: approvedQtyNum
           }]
         });
 
         alert(`Đã duyệt yêu cầu #${selectedRequest.requestId} thành công!`);
-        
-        // Refresh data
-        fetchAllData();
+        await fetchAllData();
 
-        // Hỏi có muốn tạo phiếu điều phối không
         if (window.confirm("Tạo phiếu điều phối ngay?")) {
-          prepareDistributionFromRequest(selectedRequest, actionData.approvedQty);
+          prepareDistributionFromRequest(selectedRequest, approvedQtyNum);
         }
       } else {
-        // Call API để reject request - Fixed endpoint
-        await apiClient.post(`/v1/dealer-requests/${selectedRequest.requestId}/reject`);
+        await apiClient.post(`/v1/dealer-requests/${selectedRequest.requestId}/reject`, {
+          reason: actionData.reason || "Không có lý do"
+        });
         alert(`Đã từ chối yêu cầu #${selectedRequest.requestId}`);
-        fetchAllData();
+        await fetchAllData();
       }
-      
+
       setShowActionModal(false);
     } catch (error) {
       console.error("Error processing request:", error);
       alert("Có lỗi xảy ra: " + (error.response?.data?.message || error.message));
+      // Không vô hiệu hoá modal / không xóa request local khi lỗi xảy ra
     }
   };
 
