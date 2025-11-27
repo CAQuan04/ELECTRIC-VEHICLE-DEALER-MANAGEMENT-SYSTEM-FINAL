@@ -1,36 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
-import { dealerAPI } from '@utils/api/services';
+import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { notifications } from '@utils/notifications';
-import { 
-  PageContainer, 
-  PageHeader, 
+import {
+  PageContainer,
+  PageHeader,
   Card,
-  Button, 
-  Badge 
-} from '../../components';const VehicleDetail = () => {
-  const { vehicleId } = useParams();
-  const navigate = useNavigate();
-  const { startLoading, stopLoading } = usePageLoading();
-  const [vehicle, setVehicle] = useState(null);
+  Button,
+  Badge
+} from '../../components';
 
-  useEffect(() => {
-    loadVehicleDetail();
-  }, [vehicleId]);
+const VehicleDetail = () => {
+  const { vehicleId } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
+  const { startLoading, stopLoading } = usePageLoading();
+  const [vehicle, setVehicle] = useState(null);
+
+  useEffect(() => {
+    loadVehicleDetail();
+  }, [vehicleId]);
 
   const loadVehicleDetail = async () => {
     try {
       startLoading('Đang tải thông tin xe...');
-      
+
       const result = await dealerAPI.getVehicleById(vehicleId);
-      
+
       if (result.success) {
         const data = result.data;
         // Transform backend data to match component format
         const transformedVehicle = {
           id: data.vehicleId || data.id,
           model: data.name || data.model,
+          // --- THÊM TRƯỜNG IMAGE URL TẠI ĐÂY ---
+          image: data.imageUrl || data.image || '', 
           price: data.basePrice || data.price || 0,
           availability: data.totalQuantity > 0 ? 'Có sẵn' : 'Hết hàng',
           stock: data.totalQuantity || 0,
@@ -54,6 +61,8 @@ import {
         const mockVehicle = {
           id: vehicleId,
           model: 'Model 3',
+          // --- MOCK IMAGE URL ---
+          image: 'https://images.unsplash.com/photo-1560958089-b8a1929cea89?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
           price: 1200000000,
           availability: 'Có sẵn',
           stock: 5,
@@ -78,40 +87,60 @@ import {
     } finally {
       stopLoading();
     }
-  };  if (!vehicle) return null;
+  };
 
-  const formatPrice = (price) => {
-    return `${(price / 1000000000).toFixed(1)} tỷ VNĐ`;
-  };
+  if (!vehicle) return null;
 
-  return (
-    <PageContainer>
-      <PageHeader
-        title={`🚗 ${vehicle.model}`}
-        subtitle="Thông tin chi tiết xe"
-        actions={
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            ← Quay lại
-          </Button>
-        }
-      />
+  const formatPrice = (price) => {
+    return `${(price / 1000000000).toFixed(1)} tỷ VNĐ`;
+  };
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Vehicle Image */}
-        <Card className="p-0 overflow-hidden">
-          <div className="aspect-video bg-gradient-to-br from-gray-700 to-gray-800 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-9xl">
-            🚗
-          </div>
-        </Card>
+  return (
+    <PageContainer>
+      <PageHeader
+        title={`🚗 ${vehicle.model}`}
+        subtitle="Thông tin chi tiết xe"
+        actions={
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            ← Quay lại
+          </Button>
+        }
+      />
 
-        {/* Vehicle Info */}
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+        
+        {/* Left Column: Image */}
+        <div className="lg:col-span-2">
+          <Card className="p-0 overflow-hidden h-full">
+            {vehicle.image ? (
+              <img 
+                src={vehicle.image} 
+                alt={vehicle.model} 
+                className="w-full h-full object-cover min-h-[300px] lg:min-h-[500px]"
+                onError={(e) => {
+                  e.target.onerror = null; 
+                  e.target.src = ''; // Clear src để hiển thị fallback nếu ảnh lỗi
+                  // Logic ẩn img và hiện placeholder có thể xử lý phức tạp hơn nếu cần
+                }}
+              />
+            ) : (
+              <div className="w-full h-full min-h-[300px] lg:min-h-[500px] bg-gradient-to-br from-gray-700 to-gray-800 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center text-9xl">
+                🚗
+              </div>
+            )}
+          </Card>
+        </div>
+
+        {/* Right Column: Info & Actions */}
         <div className="space-y-6">
+          {/* Price & Stock */}
           <Card>
             <h2 className="text-3xl font-bold dark:text-white text-gray-900 mb-2">{vehicle.model}</h2>
             <p className="text-emerald-400 text-2xl font-bold mb-4">
               {formatPrice(vehicle.price)}
             </p>
-            
+
             <div className="flex items-center gap-4">
               <Badge variant={vehicle.availability === 'Có sẵn' ? 'success' : 'warning'}>
                 {vehicle.availability}
@@ -154,23 +183,25 @@ import {
                 </li>
               ))}
             </ul>
-          </Card>          {/* Actions (Giữ nguyên, giả sử Button đã được theme) */}
-          <div className="flex gap-4">
-            <Button variant="gradient" className="flex-1">
-              📋 Tạo báo giá
-            </Button>
-  t         <Button 
-              variant="secondary" 
-              className="flex-1"
-              onClick={() => navigate('/dealer/vehicles/compare')}
-            >
-              ⚖️ So sánh xe
-            </Button>
-          </div>
-        </div>
-      </div>
-    </PageContainer>
-  );
+          </Card>
+
+          {/* Bottom Actions */}
+          <div className="flex gap-4">
+            <Button variant="gradient" className="flex-1">
+              📋 Tạo báo giá
+            </Button>
+            <Button
+              variant="secondary"
+              className="flex-1"
+              onClick={() => navigate(dealerId ? `/${dealerId}/dealer/vehicles/compare` : '/dealer/vehicles/compare')}
+            >
+              ⚖️ So sánh xe
+            </Button>
+          </div>
+        </div>
+      </div>
+    </PageContainer>
+  );
 };
 
 export default VehicleDetail;

@@ -634,7 +634,7 @@ const TestDriveForm = () => {
         </div>
 
         <ActionBar align="right" className="mt-8 mb-12">
-          <Button variant="ghost" onClick={() => navigate('/dealer/test-drives')} disabled={isLoading}>
+          <Button variant="ghost" onClick={() => navigate(dealerId ? `/${dealerId}/dealer/test-drives` : '/dealer/test-drives')} disabled={isLoading}>
             Hủy
           </Button>
           <Button type="submit" variant="gradient" disabled={isLoading}>

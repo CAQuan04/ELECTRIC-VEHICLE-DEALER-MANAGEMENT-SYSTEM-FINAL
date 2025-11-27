@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@utils/api';
 
 const TestDriveCalendarDetail = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { date } = useParams(); // Format: YYYY-MM-DD
   const { startLoading, stopLoading } = usePageLoading();
   
@@ -142,7 +145,7 @@ const TestDriveCalendarDetail = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-gray-900 dark:text-gray-100">
       <button 
         className="mb-4 font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition-colors duration-200" 
-        onClick={() => navigate('/dealer/test-drive')}
+        onClick={() => navigate(dealerId ? `/${dealerId}/dealer/test-drives` : '/dealer/test-drives')}
       >
         ← Quay lại danh sách
       </button>
@@ -154,7 +157,7 @@ const TestDriveCalendarDetail = () => {
         </div>
         <button 
           className="px-5 py-2.5 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5" 
-          onClick={() => navigate('/dealer/test-drives/new')}
+          onClick={() => navigate(dealerId ? `/${dealerId}/dealer/test-drives/new` : '/dealer/test-drives/new')}
         >
           + Đăng ký mới
         </button>

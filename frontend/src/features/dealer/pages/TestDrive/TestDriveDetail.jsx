@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { AuthService } from '@utils';
+import { useAuth } from '@/context/AuthContext';
 import { notifications } from '@utils/notifications';
 import { 
   PageContainer, 
@@ -17,6 +18,8 @@ import { Car, Calendar, User, Phone, Mail, MessageSquare } from 'lucide-react';
 
 const TestDriveDetail = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { id } = useParams();
   console.log('🆔 TestDriveDetail - id from useParams:', id);
   console.log('🌐 TestDriveDetail - current URL:', window.location.href);
@@ -87,13 +90,13 @@ const TestDriveDetail = () => {
         console.error('❌ Failed to load test drive:', result.message);
         notifications.error('Lỗi', 'Không thể tải thông tin lịch lái thử');
         const currentUser = AuthService.getCurrentUser();
-        const dealerId = currentUser?.dealerId;
-        navigate(dealerId ? `/${dealerId}/dealer/test-drives` : '/dealer/test-drives');
+        const resolvedDealerId = currentUser?.dealerId || dealerId;
+        navigate(resolvedDealerId ? `/${resolvedDealerId}/dealer/test-drives` : '/dealer/test-drives');
       }
     } catch (error) {
       console.error('Error loading test drive:', error);
       notifications.error('Lỗi', 'Có lỗi xảy ra khi tải dữ liệu');
-      navigate('/dealer/test-drives');
+      navigate(dealerId ? `/${dealerId}/dealer/test-drives` : '/dealer/test-drives');
     } finally {
       setIsLoading(false);
     }

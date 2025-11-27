@@ -3,11 +3,13 @@ using EVDealer.BE.Services.Procurement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace EVDealer.BE.API.Controllers
 {
+    // Đảm bảo Route này khớp với dealer.api.js ở Frontend
     [Route("api/procurement/requests")]
     [ApiController]
     [Authorize]
@@ -20,16 +22,60 @@ namespace EVDealer.BE.API.Controllers
             _requestService = requestService;
         }
 
+        // =========================================================================
+        // 1. CREATE (Đã sửa để nhận JSON mảng items & config_id)
+        // =========================================================================
         [HttpPost]
         [Authorize(Roles = "DealerManager,DealerStaff")]
-        public async Task<IActionResult> CreatePurchaseRequest([FromBody] PurchaseRequestCreateDto createDto)
+        public async Task<IActionResult> CreatePurchaseRequest([FromBody] BulkPurchaseRequestInputDto input)
         {
-            var dealerId = GetDealerIdFromClaims();
-            if (dealerId == null) return Unauthorized();
+            try
+            {
+                // Bảo mật: Lấy DealerId thực tế từ Token người đăng nhập
+                var dealerIdFromToken = GetDealerIdFromClaims();
+                if (dealerIdFromToken == null) return Unauthorized("Không tìm thấy thông tin đại lý trong token.");
 
-            var result = await _requestService.CreateRequestAsync(createDto, dealerId.Value);
-            return CreatedAtAction(nameof(GetRequestsForDealer), new { }, result);
+                // (Tùy chọn) Validate dealerId gửi lên có khớp token không
+                if (input.DealerId != 0 && input.DealerId != dealerIdFromToken)
+                {
+                    // Có thể return BadRequest hoặc chỉ cảnh báo log. 
+                    // Ở đây ta ưu tiên dùng ID từ Token để đảm bảo an toàn.
+                }
+
+                var createdResults = new List<PurchaseRequestDto>();
+
+                // Xử lý vòng lặp: Tách gói items thành từng request lẻ để lưu xuống DB
+                foreach (var item in input.Items)
+                {
+                    var serviceDto = new PurchaseRequestCreateDto
+                    {
+                        VehicleId = item.VehicleId,
+                        ConfigId = item.ConfigId, // Đã được map từ config_id
+                        Quantity = item.Quantity,
+                        Notes = input.Note // Lưu ghi chú chung vào từng đơn (hoặc xử lý khác tùy logic)
+                    };
+
+                    // Gọi Service tạo đơn lẻ
+                    var result = await _requestService.CreateRequestAsync(serviceDto, dealerIdFromToken.Value);
+                    createdResults.Add(result);
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Đã tạo thành công {createdResults.Count} yêu cầu nhập hàng.",
+                    data = createdResults
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
         }
+
+        // =========================================================================
+        // CÁC METHOD KHÁC (GIỮ NGUYÊN)
+        // =========================================================================
 
         [HttpGet("mine")]
         [Authorize(Roles = "DealerManager,DealerStaff")]
@@ -49,7 +95,7 @@ namespace EVDealer.BE.API.Controllers
             var result = await _requestService.GetPendingRequestsAsync();
             return Ok(result);
         }
-        
+
         [HttpPut("{requestId}/approve")]
         [Authorize(Roles = "EVMStaff,Admin")]
         public async Task<IActionResult> ApproveRequest(int requestId)
@@ -64,7 +110,7 @@ namespace EVDealer.BE.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        
+
         [HttpPut("{requestId}/reject")]
         [Authorize(Roles = "EVMStaff,Admin")]
         public async Task<IActionResult> RejectRequest(int requestId)
@@ -99,25 +145,52 @@ namespace EVDealer.BE.API.Controllers
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
-
         /// <summary>
-        /// Gửi Purchase Request tới EVM
-        /// Auth: DealerManager (requires password confirmation)
+        /// Lấy chi tiết yêu cầu mua hàng theo ID
+        /// GET /api/procurement/requests/{id}
+        /// </summary>
+        [HttpGet("{id}")]
+        [Authorize(Roles = "DealerManager,DealerStaff")]
+        public async Task<IActionResult> GetPurchaseRequestById(int id)
+        {
+            var dealerId = GetDealerIdFromClaims();
+            if (dealerId == null) return Unauthorized();
+            var request = await _requestService.GetRequestByIdAsync(id, dealerId.Value);
+
+            if (request == null) return NotFound(new { message = "Không tìm thấy yêu cầu hoặc bạn không có quyền truy cập." });
+
+            return Ok(request);
+        }
+        /// <summary>
+        /// Gửi đơn hàng đến EVM (Yêu cầu mật khẩu xác nhận)
+        /// POST: api/procurement/requests/{id}/send-to-evm
         /// </summary>
         [HttpPost("{purchaseRequestId}/send-to-evm")]
-        [Authorize(Roles = "DealerManager,Admin")]
+        [Authorize(Roles = "DealerManager,Admin")] // Chỉ Manager mới được gửi
         public async Task<IActionResult> SendToEVM(int purchaseRequestId, [FromBody] SendToEVMDto dto)
         {
             try
             {
+                // Gọi Service xử lý
                 var success = await _requestService.SendToEVMAsync(purchaseRequestId, dto.ManagerPassword);
-                return Ok(new { success = true, message = "Purchase request sent to EVM successfully" });
+
+                if (success)
+                {
+                    return Ok(new { success = true, message = "Đơn hàng đã được gửi đến EVM thành công." });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = "Gửi thất bại." });
+                }
             }
             catch (Exception ex)
             {
+                // Trả về lỗi (ví dụ: Sai mật khẩu, Đơn hàng không tồn tại...)
                 return BadRequest(new { success = false, message = ex.Message });
             }
         }
+
+        // --- HELPER METHODS ---
 
         private int? GetDealerIdFromClaims()
         {
@@ -138,14 +211,6 @@ namespace EVDealer.BE.API.Controllers
             }
             return userId;
         }
-    }
-}
 
-// DTO for SendToEVM endpoint
-namespace EVDealer.BE.Common.DTOs
-{
-    public class SendToEVMDto
-    {
-        public string ManagerPassword { get; set; } = null!;
     }
 }

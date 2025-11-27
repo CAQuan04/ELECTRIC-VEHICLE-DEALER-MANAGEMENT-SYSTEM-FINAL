@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 // SỬA: Thêm useLocation (hoặc useSearchParams)
 import { useNavigate, useSearchParams } from 'react-router-dom'; 
+import { useAuth } from '@/context/AuthContext';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { notifications } from '@utils/notifications';
 
@@ -22,6 +23,8 @@ import { ShoppingCart } from 'lucide-react';
 
 const CreateOrder = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   // SỬA: Lấy quotationId từ URL ?quotationId=...
   const [searchParams] = useSearchParams();
   const quotationId = searchParams.get('quotationId');
@@ -44,7 +47,7 @@ const CreateOrder = () => {
   useEffect(() => {
     if (!quotationId) {
       notifications.error('Lỗi', 'Không tìm thấy báo giá. Vui lòng quay lại danh sách.');
-      navigate('/dealer/quotations');
+      navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
       return;
     }
 
@@ -65,7 +68,7 @@ const CreateOrder = () => {
       } catch (error) {
         console.error('Error loading quotation:', error);
         notifications.error('Lỗi', error.message);
-        navigate('/dealer/quotations');
+        navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
       } finally {
         setIsLoading(false);
       }
@@ -103,7 +106,7 @@ const CreateOrder = () => {
       
       if (result.success) {
         notifications.success('Thành công', 'Tạo đơn hàng thành công!');
-        navigate('/dealer/orders');
+        navigate(dealerId ? `/${dealerId}/dealer/orders` : '/dealer/orders');
       } else {
         throw new Error(result.message || 'Lỗi không xác định');
       }
@@ -137,7 +140,7 @@ const CreateOrder = () => {
         subtitle={`Tạo đơn hàng từ Báo giá #${quotationId}`}
         icon={<ShoppingCart className="w-16 h-16" />}
         showBackButton
-        onBack={() => navigate('/dealer/quotations')}
+        onBack={() => navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations')}
       />
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -263,7 +266,7 @@ const CreateOrder = () => {
           <Button
             type="button"
             variant="ghost"
-            onClick={() => navigate('/dealer/quotations')}
+            onClick={() => navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations')}
             disabled={isLoading}
           >
             Hủy

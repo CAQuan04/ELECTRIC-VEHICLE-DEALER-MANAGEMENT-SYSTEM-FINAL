@@ -413,7 +413,7 @@ const CreateQuotation = () => {
 
       if (result.success) {
         notifications.success('Thành công', isEditMode ? 'Cập nhật thành công!' : 'Tạo báo giá thành công!');
-        navigate('/dealer/quotations');
+        navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations');
       } else {
         notifications.error('Lỗi', result.message || 'Lỗi không xác định');
       }
@@ -457,7 +457,7 @@ const CreateQuotation = () => {
         subtitle={isEditMode ? `Đang chỉnh sửa Báo giá ID: ${quotationId}` : 'Tạo báo giá chi tiết cho khách hàng'}
         icon={isEditMode ? <Edit className="w-16 h-16" /> : <FileText className="w-16 h-16" />}
         showBackButton
-        onBack={() => navigate('/dealer/quotations')}
+        onBack={() => navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations')}
       />
 
       <form onSubmit={handleSubmit} className="mt-8">
@@ -976,10 +976,10 @@ const CreateQuotation = () => {
               Gửi PDF cho khách hàng ngay
             </label>
           </div>
-          <Button
+            <Button
             type="button"
             variant="ghost"
-            onClick={() => navigate('/dealer/quotations')}
+            onClick={() => navigate(dealerId ? `/${dealerId}/dealer/quotations` : '/dealer/quotations')}
             disabled={isLoading}
           >
             Hủy

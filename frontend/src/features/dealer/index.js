@@ -47,6 +47,7 @@ export { default as PaymentForm } from './pages/Sales/PaymentForm';
 // Purchase Management
 export { default as PurchaseRequestList } from './pages/Purchase/PurchaseRequestList';
 export { default as CreatePurchaseRequest } from './pages/Purchase/CreatePurchaseRequest';
+export { default as PurchaseRequestDetail } from './pages/Purchase/PurchaseRequestDetail';
 
 // Reports
 export { default as SalesPerformanceReport } from './pages/Reports/SalesPerformanceReport';

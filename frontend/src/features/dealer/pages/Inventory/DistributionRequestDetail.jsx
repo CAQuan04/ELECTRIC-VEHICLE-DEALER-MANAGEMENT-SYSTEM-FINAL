@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
 import { usePageLoading } from '@modules/loading';
 import { dealerAPI } from '@/utils/api/services/dealer.api.js';
 import { FileText, Clock, User, Package, CheckCircle, XCircle } from 'lucide-react';
@@ -19,14 +20,15 @@ import PageContainer from '../../components/layout/PageContainer';
 const DistributionRequestDetail = () => {
   const { requestId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const dealerId = user?.dealerId;
   const { startLoading, stopLoading } = usePageLoading();
   const [request, setRequest] = useState(null);
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
-
-  useEffect(() => {
+  useEffect(() => {if (dealerId) {
     loadRequestDetail();
-  }, [requestId]);
+  }}, [dealerId, requestId]);
 
   const loadRequestDetail = async () => {
     try {
@@ -42,7 +44,7 @@ const DistributionRequestDetail = () => {
     } catch (error) {
       console.error('Error loading request detail:', error);
       notifications.error('Lỗi', error.message || 'Không thể tải chi tiết yêu cầu');
-      navigate('/dealer/inventory/distributions');
+      navigate(dealerId ? `/${dealerId}/dealer/inventory/distributions` : '/dealer/inventory/distributions');
     } finally {
       stopLoading();
     }
@@ -64,7 +66,7 @@ const DistributionRequestDetail = () => {
       notifications.success('Đã duyệt', result.message || 'Yêu cầu đã được duyệt. Hãy tạo Purchase Request để gửi EVM.');
       
       // Chuyển đến trang tạo Purchase Request với thông tin được điền sẵn
-      navigate('/dealer/purchase-requests/create', {
+      navigate(dealerId ? `/${dealerId}/dealer/purchase-requests/create` : '/dealer/purchase-requests/create', {
         state: {
           prefilledData: {
             vehicleName: request.vehicleName,
@@ -99,7 +101,7 @@ const DistributionRequestDetail = () => {
       }
       
       notifications.success('Đã từ chối', result.message || 'Yêu cầu đã bị từ chối');
-      navigate('/dealer/inventory/distributions');
+      navigate(dealerId ? `/${dealerId}/dealer/inventory/distributions` : '/dealer/inventory/distributions');
     } catch (error) {
       notifications.error('Lỗi', error.message || 'Không thể từ chối yêu cầu');
     } finally {
@@ -146,7 +148,7 @@ const DistributionRequestDetail = () => {
       <DetailHeader
         title={`Yêu cầu nhập hàng #SR-${String(request.id).padStart(4, '0')}`}
         subtitle="Chi tiết yêu cầu nhập xe từ Staff"
-        onBack={() => navigate('/dealer/inventory/distributions')}
+        onBack={() => navigate(`/${dealerId}/dealer/inventory/distributions`)}
       />
 
       {/* Action Buttons */}

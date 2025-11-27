@@ -11,10 +11,10 @@ namespace EVDealer.BE.Services.Procurement
         Task<IEnumerable<PurchaseRequestDto>> GetPendingRequestsAsync();
         Task<PurchaseRequestDto> ApproveRequestAsync(int requestId);
         Task<PurchaseRequestDto> RejectRequestAsync(int requestId);
-        
+        Task<PurchaseRequestDto> GetRequestByIdAsync(int requestId, int dealerId);
+        Task<bool> SendToEVMAsync(int purchaseRequestId, string managerPassword);
         // New methods for StockRequest integration
         Task<PurchaseRequestDto> CreateFromStockRequestAsync(int stockRequestId, int managerId);
-        Task<bool> SendToEVMAsync(int purchaseRequestId, string managerPassword);
         Task<PurchaseRequestDto?> GetByEVMOrderIdAsync(string evmOrderId);
     }
 }
