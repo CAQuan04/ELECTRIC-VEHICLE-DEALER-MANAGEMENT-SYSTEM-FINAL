@@ -203,28 +203,27 @@ const UserManagement = () => {
               </div>
               
               {/* Search */}
-              <div className="h-full flex items-center flex-[2] px-4 md:px-6 border-r border-slate-700/60 min-w-[280px] group cursor-text hover:bg-[#1a2b44]/20 transition">
-                  <span className="text-slate-300 font-semibold text-base mr-3 group-hover:text-white transition hidden sm:block">Search</span>
+              <div className="h-full flex items-center flex-[2] px-4 md:px-6 border-r border-gray-700/60 min-w-[280px] group cursor-text hover:bg-[#1a2b44]/20 transition">
+                  <span className="text-gray-300 font-semibold text-base mr-3 group-hover:text-white transition hidden sm:block">Search</span>
                   <div className="relative flex-1">
-                     <div className="flex items-center bg-[#0b1622] border border-slate-600 rounded-xl px-3 py-2 group-focus-within:border-blue-500 transition">
+                     <div className="flex items-center bg-[#1e293b] border border-gray-600 rounded-xl px-3 py-2 group-focus-within:border-blue-500 transition">
                         <input 
                           type="text" 
-                          placeholder="Tên, email, SĐT..." 
+                          placeholder="Tìm tên, địa chỉ, SĐT..." 
                           value={filter.searchTerm} 
                           onChange={(e) => setFilter({...filter, searchTerm: e.target.value})} 
-                          className="w-full bg-transparent border-none p-0 text-white placeholder:text-slate-500 focus:ring-0 text-base font-medium" 
+                          className="w-full bg-transparent border-none p-0 text-white placeholder:text-gray-500 focus:ring-0 text-base font-medium" 
                         />
                         {filter.searchTerm ? ( 
-                          <button onClick={() => setFilter({...filter, searchTerm: ''})} className="text-slate-400 hover:text-white ml-2">
+                          <button onClick={() => setFilter({...filter, searchTerm: ''})} className="text-gray-400 hover:text-white ml-2">
                             <X className="w-5 h-5" />
                           </button> 
                         ) : (
-                          <ChevronDown className="w-5 h-5 text-slate-500 ml-2" />
+                          <Search className="w-5 h-5 text-gray-500 ml-2" />
                         )}
                      </div>
                   </div>
               </div>
-              
               {/* Role Filter */}
               <div className="h-full relative px-4 md:px-6 border-r border-slate-700/60 flex-1 min-w-[180px] hover:bg-[#1a2b44]/30 transition cursor-pointer flex items-center">
                   <span className="text-slate-300 text-base font-semibold mr-2 truncate">Vai trò</span>
