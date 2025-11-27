@@ -23,6 +23,7 @@ namespace EVDealer.BE.DAL.Repositories
         Task<decimal> CalculateActualSalesAsync(int dealerId, DateOnly startDate, DateOnly endDate);
 
         Task<IEnumerable<Debt>> GetDebtsByDealerIdAsync(int dealerId);
-
+        Task<DealerContract?> GetContractByIdAsync(int contractId);
+        void UpdateContract(DealerContract contract); // Không cần async vì nó chỉ đánh dấu thay đổi
     }
 }

@@ -30,6 +30,9 @@ namespace EVDealer.BE.DAL.Models
         [StringLength(20)] // Ghi chú: Giới hạn độ dài chuỗi, tương ứng với VARCHAR(20).
         public string Status { get; set; }
 
+        [Column("contract_file_url")]
+        public string? ContractFileUrl { get; set; }
+
         // Ghi chú: [ForeignKey("DealerId")] thiết lập mối quan hệ khóa ngoại.
         // Điều này giúp EF Core hiểu rằng DealerContract này thuộc về một Dealer.
         [ForeignKey("DealerId")]

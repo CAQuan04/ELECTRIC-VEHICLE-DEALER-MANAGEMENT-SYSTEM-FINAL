@@ -58,5 +58,15 @@ namespace EVDealer.BE.DAL.Repositories
                 .OrderByDescending(d => d.DueDate)
                 .ToListAsync();
         }
+
+        public async Task<DealerContract?> GetContractByIdAsync(int contractId)
+        {
+            return await _context.DealerContracts.FindAsync(contractId);
+        }
+
+        public void UpdateContract(DealerContract contract)
+        {
+            _context.DealerContracts.Update(contract);
+        }
     }
 }
