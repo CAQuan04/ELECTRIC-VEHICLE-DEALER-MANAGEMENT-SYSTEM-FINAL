@@ -1,47 +1,46 @@
-// File: src/features/admin/pages/ForecastReport.jsx
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
 } from "recharts";
 import { 
-  BrainCircuit, 
-  Play, 
-  RotateCw, 
-  CalendarClock, 
-  TrendingUp, 
-  AlertCircle, 
-  BarChart3,
-  Search
+  BrainCircuit, Play, RotateCw, CalendarClock, 
+  TrendingUp, AlertCircle, BarChart3, Search, 
+  Clock, CheckCircle2
 } from "lucide-react"; 
-import apiClient from '../../../utils/api/client'; // Đảm bảo đường dẫn đúng
-import { useAuth } from '../../../context/AuthContext';
+
+import apiClient from '../../../utils/api/client';
+import { useAuth } from '../../../context/AuthContext'; // Giả sử bạn có context này
+
+// Import UI Components
+import PageContainer from '../../admin/components/layout/PageContainer';
+import PageHeader from '../../admin/components/layout/PageHeader';
+import Card from '../../admin/components/ui/Card';
+import Button from '../../admin/components/ui/Button';
+import Badge from '../../admin/components/ui/Badge'; // Đảm bảo đã import Badge
+import EmptyState from '../../admin/components/ui/EmptyState';
 
 const ForecastReport = () => {
+  // --- STATE ---
   const [forecasts, setForecasts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isJobRunning, setIsJobRunning] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  
   const { user } = useAuth();
-
   const canRunAI = user?.role === "Admin"; 
 
   // --- API CALLS ---
   const fetchForecasts = useCallback(async () => {
     setLoading(true);
     try {
-      // === GỌI API THẬT ===
       const response = await apiClient.get('/Analytics/demand-forecasts');
-      
-      // Xử lý dữ liệu trả về (đảm bảo là mảng)
-      // Tùy vào cấu hình axios interceptor của bạn mà dữ liệu nằm trong response.data hoặc response trực tiếp
       const data = response.data || response; 
       
       if (Array.isArray(data)) {
         setForecasts(data);
       } else {
-        console.warn("API không trả về mảng dữ liệu:", data);
         setForecasts([]);
       }
-
     } catch (error) {
       console.error("Lỗi tải dữ liệu dự báo:", error);
       setForecasts([]);
@@ -54,12 +53,8 @@ const ForecastReport = () => {
     if (!canRunAI) return;
     setIsJobRunning(true);
     try {
-      // Gọi API kích hoạt Job AI
       await apiClient.post('/Analytics/run-demand-forecast');
       alert("Đã gửi yêu cầu chạy mô hình AI thành công. Vui lòng đợi vài phút rồi nhấn 'Làm mới'.");
-      
-      // Tùy chọn: Tự động load lại bảng sau khi gửi lệnh (tuy nhiên Job AI thường tốn thời gian)
-      // fetchForecasts(); 
     } catch (error) {
       console.error("Lỗi kích hoạt Job AI:", error);
       alert("Không thể chạy mô hình AI lúc này. Vui lòng thử lại sau.");
@@ -72,14 +67,23 @@ const ForecastReport = () => {
     fetchForecasts();
   }, [fetchForecasts]);
 
-  // --- CHUẨN BỊ DỮ LIỆU CHO BIỂU ĐỒ (Dựa trên Bảng) ---
-  // Gom nhóm dữ liệu để vẽ biểu đồ: Tổng nhu cầu theo từng Dòng xe
+  // --- DATA PROCESSING ---
+  
+  // 1. Filter Data
+  const filteredForecasts = useMemo(() => {
+      if (!searchTerm) return forecasts;
+      return forecasts.filter(f => 
+        f.vehicleName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        f.dealerName?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [forecasts, searchTerm]);
+
+  // 2. Chart Data (Aggregate by Vehicle Name)
   const chartData = useMemo(() => {
-    if (!Array.isArray(forecasts) || forecasts.length === 0) return [];
+    if (!Array.isArray(filteredForecasts) || filteredForecasts.length === 0) return [];
 
     const agg = {};
-    forecasts.forEach(f => {
-      // Kiểm tra an toàn các trường dữ liệu
+    filteredForecasts.forEach(f => {
       const vName = f.vehicleName || "Unknown";
       const qty = f.predictedQuantity || 0;
 
@@ -88,209 +92,212 @@ const ForecastReport = () => {
       }
       agg[vName].Value += qty;
     });
-    return Object.values(agg).sort((a, b) => b.Value - a.Value); // Sắp xếp cao xuống thấp
-  }, [forecasts]);
+    return Object.values(agg).sort((a, b) => b.Value - a.Value).slice(0, 10); // Top 10
+  }, [filteredForecasts]);
+
+  // 3. Statistics
+  const totalDemand = useMemo(() => forecasts.reduce((sum, item) => sum + (item.predictedQuantity || 0), 0), [forecasts]);
 
   return (
-    <div className="space-y-6 text-slate-200 min-h-screen bg-slate-950 p-6">
-      {/* === HEADER === */}
-      <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
-        <div className="flex items-center gap-4">
-            <div className="p-3 bg-indigo-500/10 rounded-2xl border border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
-                <BrainCircuit className="w-12 h-12 text-indigo-400" />
-            </div>
-            <div>
-                <h2 className="text-3xl font-bold text-white tracking-tight">
-                    Dự báo nhu cầu AI
-                </h2>
-                <p className="text-slate-400 mt-1 flex items-center gap-2 text-base">
-                    Phân tích dữ liệu lịch sử để đề xuất số lượng nhập hàng
-                </p>
-            </div>
-        </div>
+    <PageContainer>
+      {/* 1. HEADER */}
+      <PageHeader
+        title="Dự báo Nhu cầu AI"
+        subtitle="Phân tích & Đề xuất nhập hàng"
+        description="Sử dụng mô hình học máy (Machine Learning) để phân tích dữ liệu lịch sử và dự báo nhu cầu xe cho kỳ tiếp theo."
+        icon={<BrainCircuit />}
+        breadcrumbs={[
+          { label: "Trang chủ", path: "/" },
+          { label: "AI Dự báo", path: "/forecast" }
+        ]}
+        actions={
+          <div className="flex gap-3">
+             <Button 
+                variant="ghost" 
+                icon={<RotateCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />}
+                onClick={fetchForecasts}
+                disabled={loading}
+             >
+                Làm mới
+             </Button>
+             <Button 
+                variant="primary" 
+                icon={isJobRunning ? <RotateCw className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
+                onClick={handleRunForecast}
+                disabled={!canRunAI || isJobRunning}
+                className={isJobRunning ? "opacity-80 cursor-not-allowed" : ""}
+             >
+                {isJobRunning ? "AI đang xử lý..." : "Chạy dự báo ngay"}
+             </Button>
+          </div>
+        }
+      />
+
+      <div className="mt-8 space-y-8">
         
-        <div className="flex items-center gap-3 px-4 py-3 bg-slate-900 rounded-xl border border-slate-800">
-          <CalendarClock className="w-5 h-5 text-amber-400" />
-          <div className="text-sm">
-            <p className="text-slate-400">Lịch chạy tự động:</p>
-            <p className="font-bold text-amber-400">Chủ Nhật (18:00)</p>
+        {/* 2. FILTER BAR */}
+        <div className="w-full bg-[#13233a] border-y border-gray-700 mb-8 shadow-2xl overflow-x-auto rounded-lg">
+          <div className="flex items-center w-full h-auto md:h-24">
+              {/* Filter Label */}
+              <div className="h-full flex items-center px-6 md:px-8 border-r border-gray-700/60 bg-[#1a2b44]/50 flex-none">
+                  <span className="text-blue-400 font-bold text-lg md:text-xl tracking-wide mr-3">AI Filter</span>
+                  <div className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,1)] animate-pulse"></div>
+              </div>
+              
+              {/* Search */}
+              <div className="h-full flex items-center flex-[2] px-4 md:px-6 border-r border-gray-700/60 min-w-[280px] group cursor-text hover:bg-[#1a2b44]/20 transition">
+                  <span className="text-gray-300 font-semibold text-base mr-3 hidden sm:block">Tìm kiếm</span>
+                  <div className="relative flex-1">
+                     <div className="flex items-center bg-[#1e293b] border border-gray-600 rounded-xl px-3 py-2">
+                        <Search className="w-4 h-4 text-gray-400 mr-2" />
+                        <input 
+                            type="text" 
+                            placeholder="Tên dòng xe, đại lý..." 
+                            value={searchTerm} 
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="bg-transparent border-none p-0 text-white text-sm font-medium outline-none w-full" 
+                        />
+                     </div>
+                  </div>
+              </div>
+
+              {/* Info Section */}
+              <div className="h-full flex items-center flex-1 px-4 md:px-6 min-w-[250px] hover:bg-[#1a2b44]/20 transition justify-between">
+                  <div className="flex items-center gap-2">
+                      <CalendarClock className="w-5 h-5 text-yellow-500" />
+                      <div>
+                          <div className="text-xs text-gray-400">Lịch chạy tự động</div>
+                          <div className="text-sm font-bold text-white">Chủ Nhật (18:00)</div>
+                      </div>
+                  </div>
+              </div>
           </div>
         </div>
-      </div>
 
-      {/* === CONTROLS === */}
-      <div className="bg-[#0f172a] p-2 rounded-2xl border border-slate-800 flex flex-wrap items-center gap-2 shadow-sm">
-        <button
-          onClick={handleRunForecast}
-          disabled={!canRunAI || isJobRunning}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold transition shadow-lg ${
-            canRunAI
-              ? "bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:shadow-indigo-500/40 hover:scale-105 disabled:opacity-50 disabled:scale-100 disabled:cursor-wait"
-              : "bg-slate-800 text-slate-500 cursor-not-allowed"
-          }`}
-        >
-          {isJobRunning ? (
-              <> <RotateCw className="w-5 h-5 animate-spin" /> AI đang xử lý... </>
-          ) : (
-              <> <Play className="w-5 h-5 fill-current" /> Chạy dự báo ngay </>
-          )}
-        </button>
-
-        <button
-          onClick={fetchForecasts}
-          disabled={loading}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 font-medium transition hover:text-white"
-        >
-          <RotateCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
-          Làm mới
-        </button>
-        
-        <div className="ml-auto px-4 text-sm text-slate-400 italic flex items-center gap-2">
-             {forecasts.length > 0 && (
-                 <>
-                    <AlertCircle className="w-4 h-4 text-emerald-400" />
-                    Dữ liệu mới nhất: <span className="text-emerald-400 font-medium">{new Date().toLocaleDateString('vi-VN')}</span>
-                 </>
-             )}
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* === CHART SECTION === */}
-          <div className="lg:col-span-2 bg-[#0b1622] rounded-3xl border border-slate-800 p-6 shadow-xl">
-             <div className="flex items-center justify-between mb-6">
-                 <h3 className="text-xl font-bold text-indigo-300 flex items-center gap-2">
-                     <BarChart3 className="w-5 h-5" /> Tổng nhu cầu theo dòng xe
-                 </h3>
-                 <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold border border-indigo-500/20">
-                     Mô hình: ARIMA + LSTM
-                 </span>
-             </div>
-             
-             <div className="h-80 w-full">
-                {forecasts.length > 0 ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} layout="horizontal">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />
-                            <XAxis dataKey="name" stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} />
-                            <YAxis stroke="#64748b" tick={{fill: '#94a3b8', fontSize: 12}} />
-                            <Tooltip 
-                                cursor={{fill: '#1e293b', opacity: 0.4}}
-                                contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', color: '#f1f5f9', borderRadius: '12px' }}
-                            />
-                            <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                            <Bar dataKey="Value" name="Số lượng dự báo" fill="#6366f1" radius={[6, 6, 0, 0]} barSize={50}>
-                                {chartData.map((entry, index) => (
-                                  <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#8b5cf6'} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl">
-                        <BarChart3 className="w-12 h-12 mb-3 opacity-20" />
-                        <p>{loading ? "Đang tải dữ liệu..." : "Chưa có dữ liệu để vẽ biểu đồ"}</p>
+        {/* 3. SUMMARY CARDS */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="relative overflow-hidden border-l-4 border-l-indigo-500 p-6">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <TrendingUp className="w-24 h-24 text-indigo-500" />
+                </div>
+                <div className="relative z-10">
+                    <span className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs">Tổng nhu cầu kỳ tới</span>
+                    <div className="text-4xl font-black text-gray-900 dark:text-white my-2">
+                        {totalDemand.toLocaleString()} <span className="text-lg font-normal text-gray-500">xe</span>
                     </div>
-                )}
-             </div>
-          </div>
+                    <Badge variant="success">+15% tăng trưởng</Badge>
+                </div>
+            </Card>
 
-          {/* === MINI STATS === */}
-          <div className="space-y-4">
-             {/* Tổng quan */}
-             <div className="bg-gradient-to-br from-indigo-900/60 to-slate-900 p-6 rounded-3xl border border-indigo-500/20 shadow-lg">
-                 <h4 className="text-indigo-200 text-sm font-medium mb-2 flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" /> Tổng nhu cầu kỳ tới
-                 </h4>
-                 <div className="text-5xl font-extrabold text-white mb-2 tracking-tight">
-                     {forecasts.reduce((sum, item) => sum + (item.predictedQuantity || 0), 0).toLocaleString()}
-                     <span className="text-xl text-indigo-400 font-medium ml-2">xe</span>
-                 </div>
-                 <div className="flex items-center gap-2 text-xs font-medium">
-                    <span className="bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded-lg border border-emerald-500/20">
-                        +15% tăng trưởng
-                    </span>
-                    <span className="text-slate-400">so với tháng trước</span>
-                 </div>
-             </div>
+            <Card className="relative overflow-hidden border-l-4 border-l-emerald-500 p-6">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <CheckCircle2 className="w-24 h-24 text-emerald-500" />
+                </div>
+                <div className="relative z-10">
+                    <span className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs">Độ tin cậy (Confidence)</span>
+                    <div className="text-4xl font-black text-emerald-600 dark:text-emerald-400 my-2">
+                        92.4%
+                    </div>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mt-2">
+                        <div className="bg-emerald-500 h-1.5 rounded-full" style={{ width: '92.4%' }}></div>
+                    </div>
+                </div>
+            </Card>
 
-             {/* Độ tin cậy AI */}
-             <div className="bg-[#0b1622] p-6 rounded-3xl border border-slate-800 shadow-lg">
-                 <div className="flex justify-between items-center mb-4">
-                    <h4 className="text-slate-400 text-sm font-medium">Độ chính xác (Confidence)</h4>
-                    <AlertCircle className="w-4 h-4 text-slate-500" />
-                 </div>
-                 
-                 <div className="flex items-end gap-2 mb-3">
-                     <span className="text-4xl font-bold text-emerald-400">92.4%</span>
-                 </div>
-                 <div className="w-full bg-slate-800 rounded-full h-2.5 overflow-hidden">
-                     <div className="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full shadow-[0_0_10px_rgba(16,185,129,0.5)]" style={{ width: '92.4%' }}></div>
-                 </div>
-                 <p className="text-xs text-slate-500 mt-3 italic">
-                    *Dựa trên đối chiếu dữ liệu lịch sử 6 tháng gần nhất.
-                 </p>
-             </div>
-          </div>
-      </div>
-
-      {/* === DATA TABLE === */}
-      <div className="bg-[#0b1622] rounded-3xl border border-slate-800 shadow-xl overflow-hidden">
-        <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-            <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-               <Search className="w-5 h-5 text-slate-400" /> Chi tiết dự báo theo Đại lý
-            </h3>
-            <span className="text-xs text-slate-500 bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
-              Hiển thị {forecasts.length} bản ghi
-            </span>
+            <Card className="relative overflow-hidden border-l-4 border-l-cyan-500 p-6">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <Clock className="w-24 h-24 text-cyan-500" />
+                </div>
+                <div className="relative z-10">
+                    <span className="text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider text-xs">Cập nhật lần cuối</span>
+                    <div className="text-2xl font-bold text-gray-900 dark:text-white my-2">
+                        {new Date().toLocaleDateString('vi-VN')}
+                    </div>
+                    <p className="text-xs text-gray-500 italic">*Dữ liệu được cập nhật Realtime từ Job Server</p>
+                </div>
+            </Card>
         </div>
-        <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-            <thead className="bg-slate-900/80 text-slate-400 text-xs uppercase tracking-wider font-semibold">
-                <tr>
-                <th className="p-5">Đại lý</th>
-                <th className="p-5">Dòng xe</th>
-                <th className="p-5">Kỳ dự báo</th>
-                <th className="p-5 text-center">SL Đề xuất</th>
-                <th className="p-5 text-right">Ngày phân tích</th>
-                </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800 text-sm">
-                {loading ? (
-                    <tr><td colSpan="5" className="p-10 text-center text-slate-500">
-                        <div className="flex justify-center items-center gap-2"><RotateCw className="animate-spin w-5 h-5"/> Đang tải dữ liệu...</div>
-                    </td></tr>
-                ) : forecasts.length > 0 ? (
-                forecasts.map((f) => (
-                    <tr key={f.forecastId} className="hover:bg-slate-800/50 transition group">
-                    <td className="p-5 font-semibold text-slate-200">{f.dealerName}</td>
-                    <td className="p-5">
-                        <span className="px-3 py-1.5 rounded-lg bg-slate-800 text-cyan-400 font-medium border border-slate-700 group-hover:border-cyan-500/30 transition">
-                            {f.vehicleName}
+
+        {/* 4. CHART & TABLE */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            {/* CHART SECTION (Chiếm 2/3) */}
+            <div className="lg:col-span-2">
+                <Card className="h-full p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <BarChart3 className="w-5 h-5 text-indigo-500" /> 
+                            Top 10 Dòng xe có nhu cầu cao nhất
+                        </h3>
+                        <span className="text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 px-3 py-1 rounded-full font-bold border border-indigo-200 dark:border-indigo-500/30">
+                            Mô hình: ARIMA + LSTM
                         </span>
-                    </td>
-                    <td className="p-5 text-slate-400">{f.forecastPeriodStart}</td>
-                    <td className="p-5 text-center">
-                        <span className="text-lg font-bold text-indigo-400">{f.predictedQuantity}</span>
-                    </td>
-                    <td className="p-5 text-right text-slate-500 font-mono">
-                        {new Date(f.createdAt).toLocaleDateString('vi-VN')}
-                    </td>
-                    </tr>
-                ))
-                ) : (
-                <tr>
-                    <td colSpan="5" className="p-12 text-center text-slate-500 flex flex-col items-center">
-                        <BrainCircuit className="w-12 h-12 mb-3 opacity-20" />
-                        Chưa có dữ liệu dự báo nào. Nhấn nút "Chạy dự báo" để bắt đầu.
-                    </td>
-                </tr>
-                )}
-            </tbody>
-            </table>
+                    </div>
+                    <div className="h-[350px] w-full">
+                        {chartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={chartData} layout="horizontal" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                    <CartesianGrid strokeDasharray="3 3" stroke="#374151" opacity={0.3} vertical={false} />
+                                    <XAxis dataKey="name" stroke="#9ca3af" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#9ca3af" tick={{fontSize: 12}} tickLine={false} axisLine={false} />
+                                    <Tooltip 
+                                        cursor={{fill: '#374151', opacity: 0.2}}
+                                        contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff', borderRadius: '8px' }}
+                                    />
+                                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                                    <Bar dataKey="Value" name="Số lượng dự báo" fill="#6366f1" radius={[4, 4, 0, 0]} barSize={40}>
+                                        {chartData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index % 2 === 0 ? '#6366f1' : '#8b5cf6'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        ) : (
+                            <EmptyState title="Chưa có dữ liệu biểu đồ" description="Hãy chạy dự báo để xem phân tích." />
+                        )}
+                    </div>
+                </Card>
+            </div>
+
+            {/* TABLE SECTION (Chiếm 1/3 - Danh sách chi tiết rút gọn) */}
+            <div className="lg:col-span-1">
+                <Card className="h-full overflow-hidden p-0 flex flex-col">
+                    <div className="p-5 border-b border-gray-100 dark:border-gray-700">
+                        <h3 className="font-bold text-gray-900 dark:text-white">Chi tiết Dự báo</h3>
+                    </div>
+                    <div className="overflow-y-auto flex-1 max-h-[400px] custom-scrollbar">
+                        <table className="w-full text-left">
+                            <thead className="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400 sticky top-0">
+                                <tr>
+                                    <th className="px-5 py-3">Dòng xe</th>
+                                    <th className="px-5 py-3 text-right">Số lượng</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100 dark:divide-gray-700/50">
+                                {filteredForecasts.length > 0 ? filteredForecasts.map((f, idx) => (
+                                    <tr key={idx} className="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition">
+                                        <td className="px-5 py-4">
+                                            <div className="font-medium text-gray-900 dark:text-white">{f.vehicleName}</div>
+                                            <div className="text-xs text-gray-500">{f.dealerName}</div>
+                                        </td>
+                                        <td className="px-5 py-4 text-right">
+                                            <span className="font-bold text-indigo-600 dark:text-indigo-400">{f.predictedQuantity}</span>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="2" className="p-8 text-center text-gray-500 text-sm">Không có dữ liệu</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </Card>
+            </div>
+
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 };
 
