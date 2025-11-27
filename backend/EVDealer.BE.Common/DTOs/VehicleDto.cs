@@ -33,6 +33,7 @@ public class VehicleDetailDto
     public string Model { get; set; } = string.Empty;
     public string Brand { get; set; } = string.Empty;
     public int? Year { get; set; }
+    public string? ImageUrl { get; set; }
     public List<VehicleConfigDto> Configs { get; set; } = new();
     public List<InventoryDto> Inventory { get; set; } = new();
 }
@@ -60,5 +61,6 @@ public class VehicleComparisonItemDto
     public string Model { get; set; } = string.Empty;
     public int? Year { get; set; }
     public decimal? BasePrice { get; set; }
+    public string? ImageUrl { get; set; }
     public List<VehicleConfigDto> Configs { get; set; } = new();
 }

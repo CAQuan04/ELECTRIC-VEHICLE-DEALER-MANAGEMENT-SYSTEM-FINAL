@@ -125,6 +125,43 @@ namespace EVDealer.BE.API.Controllers.V1
                 return StatusCode(500, new { message = "Đã có lỗi xảy ra trong quá trình xử lý.", error = ex.Message });
             }
         }
+        /// <summary>
+        /// Lấy danh sách phiếu điều phối theo Dealer ID cụ thể.
+        /// (Admin/EVMStaff xem được tất cả, Dealer chỉ xem được của chính mình)
+        /// </summary>
+        // GET /api/v1/distributions/dealer/{dealerId}
+        [HttpGet("dealer/{dealerId}")]
+        [Authorize(Roles = "EVMStaff,Admin,DealerManager,DealerStaff")]
+        public async Task<IActionResult> GetDistributionsByDealerId(int dealerId)
+        {
+            // 1. Kiểm tra bảo mật: Nếu là người của Đại lý, chặn việc xem dữ liệu của đại lý khác
+            if (User.IsInRole("DealerManager") || User.IsInRole("DealerStaff"))
+            {
+                var tokenDealerIdClaim = User.FindFirstValue("dealerId");
 
+                if (string.IsNullOrEmpty(tokenDealerIdClaim) || !int.TryParse(tokenDealerIdClaim, out int tokenDealerId))
+                {
+                    return Unauthorized("Không xác định được thông tin đại lý trong token.");
+                }
+
+                // Nếu ID yêu cầu khác ID trong token -> Chặn
+                if (tokenDealerId != dealerId)
+                {
+                    return Forbid("Bạn không có quyền xem dữ liệu nhập hàng của đại lý khác.");
+                }
+            }
+
+            try
+            {
+                // 2. Gọi Service (Tái sử dụng hàm lấy danh sách theo DealerId đã có)
+                var distributions = await _inventoryService.GetDistributionSummaryForDealerAsync(dealerId);
+
+                return Ok(distributions);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
