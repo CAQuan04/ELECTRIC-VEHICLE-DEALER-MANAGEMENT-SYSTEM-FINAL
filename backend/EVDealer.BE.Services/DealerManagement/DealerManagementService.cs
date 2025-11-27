@@ -1,13 +1,14 @@
-﻿using EVDealer.BE.Common.DTOs;
+﻿using AutoMapper;
+using EVDealer.BE.Common.DTOs;
 using EVDealer.BE.DAL.Models;
 using EVDealer.BE.DAL.Repositories;
 using FluentNHibernate.Automapping;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 
 namespace EVDealer.BE.Services.DealerManagement
 {
@@ -83,6 +84,49 @@ namespace EVDealer.BE.Services.DealerManagement
             var debtsFromDb = await _dealerRepo.GetDebtsByDealerIdAsync(dealerId);
             // Ghi chú: Sử dụng AutoMapper để chuyển đổi List<Debt> thành List<DebtDto>.
             return _mapper.Map<IEnumerable<DebtDto>>(debtsFromDb);
+        }
+
+        public async Task<ContractDto?> UploadContractFileAsync(int dealerId, int contractId, IFormFile file)
+        {
+            // 1. Kiểm tra nghiệp vụ
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("Không có file nào được tải lên.");
+
+            if (Path.GetExtension(file.FileName).ToLower() != ".pdf")
+                throw new ArgumentException("Chỉ chấp nhận file định dạng PDF.");
+
+            var contract = await _dealerRepo.GetContractByIdAsync(contractId);
+            if (contract == null || contract.DealerId != dealerId)
+            {
+                // Không tìm thấy hợp đồng hoặc hợp đồng không thuộc đại lý này
+                return null;
+            }
+
+            // 2. Xử lý lưu file
+            // Tạo một tên file duy nhất để tránh trùng lặp
+            var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+            // Định nghĩa đường dẫn lưu file trên server (ví dụ: wwwroot/uploads/contracts)
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "contracts", fileName);
+
+            // Tạo thư mục nếu chưa tồn tại
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+            // Lưu file vào đường dẫn đã định
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // 3. Cập nhật CSDL
+            // Tạo đường dẫn URL có thể truy cập từ bên ngoài
+            var fileUrl = $"/uploads/contracts/{fileName}";
+            contract.ContractFileUrl = fileUrl;
+
+            _dealerRepo.UpdateContract(contract);
+            await _dealerRepo.SaveChangesAsync();
+
+            // 4. Trả về DTO đã được cập nhật
+            return _mapper.Map<ContractDto>(contract);
         }
     }
 }

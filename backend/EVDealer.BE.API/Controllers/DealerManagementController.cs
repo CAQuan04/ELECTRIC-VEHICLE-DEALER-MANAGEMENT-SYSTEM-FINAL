@@ -2,6 +2,7 @@
 using EVDealer.BE.Services.DealerManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace EVDealer.BE.API.Controllers
 {
@@ -58,6 +59,30 @@ namespace EVDealer.BE.API.Controllers
         {
             var debts = await _dealerService.GetDebtsAsync(dealerId);
             return Ok(debts);
+        }
+
+        // === PHẦN BỔ SUNG: ENDPOINT UPLOAD FILE ===
+        // POST: /api/manage/dealers/{dealerId}/contracts/{contractId}/upload-pdf
+        [HttpPost("{dealerId}/contracts/{contractId}/upload-pdf")]
+        public async Task<IActionResult> UploadContractPdf(int dealerId, int contractId, IFormFile file)
+        {
+            try
+            {
+                var updatedContract = await _dealerService.UploadContractFileAsync(dealerId, contractId, file);
+                if (updatedContract == null)
+                {
+                    return NotFound("Không tìm thấy hợp đồng tương ứng.");
+                }
+                return Ok(updatedContract);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi server nội bộ: {ex.Message}");
+            }
         }
     }
 }
