@@ -49,7 +49,7 @@ const VehicleList = () => {
       setLoading(true);
       setError(null);
       startLoading('Đang tải danh sách xe...');
-      
+
       // Build params object, only include defined values
       const params = {};
       if (filters.search) params.Search = filters.search;
@@ -63,7 +63,7 @@ const VehicleList = () => {
       console.log('Calling API with params:', params); // Debug log
 
       const result = await dealerAPI.getVehicles(params);
-      
+
       if (result.success) {
         const data = result.data;
         setVehicles(data.items || data.data || []);
@@ -117,7 +117,7 @@ const VehicleList = () => {
         subtitle="Quản lý và xem thông tin các dòng xe"
         icon={<Car className="w-16 h-16" />}
         actions={
-          <Button 
+          <Button
             variant="gradient"
             onClick={() => navigate(dealerId ? `/${dealerId}/dealer/vehicles/compare` : '/dealer/vehicles/compare')}
           >
@@ -207,8 +207,8 @@ const VehicleList = () => {
       {error && (
         <div className="mb-4 p-4 bg-red-900/20 border border-red-500 rounded-lg">
           <p className="text-red-400">⚠️ {error}</p>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="mt-2"
             onClick={loadVehicles}
           >
@@ -237,12 +237,20 @@ const VehicleList = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {vehicles.map(vehicle => {
             const availability = getAvailabilityBadge(vehicle.inventorySummary?.totalQuantity || 0);
-            
+
             return (
               <Card key={vehicle.vehicleId} hover className="flex flex-col">
-                <div className="aspect-video bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl mb-4 flex items-center justify-center text-6xl">
-                  🚗
-                </div>
+                {vehicle.imageUrl ? (
+                  <img
+                    src={vehicle.imageUrl}
+                    alt={`${vehicle.brand} ${vehicle.model}`}
+                    className="aspect-video object-cover rounded-xl mb-4"
+                  />
+                ) : (
+                  <div className="aspect-video bg-gradient-to-br from-gray-700 to-gray-800 rounded-xl mb-4 flex items-center justify-center text-6xl">
+                    🚗
+                  </div>
+                )}
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="text-lg font-bold text-white">{vehicle.brand}</h3>
@@ -252,7 +260,7 @@ const VehicleList = () => {
                   <p className="text-emerald-400 text-lg font-semibold mb-3">
                     {formatPrice(vehicle.basePrice)}
                   </p>
-                  
+
                   {/* Vehicle Configs */}
                   {vehicle.configs && vehicle.configs.length > 0 && (
                     <div className="mb-3">
@@ -281,7 +289,7 @@ const VehicleList = () => {
                     </span>
                   </div>
                 </div>
-                <Button 
+                <Button
                   variant="primary"
                   className="w-full"
                   onClick={() => handleViewDetail(vehicle.vehicleId)}

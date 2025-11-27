@@ -279,7 +279,7 @@ const DealerDashboard = () => {
         </div>
       </div>
 
-      {/* Navigation Pills - Modern Glass Design */}
+    {/* Navigation Pills - Modern Glass Design */}
       <div className="relative mb-8">
         {/* Background Glow Effect */}
         <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-sky-500/10 to-purple-300/10 dark:from-rose-500/10 dark:via-indigo-500/10 dark:to-fuchsia-500/10 rounded-3xl blur-xl"></div>
