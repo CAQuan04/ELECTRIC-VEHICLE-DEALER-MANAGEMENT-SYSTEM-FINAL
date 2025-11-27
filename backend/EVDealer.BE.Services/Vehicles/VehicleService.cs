@@ -71,6 +71,7 @@ public class VehicleService : IVehicleService
             Brand = vehicle.Brand,
             Year = vehicle.Year,
             BasePrice = vehicle.BasePrice,
+            ImageUrl = vehicle.ImageUrl,
             Configs = vehicle.VehicleConfigs.Select(MapToVehicleConfigDto).ToList(),
             InventorySummary = MapToInventorySummaryDto(vehicle.Inventories)
         };
@@ -84,6 +85,7 @@ public class VehicleService : IVehicleService
             Model = vehicle.Model,
             Brand = vehicle.Brand,
             Year = vehicle.Year,
+            ImageUrl = vehicle.ImageUrl,
             Configs = vehicle.VehicleConfigs.Select(MapToVehicleConfigDto).ToList(),
             Inventory = inventories.Select(MapToInventoryDto).ToList()
         };
@@ -99,6 +101,7 @@ public class VehicleService : IVehicleService
             Model = vehicle.Model,
             Year = vehicle.Year,
             BasePrice = vehicle.BasePrice,
+            ImageUrl = vehicle.ImageUrl,
             Configs = vehicle.VehicleConfigs.Select(MapToVehicleConfigDto).ToList()
         };
     }
